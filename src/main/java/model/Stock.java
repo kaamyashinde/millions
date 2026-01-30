@@ -54,12 +54,17 @@ public class Stock {
   }
 
   /**
-   * Gets the list of prices of the stock.
+   * Gets the latest price of the stock.
    *
-   * @return The list of prices of the stock.
+   * @return The latest price of the stock.
    */
-  public List<BigDecimal> getPrice() {
-    return price;
+  public BigDecimal getSalesPrice() {
+    // Returns the latest price
+    return price.getLast();
+  }
+
+  public void addNewSalesPrice(BigDecimal price) {
+    this.price.add(price);
   }
 
   /**
