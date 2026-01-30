@@ -1,7 +1,6 @@
 package model;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,10 +19,10 @@ public class Stock {
 
   private final String symbol;
   private final String company;
-  private final ArrayList<BigDecimal> price;
+  private final List<BigDecimal> price;
 
 
-  public Stock(String symbol, String company, ArrayList<BigDecimal> price) {
+  public Stock(String symbol, String company, List<BigDecimal> price) {
     this.symbol = symbol;
     this.company = company;
     this.price = price;
