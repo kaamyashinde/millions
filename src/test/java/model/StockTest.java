@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class StockTest {
 
@@ -58,5 +59,32 @@ class StockTest {
             + pricesAdded
             + '}';
     assertEquals(expected, stock.toString());
+  }
+
+  @Test
+  void constructorThrowsWhenSymbolIsNull() {
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new Stock(null, "Apple Inc."));
+    assertEquals("Symbol cannot be null", thrown.getMessage());
+  }
+
+  @Test
+  void constructorThrowsWhenCompanyIsNull() {
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new Stock("AAPL", null));
+    assertEquals("Company cannot be null", thrown.getMessage());
+  }
+
+  @Test
+  void addNewSalesPriceThrowsWhenPriceIsNull() {
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> stock.addNewSalesPrice(null));
+    assertEquals("Price cannot be null", thrown.getMessage());
   }
 }
