@@ -1,5 +1,6 @@
 package model;
 
+import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -29,6 +30,9 @@ public class Stock {
    * @param price   The list of prices of the stock.
    */
   public Stock(String symbol, String company, List<BigDecimal> price) {
+    checkNotNull(symbol, "Symbol cannot be null");
+    checkNotNull(company, "Company cannot be null");
+    checkNotNull(price, "Price cannot be null");
     this.symbol = symbol;
     this.company = company;
     this.price = price;
@@ -64,6 +68,7 @@ public class Stock {
   }
 
   public void addNewSalesPrice(BigDecimal price) {
+    checkNotNull(price, "Price cannot be null");
     this.price.add(price);
   }
 
