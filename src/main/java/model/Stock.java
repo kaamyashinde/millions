@@ -27,15 +27,13 @@ public class Stock {
    *
    * @param symbol  The symbol of the stock.
    * @param company The company name of the stock.
-   * @param price   The list of prices of the stock.
    */
-  public Stock(String symbol, String company, List<BigDecimal> price) {
+  public Stock(String symbol, String company) {
     checkNotNull(symbol, "Symbol cannot be null");
     checkNotNull(company, "Company cannot be null");
-    checkNotNull(price, "Price cannot be null");
     this.symbol = symbol;
     this.company = company;
-    this.price = price;
+    this.price = new java.util.ArrayList<>();
   }
 
 
