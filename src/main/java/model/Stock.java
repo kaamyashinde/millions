@@ -21,7 +21,13 @@ public class Stock {
   private final String company;
   private final List<BigDecimal> price;
 
-
+  /**
+   * This is the constructor for the Stock class.
+   *
+   * @param symbol  The symbol of the stock.
+   * @param company The company name of the stock.
+   * @param price   The list of prices of the stock.
+   */
   public Stock(String symbol, String company, List<BigDecimal> price) {
     this.symbol = symbol;
     this.company = company;
@@ -29,18 +35,38 @@ public class Stock {
   }
 
 
+  /**
+   * Gets the symbol of the stock.
+   *
+   * @return The symbol of the stock.
+   */
   public String getSymbol() {
     return symbol;
   }
 
+  /**
+   * Gets the company name of the stock.
+   *
+   * @return The company name of the stock.
+   */
   public String getCompany() {
     return company;
   }
 
+  /**
+   * Gets the list of prices of the stock.
+   *
+   * @return The list of prices of the stock.
+   */
   public List<BigDecimal> getPrice() {
     return price;
   }
 
+  /**
+   * Returns a string representation of the Stock object.
+   *
+   * @return A string representation of the Stock object.
+   */
   @Override
   public String toString() {
     return "Stock{" +
