@@ -27,6 +27,7 @@ public class Stock {
    *
    * @param symbol  The symbol of the stock.
    * @param company The company name of the stock.
+   * @throws IllegalArgumentException if {@code symbol} or {@code company} is null.
    */
   public Stock(String symbol, String company) {
     checkNotNull(symbol, "Symbol");
@@ -61,10 +62,14 @@ public class Stock {
    * @return The latest price of the stock.
    */
   public BigDecimal getSalesPrice() {
-    // Returns the latest price
     return price.getLast();
   }
 
+  /**
+   * Adds a new sales price to the stock's price history.
+   * @param price The new sales price to be added.
+   * @throws IllegalArgumentException if {@code price} is null.
+   */
   public void addNewSalesPrice(BigDecimal price) {
     checkNotNull(price, "Price");
     this.price.add(price);
