@@ -7,7 +7,7 @@ import java.util.List;
  * Represents a portfolio of stocks and shares.This would belong to a user.
  *
  * @author kaamyashinde
- * @version 0.0.2
+ * @version 0.0.3
  * @since 31-01-2026
  */
 public class Portfolio {

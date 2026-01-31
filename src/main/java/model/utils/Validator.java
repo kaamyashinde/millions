@@ -5,7 +5,7 @@ package model.utils;
  * methods, to avoid code duplication.
  *
  * @author kaamyashinde
- * @version 0.0.2
+ * @version 0.0.3
  * @since 30-01-2026
  */
 public class Validator {
