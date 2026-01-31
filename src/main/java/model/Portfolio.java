@@ -7,7 +7,7 @@ import java.util.List;
  * Represents a portfolio of stocks and shares.This would belong to a user.
  *
  * @author kaamyashinde
- * @version 0.0.2
+ * @version 0.0.3
  * @since 31-01-2026
  */
 public class Portfolio {
@@ -27,6 +27,7 @@ public class Portfolio {
    *
    * @param share The share to be added.
    * @return True if the share was added successfully, false otherwise.
+   * @throws IllegalArgumentException if {@code share} is null.
    */
   public boolean addShare(Share share) {
     checkNotNull(share, "Share");
@@ -38,6 +39,7 @@ public class Portfolio {
    *
    * @param share The share to be removed.
    * @return True if the share was removed successfully, false otherwise.
+   * @throws IllegalArgumentException if {@code share} is null.
    */
   public boolean removeShare(Share share) {
     checkNotNull(share, "Share");
@@ -58,6 +60,7 @@ public class Portfolio {
    *
    * @param symbol The stock symbol.
    * @return The list of shares with the given stock symbol.
+   * @throws IllegalArgumentException if {@code symbol} is null.
    */
   public List<Share> getSharesBasedOnSymbol(String symbol) {
     checkNotNull(symbol, "Symbol");
@@ -69,8 +72,10 @@ public class Portfolio {
    *
    * @param share The share to check.
    * @return True if the share is in the portfolio, false otherwise.
+   * @throws IllegalArgumentException if {@code share} is null.
    */
   public boolean containsShare(Share share) {
+    checkNotNull(share, "Share");
     return this.shares.contains(share);
   }
 }
