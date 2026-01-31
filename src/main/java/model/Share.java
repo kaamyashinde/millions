@@ -26,7 +26,7 @@ public class Share {
    * @param purchasePrice The price at which the shares were purchased.
    */
   public Share(Stock stock, BigDecimal quantity, BigDecimal purchasePrice) {
-    checkNotNull(stock, "Stock cannot be null");
+    checkNotNull(stock, "Stock");
     this.stock = stock;
     this.quantity = quantity;
     this.purchasePrice = purchasePrice;
