@@ -1,12 +1,13 @@
 package model;
 
+import static model.utils.Validator.checkNotNull;
 import java.util.List;
 
 /**
  * Represents a portfolio of stocks and shares.This would belong to a user.
  *
  * @author kaamyashinde
- * @version 0.0.1
+ * @version 0.0.2
  * @since 31-01-2026
  */
 public class Portfolio {
@@ -28,6 +29,7 @@ public class Portfolio {
    * @return True if the share was added successfully, false otherwise.
    */
   public boolean addShare(Share share) {
+    checkNotNull(share, "Share");
     return this.shares.add(share);
   }
 
@@ -38,6 +40,7 @@ public class Portfolio {
    * @return True if the share was removed successfully, false otherwise.
    */
   public boolean removeShare(Share share) {
+    checkNotNull(share, "Share");
     return this.shares.remove(share);
   }
 
@@ -57,6 +60,7 @@ public class Portfolio {
    * @return The list of shares with the given stock symbol.
    */
   public List<Share> getSharesBasedOnSymbol(String symbol) {
+    checkNotNull(symbol, "Symbol");
     return shares.stream().filter(share -> share.getStock().getSymbol().equals(symbol)).toList();
   }
 
