@@ -8,7 +8,7 @@ import java.math.BigDecimal;
  * Shares.
  *
  * @author kaamyashinde
- * @version 0.0.2
+ * @version 0.0.3
  * @since 31-01-2026
  */
 
@@ -24,9 +24,12 @@ public class Share {
    * @param stock         The stock associated with the share.
    * @param quantity      The quantity of shares purchased.
    * @param purchasePrice The price at which the shares were purchased.
+   * @throws IllegalArgumentException if {@code stock, quantity, purchasePrice} is null.
    */
   public Share(Stock stock, BigDecimal quantity, BigDecimal purchasePrice) {
     checkNotNull(stock, "Stock");
+    checkNotNull(stock, "Quantity");
+    checkNotNull(stock, "Purchase Price");
     this.stock = stock;
     this.quantity = quantity;
     this.purchasePrice = purchasePrice;
