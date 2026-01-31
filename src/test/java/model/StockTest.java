@@ -63,27 +63,27 @@ class StockTest {
 
   @Test
   void constructorThrowsWhenSymbolIsNull() {
-    IllegalArgumentException thrown =
+    NullPointerException thrown =
         assertThrows(
-            IllegalArgumentException.class,
+            NullPointerException.class,
             () -> new Stock(null, "Apple Inc."));
     assertEquals("Symbol cannot be null", thrown.getMessage());
   }
 
   @Test
   void constructorThrowsWhenCompanyIsNull() {
-    IllegalArgumentException thrown =
+    NullPointerException thrown =
         assertThrows(
-            IllegalArgumentException.class,
+            NullPointerException.class,
             () -> new Stock("AAPL", null));
     assertEquals("Company cannot be null", thrown.getMessage());
   }
 
   @Test
   void addNewSalesPriceThrowsWhenPriceIsNull() {
-    IllegalArgumentException thrown =
+    NullPointerException thrown =
         assertThrows(
-            IllegalArgumentException.class,
+            NullPointerException.class,
             () -> stock.addNewSalesPrice(null));
     assertEquals("Price cannot be null", thrown.getMessage());
   }
