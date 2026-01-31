@@ -6,10 +6,8 @@ target/
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+.idea/*
+.idea/vcs.xml
 *.iws
 *.iml
 *.ipr
