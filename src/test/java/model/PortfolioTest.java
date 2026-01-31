@@ -32,7 +32,7 @@ class PortfolioTest {
 
   @Test
   void addShareThrowsExceptionForNull() {
-    assertThrows(IllegalArgumentException.class, () -> portfolio.addShare(null));
+    assertThrows(NullPointerException.class, () -> portfolio.addShare(null));
   }
 
   @Test
@@ -56,7 +56,7 @@ class PortfolioTest {
 
   @Test
   void removeShareThrowsExceptionForNull() {
-    assertThrows(IllegalArgumentException.class, () -> portfolio.removeShare(null));
+    assertThrows(NullPointerException.class, () -> portfolio.removeShare(null));
   }
 
   @Test
@@ -99,7 +99,7 @@ class PortfolioTest {
 
   @Test
   void getSharesBasedOnSymbolThrowsExceptionForNull() {
-    assertThrows(IllegalArgumentException.class, () -> portfolio.getSharesBasedOnSymbol(null));
+    assertThrows(NullPointerException.class, () -> portfolio.getSharesBasedOnSymbol(null));
   }
 
   @Test

@@ -27,7 +27,7 @@ public class Portfolio {
    *
    * @param share The share to be added.
    * @return True if the share was added successfully, false otherwise.
-   * @throws IllegalArgumentException if {@code share} is null.
+   * @throws NullPointerException if {@code share} is null.
    */
   public boolean addShare(Share share) {
     checkNotNull(share, "Share");
@@ -39,7 +39,7 @@ public class Portfolio {
    *
    * @param share The share to be removed.
    * @return True if the share was removed successfully, false otherwise.
-   * @throws IllegalArgumentException if {@code share} is null.
+   * @throws NullPointerException if {@code share} is null.
    */
   public boolean removeShare(Share share) {
     checkNotNull(share, "Share");
@@ -60,7 +60,7 @@ public class Portfolio {
    *
    * @param symbol The stock symbol.
    * @return The list of shares with the given stock symbol.
-   * @throws IllegalArgumentException if {@code symbol} is null.
+   * @throws NullPointerException if {@code symbol} is null.
    */
   public List<Share> getSharesBasedOnSymbol(String symbol) {
     checkNotNull(symbol, "Symbol");
@@ -72,7 +72,7 @@ public class Portfolio {
    *
    * @param share The share to check.
    * @return True if the share is in the portfolio, false otherwise.
-   * @throws IllegalArgumentException if {@code share} is null.
+   * @throws NullPointerException if {@code share} is null.
    */
   public boolean containsShare(Share share) {
     checkNotNull(share, "Share");
