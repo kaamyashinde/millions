@@ -29,8 +29,8 @@ public class Stock {
    * @param company The company name of the stock.
    */
   public Stock(String symbol, String company) {
-    checkNotNull(symbol, "Symbol cannot be null");
-    checkNotNull(company, "Company cannot be null");
+    checkNotNull(symbol, "Symbol");
+    checkNotNull(company, "Company");
     this.symbol = symbol;
     this.company = company;
     this.price = new java.util.ArrayList<>();
@@ -66,7 +66,7 @@ public class Stock {
   }
 
   public void addNewSalesPrice(BigDecimal price) {
-    checkNotNull(price, "Price cannot be null");
+    checkNotNull(price, "Price");
     this.price.add(price);
   }
 
