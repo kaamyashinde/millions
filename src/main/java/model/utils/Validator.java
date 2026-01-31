@@ -17,11 +17,11 @@ public class Validator {
    * create a static method to check if an abject is null
    * @param obj The object to be checked
    * @param obType The type of the object, friendly name for error message
-   * @throws IllegalArgumentException if the object is null
+   * @throws NullPointerException if the object is null
    */
   public static void checkNotNull(Object obj, String obType) {
     if (obj == null) {
-      throw new IllegalArgumentException(obType + " cannot be null");
+      throw new NullPointerException(obType + " cannot be null");
     }
   }
 
