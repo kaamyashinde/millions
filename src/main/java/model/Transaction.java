@@ -13,7 +13,7 @@ public abstract class Transaction {
   private final Share share;
   private final int week;
   private final TransactionCalculator calculator;
-  private final boolean commited;
+  protected boolean commited;
 
   /**
    * Constructor for Transaction.
@@ -69,5 +69,5 @@ public abstract class Transaction {
   /**
    * Commits the transaction to a player. // TODO ADD A PLAYER PARAMETER
    */
-  public abstract void commit();
+  public abstract void commit(Player player);
 }
