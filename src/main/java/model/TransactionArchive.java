@@ -49,7 +49,9 @@ public class TransactionArchive {
    * @return the list of transactions up to the specified week
    */
   public List<Transaction> getTransactions(int week) {
-    return this.transactions.subList(0, week);
+    return this.transactions.stream()
+        .filter(t -> t.getWeek() <= week)
+        .toList();
   }
 
   /**
