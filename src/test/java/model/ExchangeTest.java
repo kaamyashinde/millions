@@ -1,9 +1,13 @@
 package model;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
+import model.transaction.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -95,7 +99,8 @@ class ExchangeTest {
 
     assertEquals(1, resultsByLowerCase.size());
     assertEquals(1, resultsByUpperCase.size());
-    assertEquals(resultsByLowerCase.getFirst().getSymbol(), resultsByUpperCase.getFirst().getSymbol());
+    assertEquals(resultsByLowerCase.getFirst().getSymbol(),
+        resultsByUpperCase.getFirst().getSymbol());
   }
 
   @Test

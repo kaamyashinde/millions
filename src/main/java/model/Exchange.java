@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
+import model.transaction.Purchase;
+import model.transaction.Sale;
+import model.transaction.Transaction;
 
 /**
  * A class representing the Exchange Market in the system.
@@ -17,10 +20,9 @@ import java.util.stream.Collectors;
 public class Exchange {
 
   private final String name;
-  private int week;
-
   private final Map<String, Stock> stockMap;
   private final Random random;
+  private int week;
 
   /**
    * Constructor for Exchange.
@@ -46,15 +48,6 @@ public class Exchange {
   }
 
   /**
-   * Gets the current week of the exchange.
-   *
-   * @return the current week
-   */
-  public int getWeek() {
-    return week;
-  }
-
-  /**
    * Gets the stock by its symbol.
    *
    * @param symbol the stock symbol
@@ -62,16 +55,6 @@ public class Exchange {
    */
   public boolean hasStock(String symbol) {
     return stockMap.containsKey(symbol);
-  }
-
-  /**
-   * Gets the stock by its symbol.
-   *
-   * @param symbol the stock symbol
-   * @return the stock object
-   */
-  public Stock getStock(String symbol) {
-    return stockMap.get(symbol);
   }
 
   /**
@@ -103,6 +86,25 @@ public class Exchange {
     Purchase purchase = new Purchase(shareToBuy, this.getWeek());
     purchase.commit(player);
     return purchase;
+  }
+
+  /**
+   * Gets the stock by its symbol.
+   *
+   * @param symbol the stock symbol
+   * @return the stock object
+   */
+  public Stock getStock(String symbol) {
+    return stockMap.get(symbol);
+  }
+
+  /**
+   * Gets the current week of the exchange.
+   *
+   * @return the current week
+   */
+  public int getWeek() {
+    return week;
   }
 
   /**

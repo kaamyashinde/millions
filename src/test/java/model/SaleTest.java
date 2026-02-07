@@ -1,8 +1,13 @@
 package model;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
+import model.transaction.Sale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +32,7 @@ class SaleTest {
     assertEquals(share, sale.getShare());
     assertEquals(1, sale.getWeek());
     assertNotNull(sale.getCalculator());
-    assertTrue(sale.getCalculator() instanceof SaleCalculator);
+    assertInstanceOf(SaleCalculator.class, sale.getCalculator());
   }
 
   @Test

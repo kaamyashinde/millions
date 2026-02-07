@@ -1,6 +1,7 @@
 package model;
 
 import java.math.BigDecimal;
+import model.transaction.TransactionArchive;
 
 /**
  * A class representing a Player in the system.
