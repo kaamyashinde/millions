@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import model.Player;
 import model.Share;
 import model.Stock;
+import model.exception.AlreadyCommittedException;
 import model.exception.InsufficientFundsException;
 import model.transactioncalculator.PurchaseCalculator;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,10 +47,11 @@ class PurchaseTest {
   void commitSuccessDeductsMoneyAddsShareAndMarksCommited() {
     Purchase purchase = new Purchase(share, 1);
     BigDecimal beforeMoney = player.getMoney();
+    BigDecimal totalCost = purchase.getCalculator().calculateTotal();
 
     purchase.commit(player);
 
-    assertTrue(player.getMoney().compareTo(beforeMoney) < 0);
+    assertEquals(beforeMoney.subtract(totalCost), player.getMoney());
     assertTrue(player.getPortfolio().getShares().contains(share));
     assertTrue(player.getTransactionArchive().getTransactions(1).contains(purchase));
     assertTrue(purchase.isCommited());
@@ -83,5 +85,21 @@ class PurchaseTest {
 
     assertThrows(IllegalStateException.class, () -> purchase.commit(playerWithFreshArchive));
     assertFalse(purchase.isCommited());
+  }
+
+  @Test
+  void commitThrowsAlreadyCommittedWhenCommitCalledTwice() {
+    Purchase purchase = new Purchase(share, 1);
+    BigDecimal afterFirstCommit = player.getMoney().subtract(purchase.getCalculator().calculateTotal());
+
+    purchase.commit(player);
+
+    assertThrows(AlreadyCommittedException.class, () -> purchase.commit(player));
+
+    // Player state unchanged by second call: same money, share still in portfolio, purchase still committed
+    assertEquals(afterFirstCommit, player.getMoney());
+    assertTrue(player.getPortfolio().getShares().contains(share));
+    assertTrue(purchase.isCommited());
+    assertEquals(1, player.getTransactionArchive().getTransactions(1).size());
   }
 }

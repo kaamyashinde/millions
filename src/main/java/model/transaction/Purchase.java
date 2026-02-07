@@ -2,6 +2,7 @@ package model.transaction;
 
 import model.Player;
 import model.Share;
+import model.exception.AlreadyCommittedException;
 import model.exception.InsufficientFundsException;
 import model.transactioncalculator.PurchaseCalculator;
 
@@ -9,7 +10,7 @@ import model.transactioncalculator.PurchaseCalculator;
  * A class that represents a purchase transaction.
  *
  * @author kevindmazali
- * @version 0.0.2
+ * @version 0.0.3
  * @since 02-02-2026
  */
 public class Purchase extends Transaction {
@@ -35,8 +36,13 @@ public class Purchase extends Transaction {
    *                                    purchase.
    * @throws IllegalStateException      if the transaction was not added to the archive after
    *                                    committing.
+   * @throws AlreadyCommittedException  if the transaction has already been committed.
    */
   public void commit(Player player) {
+
+    if (this.isCommited()) {
+      throw new AlreadyCommittedException();
+    }
 
     if (player.getMoney().compareTo(purchaseCalc.calculateTotal()) < 0) {
       throw new InsufficientFundsException();

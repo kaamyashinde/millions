@@ -3,6 +3,7 @@ package model.transaction;
 
 import model.Player;
 import model.Share;
+import model.exception.AlreadyCommittedException;
 import model.exception.ShareNotFoundException;
 import model.transactioncalculator.SaleCalculator;
 
@@ -32,16 +33,19 @@ public class Sale extends Transaction {
    * Commits the sale transaction.
    *
    * @param player the player making the sale
-   * @throws ShareNotFoundException if the player does not have the share being sold in their
-   *                                portfolio.
+   * @throws ShareNotFoundException    if the player does not have the share being sold in their
+   *                                   portfolio.
+   * @throws AlreadyCommittedException if the transaction has already been committed.
    */
   public void commit(Player player) {
-
-    player.addMoney(saleCalc.calculateGross());
+    if (this.isCommited()) {
+      throw new AlreadyCommittedException();
+    }
     if (!player.getPortfolio().containsShare(this.getShare())) {
       throw new ShareNotFoundException(this.getShare(), player);
     } else {
       player.getPortfolio().removeShare(this.getShare());
+      player.addMoney(saleCalc.calculateTotal());
       player.getTransactionArchive().addTransaction(this);
       this.commited = true;
     }

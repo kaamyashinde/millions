@@ -29,8 +29,8 @@ public class Share {
    */
   public Share(Stock stock, BigDecimal quantity, BigDecimal purchasePrice) {
     checkNotNull(stock, "Stock");
-    checkNotNull(stock, "Quantity");
-    checkNotNull(stock, "Purchase Price");
+    checkNotNull(quantity, "Quantity");
+    checkNotNull(purchasePrice, "Purchase Price");
     this.stock = stock;
     this.quantity = quantity;
     this.purchasePrice = purchasePrice;
