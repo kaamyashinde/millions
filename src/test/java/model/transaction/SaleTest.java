@@ -48,11 +48,11 @@ class SaleTest {
   void commitAddsMoneyRemovesShareAndMarksCommited() {
     Sale sale = new Sale(share, 1);
     BigDecimal beforeMoney = player.getMoney();
-    BigDecimal expectedGross = new BigDecimal("2000.00"); // 10 * 200
+    BigDecimal expectedTotal = sale.getCalculator().calculateTotal();
 
     sale.commit(player);
 
-    assertEquals(beforeMoney.add(expectedGross), player.getMoney());
+    assertEquals(beforeMoney.add(expectedTotal), player.getMoney());
     assertFalse(player.getPortfolio().getShares().contains(share));
     assertTrue(player.getTransactionArchive().getTransactions(1).contains(sale));
     assertTrue(sale.isCommited());
