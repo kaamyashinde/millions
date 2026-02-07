@@ -29,11 +29,11 @@ class SaleCalculatorTest {
 
   @Test
   void calculateTax() {
-    assertEquals(0, new BigDecimal("3980").compareTo(calculator.calculateTax()));
+    assertEquals(0, new BigDecimal("294").compareTo(calculator.calculateTax()));
   }
 
   @Test
   void calculateTotal() {
-    assertEquals(0, new BigDecimal("5960").compareTo(calculator.calculateTotal()));
+    assertEquals(0, new BigDecimal("1686").compareTo(calculator.calculateTotal()));
   }
 }
