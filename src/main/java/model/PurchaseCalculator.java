@@ -2,12 +2,13 @@ package model;
 
 
 import java.math.BigDecimal;
+import model.utils.Validator;
 
 /**
  * A class that implements TransactionCalculator to calculate purchase transactions.
  *
  * @author kaamyashinde
- * @version 0.0.1
+ * @version 0.0.2
  * @since 31-01-2026
  */
 public class PurchaseCalculator implements TransactionCalculator {
@@ -21,8 +22,10 @@ public class PurchaseCalculator implements TransactionCalculator {
    * Constructor for PurchaseCalculator.
    *
    * @param share The share being purchased.
+   * @throws NullPointerException if {@code share} is null.
    */
   public PurchaseCalculator(Share share) {
+    Validator.checkNotNull(share, "Share");
     this.purchasePrice = share.getPurchasePrice();
     this.quantity = share.getQuantity();
   }
