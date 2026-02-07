@@ -62,7 +62,7 @@ public class TransactionArchive {
    */
   public List<Purchase> getPurchases(int week) {
     return this.transactions.stream()
-        .filter(t -> t instanceof Purchase)
+        .filter(Purchase.class::isInstance)
         .map(t -> (Purchase) t)
         .filter(p -> p.getWeek() <= week)
         .toList();   // or .collect(Collectors.toList()) on Java < 16
@@ -76,7 +76,7 @@ public class TransactionArchive {
    */
   public List<Sale> getSales(int week) {
     return this.transactions.stream()
-        .filter(t -> t instanceof Sale)
+        .filter(Sale.class::isInstance)
         .map(t -> (Sale) t)
         .filter(s -> s.getWeek() <= week)
         .toList();   // or .collect(Collectors.toList()) on Java < 16
