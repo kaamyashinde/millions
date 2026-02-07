@@ -7,7 +7,7 @@ import model.utils.Validator;
  * A class that implements TransactionCalculator to calculate sale transactions.
  *
  * @author kaamyashinde
- * @version 0.0.3
+ * @version 0.0.4
  * @since 02-02-2026
  */
 
@@ -54,7 +54,8 @@ public class SaleCalculator implements TransactionCalculator {
   }
 
   /**
-   * The tax for the sale is calculated based on the profit made from the sale.
+   * The tax for the sale is calculated based on the profit made from the sale. If no profit is
+   * made, no tax is applied.
    *
    * @return the tax as a BigDecimal.
    */
@@ -62,9 +63,15 @@ public class SaleCalculator implements TransactionCalculator {
   public BigDecimal calculateTax() {
     BigDecimal purchaseCosts = purchasePrice.multiply(quantity);
     BigDecimal profit =
-        this.calculateGross().subtract(this.calculateCommission()).subtract(purchaseCosts);
+        calculateGross().subtract(calculateCommission()).subtract(purchaseCosts);
+
+    if (profit.signum() <= 0) {
+      return BigDecimal.ZERO;
+    }
+
     return profit.multiply(TAX_RATE);
   }
+
 
   /**
    * The total amount of the sale is calculated by subtracting the commission and adding the tax to
