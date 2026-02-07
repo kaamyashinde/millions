@@ -197,12 +197,35 @@ public class UserInterface {
             + share.getStock().getSalesPrice() + ")"));
   }
 
+  /**
+   * Lists all stocks available on the exchange with symbol, company and current price.
+   */
   private static void listStocks() {
-    System.out.println("-> List stocks not yet implemented.");
+    List<Stock> stocks = exchange.findStocks("");
+    if (stocks.isEmpty()) {
+      System.out.println("-> No stocks available.");
+      return;
+    }
+    System.out.println("-> Stocks on " + exchange.getName() + ":");
+    stocks.forEach(stock -> System.out.println(
+        "   " + stock.getSymbol() + " - " + stock.getCompany() + " | Price: " + stock.getSalesPrice()));
   }
 
+  /**
+   * Searches stocks by symbol or company name and prints matching results.
+   */
   private static void searchStocks() {
-    System.out.println("-> Search stocks not yet implemented.");
+    input.nextLine();
+    System.out.println("Enter search term (symbol or company name): ");
+    String term = input.nextLine().trim();
+    List<Stock> results = exchange.findStocks(term);
+    if (results.isEmpty()) {
+      System.out.println("-> No stocks found matching '" + term + "'.");
+      return;
+    }
+    System.out.println("-> Found " + results.size() + " stock(s):");
+    results.forEach(stock -> System.out.println(
+        "   " + stock.getSymbol() + " - " + stock.getCompany() + " | Price: " + stock.getSalesPrice()));
   }
 
   private static void buyShares() {
