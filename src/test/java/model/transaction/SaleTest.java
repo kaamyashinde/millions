@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import model.Player;
 import model.Share;
 import model.Stock;
+import model.exception.AlreadyCommittedException;
 import model.exception.ShareNotFoundException;
 import model.transactioncalculator.SaleCalculator;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,8 +63,30 @@ class SaleTest {
   void commitThrowsShareNotFoundWhenShareNotInPortfolio() {
     Player playerWithoutShare = new Player("Bob", new BigDecimal("10000.00"));
     Sale sale = new Sale(share, 1);
+    BigDecimal moneyBefore = playerWithoutShare.getMoney();
 
     assertThrows(ShareNotFoundException.class, () -> sale.commit(playerWithoutShare));
+
     assertFalse(sale.isCommited());
+    assertEquals(moneyBefore, playerWithoutShare.getMoney());
+    assertTrue(playerWithoutShare.getPortfolio().getShares().isEmpty());
+    assertTrue(playerWithoutShare.getTransactionArchive().isEmpty());
+  }
+
+  @Test
+  void commitThrowsAlreadyCommittedWhenCommitCalledTwice() {
+    Sale sale = new Sale(share, 1);
+    BigDecimal expectedTotal = sale.getCalculator().calculateTotal();
+    BigDecimal moneyAfterFirstCommit = player.getMoney().add(expectedTotal);
+
+    sale.commit(player);
+
+    assertThrows(AlreadyCommittedException.class, () -> sale.commit(player));
+
+    // Player state unchanged by second call: same money, share still removed, sale still committed
+    assertEquals(moneyAfterFirstCommit, player.getMoney());
+    assertFalse(player.getPortfolio().getShares().contains(share));
+    assertTrue(sale.isCommited());
+    assertEquals(1, player.getTransactionArchive().getTransactions(1).size());
   }
 }
