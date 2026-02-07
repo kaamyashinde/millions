@@ -2,9 +2,9 @@ package model.transaction;
 
 
 import model.Player;
-import model.SaleCalculator;
 import model.Share;
 import model.ShareNotFoundException;
+import model.transactioncalculator.SaleCalculator;
 
 /**
  * A class that represents a sale transaction.

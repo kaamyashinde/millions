@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import model.Player;
-import model.PurchaseCalculator;
-import model.SaleCalculator;
 import model.Share;
 import model.Stock;
+import model.transactioncalculator.PurchaseCalculator;
+import model.transactioncalculator.SaleCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

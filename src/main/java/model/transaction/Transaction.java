@@ -2,7 +2,7 @@ package model.transaction;
 
 import model.Player;
 import model.Share;
-import model.TransactionCalculator;
+import model.transactioncalculator.TransactionCalculator;
 
 /**
  * An abstract class representing a financial transaction.
