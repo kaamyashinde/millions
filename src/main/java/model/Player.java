@@ -38,6 +38,15 @@ public class Player {
   }
 
   /**
+   * Gets the starting money of the player.
+   *
+   * @return the starting money of the player
+   */
+  public BigDecimal getStartingMoney() {
+    return startingMoney;
+  }
+
+  /**
    * Gets the current money of the player.
    *
    * @return the current money of the player

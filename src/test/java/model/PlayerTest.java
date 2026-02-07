@@ -3,7 +3,6 @@ package model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +19,11 @@ class PlayerTest {
   @Test
   void getName() {
     assertEquals("Alice", player.getName());
+  }
+
+  @Test
+  void getStartingMoney() {
+    assertEquals(new BigDecimal("1000.00"), player.getStartingMoney());
   }
 
   @Test
