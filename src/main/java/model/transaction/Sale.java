@@ -3,7 +3,7 @@ package model.transaction;
 
 import model.Player;
 import model.Share;
-import model.ShareNotFoundException;
+import model.exception.ShareNotFoundException;
 import model.transactioncalculator.SaleCalculator;
 
 /**

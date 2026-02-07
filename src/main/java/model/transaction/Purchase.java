@@ -1,8 +1,8 @@
 package model.transaction;
 
-import model.InsufficientFundsException;
 import model.Player;
 import model.Share;
+import model.exception.InsufficientFundsException;
 import model.transactioncalculator.PurchaseCalculator;
 
 /**
