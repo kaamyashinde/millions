@@ -24,20 +24,27 @@ public class Purchase extends Transaction {
 
   /**
    * Commits the purchase transaction.
+   *
+   * @param player the player making the purchase
+   * @throws InsufficientFundsException if the player does not have enough money to complete the
+   *                                    purchase.
+   * @throws IllegalStateException      if the transaction was not added to the archive after
+   *                                    committing.
    */
   public void commit(Player player) {
-    try {
+
+    if (player.getMoney().compareTo(purchaseCalc.calculateTotal()) < 0) {
+      throw new InsufficientFundsException();
+    } else {
       player.withdrawMoney(this.purchaseCalc.calculateTotal());
       player.getPortfolio().addShare(this.getShare());
       player.getTransactionArchive().addTransaction(this);
-    } catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException("Insufficient funds to complete the purchase.");
-    } finally {
-      if (player.getTransactionArchive().getTransactions(getWeek()).contains(this)) {
-        this.commited = true;
-      } else {
-        System.out.println("Purchase could not be completed.");
-      }
+    }
+
+    if (player.getTransactionArchive().getTransactions(getWeek()).contains(this)) {
+      this.commited = true;
+    } else {
+      throw new IllegalStateException("Transaction was not added to the archive.");
     }
   }
 }
