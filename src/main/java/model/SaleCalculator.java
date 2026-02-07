@@ -6,13 +6,13 @@ import java.math.BigDecimal;
  * A class that implements TransactionCalculator to calculate sale transactions.
  *
  * @author kaamyashinde
- * @version 0.0.1
+ * @version 0.0.2
  * @since 02-02-2026
  */
 
 public class SaleCalculator implements TransactionCalculator {
 
-  private static final BigDecimal COMMISSION_RATE = new BigDecimal("0.01"); // 0.5%
+  private static final BigDecimal COMMISSION_RATE = new BigDecimal("0.01"); // 1%
   private final BigDecimal salePrice;
   private final BigDecimal purchasePrice;
   private final BigDecimal quantity;
