@@ -5,7 +5,7 @@ package model;
  * A class that represents a sale transaction.
  *
  * @author kevindmazali
- * @version 0.0.2
+ * @version 0.0.3
  * @since 02-02-2026
  */
 public class Sale extends Transaction {
@@ -25,6 +25,10 @@ public class Sale extends Transaction {
 
   /**
    * Commits the sale transaction.
+   *
+   * @param player the player making the sale
+   * @throws ShareNotFoundException if the player does not have the share being sold in their
+   *                                portfolio.
    */
   public void commit(Player player) {
 
