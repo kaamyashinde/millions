@@ -11,7 +11,6 @@ import model.Share;
 import model.exception.InsufficientFundsException;
 import model.exception.ShareNotFoundException;
 import model.transaction.Purchase;
-import model.transaction.Sale;
 import model.transaction.Transaction;
 
 /**
@@ -260,7 +259,7 @@ public class UserInterface {
         System.out.println(INVALID_INPUT + " Quantity must be positive.");
         return;
       }
-      Transaction purchase = exchange.buy(symbol, quantity, player);
+      exchange.buy(symbol, quantity, player);
       System.out.println("-> Successfully bought " + quantity + " share(s) of " + symbol + ".");
     } catch (NumberFormatException e) {
       System.out.println(INVALID_INPUT);
