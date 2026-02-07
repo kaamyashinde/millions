@@ -1,5 +1,13 @@
 package model;
 
+
+/**
+ * A class that represents a sale transaction.
+ *
+ * @author kevindmazali
+ * @version 0.0.2
+ * @since 02-02-2026
+ */
 public class Sale extends Transaction {
 
   private final SaleCalculator saleCalc;
@@ -19,11 +27,16 @@ public class Sale extends Transaction {
    * Commits the sale transaction.
    */
   public void commit(Player player) {
+
     player.addMoney(saleCalc.calculateGross());
-    player.getPortfolio().removeShare(this.getShare());
-    player.getTransactionArchive().addTransaction(this);
-    if (player.getTransactionArchive().getTransactions(getWeek()).contains(this)) {
+    if (!player.getPortfolio().containsShare(this.getShare())) {
+      throw new ShareNotFoundException(this.getShare(), player);
+    } else {
+      player.getPortfolio().removeShare(this.getShare());
+      player.getTransactionArchive().addTransaction(this);
       this.commited = true;
     }
+
+
   }
 }
