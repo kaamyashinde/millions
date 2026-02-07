@@ -131,17 +131,70 @@ public class UserInterface {
     System.exit(0);
   }
 
+  /**
+   * Ensures a player has been set up. Prints a message if not.
+   *
+   * @return true if player is not null, false otherwise
+   */
+  private static boolean requirePlayer() {
+    if (player == null) {
+      System.out.println("-> You need to set up a player first (option 1).");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Sets up the player. Prompts for name and starting money and creates a new Player.
+   */
   private static void setUpPlayer() {
-    // TODO: implement
-    System.out.println("-> Set up player not yet implemented.");
+    input.nextLine();
+    System.out.println("Enter your name: ");
+    String name = input.nextLine().trim();
+    if (name.isEmpty()) {
+      System.out.println(INVALID_INPUT);
+      return;
+    }
+    System.out.println("Enter your starting money (e.g. 10000.00): ");
+    try {
+      BigDecimal startingMoney = new BigDecimal(input.nextLine().trim());
+      if (startingMoney.compareTo(BigDecimal.ZERO) < 0) {
+        System.out.println(INVALID_INPUT + " Starting money must be non-negative.");
+        return;
+      }
+      player = new Player(name, startingMoney);
+      System.out.println("-> Player '" + name + "' created with " + startingMoney + " in balance.");
+    } catch (NumberFormatException e) {
+      System.out.println(INVALID_INPUT);
+    }
   }
 
+  /**
+   * Prints the current balance of the player.
+   */
   private static void viewBalance() {
-    System.out.println("-> View balance not yet implemented.");
+    if (!requirePlayer()) {
+      return;
+    }
+    System.out.println("-> Your current balance: " + player.getMoney());
   }
 
+  /**
+   * Prints the player's portfolio (all shares held).
+   */
   private static void viewPortfolio() {
-    System.out.println("-> View portfolio not yet implemented.");
+    if (!requirePlayer()) {
+      return;
+    }
+    if (player.getPortfolio().getShares().isEmpty()) {
+      System.out.println("-> Your portfolio is empty.");
+      return;
+    }
+    System.out.println("-> Your portfolio:");
+    player.getPortfolio().getShares().forEach(share -> System.out.println(
+        "   " + share.getStock().getSymbol() + " (" + share.getStock().getCompany() + "): "
+            + share.getQuantity() + " shares @ " + share.getPurchasePrice() + " (current: "
+            + share.getStock().getSalesPrice() + ")"));
   }
 
   private static void listStocks() {
