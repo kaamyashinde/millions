@@ -40,8 +40,9 @@ public class PurchaseCalculator implements TransactionCalculator {
     return purchasePrice.multiply(quantity);
   }
 
-  /***
+  /**
    * Calculates the commission for the purchase.
+   *
    * @return the commission as a BigDecimal.
    */
   @Override
