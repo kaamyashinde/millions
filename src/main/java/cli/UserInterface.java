@@ -6,6 +6,8 @@ import java.util.Scanner;
 import model.Exchange;
 import model.Player;
 import model.Stock;
+import model.exception.InsufficientFundsException;
+import model.transaction.Transaction;
 
 /**
  * The UserInterface class is responsible for handling the user input and output
@@ -228,8 +230,38 @@ public class UserInterface {
         "   " + stock.getSymbol() + " - " + stock.getCompany() + " | Price: " + stock.getSalesPrice()));
   }
 
+  /**
+   * Buys shares of a stock. Prompts for stock symbol and quantity, then commits the purchase.
+   */
   private static void buyShares() {
-    System.out.println("-> Buy shares not yet implemented.");
+    if (!requirePlayer()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println("Enter the stock symbol (e.g. AAPL): ");
+    String symbol = input.nextLine().trim().toUpperCase();
+    if (symbol.isEmpty()) {
+      System.out.println(INVALID_INPUT);
+      return;
+    }
+    if (!exchange.hasStock(symbol)) {
+      System.out.println("-> Stock '" + symbol + "' not found on the exchange.");
+      return;
+    }
+    System.out.println("Enter the quantity to buy: ");
+    try {
+      BigDecimal quantity = new BigDecimal(input.nextLine().trim());
+      if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
+        System.out.println(INVALID_INPUT + " Quantity must be positive.");
+        return;
+      }
+      Transaction purchase = exchange.buy(symbol, quantity, player);
+      System.out.println("-> Successfully bought " + quantity + " share(s) of " + symbol + ".");
+    } catch (NumberFormatException e) {
+      System.out.println(INVALID_INPUT);
+    } catch (InsufficientFundsException e) {
+      System.out.println("-> " + e.getMessage());
+    }
   }
 
   private static void sellShares() {
