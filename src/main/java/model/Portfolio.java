@@ -30,8 +30,18 @@ public class Portfolio {
    * @throws NullPointerException if {@code share} is null.
    */
   public boolean addShare(Share share) {
-    checkNotNull(share, "Share");
+    checkNotNullOnShare(share);
     return this.shares.add(share);
+  }
+
+
+  /**
+   * Checks if the share is not null.
+   *
+   * @param share The share to be checked.
+   */
+  private static void checkNotNullOnShare(Share share) {
+    checkNotNull(share, "Share");
   }
 
   /**
@@ -42,7 +52,7 @@ public class Portfolio {
    * @throws NullPointerException if {@code share} is null.
    */
   public boolean removeShare(Share share) {
-    checkNotNull(share, "Share");
+    checkNotNullOnShare(share);
     return this.shares.remove(share);
   }
 
@@ -75,7 +85,7 @@ public class Portfolio {
    * @throws NullPointerException if {@code share} is null.
    */
   public boolean containsShare(Share share) {
-    checkNotNull(share, "Share");
+    checkNotNullOnShare(share);
     return this.shares.contains(share);
   }
 }
