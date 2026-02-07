@@ -1,4 +1,8 @@
-package model;
+package model.transaction;
+
+import model.Player;
+import model.Share;
+import model.transactioncalculator.TransactionCalculator;
 
 /**
  * An abstract class representing a financial transaction.
@@ -23,7 +27,7 @@ public abstract class Transaction {
    * @param calculator The calculator to compute transaction details.
    */
 
-  public Transaction(Share share, int week, TransactionCalculator calculator) {
+  protected Transaction(Share share, int week, TransactionCalculator calculator) {
     this.share = share;
     this.week = week;
     this.calculator = calculator;
@@ -67,7 +71,7 @@ public abstract class Transaction {
   }
 
   /**
-   * Commits the transaction to a player. // TODO ADD A PLAYER PARAMETER
+   * Commits the transaction to a player.
    */
   public abstract void commit(Player player);
 }

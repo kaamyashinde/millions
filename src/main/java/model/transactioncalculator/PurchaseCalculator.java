@@ -1,7 +1,8 @@
-package model;
+package model.transactioncalculator;
 
 
 import java.math.BigDecimal;
+import model.Share;
 import model.utils.Validator;
 
 /**

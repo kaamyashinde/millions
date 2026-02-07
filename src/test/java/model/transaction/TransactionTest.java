@@ -1,8 +1,16 @@
-package model;
+package model.transaction;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
+import model.Player;
+import model.Share;
+import model.Stock;
+import model.transactioncalculator.PurchaseCalculator;
+import model.transactioncalculator.SaleCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,12 +19,11 @@ import org.junit.jupiter.api.Test;
  */
 class TransactionTest {
 
-  private Stock stock;
   private Share share;
 
   @BeforeEach
   void setUp() {
-    stock = new Stock("AAPL", "Apple Inc.");
+    Stock stock = new Stock("AAPL", "Apple Inc.");
     stock.addNewSalesPrice(new BigDecimal("200.00"));
     share = new Share(stock, new BigDecimal("10"), new BigDecimal("100.00"));
   }
@@ -43,11 +50,11 @@ class TransactionTest {
   void getCalculatorReturnsCorrectCalculator() {
     Sale sale = new Sale(share, 1);
     assertNotNull(sale.getCalculator());
-    assertTrue(sale.getCalculator() instanceof SaleCalculator);
+    assertInstanceOf(SaleCalculator.class, sale.getCalculator());
 
     Purchase purchase = new Purchase(share, 1);
     assertNotNull(purchase.getCalculator());
-    assertTrue(purchase.getCalculator() instanceof PurchaseCalculator);
+    assertInstanceOf(PurchaseCalculator.class, purchase.getCalculator());
   }
 
   @Test

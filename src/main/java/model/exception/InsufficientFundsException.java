@@ -1,4 +1,4 @@
-package model;
+package model.exception;
 
 /**
  * An exception thrown when a player attempts to perform a transaction without sufficient funds.

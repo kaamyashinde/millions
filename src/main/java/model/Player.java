@@ -1,6 +1,7 @@
 package model;
 
 import java.math.BigDecimal;
+import model.transaction.TransactionArchive;
 
 /**
  * A class representing a Player in the system.
@@ -34,6 +35,15 @@ public class Player {
    */
   public String getName() {
     return name;
+  }
+
+  /**
+   * Gets the starting money of the player.
+   *
+   * @return the starting money of the player
+   */
+  public BigDecimal getStartingMoney() {
+    return startingMoney;
   }
 
   /**

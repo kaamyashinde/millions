@@ -1,7 +1,9 @@
-package model;
+package model.transactioncalculator;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
+import model.Share;
+import model.Stock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

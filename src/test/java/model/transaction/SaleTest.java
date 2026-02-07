@@ -1,20 +1,28 @@
-package model;
+package model.transaction;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
+import model.Player;
+import model.Share;
+import model.Stock;
+import model.exception.ShareNotFoundException;
+import model.transactioncalculator.SaleCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class SaleTest {
 
-  private Stock stock;
   private Share share;
   private Player player;
 
   @BeforeEach
   void setUp() {
-    stock = new Stock("AAPL", "Apple Inc.");
+    Stock stock = new Stock("AAPL", "Apple Inc.");
     stock.addNewSalesPrice(new BigDecimal("200.00"));
     share = new Share(stock, new BigDecimal("10"), new BigDecimal("100.00"));
     player = new Player("Alice", new BigDecimal("10000.00"));
@@ -27,7 +35,7 @@ class SaleTest {
     assertEquals(share, sale.getShare());
     assertEquals(1, sale.getWeek());
     assertNotNull(sale.getCalculator());
-    assertTrue(sale.getCalculator() instanceof SaleCalculator);
+    assertInstanceOf(SaleCalculator.class, sale.getCalculator());
   }
 
   @Test
