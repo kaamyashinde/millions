@@ -1,12 +1,15 @@
 package cli;
 
 import java.math.BigDecimal;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import model.Exchange;
 import model.Player;
 import model.Stock;
+import model.Share;
 import model.exception.InsufficientFundsException;
+import model.exception.ShareNotFoundException;
 import model.transaction.Transaction;
 
 /**
@@ -264,8 +267,41 @@ public class UserInterface {
     }
   }
 
+  /**
+   * Sells a share from the portfolio. Lists holdings with numbers and prompts for the index to sell.
+   */
   private static void sellShares() {
-    System.out.println("-> Sell shares not yet implemented.");
+    if (!requirePlayer()) {
+      return;
+    }
+    List<Share> shares = player.getPortfolio().getShares();
+    if (shares.isEmpty()) {
+      System.out.println("-> Your portfolio is empty. Nothing to sell.");
+      return;
+    }
+    System.out.println("-> Your holdings (enter the number to sell that lot):");
+    for (int i = 0; i < shares.size(); i++) {
+      Share s = shares.get(i);
+      System.out.println("   " + (i + 1) + ". " + s.getStock().getSymbol() + " - " + s.getQuantity()
+          + " shares @ " + s.getPurchasePrice() + " (current: " + s.getStock().getSalesPrice() + ")");
+    }
+    System.out.println("Enter the number of the holding to sell (1 to " + shares.size() + "): ");
+    try {
+      int index = input.nextInt();
+      if (index < 1 || index > shares.size()) {
+        System.out.println(INVALID_INPUT);
+        return;
+      }
+      Share toSell = shares.get(index - 1);
+      exchange.sell(toSell, player);
+      System.out.println("-> Successfully sold " + toSell.getQuantity() + " share(s) of "
+          + toSell.getStock().getSymbol() + ".");
+    } catch (InputMismatchException e) {
+      System.out.println(INVALID_INPUT);
+      input.nextLine();
+    } catch (ShareNotFoundException e) {
+      System.out.println("-> " + e.getMessage());
+    }
   }
 
   private static void advanceWeek() {
