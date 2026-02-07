@@ -1,4 +1,4 @@
-package model;
+package model.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -7,8 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
-import model.transaction.Purchase;
-import model.transaction.TransactionArchive;
+import model.InsufficientFundsException;
+import model.Player;
+import model.PurchaseCalculator;
+import model.Share;
+import model.Stock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
