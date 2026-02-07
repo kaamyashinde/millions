@@ -64,7 +64,7 @@
         <version>0.0.8</version>
         <configuration>
           <!-- ENDRE denne til din faktiske Main-klasse -->
-          <mainClass>org.example.Main</mainClass>
+          <mainClass>Main</mainClass>
         </configuration>
       </plugin>
 
