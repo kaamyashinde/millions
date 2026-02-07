@@ -10,6 +10,8 @@ import model.Stock;
 import model.Share;
 import model.exception.InsufficientFundsException;
 import model.exception.ShareNotFoundException;
+import model.transaction.Purchase;
+import model.transaction.Sale;
 import model.transaction.Transaction;
 
 /**
@@ -304,11 +306,33 @@ public class UserInterface {
     }
   }
 
+  /**
+   * Advances the exchange to the next week and updates stock prices.
+   */
   private static void advanceWeek() {
-    System.out.println("-> Advance week not yet implemented.");
+    exchange.advance();
+    System.out.println("-> Week advanced to " + exchange.getWeek() + ". Stock prices have been updated.");
   }
 
+  /**
+   * Prints the player's transaction history up to the current week.
+   */
   private static void viewTransactions() {
-    System.out.println("-> View transactions not yet implemented.");
+    if (!requirePlayer()) {
+      return;
+    }
+    int week = exchange.getWeek();
+    List<Transaction> transactions = player.getTransactionArchive().getTransactions(week);
+    if (transactions.isEmpty()) {
+      System.out.println("-> No transactions yet.");
+      return;
+    }
+    System.out.println("-> Transaction history (up to week " + week + "):");
+    transactions.forEach(t -> {
+      String type = t instanceof Purchase ? "PURCHASE" : "SALE";
+      String sym = t.getShare().getStock().getSymbol();
+      String qty = t.getShare().getQuantity().toString();
+      System.out.println("   Week " + t.getWeek() + " | " + type + " | " + sym + " | " + qty + " share(s)");
+    });
   }
 }
