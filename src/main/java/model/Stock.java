@@ -6,14 +6,13 @@ import java.util.List;
 
 /**
  * Represents a stock in a company. This has a unique stock symbol, f.e.g., "AAPL" for Apple Inc.
- * The stock is sold on Exchanges for a price that updates weekly.
+ * The stock is sold on {@code Exchange} for a price that updates weekly.
  *
  * @author kaamyashinde
  * @version 0.0.1
  * @since 30-01-2026
  */
 
-// TODO: Refer to the exchanges class when it is implemented
 
 public class Stock {
 
@@ -67,6 +66,7 @@ public class Stock {
 
   /**
    * Adds a new sales price to the stock's price history.
+   *
    * @param price The new sales price to be added.
    * @throws NullPointerException if {@code price} is null.
    */
@@ -82,10 +82,10 @@ public class Stock {
    */
   @Override
   public String toString() {
-    return "Stock{" +
-        "symbol='" + symbol + '\'' +
-        ", company='" + company + '\'' +
-        ", price=" + price +
-        '}';
+    return "Stock{"
+        + "symbol='" + symbol + '\''
+        + ", company='" + company + '\''
+        + ", price=" + price
+        + '}';
   }
 }

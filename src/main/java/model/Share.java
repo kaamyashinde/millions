@@ -24,7 +24,8 @@ public class Share {
    * @param stock         The stock associated with the share.
    * @param quantity      The quantity of shares purchased.
    * @param purchasePrice The price at which the shares were purchased.
-   * @throws NullPointerException if {@code stock}, {@code quantity} or {@code purchasePrice} is null.
+   * @throws NullPointerException if {@code stock}, {@code quantity} or {@code purchasePrice} is
+   *                              null.
    */
   public Share(Stock stock, BigDecimal quantity, BigDecimal purchasePrice) {
     checkNotNull(stock, "Stock");
