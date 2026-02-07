@@ -33,7 +33,28 @@ class SaleCalculatorTest {
   }
 
   @Test
+  void calculateTaxReturnsZeroWhenLoss() {
+    Stock losingStock = new Stock("LOSE", "Losing Inc.");
+    losingStock.addNewSalesPrice(new BigDecimal("50.00"));
+    Share losingShare = new Share(losingStock, new BigDecimal("10"), new BigDecimal("100.00"));
+    SaleCalculator lossCalculator = new SaleCalculator(losingShare);
+
+    assertEquals(BigDecimal.ZERO, lossCalculator.calculateTax());
+  }
+
+  @Test
   void calculateTotal() {
     assertEquals(0, new BigDecimal("1686").compareTo(calculator.calculateTotal()));
+  }
+
+  @Test
+  void calculateTotalWhenLoss() {
+    Stock losingStock = new Stock("LOSE", "Losing Inc.");
+    losingStock.addNewSalesPrice(new BigDecimal("50.00"));
+    Share losingShare = new Share(losingStock, new BigDecimal("10"), new BigDecimal("100.00"));
+    SaleCalculator lossCalculator = new SaleCalculator(losingShare);
+
+    // gross=500, commission=5, tax=0 → total = 500 - 5 - 0 = 495
+    assertEquals(0, new BigDecimal("495").compareTo(lossCalculator.calculateTotal()));
   }
 }
