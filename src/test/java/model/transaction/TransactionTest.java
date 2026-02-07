@@ -19,12 +19,11 @@ import org.junit.jupiter.api.Test;
  */
 class TransactionTest {
 
-  private Stock stock;
   private Share share;
 
   @BeforeEach
   void setUp() {
-    stock = new Stock("AAPL", "Apple Inc.");
+    Stock stock = new Stock("AAPL", "Apple Inc.");
     stock.addNewSalesPrice(new BigDecimal("200.00"));
     share = new Share(stock, new BigDecimal("10"), new BigDecimal("100.00"));
   }

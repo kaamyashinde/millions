@@ -17,13 +17,12 @@ import org.junit.jupiter.api.Test;
 
 class SaleTest {
 
-  private Stock stock;
   private Share share;
   private Player player;
 
   @BeforeEach
   void setUp() {
-    stock = new Stock("AAPL", "Apple Inc.");
+    Stock stock = new Stock("AAPL", "Apple Inc.");
     stock.addNewSalesPrice(new BigDecimal("200.00"));
     share = new Share(stock, new BigDecimal("10"), new BigDecimal("100.00"));
     player = new Player("Alice", new BigDecimal("10000.00"));
