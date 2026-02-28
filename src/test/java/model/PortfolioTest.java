@@ -18,7 +18,9 @@ class PortfolioTest {
   void setUp() {
     portfolio = new Portfolio();
     appleStock = new Stock("AAPL", "Apple Inc.");
+    appleStock.addNewSalesPrice(new BigDecimal("150.00"));
     googleStock = new Stock("GOOGL", "Alphabet Inc.");
+    googleStock.addNewSalesPrice(new BigDecimal("2800.00"));
     appleShare = new Share(appleStock, new BigDecimal("10"), new BigDecimal("150.00"));
     googleShare = new Share(googleStock, new BigDecimal("5"), new BigDecimal("2800.00"));
   }
@@ -116,5 +118,38 @@ class PortfolioTest {
     Portfolio emptyPortfolio = new Portfolio();
     assertTrue(emptyPortfolio.getShares().isEmpty());
     assertEquals(0, emptyPortfolio.getShares().size());
+  }
+
+  @Test
+  void getNetWorthOfEmptyPortfolio() {
+    assertEquals(0, BigDecimal.ZERO.compareTo(portfolio.getNetWorth()));
+  }
+
+  @Test
+  void getNetWorthWithSingleShare() {
+    // Apple: 10 shares at 150.00 = 1500.00 - 15.00 commission = 1485.00
+    portfolio.addShare(appleShare);
+    assertEquals(0, new BigDecimal("1485.00").compareTo(portfolio.getNetWorth()));
+  }
+
+  @Test
+  void getNetWorthWithMultipleShares() {
+    // Apple: 10 shares at 150.00 = 1500.00 - 15.00 commission = 1485.00
+    // Google: 5 shares at 2800.00 = 14000.00 - 140.00 commission = 13860.00
+    // Total = 15345.00
+    portfolio.addShare(appleShare);
+    portfolio.addShare(googleShare);
+    assertEquals(0, new BigDecimal("15345.00").compareTo(portfolio.getNetWorth()));
+  }
+
+  @Test
+  void getNetWorthWithMultipleSharesOfSameStock() {
+    Share anotherAppleShare = new Share(appleStock, new BigDecimal("5"), new BigDecimal("160.00"));
+    // First Apple: 10 shares at 150.00 = 1500.00 - 15.00 commission = 1485.00
+    // Second Apple: 5 shares at 150.00 (stock price) = 750.00 - 7.50 commission = 742.50
+    // Total = 2227.50
+    portfolio.addShare(appleShare);
+    portfolio.addShare(anotherAppleShare);
+    assertEquals(0, new BigDecimal("2227.50").compareTo(portfolio.getNetWorth()));
   }
 }
