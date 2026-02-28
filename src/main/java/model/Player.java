@@ -1,13 +1,14 @@
 package model;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import model.transaction.TransactionArchive;
 
 /**
  * A class representing a Player in the system.
  *
  * @author kevindmazali
- * @version 1.0.0
+ * @version 1.5.0
  */
 public class Player {
 
@@ -15,6 +16,7 @@ public class Player {
   private final BigDecimal startingMoney;
   private final Portfolio portfolio;
   private final TransactionArchive transactionArchive;
+  private final PlayerLevel playerLevel;
   private BigDecimal money;
 
   /**
@@ -29,6 +31,19 @@ public class Player {
     this.money = startingMoney;
     this.portfolio = new Portfolio();
     this.transactionArchive = new TransactionArchive();
+    this.playerLevel = setPlayerLevel();
+  }
+
+  /**
+   * Determines the player's status based on their net worth.
+   *
+   * @return the player's status as a PlayerLevel
+   */
+  public PlayerLevel setPlayerLevel() {
+    return Arrays.stream(PlayerLevel.values())
+        .filter(status -> status.qualifies(this))
+        .findFirst()
+        .orElse(PlayerLevel.NOVICE);
   }
 
   /**
@@ -57,6 +72,15 @@ public class Player {
 
   public BigDecimal getMoney() {
     return money;
+  }
+
+  /**
+   * Gets the player's current level.
+   *
+   * @return the player's current level as a PlayerLevel
+   */
+  public PlayerLevel getPlayerLevel() {
+    return playerLevel;
   }
 
   /**
@@ -96,7 +120,6 @@ public class Player {
     return transactionArchive;
   }
 
-
   /**
    * Calculates the net worth of the player by adding the current money and the net worth of the
    * portfolio.
@@ -106,5 +129,4 @@ public class Player {
   public BigDecimal getNetWorth() {
     return this.money.add(this.portfolio.getNetWorth());
   }
-
 }
