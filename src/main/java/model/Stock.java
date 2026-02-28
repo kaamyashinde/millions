@@ -56,15 +56,6 @@ public class Stock {
   }
 
   /**
-   * Gets the latest price of the stock.
-   *
-   * @return The latest price of the stock.
-   */
-  public BigDecimal getSalesPrice() {
-    return price.getLast();
-  }
-
-  /**
    * Adds a new sales price to the stock's price history.
    *
    * @param price The new sales price to be added.
@@ -104,6 +95,30 @@ public class Stock {
     return this.price.stream().min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
   }
 
+  /**
+   * Returns the latest price change of a stock, calculated as the difference between the most
+   * recent price and the previous price.
+   *
+   * @return The latest price change of the stock, or {@code BigDecimal.ZERO} if there are fewer
+   * than two
+   */
+  public BigDecimal getLatestPriceChange() {
+    int size = price.size();
+    if (size < 2) {
+      return BigDecimal.ZERO;
+    }
+    return price.get(size - 1)
+        .subtract(price.get(size - 2));
+  }
+
+  /**
+   * Gets the latest price of the stock.
+   *
+   * @return The latest price of the stock.
+   */
+  public BigDecimal getSalesPrice() {
+    return price.getLast();
+  }
 
   /**
    * Returns a string representation of the Stock object.
