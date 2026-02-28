@@ -15,26 +15,24 @@ import model.Stock;
  * NVDA,Nvidia,191.27 We skip empty lines and lines starting with '#' (considered as comments).
  *
  * @author kevindmazali
- * @version 0.0.1
+ * @version 1.0.0
  * @see Stock
  * @since 2026-02-28
  */
 
 public class CsvReader {
 
-  private static final String FILE_NAME = "src/main/resources/";
-
   /**
    * Reads stock data from a CSV file and returns a list of Stock objects. Each line in the CSV file
    * should contain the stock symbol, company name, and price, separated by commas.
    *
-   * @param fileName the name of the CSV file to read from, which will be saved in the resources
-   *                 folder
+   * @param directory the directory containing the CSV file
+   * @param fileName  the name of the CSV file to read from (without the .csv extension)
    * @return a list of Stock objects created from the CSV data
    */
 
-  public static List<Stock> readCsv(String fileName) {
-    Path path = Path.of(FILE_NAME + fileName + ".csv");
+  public static List<Stock> readCsv(Path directory, String fileName) {
+    Path path = directory.resolve(fileName + ".csv");
 
     try (Stream<String> lines = Files.lines(path)) {
       return lines
