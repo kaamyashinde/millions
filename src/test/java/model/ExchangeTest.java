@@ -2,6 +2,7 @@ package model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -190,5 +191,94 @@ class ExchangeTest {
 
     Transaction transaction = exchange.buy("AAPL", new BigDecimal("5"), player);
     assertEquals(3, transaction.getWeek());
+  }
+
+  @Test
+  void getGainers_returnsStocksWithPositivePriceChange() {
+    // Advance multiple times to get random price changes
+    exchange.advance();
+    exchange.advance();
+    exchange.advance();
+
+    List<Stock> gainers = exchange.getGainers(10);
+    // All gainers should have positive price changes
+    assertTrue(gainers.stream()
+        .allMatch(stock -> stock.getLatestPriceChange().signum() > 0));
+  }
+
+  @Test
+  void getGainers_returnsSortedByPriceChangeDescending() {
+    exchange.advance();
+    exchange.advance();
+
+    List<Stock> gainers = exchange.getGainers(10);
+
+    // Verify gainers are sorted in descending order (highest gains first)
+    for (int i = 0; i < gainers.size() - 1; i++) {
+      assertTrue(gainers.get(i).getLatestPriceChange()
+          .compareTo(gainers.get(i + 1).getLatestPriceChange()) >= 0);
+    }
+  }
+
+  @Test
+  void getGainers_respectsLimit() {
+    exchange.advance();
+    exchange.advance();
+    exchange.advance();
+
+    List<Stock> gainers = exchange.getGainers(2);
+    assertTrue(gainers.size() <= 2);
+  }
+
+  @Test
+  void getLosers_returnsStocksWithNegativePriceChange() {
+    exchange.advance();
+    exchange.advance();
+    exchange.advance();
+
+    List<Stock> losers = exchange.getLosers(10);
+    // All losers should have negative price changes
+    assertTrue(losers.stream()
+        .allMatch(stock -> stock.getLatestPriceChange().signum() < 0));
+  }
+
+  @Test
+  void getLosers_returnsSortedByPriceChangeAscending() {
+    exchange.advance();
+    exchange.advance();
+
+    List<Stock> losers = exchange.getLosers(10);
+
+    // Verify losers are sorted in ascending order (biggest losses first)
+    for (int i = 0; i < losers.size() - 1; i++) {
+      assertTrue(losers.get(i).getLatestPriceChange()
+          .compareTo(losers.get(i + 1).getLatestPriceChange()) <= 0);
+    }
+  }
+
+  @Test
+  void getLosers_respectsLimit() {
+    exchange.advance();
+    exchange.advance();
+    exchange.advance();
+
+    List<Stock> losers = exchange.getLosers(2);
+    assertTrue(losers.size() <= 2);
+  }
+
+  @Test
+  void getGainers_andLosers_doNotOverlap() {
+    exchange.advance();
+    exchange.advance();
+
+    List<Stock> gainers = exchange.getGainers(10);
+    List<Stock> losers = exchange.getLosers(10);
+
+    // No stock should appear in both gainers and losers
+    for (Stock gainer : gainers) {
+      for (Stock loser : losers) {
+        assertNotEquals(gainer.getSymbol(), loser.getSymbol());
+      }
+    }
   }
 }
