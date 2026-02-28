@@ -54,4 +54,11 @@ class PlayerTest {
     assertNotNull(player.getTransactionArchive());
     assertTrue(player.getTransactionArchive().isEmpty());
   }
+
+  @Test
+  void getNetWorth() {
+    assertEquals(new BigDecimal("1000.00"), player.getNetWorth());
+    player.withdrawMoney(new BigDecimal("100.00"));
+    assertEquals(new BigDecimal("900.00"), player.getNetWorth());
+  }
 }
