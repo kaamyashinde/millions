@@ -5,6 +5,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+.cursor/
+.claude/
+
 ### IntelliJ IDEA ###
 .idea/*
 .idea/vcs.xml
