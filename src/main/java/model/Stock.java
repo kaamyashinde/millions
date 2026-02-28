@@ -85,6 +85,27 @@ public class Stock {
   }
 
   /**
+   * Returns the highest recorded price of a stock.
+   *
+   * @return The highest recorded price of the stock, or {@code BigDecimal.ZERO} if there are no
+   * prices.
+   */
+  public BigDecimal getHighestPrice() {
+    return this.price.stream().max(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
+  }
+
+  /**
+   * Returns the lowest recorded price of a stock.
+   *
+   * @return The lowest recorded price of the stock, or {@code BigDecimal.ZERO} if there are no
+   * prices.
+   */
+  public BigDecimal getLowestPrice() {
+    return this.price.stream().min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
+  }
+
+
+  /**
    * Returns a string representation of the Stock object.
    *
    * @return A string representation of the Stock object.
