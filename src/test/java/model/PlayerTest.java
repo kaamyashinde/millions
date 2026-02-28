@@ -56,6 +56,16 @@ class PlayerTest {
   }
 
   @Test
+  void getPlayerLevel() {
+    assertEquals(PlayerLevel.NOVICE, player.getPlayerLevel());
+  }
+
+  @Test
+  void setPlayerLevel() {
+    assertEquals(PlayerLevel.NOVICE, player.setPlayerLevel());
+  }
+
+  @Test
   void getNetWorth() {
     assertEquals(new BigDecimal("1000.00"), player.getNetWorth());
     player.withdrawMoney(new BigDecimal("100.00"));
