@@ -1,13 +1,15 @@
 package model;
 
 import static model.utils.Validator.checkNotNull;
+import java.math.BigDecimal;
 import java.util.List;
+import model.transactioncalculator.SaleCalculator;
 
 /**
  * Represents a portfolio of stocks and shares.This would belong to a user.
  *
  * @author kaamyashinde
- * @version 0.0.3
+ * @version 1.0.0
  * @since 31-01-2026
  */
 public class Portfolio {
@@ -87,5 +89,26 @@ public class Portfolio {
   public boolean containsShare(Share share) {
     checkNotNullOnShare(share);
     return this.shares.contains(share);
+  }
+
+  /**
+   * Calculates the net worth of the portfolio by summing up the value of all shares.
+   *
+   * @return The net worth of the portfolio.
+   */
+  public BigDecimal getNetWorth() {
+    return shares.stream()
+        .map(this::calculateShareValue)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+  }
+
+  /**
+   * Calculates the value of a share using the SaleCalculator.
+   *
+   * @param share The share for which the value is to be calculated.
+   * @return The calculated value of the share.
+   */
+  private BigDecimal calculateShareValue(Share share) {
+    return new SaleCalculator(share).calculateTotal();
   }
 }

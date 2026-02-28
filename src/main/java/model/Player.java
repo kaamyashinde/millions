@@ -5,6 +5,9 @@ import model.transaction.TransactionArchive;
 
 /**
  * A class representing a Player in the system.
+ *
+ * @author kevindmazali
+ * @version 1.0.0
  */
 public class Player {
 
@@ -91,6 +94,17 @@ public class Player {
    */
   public TransactionArchive getTransactionArchive() {
     return transactionArchive;
+  }
+
+
+  /**
+   * Calculates the net worth of the player by adding the current money and the net worth of the
+   * portfolio.
+   *
+   * @return the net worth of the player
+   */
+  public BigDecimal getNetWorth() {
+    return this.money.add(this.portfolio.getNetWorth());
   }
 
 }
