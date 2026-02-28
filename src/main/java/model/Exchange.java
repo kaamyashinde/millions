@@ -1,6 +1,7 @@
 package model;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -13,7 +14,7 @@ import model.transaction.Transaction;
  * A class representing the Exchange Market in the system.
  *
  * @author kevindmazali
- * @version 0.0.1
+ * @version 1.0.0
  * @since 02-02-2026
  */
 
@@ -130,6 +131,52 @@ public class Exchange {
       stock.addNewSalesPrice(
           stock.getSalesPrice().multiply(BigDecimal.valueOf(factor)));
     });
+  }
+
+  /**
+   * Gets the top gainers in the exchange based on their latest price change. The gainers are sorted
+   * in descending order of their price change, and the method returns a list of the top gainers up
+   * to the specified limit.
+   *
+   * @param limit the maximum number of gainers to return
+   * @return a list of the top gainers in the exchange, sorted by their latest price change in
+   * descending order
+   */
+  public List<Stock> getGainers(int limit) {
+    return getByPriceChange(limit, 1, true);
+  }
+
+  /**
+   * A helper method to get stocks by their price change sign and sort them by their latest price
+   * change.
+   *
+   * @param limit      the maximum number of stocks to return
+   * @param sign       the sign of the price change (positive for gainers, negative for losers)
+   * @param descending whether to sort in descending order (true for gainers, false for losers)
+   * @return a list of stocks filtered and sorted by their latest price change
+   */
+  private List<Stock> getByPriceChange(int limit, int sign, boolean descending) {
+    Comparator<Stock> comparator =
+        Comparator.comparing(Stock::getLatestPriceChange);
+
+    return stockMap.values().stream()
+        .filter(stock -> stock.getLatestPriceChange().signum() == sign)
+        .sorted(descending ? comparator.reversed() : comparator)
+        .limit(limit)
+        .toList();
+  }
+
+  /**
+   * Gets the top losers in the exchange based on their latest price change. The losers are sorted
+   * in ascending order of their price change, and the method returns a list of the top losers up to
+   * the specified limit.
+   *
+   * @param limit the maximum number of losers to return
+   * @return a list of the top losers in the exchange, sorted by their latest price change in
+   * ascending order
+   */
+  public List<Stock> getLosers(int limit) {
+    return getByPriceChange(limit, -1, false);
   }
 
 }
