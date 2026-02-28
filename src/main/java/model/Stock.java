@@ -9,7 +9,7 @@ import java.util.List;
  * The stock is sold on {@code Exchange} for a price that updates weekly.
  *
  * @author kaamyashinde
- * @version 0.0.1
+ * @version 1.0.0
  * @since 30-01-2026
  */
 
@@ -73,6 +73,15 @@ public class Stock {
   public void addNewSalesPrice(BigDecimal price) {
     checkNotNull(price, "Price");
     this.price.add(price);
+  }
+
+  /**
+   * Returns the historical prices of the stock.
+   *
+   * @return A list of historical prices of the stock.
+   */
+  public List<BigDecimal> getHistoricalPrices() {
+    return this.price;
   }
 
   /**
