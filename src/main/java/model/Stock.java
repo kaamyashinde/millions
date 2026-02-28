@@ -9,7 +9,7 @@ import java.util.List;
  * The stock is sold on {@code Exchange} for a price that updates weekly.
  *
  * @author kaamyashinde
- * @version 0.0.1
+ * @version 1.0.0
  * @since 30-01-2026
  */
 
@@ -56,15 +56,6 @@ public class Stock {
   }
 
   /**
-   * Gets the latest price of the stock.
-   *
-   * @return The latest price of the stock.
-   */
-  public BigDecimal getSalesPrice() {
-    return price.getLast();
-  }
-
-  /**
    * Adds a new sales price to the stock's price history.
    *
    * @param price The new sales price to be added.
@@ -73,6 +64,60 @@ public class Stock {
   public void addNewSalesPrice(BigDecimal price) {
     checkNotNull(price, "Price");
     this.price.add(price);
+  }
+
+  /**
+   * Returns the historical prices of the stock.
+   *
+   * @return A list of historical prices of the stock.
+   */
+  public List<BigDecimal> getHistoricalPrices() {
+    return this.price;
+  }
+
+  /**
+   * Returns the highest recorded price of a stock.
+   *
+   * @return The highest recorded price of the stock, or {@code BigDecimal.ZERO} if there are no
+   * prices.
+   */
+  public BigDecimal getHighestPrice() {
+    return this.price.stream().max(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
+  }
+
+  /**
+   * Returns the lowest recorded price of a stock.
+   *
+   * @return The lowest recorded price of the stock, or {@code BigDecimal.ZERO} if there are no
+   * prices.
+   */
+  public BigDecimal getLowestPrice() {
+    return this.price.stream().min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
+  }
+
+  /**
+   * Returns the latest price change of a stock, calculated as the difference between the most
+   * recent price and the previous price.
+   *
+   * @return The latest price change of the stock, or {@code BigDecimal.ZERO} if there are fewer
+   * than two
+   */
+  public BigDecimal getLatestPriceChange() {
+    int size = price.size();
+    if (size < 2) {
+      return BigDecimal.ZERO;
+    }
+    return price.get(size - 1)
+        .subtract(price.get(size - 2));
+  }
+
+  /**
+   * Gets the latest price of the stock.
+   *
+   * @return The latest price of the stock.
+   */
+  public BigDecimal getSalesPrice() {
+    return price.getLast();
   }
 
   /**
