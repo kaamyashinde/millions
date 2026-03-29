@@ -1,7 +1,5 @@
 package view;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,16 +13,18 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.util.Duration;
-import view.components.toast.Toast;
+import view.components.notification.NotificationService;
+import view.components.notification.ToastTray;
 import view.components.toast.ToastMode;
 
 /**
- * A small demo application that showcases the Toast notification component. Each button triggers
- * a different severity level. Toasts auto-dismiss after 3 seconds with a fade-out.
+ * A small demo application that showcases toast notifications via {@link NotificationService} and
+ * {@link ToastTray}. Each button enqueues a different severity; toasts auto-dismiss after the
+ * service default duration (3 seconds).
  */
 public class ToastDemoApp extends Application {
 
+  private final NotificationService notifications = new NotificationService();
   private final StackPane toastArea = new StackPane();
 
   @Override
@@ -49,9 +49,12 @@ public class ToastDemoApp extends Application {
     center.setAlignment(Pos.CENTER);
     center.setPadding(new Insets(40));
 
+    ToastTray tray = new ToastTray(notifications.getItems());
+
     toastArea.setAlignment(Pos.TOP_RIGHT);
     toastArea.setPadding(new Insets(16, 16, 0, 0));
     toastArea.setMouseTransparent(true);
+    toastArea.getChildren().add(tray);
 
     StackPane root = new StackPane(center, toastArea);
     root.setStyle("-fx-background-color: #121212;");
@@ -73,33 +76,8 @@ public class ToastDemoApp extends Application {
             + "-fx-background-radius: 6;"
             + "-fx-cursor: hand;"
     );
-    btn.setOnAction(e -> showToast(mode, title, description, actionLabel));
+    btn.setOnAction(e -> notifications.show(mode, title, description, actionLabel, null));
     return btn;
-  }
-
-  private void showToast(ToastMode mode, String title, String description, String actionLabel) {
-    toastArea.getChildren().clear();
-
-    Toast toast = new Toast(mode, title, description, actionLabel, null);
-    toast.setStyle(
-        "-fx-background-color: #1e1e1e;"
-            + "-fx-background-radius: 8;"
-            + "-fx-border-color: " + mode.getColorHex() + ";"
-            + "-fx-border-radius: 8;"
-            + "-fx-border-width: 1.5;"
-    );
-    toast.setOpacity(1.0);
-    toastArea.getChildren().add(toast);
-
-    PauseTransition pause = new PauseTransition(Duration.seconds(3));
-    pause.setOnFinished(ev -> {
-      FadeTransition fade = new FadeTransition(Duration.millis(400), toast);
-      fade.setFromValue(1.0);
-      fade.setToValue(0.0);
-      fade.setOnFinished(f -> toastArea.getChildren().clear());
-      fade.play();
-    });
-    pause.play();
   }
 
   public static void main(String[] args) {
