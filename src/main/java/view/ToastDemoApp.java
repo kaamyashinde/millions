@@ -1,5 +1,6 @@
 package view;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import javafx.application.Application;
@@ -16,6 +17,8 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import model.Stock;
+import view.components.chart.StockChart;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
 import view.components.toast.ToastMode;
@@ -51,7 +54,10 @@ public class ToastDemoApp extends Application {
     HBox buttons = new HBox(14, errBtn, warnBtn, infoBtn, successBtn);
     buttons.setAlignment(Pos.CENTER);
 
-    VBox center = new VBox(28, heading, buttons);
+    StockChart chart = new StockChart(buildSeedStock());
+    chart.setPrefHeight(280);
+
+    VBox center = new VBox(28, heading, chart, buttons);
     center.setAlignment(Pos.CENTER);
     center.setPadding(new Insets(40));
 
@@ -66,7 +72,7 @@ public class ToastDemoApp extends Application {
     StackPane root = new StackPane(center, toastArea);
     root.setStyle("-fx-background-color: #121212;");
 
-    stage.setScene(new Scene(root, 620, 380));
+    stage.setScene(new Scene(root, 800, 560));
     stage.setTitle("Toast Notification Demo");
     stage.show();
   }
@@ -102,6 +108,20 @@ public class ToastDemoApp extends Application {
         "Trading resumes in 30 minutes.", null, null, SEED_DISPLAY_DURATION));
     discard(notifications.show(ToastMode.SUCCESS, "Trade executed",
         "10 AAPL shares purchased.", "View", null, SEED_DISPLAY_DURATION));
+  }
+
+  private static Stock buildSeedStock() {
+    Stock stock = new Stock("AAPL", "Apple Inc.");
+    double[] prices = {
+        150.00, 151.20, 149.80, 152.50, 153.10,
+        151.75, 154.30, 155.00, 153.60, 156.20,
+        157.40, 155.90, 158.00, 159.30, 157.80,
+        160.10, 161.50, 159.90, 162.00, 163.25
+    };
+    for (double p : prices) {
+      stock.addNewSalesPrice(BigDecimal.valueOf(p));
+    }
+    return stock;
   }
 
   @SuppressWarnings("unused")
