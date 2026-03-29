@@ -15,7 +15,7 @@ import model.transactioncalculator.TransactionCalculator;
 public abstract class Transaction {
 
   private final Share share;
-  private final int week;
+  private final int day;
   private final TransactionCalculator calculator;
   protected boolean commited;
 
@@ -23,13 +23,13 @@ public abstract class Transaction {
    * Constructor for Transaction.
    *
    * @param share      The share involved in the transaction.
-   * @param week       The week of the transaction.
+   * @param day        The trading day of the transaction.
    * @param calculator The calculator to compute transaction details.
    */
 
-  protected Transaction(Share share, int week, TransactionCalculator calculator) {
+  protected Transaction(Share share, int day, TransactionCalculator calculator) {
     this.share = share;
-    this.week = week;
+    this.day = day;
     this.calculator = calculator;
     this.commited = false;
   }
@@ -44,12 +44,12 @@ public abstract class Transaction {
   }
 
   /**
-   * Gets the week of the transaction.
+   * Gets the trading day of the transaction.
    *
-   * @return The week of the transaction.
+   * @return The trading day of the transaction.
    */
-  public int getWeek() {
-    return week;
+  public int getDay() {
+    return day;
   }
 
   /**

@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * Represents a stock in a company. This has a unique stock symbol, f.e.g., "AAPL" for Apple Inc.
- * The stock is sold on {@code Exchange} for a price that updates weekly.
+ * The stock is sold on {@code Exchange} for a price that updates each trading day.
  *
  * @author kaamyashinde
  * @version 1.0.0

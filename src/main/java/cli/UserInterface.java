@@ -18,7 +18,7 @@ import util.I18n;
  * The UserInterface class is responsible for handling the user input and output
  * for the Millions stock trading application.
  * The class provides a menu for the user to set up a player, view portfolio and balance,
- * list and search stocks, buy and sell shares, advance the week, and view transaction history.
+ * list and search stocks, buy and sell shares, advance the trading day, and view transaction history.
  */
 public class UserInterface {
 
@@ -30,7 +30,7 @@ public class UserInterface {
   private static final int SEARCH_STOCKS = 5;
   private static final int BUY_SHARES = 6;
   private static final int SELL_SHARES = 7;
-  private static final int ADVANCE_WEEK = 8;
+  private static final int ADVANCE_DAY = 8;
   private static final int VIEW_TRANSACTIONS = 9;
   private static final int INVALID_MENU_CHOICE = -1;
 
@@ -97,7 +97,7 @@ public class UserInterface {
     System.out.println(I18n.get("menu.option.search"));
     System.out.println(I18n.get("menu.option.buy"));
     System.out.println(I18n.get("menu.option.sell"));
-    System.out.println(I18n.get("menu.option.week"));
+    System.out.println(I18n.get("menu.option.day"));
     System.out.println(I18n.get("menu.option.transactions"));
     System.out.println(I18n.get("menu.footer"));
     System.out.println(I18n.get("menu.prompt"));
@@ -123,7 +123,7 @@ public class UserInterface {
       case SEARCH_STOCKS -> searchStocks();
       case BUY_SHARES -> buyShares();
       case SELL_SHARES -> sellShares();
-      case ADVANCE_WEEK -> advanceWeek();
+      case ADVANCE_DAY -> advanceDay();
       case VIEW_TRANSACTIONS -> viewTransactions();
       default -> System.out.println(I18n.get("invalid.input"));
     }
@@ -319,32 +319,32 @@ public class UserInterface {
   }
 
   /**
-   * Advances the exchange to the next week and updates stock prices.
+   * Advances the exchange to the next trading day and updates stock prices.
    */
-  private static void advanceWeek() {
+  private static void advanceDay() {
     exchange.advance();
-    System.out.println(I18n.format("week.advanced", exchange.getWeek()));
+    System.out.println(I18n.format("day.advanced", exchange.getDay()));
   }
 
   /**
-   * Prints the player's transaction history up to the current week.
+   * Prints the player's transaction history up to the current trading day.
    */
   private static void viewTransactions() {
     if (isPlayerMissing()) {
       return;
     }
-    int week = exchange.getWeek();
-    List<Transaction> transactions = player.getTransactionArchive().getTransactions(week);
+    int day = exchange.getDay();
+    List<Transaction> transactions = player.getTransactionArchive().getTransactions(day);
     if (transactions.isEmpty()) {
       System.out.println(I18n.get("transactions.none"));
       return;
     }
-    System.out.println(I18n.format("transactions.header", week));
+    System.out.println(I18n.format("transactions.header", day));
     transactions.forEach(t -> {
       String type = t instanceof Purchase ? I18n.get("tx.type.purchase") : I18n.get("tx.type.sale");
       String sym = t.getShare().getStock().getSymbol();
       String qty = t.getShare().getQuantity().toString();
-      System.out.println(I18n.format("transaction.line", t.getWeek(), type, sym, qty));
+      System.out.println(I18n.format("transaction.line", t.getDay(), type, sym, qty));
     });
   }
 }

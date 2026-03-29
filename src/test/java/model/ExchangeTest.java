@@ -43,8 +43,8 @@ class ExchangeTest {
   }
 
   @Test
-  void getWeek_initialWeekIsOne() {
-    assertEquals(1, exchange.getWeek());
+  void getDay_initialDayIsOne() {
+    assertEquals(1, exchange.getDay());
   }
 
   @Test
@@ -123,9 +123,9 @@ class ExchangeTest {
   }
 
   @Test
-  void buy_transactionHasCorrectWeek() {
+  void buy_transactionHasCorrectDay() {
     Transaction transaction = exchange.buy("AAPL", new BigDecimal("5"), player);
-    assertEquals(1, transaction.getWeek());
+    assertEquals(1, transaction.getDay());
   }
 
   @Test
@@ -142,23 +142,23 @@ class ExchangeTest {
   }
 
   @Test
-  void sell_transactionHasCorrectWeek() {
+  void sell_transactionHasCorrectDay() {
     exchange.buy("AAPL", new BigDecimal("10"), player);
     Share shareToSell = player.getPortfolio().getShares().getFirst();
 
     Transaction transaction = exchange.sell(shareToSell, player);
-    assertEquals(1, transaction.getWeek());
+    assertEquals(1, transaction.getDay());
   }
 
   @Test
-  void advance_incrementsWeek() {
-    assertEquals(1, exchange.getWeek());
+  void advance_incrementsDay() {
+    assertEquals(1, exchange.getDay());
 
     exchange.advance();
-    assertEquals(2, exchange.getWeek());
+    assertEquals(2, exchange.getDay());
 
     exchange.advance();
-    assertEquals(3, exchange.getWeek());
+    assertEquals(3, exchange.getDay());
   }
 
   @Test
@@ -168,29 +168,33 @@ class ExchangeTest {
 
     exchange.advance();
 
-    // Prices should change (within ±5% range)
+    // One daily step: ±5%/√7 of prior price (same scaling as Exchange.advance)
+    double dailySigma = 0.05 / Math.sqrt(7);
     BigDecimal newApplePrice = appleStock.getSalesPrice();
     BigDecimal newGooglePrice = googleStock.getSalesPrice();
 
-    // Verify prices are within expected range (95% to 105% of original)
-    BigDecimal appleLowerBound = initialApplePrice.multiply(new BigDecimal("0.95"));
-    BigDecimal appleUpperBound = initialApplePrice.multiply(new BigDecimal("1.05"));
+    BigDecimal appleLowerBound =
+        initialApplePrice.multiply(BigDecimal.valueOf(1 - dailySigma));
+    BigDecimal appleUpperBound =
+        initialApplePrice.multiply(BigDecimal.valueOf(1 + dailySigma));
     assertTrue(newApplePrice.compareTo(appleLowerBound) >= 0);
     assertTrue(newApplePrice.compareTo(appleUpperBound) <= 0);
 
-    BigDecimal googleLowerBound = initialGooglePrice.multiply(new BigDecimal("0.95"));
-    BigDecimal googleUpperBound = initialGooglePrice.multiply(new BigDecimal("1.05"));
+    BigDecimal googleLowerBound =
+        initialGooglePrice.multiply(BigDecimal.valueOf(1 - dailySigma));
+    BigDecimal googleUpperBound =
+        initialGooglePrice.multiply(BigDecimal.valueOf(1 + dailySigma));
     assertTrue(newGooglePrice.compareTo(googleLowerBound) >= 0);
     assertTrue(newGooglePrice.compareTo(googleUpperBound) <= 0);
   }
 
   @Test
-  void buyAfterAdvance_usesCurrentWeek() {
+  void buyAfterAdvance_usesCurrentDay() {
     exchange.advance();
     exchange.advance();
 
     Transaction transaction = exchange.buy("AAPL", new BigDecimal("5"), player);
-    assertEquals(3, transaction.getWeek());
+    assertEquals(3, transaction.getDay());
   }
 
   @Test

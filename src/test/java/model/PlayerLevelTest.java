@@ -26,16 +26,16 @@ class PlayerLevelTest {
     // NOVICE always qualifies
     assertTrue(PlayerLevel.NOVICE.qualifies(player));
 
-    // INVESTOR requires >= 10 distinct weeks AND net worth >= 1.2x starting money
+    // INVESTOR requires >= 70 distinct trading days AND net worth >= 1.2x starting money
     assertFalse(PlayerLevel.INVESTOR.qualifies(player));
 
-    // SPECULATOR requires >= 20 distinct weeks AND net worth >= 2x starting money
+    // SPECULATOR requires >= 140 distinct trading days AND net worth >= 2x starting money
     assertFalse(PlayerLevel.SPECULATOR.qualifies(player));
 
-    // Add 10 distinct weeks of transactions
-    for (int week = 1; week <= 10; week++) {
+    // Add 70 distinct trading days of transactions (~10 former "weeks")
+    for (int day = 1; day <= 70; day++) {
       Share share = new Share(stock, new BigDecimal("1"), new BigDecimal("10.00"));
-      Purchase purchase = new Purchase(share, week);
+      Purchase purchase = new Purchase(share, day);
       player.getTransactionArchive().addTransaction(purchase);
     }
 
@@ -47,10 +47,10 @@ class PlayerLevelTest {
     assertTrue(PlayerLevel.INVESTOR.qualifies(player));
     assertFalse(PlayerLevel.SPECULATOR.qualifies(player));
 
-    // Add 10 more distinct weeks (total 20)
-    for (int week = 11; week <= 20; week++) {
+    // Add 70 more distinct trading days (total 140 ~20 former "weeks")
+    for (int day = 71; day <= 140; day++) {
       Share share = new Share(stock, new BigDecimal("1"), new BigDecimal("10.00"));
-      Purchase purchase = new Purchase(share, week);
+      Purchase purchase = new Purchase(share, day);
       player.getTransactionArchive().addTransaction(purchase);
     }
 

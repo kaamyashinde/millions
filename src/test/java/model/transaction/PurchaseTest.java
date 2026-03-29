@@ -32,7 +32,7 @@ class PurchaseTest {
   void constructorSetsCalculatorAndShare() {
     Purchase purchase = new Purchase(share, 1);
     assertEquals(share, purchase.getShare());
-    assertEquals(1, purchase.getWeek());
+    assertEquals(1, purchase.getDay());
     assertNotNull(purchase.getCalculator());
     assertInstanceOf(PurchaseCalculator.class, purchase.getCalculator());
   }

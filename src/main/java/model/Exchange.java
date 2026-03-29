@@ -23,7 +23,7 @@ public class Exchange {
   private final String name;
   private final Map<String, Stock> stockMap;
   private final Random random;
-  private int week;
+  private int day;
 
   /**
    * Constructor for Exchange.
@@ -33,7 +33,7 @@ public class Exchange {
    */
   public Exchange(String name, List<Stock> stocks) {
     this.name = name;
-    this.week = 1;
+    this.day = 1;
     this.stockMap = stocks.stream()
         .collect(Collectors.toMap(Stock::getSymbol, s -> s));
     this.random = new Random();
@@ -84,7 +84,7 @@ public class Exchange {
   public Transaction buy(String symbol, BigDecimal quantity, Player player) {
     Stock stockToBuy = this.getStock(symbol);
     Share shareToBuy = new Share(stockToBuy, quantity, stockToBuy.getSalesPrice());
-    Purchase purchase = new Purchase(shareToBuy, this.getWeek());
+    Purchase purchase = new Purchase(shareToBuy, this.getDay());
     purchase.commit(player);
     return purchase;
   }
@@ -100,12 +100,12 @@ public class Exchange {
   }
 
   /**
-   * Gets the current week of the exchange.
+   * Gets the current trading day of the exchange.
    *
-   * @return the current week
+   * @return the current day
    */
-  public int getWeek() {
-    return week;
+  public int getDay() {
+    return day;
   }
 
   /**
@@ -116,18 +116,21 @@ public class Exchange {
    * @return the Sale transaction
    */
   public Transaction sell(Share share, Player player) {
-    Sale sale = new Sale(share, this.getWeek());
+    Sale sale = new Sale(share, this.getDay());
     sale.commit(player);
     return sale;
   }
 
   /**
-   * Advances the exchange to the next week and updates stock prices.
+   * Advances the exchange to the next trading day and updates stock prices.
+   * Daily moves use a band scaled from the former weekly ±5% by 1/√7 so seven
+   * independent days have comparable volatility to one former weekly step.
    */
   public void advance() {
-    this.week += 1;
+    this.day += 1;
+    double dailySigma = 0.05 / Math.sqrt(7);
     this.stockMap.values().forEach(stock -> {
-      double factor = 1 + this.random.nextDouble(-0.05, 0.05); // −5% to +5%
+      double factor = 1 + this.random.nextDouble(-dailySigma, dailySigma);
       stock.addNewSalesPrice(
           stock.getSalesPrice().multiply(BigDecimal.valueOf(factor)));
     });

@@ -21,10 +21,10 @@ public class Purchase extends Transaction {
    * Constructor for Purchase.
    *
    * @param share the share
-   * @param week  the week
+   * @param day  the trading day
    */
-  public Purchase(Share share, int week) {
-    super(share, week, new PurchaseCalculator(share));
+  public Purchase(Share share, int day) {
+    super(share, day, new PurchaseCalculator(share));
     this.purchaseCalc = (PurchaseCalculator) this.getCalculator();
   }
 
@@ -52,7 +52,7 @@ public class Purchase extends Transaction {
       player.getTransactionArchive().addTransaction(this);
     }
 
-    if (player.getTransactionArchive().getTransactions(getWeek()).contains(this)) {
+    if (player.getTransactionArchive().getTransactions(getDay()).contains(this)) {
       this.commited = true;
     } else {
       throw new IllegalStateException("Transaction was not added to the archive.");

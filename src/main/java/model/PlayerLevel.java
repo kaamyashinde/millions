@@ -13,7 +13,7 @@ public enum PlayerLevel {
   SPECULATOR {
     @Override
     public boolean qualifies(Player player) {
-      return player.getTransactionArchive().countDistinctWeek() >= 20 &&
+      return player.getTransactionArchive().countDistinctDay() >= 140 &&
           player.getNetWorth()
               .compareTo(player.getStartingMoney()
                   .multiply(BigDecimal.valueOf(2))) >= 0;
@@ -23,7 +23,7 @@ public enum PlayerLevel {
   INVESTOR {
     @Override
     public boolean qualifies(Player player) {
-      return player.getTransactionArchive().countDistinctWeek() >= 10 &&
+      return player.getTransactionArchive().countDistinctDay() >= 70 &&
           player.getNetWorth()
               .compareTo(player.getStartingMoney()
                   .multiply(BigDecimal.valueOf(1.20))) >= 0;
