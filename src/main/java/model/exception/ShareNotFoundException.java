@@ -14,6 +14,9 @@ import model.Share;
 
 public class ShareNotFoundException extends RuntimeException {
 
+  private final Share share;
+  private final Player player;
+
   /**
    * Constructs a new ShareNotFoundException with a message indicating the share and player
    * involved.
@@ -24,5 +27,25 @@ public class ShareNotFoundException extends RuntimeException {
   public ShareNotFoundException(Share share, Player player) {
     super("Share of stock" + share.getStock().getSymbol() + " was not found in the "
         + player.getName() + "'s portfolio.");
+    this.share = share;
+    this.player = player;
+  }
+
+  /**
+   * Stock symbol for the share that was not found.
+   *
+   * @return the symbol
+   */
+  public String getStockSymbol() {
+    return share.getStock().getSymbol();
+  }
+
+  /**
+   * Name of the player whose portfolio was checked.
+   *
+   * @return the player name
+   */
+  public String getPlayerName() {
+    return player.getName();
   }
 }
