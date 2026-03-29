@@ -44,8 +44,8 @@ class TransactionArchiveTest {
     archive.addTransaction(new Purchase(share, 3));
     List<Transaction> firstTwo = archive.getTransactions(2);
     assertEquals(2, firstTwo.size());
-    assertEquals(1, firstTwo.get(0).getWeek());
-    assertEquals(2, firstTwo.get(1).getWeek());
+    assertEquals(1, firstTwo.get(0).getDay());
+    assertEquals(2, firstTwo.get(1).getDay());
   }
 
   @Test
@@ -54,12 +54,12 @@ class TransactionArchiveTest {
     archive.addTransaction(new Purchase(share, 2));
     archive.addTransaction(new Sale(share, 2));
     archive.addTransaction(new Purchase(share, 3));
-    List<Purchase> purchasesUpToWeek2 = archive.getPurchases(2);
-    assertEquals(2, purchasesUpToWeek2.size());
-    assertTrue(purchasesUpToWeek2.stream().allMatch(p -> p.getWeek() <= 2));
-    List<Purchase> purchasesUpToWeek1 = archive.getPurchases(1);
-    assertEquals(1, purchasesUpToWeek1.size());
-    assertEquals(1, purchasesUpToWeek1.get(0).getWeek());
+    List<Purchase> purchasesUpToDay2 = archive.getPurchases(2);
+    assertEquals(2, purchasesUpToDay2.size());
+    assertTrue(purchasesUpToDay2.stream().allMatch(p -> p.getDay() <= 2));
+    List<Purchase> purchasesUpToDay1 = archive.getPurchases(1);
+    assertEquals(1, purchasesUpToDay1.size());
+    assertEquals(1, purchasesUpToDay1.get(0).getDay());
   }
 
   @Test
@@ -67,19 +67,19 @@ class TransactionArchiveTest {
     archive.addTransaction(new Purchase(share, 1));
     archive.addTransaction(new Sale(share, 2));
     archive.addTransaction(new Sale(share, 3));
-    List<Sale> salesUpToWeek2 = archive.getSales(2);
-    assertEquals(1, salesUpToWeek2.size());
-    assertEquals(2, salesUpToWeek2.get(0).getWeek());
-    List<Sale> salesUpToWeek3 = archive.getSales(3);
-    assertEquals(2, salesUpToWeek3.size());
+    List<Sale> salesUpToDay2 = archive.getSales(2);
+    assertEquals(1, salesUpToDay2.size());
+    assertEquals(2, salesUpToDay2.get(0).getDay());
+    List<Sale> salesUpToDay3 = archive.getSales(3);
+    assertEquals(2, salesUpToDay3.size());
   }
 
   @Test
-  void countDistinctWeek() {
-    assertEquals(0, archive.countDistinctWeek());
+  void countDistinctDay() {
+    assertEquals(0, archive.countDistinctDay());
     archive.addTransaction(new Purchase(share, 1));
     archive.addTransaction(new Sale(share, 2));
     archive.addTransaction(new Purchase(share, 1));
-    assertEquals(2, archive.countDistinctWeek());
+    assertEquals(2, archive.countDistinctDay());
   }
 }
