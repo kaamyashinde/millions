@@ -13,16 +13,20 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
 import view.components.toast.ToastMode;
 
 /**
  * A small demo application that showcases toast notifications via {@link NotificationService} and
- * {@link ToastTray}. Each button enqueues a different severity; toasts auto-dismiss after the
- * service default duration (3 seconds).
+ * {@link ToastTray}. On startup, sample notifications fill the tray for layout preview (long
+ * auto-dismiss). Buttons still enqueue with the default 3 second dismiss.
  */
 public class ToastDemoApp extends Application {
+
+  /** Long auto-dismiss for seeded rows so the stacked tray stays visible for layout checks. */
+  private static final Duration SEED_DISPLAY_DURATION = Duration.minutes(10);
 
   private final NotificationService notifications = new NotificationService();
   private final StackPane toastArea = new StackPane();
@@ -55,6 +59,7 @@ public class ToastDemoApp extends Application {
     toastArea.setPadding(new Insets(16, 16, 0, 0));
     toastArea.setMouseTransparent(true);
     toastArea.getChildren().add(tray);
+    seedDemoNotifications();
 
     StackPane root = new StackPane(center, toastArea);
     root.setStyle("-fx-background-color: #121212;");
@@ -78,6 +83,17 @@ public class ToastDemoApp extends Application {
     );
     btn.setOnAction(e -> notifications.show(mode, title, description, actionLabel, null));
     return btn;
+  }
+
+  private void seedDemoNotifications() {
+    notifications.show(ToastMode.ERROR, "Something went wrong!",
+        "Check the logs for more details.", "Dismiss", null, SEED_DISPLAY_DURATION);
+    notifications.show(ToastMode.WARNING, "Low balance",
+        "Your portfolio is below the threshold.", null, null, SEED_DISPLAY_DURATION);
+    notifications.show(ToastMode.INFO, "Market opens soon",
+        "Trading resumes in 30 minutes.", null, null, SEED_DISPLAY_DURATION);
+    notifications.show(ToastMode.SUCCESS, "Trade executed",
+        "10 AAPL shares purchased.", "View", null, SEED_DISPLAY_DURATION);
   }
 
   public static void main(String[] args) {
