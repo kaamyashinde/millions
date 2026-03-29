@@ -22,10 +22,10 @@ public class Sale extends Transaction {
    * Constructor for Sale.
    *
    * @param share the share
-   * @param week  the week
+   * @param day  the trading day
    */
-  public Sale(Share share, int week) {
-    super(share, week, new SaleCalculator(share));
+  public Sale(Share share, int day) {
+    super(share, day, new SaleCalculator(share));
     this.saleCalc = (SaleCalculator) this.getCalculator();
   }
 
