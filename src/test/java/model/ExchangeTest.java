@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
@@ -162,6 +163,35 @@ class ExchangeTest {
   }
 
   @Test
+  void advance_withMultipleDays_incrementsDayByRequestedAmount() {
+    exchange.advance(4);
+
+    assertEquals(5, exchange.getDay());
+    assertEquals(5, appleStock.getHistoricalPrices().size());
+    assertEquals(5, googleStock.getHistoricalPrices().size());
+    assertEquals(5, microsoftStock.getHistoricalPrices().size());
+  }
+
+  @Test
+  void advance_withZeroDays_doesNotChangeDayOrPrices() {
+    BigDecimal applePriceBeforeAdvance = appleStock.getSalesPrice();
+
+    exchange.advance(0);
+
+    assertEquals(1, exchange.getDay());
+    assertEquals(applePriceBeforeAdvance, appleStock.getSalesPrice());
+    assertEquals(1, appleStock.getHistoricalPrices().size());
+  }
+
+  @Test
+  void advance_withNegativeDays_throwsException() {
+    IllegalArgumentException exception =
+        assertThrows(IllegalArgumentException.class, () -> exchange.advance(-1));
+
+    assertEquals("Days to advance cannot be negative", exception.getMessage());
+  }
+
+  @Test
   void advance_updateStockPrices() {
     BigDecimal initialApplePrice = appleStock.getSalesPrice();
     BigDecimal initialGooglePrice = googleStock.getSalesPrice();
@@ -190,8 +220,7 @@ class ExchangeTest {
 
   @Test
   void buyAfterAdvance_usesCurrentDay() {
-    exchange.advance();
-    exchange.advance();
+    exchange.advance(2);
 
     Transaction transaction = exchange.buy("AAPL", new BigDecimal("5"), player);
     assertEquals(3, transaction.getDay());

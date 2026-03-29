@@ -20,6 +20,7 @@ import model.transaction.Transaction;
 
 public class Exchange {
 
+  private static final double DAILY_SIGMA = 0.05 / Math.sqrt(7);
   private final String name;
   private final Map<String, Stock> stockMap;
   private final Random random;
@@ -122,15 +123,37 @@ public class Exchange {
   }
 
   /**
-   * Advances the exchange to the next trading day and updates stock prices.
-   * Daily moves use a band scaled from the former weekly ±5% by 1/√7 so seven
-   * independent days have comparable volatility to one former weekly step.
+   * Advances the exchange to the next trading day and updates stock prices. Daily moves use a band
+   * scaled from the former weekly ±5% by 1/√7 so seven independent days have comparable volatility
+   * to one former weekly step.
    */
   public void advance() {
+    advance(1);
+  }
+
+  /**
+   * Advances the exchange by the requested number of trading days and updates stock prices for each
+   * skipped day.
+   *
+   * @param days the number of trading days to advance
+   * @throws IllegalArgumentException if {@code days} is negative
+   */
+  public void advance(int days) {
+    if (days < 0) {
+      throw new IllegalArgumentException("Days to advance cannot be negative");
+    }
+    for (int i = 0; i < days; i++) {
+      advanceOneDay();
+    }
+  }
+
+  /**
+   * Advances the exchange by one trading day and updates stock prices.
+   */
+  private void advanceOneDay() {
     this.day += 1;
-    double dailySigma = 0.05 / Math.sqrt(7);
     this.stockMap.values().forEach(stock -> {
-      double factor = 1 + this.random.nextDouble(-dailySigma, dailySigma);
+      double factor = 1 + this.random.nextDouble(-DAILY_SIGMA, DAILY_SIGMA);
       stock.addNewSalesPrice(
           stock.getSalesPrice().multiply(BigDecimal.valueOf(factor)));
     });
