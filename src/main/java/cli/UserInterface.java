@@ -12,6 +12,7 @@ import model.exception.InsufficientFundsException;
 import model.exception.ShareNotFoundException;
 import model.transaction.Purchase;
 import model.transaction.Transaction;
+import util.I18n;
 
 /**
  * The UserInterface class is responsible for handling the user input and output
@@ -31,9 +32,9 @@ public class UserInterface {
   private static final int SELL_SHARES = 7;
   private static final int ADVANCE_WEEK = 8;
   private static final int VIEW_TRANSACTIONS = 9;
+  private static final int INVALID_MENU_CHOICE = -1;
 
   private static final Scanner input = new Scanner(System.in);
-  private static final String INVALID_INPUT = "-> Invalid input, please try again.";
 
   private static boolean running = true;
   private static Exchange exchange;
@@ -73,11 +74,9 @@ public class UserInterface {
    * until the user chooses to quit.
    */
   private static void start() {
-    System.out.println("""
-        =================== MILLIONS - Stock Trading ===================
-
-        Hello and welcome to Millions. Manage your portfolio and trade stocks.
-        """);
+    System.out.println(I18n.get("app.welcome.banner"));
+    System.out.println();
+    System.out.println(I18n.get("app.welcome.body"));
     while (running) {
       triggerChoice();
     }
@@ -89,22 +88,25 @@ public class UserInterface {
    * @return the integer corresponding to the action the user wants to perform
    */
   private static int showMenu() {
-    System.out.println("""
-        ------------ MENU -----------
-        0. Exit the application
-        1. Set up player (name, starting money)
-        2. View balance
-        3. View portfolio
-        4. List all stocks
-        5. Search stocks
-        6. Buy shares
-        7. Sell shares
-        8. Advance week
-        9. View transaction history
-        -----------------------------
-        What would you like to do? (Enter a number between 0 and 9).
-        """);
-    return input.nextInt();
+    System.out.println(I18n.get("menu.header"));
+    System.out.println(I18n.get("menu.option.exit"));
+    System.out.println(I18n.get("menu.option.setup"));
+    System.out.println(I18n.get("menu.option.balance"));
+    System.out.println(I18n.get("menu.option.portfolio"));
+    System.out.println(I18n.get("menu.option.list"));
+    System.out.println(I18n.get("menu.option.search"));
+    System.out.println(I18n.get("menu.option.buy"));
+    System.out.println(I18n.get("menu.option.sell"));
+    System.out.println(I18n.get("menu.option.week"));
+    System.out.println(I18n.get("menu.option.transactions"));
+    System.out.println(I18n.get("menu.footer"));
+    System.out.println(I18n.get("menu.prompt"));
+    try {
+      return input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      return INVALID_MENU_CHOICE;
+    }
   }
 
   /**
@@ -123,7 +125,7 @@ public class UserInterface {
       case SELL_SHARES -> sellShares();
       case ADVANCE_WEEK -> advanceWeek();
       case VIEW_TRANSACTIONS -> viewTransactions();
-      default -> System.out.println(INVALID_INPUT);
+      default -> System.out.println(I18n.get("invalid.input"));
     }
   }
 
@@ -132,8 +134,8 @@ public class UserInterface {
    */
   private static void quit() {
     running = false;
-    System.out.println("Thank you for using Millions!");
-    System.out.println("Successfully exited the application.");
+    System.out.println(I18n.get("quit.thanks"));
+    System.out.println(I18n.get("quit.success"));
     System.exit(0);
   }
 
@@ -144,7 +146,7 @@ public class UserInterface {
    */
   private static boolean requirePlayer() {
     if (player == null) {
-      System.out.println("-> You need to set up a player first (option 1).");
+      System.out.println(I18n.get("require.player"));
       return false;
     }
     return true;
@@ -155,23 +157,24 @@ public class UserInterface {
    */
   private static void setUpPlayer() {
     input.nextLine();
-    System.out.println("Enter your name: ");
+    System.out.println(I18n.get("prompt.name"));
     String name = input.nextLine().trim();
     if (name.isEmpty()) {
-      System.out.println(INVALID_INPUT);
+      System.out.println(I18n.get("invalid.input"));
       return;
     }
-    System.out.println("Enter your starting money (e.g. 10000.00): ");
+    System.out.println(I18n.get("prompt.startingMoney"));
     try {
       BigDecimal startingMoney = new BigDecimal(input.nextLine().trim());
       if (startingMoney.compareTo(BigDecimal.ZERO) < 0) {
-        System.out.println(INVALID_INPUT + " Starting money must be non-negative.");
+        System.out.println(
+            I18n.get("invalid.input") + " " + I18n.get("validation.startingMoney.nonNegative"));
         return;
       }
       player = new Player(name, startingMoney);
-      System.out.println("-> Player '" + name + "' created with " + startingMoney + " in balance.");
+      System.out.println(I18n.format("player.created", name, startingMoney));
     } catch (NumberFormatException e) {
-      System.out.println(INVALID_INPUT);
+      System.out.println(I18n.get("invalid.input"));
     }
   }
 
@@ -182,7 +185,7 @@ public class UserInterface {
     if (!requirePlayer()) {
       return;
     }
-    System.out.println("-> Your current balance: " + player.getMoney());
+    System.out.println(I18n.format("balance.current", player.getMoney()));
   }
 
   /**
@@ -193,14 +196,18 @@ public class UserInterface {
       return;
     }
     if (player.getPortfolio().getShares().isEmpty()) {
-      System.out.println("-> Your portfolio is empty.");
+      System.out.println(I18n.get("portfolio.empty"));
       return;
     }
-    System.out.println("-> Your portfolio:");
+    System.out.println(I18n.get("portfolio.header"));
     player.getPortfolio().getShares().forEach(share -> System.out.println(
-        "   " + share.getStock().getSymbol() + " (" + share.getStock().getCompany() + "): "
-            + share.getQuantity() + " shares @ " + share.getPurchasePrice() + " (current: "
-            + share.getStock().getSalesPrice() + ")"));
+        I18n.format(
+            "portfolio.line",
+            share.getStock().getSymbol(),
+            share.getStock().getCompany(),
+            share.getQuantity(),
+            share.getPurchasePrice(),
+            share.getStock().getSalesPrice())));
   }
 
   /**
@@ -209,12 +216,12 @@ public class UserInterface {
   private static void listStocks() {
     List<Stock> stocks = exchange.findStocks("");
     if (stocks.isEmpty()) {
-      System.out.println("-> No stocks available.");
+      System.out.println(I18n.get("stocks.none"));
       return;
     }
-    System.out.println("-> Stocks on " + exchange.getName() + ":");
+    System.out.println(I18n.format("stocks.onExchange", exchange.getName()));
     stocks.forEach(stock -> System.out.println(
-        "   " + stock.getSymbol() + " - " + stock.getCompany() + " | Price: " + stock.getSalesPrice()));
+        I18n.format("stock.line", stock.getSymbol(), stock.getCompany(), stock.getSalesPrice())));
   }
 
   /**
@@ -222,16 +229,16 @@ public class UserInterface {
    */
   private static void searchStocks() {
     input.nextLine();
-    System.out.println("Enter search term (symbol or company name): ");
+    System.out.println(I18n.get("prompt.search"));
     String term = input.nextLine().trim();
     List<Stock> results = exchange.findStocks(term);
     if (results.isEmpty()) {
-      System.out.println("-> No stocks found matching '" + term + "'.");
+      System.out.println(I18n.format("search.none", term));
       return;
     }
-    System.out.println("-> Found " + results.size() + " stock(s):");
+    System.out.println(I18n.format("search.found", results.size()));
     results.forEach(stock -> System.out.println(
-        "   " + stock.getSymbol() + " - " + stock.getCompany() + " | Price: " + stock.getSalesPrice()));
+        I18n.format("stock.line", stock.getSymbol(), stock.getCompany(), stock.getSalesPrice())));
   }
 
   /**
@@ -242,29 +249,30 @@ public class UserInterface {
       return;
     }
     input.nextLine();
-    System.out.println("Enter the stock symbol (e.g. AAPL): ");
+    System.out.println(I18n.get("prompt.symbol"));
     String symbol = input.nextLine().trim().toUpperCase();
     if (symbol.isEmpty()) {
-      System.out.println(INVALID_INPUT);
+      System.out.println(I18n.get("invalid.input"));
       return;
     }
     if (!exchange.hasStock(symbol)) {
-      System.out.println("-> Stock '" + symbol + "' not found on the exchange.");
+      System.out.println(I18n.format("error.stockNotOnExchange", symbol));
       return;
     }
-    System.out.println("Enter the quantity to buy: ");
+    System.out.println(I18n.get("prompt.quantity.buy"));
     try {
       BigDecimal quantity = new BigDecimal(input.nextLine().trim());
       if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
-        System.out.println(INVALID_INPUT + " Quantity must be positive.");
+        System.out.println(
+            I18n.get("invalid.input") + " " + I18n.get("validation.quantity.positive"));
         return;
       }
       exchange.buy(symbol, quantity, player);
-      System.out.println("-> Successfully bought " + quantity + " share(s) of " + symbol + ".");
+      System.out.println(I18n.format("buy.success", quantity, symbol));
     } catch (NumberFormatException e) {
-      System.out.println(INVALID_INPUT);
-    } catch (InsufficientFundsException e) {
-      System.out.println("-> " + e.getMessage());
+      System.out.println(I18n.get("invalid.input"));
+    } catch (InsufficientFundsException ignored) {
+      System.out.println(I18n.get("error.insufficientFunds"));
     }
   }
 
@@ -277,31 +285,36 @@ public class UserInterface {
     }
     List<Share> shares = player.getPortfolio().getShares();
     if (shares.isEmpty()) {
-      System.out.println("-> Your portfolio is empty. Nothing to sell.");
+      System.out.println(I18n.get("portfolio.empty.sell"));
       return;
     }
-    System.out.println("-> Your holdings (enter the number to sell that lot):");
+    System.out.println(I18n.get("holdings.header"));
     for (int i = 0; i < shares.size(); i++) {
       Share s = shares.get(i);
-      System.out.println("   " + (i + 1) + ". " + s.getStock().getSymbol() + " - " + s.getQuantity()
-          + " shares @ " + s.getPurchasePrice() + " (current: " + s.getStock().getSalesPrice() + ")");
+      System.out.println(I18n.format(
+          "holding.line",
+          i + 1,
+          s.getStock().getSymbol(),
+          s.getQuantity(),
+          s.getPurchasePrice(),
+          s.getStock().getSalesPrice()));
     }
-    System.out.println("Enter the number of the holding to sell (1 to " + shares.size() + "): ");
+    System.out.println(I18n.format("prompt.holdingIndex", shares.size()));
     try {
       int index = input.nextInt();
       if (index < 1 || index > shares.size()) {
-        System.out.println(INVALID_INPUT);
+        System.out.println(I18n.get("invalid.input"));
         return;
       }
       Share toSell = shares.get(index - 1);
       exchange.sell(toSell, player);
-      System.out.println("-> Successfully sold " + toSell.getQuantity() + " share(s) of "
-          + toSell.getStock().getSymbol() + ".");
+      System.out.println(I18n.format("sell.success", toSell.getQuantity(),
+          toSell.getStock().getSymbol()));
     } catch (InputMismatchException e) {
-      System.out.println(INVALID_INPUT);
+      System.out.println(I18n.get("invalid.input"));
       input.nextLine();
     } catch (ShareNotFoundException e) {
-      System.out.println("-> " + e.getMessage());
+      System.out.println(I18n.format("error.shareNotFound", e.getStockSymbol(), e.getPlayerName()));
     }
   }
 
@@ -310,7 +323,7 @@ public class UserInterface {
    */
   private static void advanceWeek() {
     exchange.advance();
-    System.out.println("-> Week advanced to " + exchange.getWeek() + ". Stock prices have been updated.");
+    System.out.println(I18n.format("week.advanced", exchange.getWeek()));
   }
 
   /**
@@ -323,15 +336,15 @@ public class UserInterface {
     int week = exchange.getWeek();
     List<Transaction> transactions = player.getTransactionArchive().getTransactions(week);
     if (transactions.isEmpty()) {
-      System.out.println("-> No transactions yet.");
+      System.out.println(I18n.get("transactions.none"));
       return;
     }
-    System.out.println("-> Transaction history (up to week " + week + "):");
+    System.out.println(I18n.format("transactions.header", week));
     transactions.forEach(t -> {
-      String type = t instanceof Purchase ? "PURCHASE" : "SALE";
+      String type = t instanceof Purchase ? I18n.get("tx.type.purchase") : I18n.get("tx.type.sale");
       String sym = t.getShare().getStock().getSymbol();
       String qty = t.getShare().getQuantity().toString();
-      System.out.println("   Week " + t.getWeek() + " | " + type + " | " + sym + " | " + qty + " share(s)");
+      System.out.println(I18n.format("transaction.line", t.getWeek(), type, sym, qty));
     });
   }
 }
