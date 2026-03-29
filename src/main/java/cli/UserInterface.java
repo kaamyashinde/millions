@@ -140,16 +140,16 @@ public class UserInterface {
   }
 
   /**
-   * Ensures a player has been set up. Prints a message if not.
+   * Checks whether a player has been set up. Prints a message if not.
    *
-   * @return true if player is not null, false otherwise
+   * @return true if player is null, false otherwise
    */
-  private static boolean requirePlayer() {
+  private static boolean isPlayerMissing() {
     if (player == null) {
       System.out.println(I18n.get("require.player"));
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }
 
   /**
@@ -182,7 +182,7 @@ public class UserInterface {
    * Prints the current balance of the player.
    */
   private static void viewBalance() {
-    if (!requirePlayer()) {
+    if (isPlayerMissing()) {
       return;
     }
     System.out.println(I18n.format("balance.current", player.getMoney()));
@@ -192,7 +192,7 @@ public class UserInterface {
    * Prints the player's portfolio (all shares held).
    */
   private static void viewPortfolio() {
-    if (!requirePlayer()) {
+    if (isPlayerMissing()) {
       return;
     }
     if (player.getPortfolio().getShares().isEmpty()) {
@@ -245,7 +245,7 @@ public class UserInterface {
    * Buys shares of a stock. Prompts for stock symbol and quantity, then commits the purchase.
    */
   private static void buyShares() {
-    if (!requirePlayer()) {
+    if (isPlayerMissing()) {
       return;
     }
     input.nextLine();
@@ -280,7 +280,7 @@ public class UserInterface {
    * Sells a share from the portfolio. Lists holdings with numbers and prompts for the index to sell.
    */
   private static void sellShares() {
-    if (!requirePlayer()) {
+    if (isPlayerMissing()) {
       return;
     }
     List<Share> shares = player.getPortfolio().getShares();
@@ -330,7 +330,7 @@ public class UserInterface {
    * Prints the player's transaction history up to the current week.
    */
   private static void viewTransactions() {
-    if (!requirePlayer()) {
+    if (isPlayerMissing()) {
       return;
     }
     int week = exchange.getWeek();

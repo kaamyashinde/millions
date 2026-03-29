@@ -14,8 +14,8 @@ import model.Share;
 
 public class ShareNotFoundException extends RuntimeException {
 
-  private final Share share;
-  private final Player player;
+  private final transient Share share;
+  private final transient Player player;
 
   /**
    * Constructs a new ShareNotFoundException with a message indicating the share and player
