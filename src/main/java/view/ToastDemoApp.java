@@ -7,6 +7,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -39,6 +41,35 @@ public class ToastDemoApp extends Application {
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
     heading.setFill(Color.web("#e0e0e0"));
 
+    Label daysLabel = new Label("Days:");
+    daysLabel.setTextFill(Color.web("#e0e0e0"));
+
+    TextField daysField = new TextField();
+    daysField.setPromptText("e.g. 14");
+    daysField.setPrefWidth(100);
+    daysField.setStyle(
+        "-fx-background-color: #2a2a2a;"
+            + "-fx-text-fill: #e0e0e0;"
+            + "-fx-prompt-text-fill: #888888;"
+            + "-fx-border-color: #3d3d3d;"
+            + "-fx-border-radius: 6;"
+            + "-fx-background-radius: 6;"
+    );
+
+    Button advanceWeeksBtn = new Button("Advance by weeks");
+    advanceWeeksBtn.setStyle(
+        "-fx-background-color: #2a2a2a;"
+            + "-fx-text-fill: #e0e0e0;"
+            + "-fx-border-color: #3d3d3d;"
+            + "-fx-border-radius: 6;"
+            + "-fx-background-radius: 6;"
+            + "-fx-cursor: hand;"
+    );
+    advanceWeeksBtn.setOnAction(_ -> {});
+
+    HBox advanceRow = new HBox(12, daysLabel, daysField, advanceWeeksBtn);
+    advanceRow.setAlignment(Pos.CENTER);
+
     Button errBtn = makeButton("Error", ToastMode.ERROR,
         "Something went wrong!", "Check the logs for more details.", "Dismiss");
     Button warnBtn = makeButton("Warning", ToastMode.WARNING,
@@ -51,7 +82,7 @@ public class ToastDemoApp extends Application {
     HBox buttons = new HBox(14, errBtn, warnBtn, infoBtn, successBtn);
     buttons.setAlignment(Pos.CENTER);
 
-    VBox center = new VBox(28, heading, buttons);
+    VBox center = new VBox(28, heading, advanceRow, buttons);
     center.setAlignment(Pos.CENTER);
     center.setPadding(new Insets(40));
 
@@ -66,7 +97,7 @@ public class ToastDemoApp extends Application {
     StackPane root = new StackPane(center, toastArea);
     root.setStyle("-fx-background-color: #121212;");
 
-    stage.setScene(new Scene(root, 620, 380));
+    stage.setScene(new Scene(root, 680, 380));
     stage.setTitle("Toast Notification Demo");
     stage.show();
   }
