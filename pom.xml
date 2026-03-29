@@ -21,11 +21,11 @@
   <dependencies>
 
     <!-- JavaFX -->
-    <!--    <dependency>-->
-    <!--      <groupId>org.openjfx</groupId>-->
-    <!--      <artifactId>javafx-controls</artifactId>-->
-    <!--      <version>${javafx.version}</version>-->
-    <!--    </dependency>-->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
 
     <!-- JUnit Jupiter -->
     <dependency>
@@ -63,8 +63,7 @@
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
-          <!-- ENDRE denne til din faktiske Main-klasse -->
-          <mainClass>Main</mainClass>
+          <mainClass>view.ToastDemoApp</mainClass>
         </configuration>
       </plugin>
 
