@@ -60,7 +60,7 @@ public enum ToastMode {
     }
   },
 
-  SUCCESS("#4CAF50", "\u2713") {
+  SUCCESS("#4CAF50", "✓") {
     @Override
     public Shape createShape(Color color) {
       Circle circle = new Circle(ICON_SIZE / 2.0);
@@ -90,10 +90,20 @@ public enum ToastMode {
    */
   public abstract Shape createShape(Color color);
 
+  /**
+   * Returns the hex color associated with this toast mode.
+   *
+   * @return the color hex string for this mode
+   */
   public String getColorHex() {
     return colorHex;
   }
 
+  /**
+   * Returns the symbol rendered inside this mode's icon.
+   *
+   * @return the icon symbol for this mode
+   */
   public String getSymbol() {
     return symbol;
   }

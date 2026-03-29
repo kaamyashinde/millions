@@ -12,6 +12,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
@@ -87,13 +88,13 @@ public class Toast extends HBox {
     Label titleLabel = new Label(title);
     titleLabel.setTextFill(color);
     titleLabel.setWrapText(true);
-    textBox.getChildren().add(titleLabel);
-
     if (description != null) {
       Label descLabel = new Label(description);
       descLabel.setTextFill(Color.web("#aaaaaa"));
       descLabel.setWrapText(true);
-      textBox.getChildren().add(descLabel);
+      boolean _ = textBox.getChildren().addAll(titleLabel, descLabel);
+    } else {
+      boolean _ = textBox.getChildren().addAll(titleLabel);
     }
 
     Region spacer = new Region();
@@ -104,22 +105,28 @@ public class Toast extends HBox {
     if (actionLabel != null) {
       Button actionButton = new Button(actionLabel);
       if (onAction != null) {
-        actionButton.setOnAction(e -> onAction.run());
+        actionButton.setOnAction(_ -> onAction.run());
       }
       getChildren().add(actionButton);
     }
   }
 
+  /**
+   * Builds the icon pane for the toast by combining the mode-specific outline and symbol.
+   *
+   * @param mode the toast mode that defines the icon shape and symbol
+   * @param color the accent color applied to the icon
+   * @return the configured icon pane
+   */
   private StackPane buildIconPane(ToastMode mode, Color color) {
     StackPane pane = new StackPane();
     pane.setPrefSize(ICON_SIZE, ICON_SIZE);
 
-    pane.getChildren().add(mode.createShape(color));
-
+    Shape outline = mode.createShape(color);
     Text symbol = new Text(mode.getSymbol());
     symbol.setFill(color);
     symbol.setFont(Font.font(SYMBOL_FONT_SIZE));
-    pane.getChildren().add(symbol);
+    boolean _ = pane.getChildren().addAll(outline, symbol);
 
     return pane;
   }

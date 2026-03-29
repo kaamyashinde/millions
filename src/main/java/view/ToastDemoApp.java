@@ -1,7 +1,7 @@
 package view;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
+import java.util.UUID;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,15 +16,21 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import view.components.toast.Toast;
+import view.components.notification.NotificationService;
+import view.components.notification.ToastTray;
 import view.components.toast.ToastMode;
 
 /**
- * A small demo application that showcases the Toast notification component. Each button triggers
- * a different severity level. Toasts auto-dismiss after 3 seconds with a fade-out.
+ * A small demo application that showcases toast notifications via {@link NotificationService} and
+ * {@link ToastTray}. On startup, sample notifications fill the tray for layout preview (long
+ * auto-dismiss). Buttons still enqueue with the default 3 second dismiss.
  */
 public class ToastDemoApp extends Application {
 
+  /** Long auto-dismiss for seeded rows so the stacked tray stays visible for layout checks. */
+  private static final Duration SEED_DISPLAY_DURATION = Duration.minutes(10);
+
+  private final NotificationService notifications = new NotificationService();
   private final StackPane toastArea = new StackPane();
 
   @Override
@@ -49,9 +55,13 @@ public class ToastDemoApp extends Application {
     center.setAlignment(Pos.CENTER);
     center.setPadding(new Insets(40));
 
+    ToastTray tray = new ToastTray(notifications.getItems());
+
     toastArea.setAlignment(Pos.TOP_RIGHT);
     toastArea.setPadding(new Insets(16, 16, 0, 0));
     toastArea.setMouseTransparent(true);
+    toastArea.getChildren().add(tray);
+    seedDemoNotifications();
 
     StackPane root = new StackPane(center, toastArea);
     root.setStyle("-fx-background-color: #121212;");
@@ -73,34 +83,29 @@ public class ToastDemoApp extends Application {
             + "-fx-background-radius: 6;"
             + "-fx-cursor: hand;"
     );
-    btn.setOnAction(e -> showToast(mode, title, description, actionLabel));
+    btn.setOnAction(_ -> {
+      if (actionLabel == null) {
+        discard(notifications.show(mode, title, description));
+      } else {
+        discard(notifications.show(mode, title, description, actionLabel, null));
+      }
+    });
     return btn;
   }
 
-  private void showToast(ToastMode mode, String title, String description, String actionLabel) {
-    toastArea.getChildren().clear();
-
-    Toast toast = new Toast(mode, title, description, actionLabel, null);
-    toast.setStyle(
-        "-fx-background-color: #1e1e1e;"
-            + "-fx-background-radius: 8;"
-            + "-fx-border-color: " + mode.getColorHex() + ";"
-            + "-fx-border-radius: 8;"
-            + "-fx-border-width: 1.5;"
-    );
-    toast.setOpacity(1.0);
-    toastArea.getChildren().add(toast);
-
-    PauseTransition pause = new PauseTransition(Duration.seconds(3));
-    pause.setOnFinished(ev -> {
-      FadeTransition fade = new FadeTransition(Duration.millis(400), toast);
-      fade.setFromValue(1.0);
-      fade.setToValue(0.0);
-      fade.setOnFinished(f -> toastArea.getChildren().clear());
-      fade.play();
-    });
-    pause.play();
+  private void seedDemoNotifications() {
+    discard(notifications.show(ToastMode.ERROR, "Something went wrong!",
+        "Check the logs for more details.", "Dismiss", null, SEED_DISPLAY_DURATION));
+    discard(notifications.show(ToastMode.WARNING, "Low balance",
+        "Your portfolio is below the threshold.", null, null, SEED_DISPLAY_DURATION));
+    discard(notifications.show(ToastMode.INFO, "Market opens soon",
+        "Trading resumes in 30 minutes.", null, null, SEED_DISPLAY_DURATION));
+    discard(notifications.show(ToastMode.SUCCESS, "Trade executed",
+        "10 AAPL shares purchased.", "View", null, SEED_DISPLAY_DURATION));
   }
+
+  @SuppressWarnings("unused")
+  private static void discard(UUID id) {}
 
   public static void main(String[] args) {
     launch(args);
