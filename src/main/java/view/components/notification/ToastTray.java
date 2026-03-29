@@ -19,6 +19,8 @@ import view.components.toast.ToastMode;
  * bottom). New items appended with {@code list.add} appear at the bottom.
  *
  * @author kaamyashinde
+ * @version 1.0.0
+ * @since 2026-03-29
  */
 public class ToastTray extends VBox {
 
@@ -43,6 +45,11 @@ public class ToastTray extends VBox {
     items.addListener(this::onItemsChanged);
   }
 
+  /**
+   * Mirrors additions and removals from the backing notification list into the tray children.
+   *
+   * @param c the list change describing inserted and removed notifications
+   */
   private void onItemsChanged(ListChangeListener.Change<? extends NotificationItem> c) {
     while (c.next()) {
       if (c.wasRemoved()) {
@@ -62,6 +69,12 @@ public class ToastTray extends VBox {
     }
   }
 
+  /**
+   * Creates and inserts a toast node for the given notification at the requested position.
+   *
+   * @param item the notification to render
+   * @param index the child index where the toast should be inserted
+   */
   private void insertToastAt(NotificationItem item, int index) {
     Toast toast =
         new Toast(item.mode(), item.title(), item.description(), item.actionLabel(), item.onAction());
@@ -72,12 +85,25 @@ public class ToastTray extends VBox {
 
   /**
    * Shared toast chrome (background, border) aligned with {@link view.ToastDemoApp}.
+   *
+   * @author kaamyashinde
+   * @version 1.0.0
+   * @since 2026-03-29
    */
   public static final class ToastNotificationStyles {
 
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private ToastNotificationStyles() {
     }
 
+    /**
+     * Builds the shared border and background style for a toast of the given mode.
+     *
+     * @param mode the toast mode whose accent color should be used
+     * @return the inline JavaFX style string for the toast container
+     */
     public static String toastBorderStyle(ToastMode mode) {
       return "-fx-background-color: #1e1e1e;"
           + "-fx-background-radius: 8;"

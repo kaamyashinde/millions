@@ -110,6 +110,13 @@ public class Toast extends HBox {
     }
   }
 
+  /**
+   * Builds the icon pane for the toast by combining the mode-specific outline and symbol.
+   *
+   * @param mode the toast mode that defines the icon shape and symbol
+   * @param color the accent color applied to the icon
+   * @return the configured icon pane
+   */
   private StackPane buildIconPane(ToastMode mode, Color color) {
     StackPane pane = new StackPane();
     pane.setPrefSize(ICON_SIZE, ICON_SIZE);

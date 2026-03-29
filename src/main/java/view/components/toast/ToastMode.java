@@ -90,10 +90,20 @@ public enum ToastMode {
    */
   public abstract Shape createShape(Color color);
 
+  /**
+   * Returns the hex color associated with this toast mode.
+   *
+   * @return the color hex string for this mode
+   */
   public String getColorHex() {
     return colorHex;
   }
 
+  /**
+   * Returns the symbol rendered inside this mode's icon.
+   *
+   * @return the icon symbol for this mode
+   */
   public String getSymbol() {
     return symbol;
   }
