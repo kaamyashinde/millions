@@ -1,5 +1,7 @@
 package view;
 
+import java.util.UUID;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -81,20 +83,29 @@ public class ToastDemoApp extends Application {
             + "-fx-background-radius: 6;"
             + "-fx-cursor: hand;"
     );
-    btn.setOnAction(e -> notifications.show(mode, title, description, actionLabel, null));
+    btn.setOnAction(_ -> {
+      if (actionLabel == null) {
+        discard(notifications.show(mode, title, description));
+      } else {
+        discard(notifications.show(mode, title, description, actionLabel, null));
+      }
+    });
     return btn;
   }
 
   private void seedDemoNotifications() {
-    notifications.show(ToastMode.ERROR, "Something went wrong!",
-        "Check the logs for more details.", "Dismiss", null, SEED_DISPLAY_DURATION);
-    notifications.show(ToastMode.WARNING, "Low balance",
-        "Your portfolio is below the threshold.", null, null, SEED_DISPLAY_DURATION);
-    notifications.show(ToastMode.INFO, "Market opens soon",
-        "Trading resumes in 30 minutes.", null, null, SEED_DISPLAY_DURATION);
-    notifications.show(ToastMode.SUCCESS, "Trade executed",
-        "10 AAPL shares purchased.", "View", null, SEED_DISPLAY_DURATION);
+    discard(notifications.show(ToastMode.ERROR, "Something went wrong!",
+        "Check the logs for more details.", "Dismiss", null, SEED_DISPLAY_DURATION));
+    discard(notifications.show(ToastMode.WARNING, "Low balance",
+        "Your portfolio is below the threshold.", null, null, SEED_DISPLAY_DURATION));
+    discard(notifications.show(ToastMode.INFO, "Market opens soon",
+        "Trading resumes in 30 minutes.", null, null, SEED_DISPLAY_DURATION));
+    discard(notifications.show(ToastMode.SUCCESS, "Trade executed",
+        "10 AAPL shares purchased.", "View", null, SEED_DISPLAY_DURATION));
   }
+
+  @SuppressWarnings("unused")
+  private static void discard(UUID id) {}
 
   public static void main(String[] args) {
     launch(args);

@@ -60,7 +60,7 @@ public enum ToastMode {
     }
   },
 
-  SUCCESS("#4CAF50", "\u2713") {
+  SUCCESS("#4CAF50", "✓") {
     @Override
     public Shape createShape(Color color) {
       Circle circle = new Circle(ICON_SIZE / 2.0);

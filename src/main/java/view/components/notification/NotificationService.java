@@ -112,7 +112,7 @@ public class NotificationService {
     UUID id = UUID.randomUUID();
     NotificationItem item =
         new NotificationItem(id, mode, title, description, actionLabel, onAction);
-    items.add(item);
+    boolean _ = items.add(item);
     scheduleDismiss(id, displayDuration);
     return id;
   }
@@ -125,7 +125,7 @@ public class NotificationService {
    */
   private void scheduleDismiss(UUID id, Duration displayDuration) {
     PauseTransition pause = new PauseTransition(displayDuration);
-    pause.setOnFinished(e -> dismiss(id));
+    pause.setOnFinished(_ -> dismiss(id));
     pendingDismiss.put(id, pause);
     pause.play();
   }
