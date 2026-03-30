@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
+import model.exception.InsufficientFundsException;
+import model.exception.InsufficientSharesException;
 import model.transaction.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -297,6 +299,51 @@ class ExchangeTest {
 
     List<Stock> losers = exchange.getLosers(2);
     assertTrue(losers.size() <= 2);
+  }
+
+  @Test
+  void buyUpToBudget_spendsAtMostMaxAndPlayerCash() {
+    Player p = new Player("P", new BigDecimal("1600"));
+    exchange.buyUpToBudget("AAPL", new BigDecimal("1600"), p);
+    assertTrue(p.getMoney().signum() >= 0);
+    Share sh = p.getPortfolio().getShares().getFirst();
+    BigDecimal total = new model.transactioncalculator.PurchaseCalculator(sh).calculateTotal();
+    assertTrue(total.compareTo(new BigDecimal("1600")) <= 0);
+  }
+
+  @Test
+  void buyUpToBudget_throwsWhenCannotAffordAnyShare() {
+    Player p = new Player("P", BigDecimal.ZERO);
+    assertThrows(InsufficientFundsException.class,
+        () -> exchange.buyUpToBudget("AAPL", new BigDecimal("50000"), p));
+  }
+
+  @Test
+  void sellByQuantity_splitsFifoLots() {
+    exchange.buy("AAPL", new BigDecimal("3"), player);
+    exchange.buy("AAPL", new BigDecimal("2"), player);
+    List<Transaction> txs = exchange.sellByQuantity("AAPL", new BigDecimal("4"), player);
+    assertEquals(2, txs.size());
+    assertTrue(player.getPortfolio().totalQuantityForSymbol("AAPL").compareTo(new BigDecimal("1")) == 0);
+  }
+
+  @Test
+  void sellByQuantity_throwsWhenNotEnoughShares() {
+    exchange.buy("AAPL", new BigDecimal("1"), player);
+    assertThrows(InsufficientSharesException.class,
+        () -> exchange.sellByQuantity("AAPL", new BigDecimal("5"), player));
+  }
+
+  @Test
+  void sellUpToTargetNet_respectsNetCap() {
+    exchange.buy("AAPL", new BigDecimal("100"), player);
+    BigDecimal target = new BigDecimal("500");
+    List<Transaction> txs = exchange.sellUpToTargetNet("AAPL", target, player);
+    BigDecimal sumNet = txs.stream()
+        .map(t -> new model.transactioncalculator.SaleCalculator(t.getShare()).calculateTotal())
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    assertTrue(sumNet.compareTo(target) <= 0);
+    assertTrue(sumNet.signum() > 0);
   }
 
   @Test

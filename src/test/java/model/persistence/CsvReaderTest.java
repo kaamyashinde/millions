@@ -2,8 +2,10 @@ package model.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -104,5 +106,17 @@ public class CsvReaderTest {
     List<Stock> stocks = CsvReader.readCsv(tempDir, "empty");
 
     assertEquals(0, stocks.size());
+  }
+
+  @Test
+  void testReadCsvFromInputStream() {
+    String csvContent = "# header\nNVDA,Nvidia,191.27\nAAPL,Apple Inc,152.54\n";
+    List<Stock> stocks =
+        CsvReader.readCsv(
+            new ByteArrayInputStream(csvContent.getBytes(StandardCharsets.UTF_8)));
+
+    assertEquals(2, stocks.size());
+    assertEquals("NVDA", stocks.get(0).getSymbol());
+    assertEquals("AAPL", stocks.get(1).getSymbol());
   }
 }

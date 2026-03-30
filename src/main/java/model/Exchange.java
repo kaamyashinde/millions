@@ -1,14 +1,21 @@
 package model;
 
+import static model.utils.Validator.requirePositive;
+
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
+import model.exception.InsufficientFundsException;
+import model.exception.InsufficientSharesException;
+import model.transactioncalculator.SaleCalculator;
 import model.transaction.Purchase;
 import model.transaction.Sale;
 import model.transaction.Transaction;
+import model.transaction.TransactionSizing;
 
 /**
  * A class representing the Exchange Market in the system.
@@ -91,6 +98,34 @@ public class Exchange {
   }
 
   /**
+   * Buys as many shares as possible without exceeding {@code maxSpend} total cost (including
+   * purchase commission), and without spending more cash than the player currently has. Uses the
+   * same {@link Purchase} flow as {@link #buy(String, BigDecimal, Player)}.
+   *
+   * @param symbol   the stock symbol
+   * @param maxSpend upper bound on total purchase cost (gross + commission)
+   * @param player   the player making the purchase
+   * @return the Purchase transaction
+   * @throws NullPointerException         if {@code maxSpend} is null
+   * @throws IllegalArgumentException     if the symbol is unknown or {@code maxSpend} is not
+   *                                      positive
+   * @throws InsufficientFundsException   if no positive quantity fits the budget and cash available
+   */
+  public Transaction buyUpToBudget(String symbol, BigDecimal maxSpend, Player player) {
+    Stock stock = this.getStock(symbol);
+    if (stock == null) {
+      throw new IllegalArgumentException("Unknown stock symbol: " + symbol);
+    }
+    requirePositive(maxSpend, "maxSpend");
+    BigDecimal budget = maxSpend.min(player.getMoney());
+    BigDecimal quantity = TransactionSizing.maxQuantityForBudget(stock, budget);
+    if (quantity.signum() <= 0) {
+      throw new InsufficientFundsException();
+    }
+    return buy(symbol, quantity, player);
+  }
+
+  /**
    * Gets the stock by its symbol.
    *
    * @param symbol the stock symbol
@@ -120,6 +155,66 @@ public class Exchange {
     Sale sale = new Sale(share, this.getDay());
     sale.commit(player);
     return sale;
+  }
+
+  /**
+   * Sells a total quantity of the given symbol using FIFO lots (oldest holding first). May perform
+   * several {@link Sale} transactions if the quantity spans multiple lots. Partial lots are split so
+   * cost basis is preserved per lot.
+   *
+   * @param symbol   the stock symbol
+   * @param quantity total shares to sell
+   * @param player   the player
+   * @return all sale transactions, in order
+   * @throws NullPointerException     if {@code quantity} is null
+   * @throws IllegalArgumentException if {@code quantity} is not positive
+   */
+  public List<Transaction> sellByQuantity(String symbol, BigDecimal quantity, Player player) {
+    requirePositive(quantity, "quantity");
+    if (player.getPortfolio().totalQuantityForSymbol(symbol).compareTo(quantity) < 0) {
+      throw new InsufficientSharesException(symbol, quantity);
+    }
+    List<Transaction> transactions = new ArrayList<>();
+    BigDecimal remaining = quantity;
+    while (remaining.signum() > 0) {
+      Share slice = player.getPortfolio().buildNextFifoSaleSlice(symbol, remaining);
+      if (slice == null) {
+        throw new InsufficientSharesException(symbol, quantity);
+      }
+      transactions.add(sell(slice, player));
+      remaining = remaining.subtract(slice.getQuantity());
+    }
+    return transactions;
+  }
+
+  /**
+   * Sells shares of the symbol in FIFO order, stopping when the cumulative net proceeds credited to
+   * the player (per {@link SaleCalculator#calculateTotal()}) would
+   * exceed {@code targetNet}, or when there are no more shares. May perform several sales.
+   *
+   * @param symbol    the stock symbol
+   * @param targetNet desired maximum total net cash to raise
+   * @param player    the player
+   * @return all sale transactions, in order (may be empty if nothing could be sold)
+   * @throws NullPointerException     if {@code targetNet} is null
+   * @throws IllegalArgumentException if {@code targetNet} is not positive
+   */
+  public List<Transaction> sellUpToTargetNet(String symbol, BigDecimal targetNet, Player player) {
+    requirePositive(targetNet, "targetNet");
+    List<Transaction> transactions = new ArrayList<>();
+    BigDecimal remainingTarget = targetNet;
+    while (remainingTarget.signum() > 0
+        && player.getPortfolio().totalQuantityForSymbol(symbol).signum() > 0) {
+      Share slice =
+          player.getPortfolio().buildNextFifoSliceForTargetNet(symbol, remainingTarget);
+      if (slice == null) {
+        break;
+      }
+      transactions.add(sell(slice, player));
+      BigDecimal net = new SaleCalculator(slice).calculateTotal();
+      remainingTarget = remainingTarget.subtract(net);
+    }
+    return transactions;
   }
 
   /**
