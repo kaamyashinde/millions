@@ -191,6 +191,12 @@ public class RegularSavingsPanel extends BorderPane {
     List<String> skipped =
         RegularSavingsProcessor.run(exchange, player, before, exchange.getDay());
     refreshTable();
+    if (!skipped.isEmpty()) {
+      status.setText(
+          "Regular savings skipped (insufficient funds): "
+              + String.join(", ", skipped)
+              + ". See Notifications.");
+    }
     for (String sym : skipped) {
       notifications.show(ToastMode.WARNING, "Regular savings skipped",
           "Insufficient funds for " + sym + ".");
