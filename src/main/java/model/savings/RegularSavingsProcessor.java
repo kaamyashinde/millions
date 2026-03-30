@@ -9,10 +9,12 @@ import model.exception.InsufficientFundsException;
 /**
  * Applies regular savings plans on trading-day advances: executes due installments via
  * {@link Exchange#buy} or {@link Exchange#buyUpToBudget}, and reschedules each plan after each
- * attempt. Depends on {@link Exchange} and {@link Player} only at call sites (no global state).
+ * attempt. Reads current {@link RegularSavingsPlan} field values on each run, so in-place updates
+ * to mode, amount, or interval are respected. Depends on {@link Exchange} and {@link Player} only
+ * at call sites (no global state).
  *
  * @author kevindmazali
- * @version 1.0.0
+ * @version 1.1.0
  * @since 29-03-2026
  */
 public final class RegularSavingsProcessor {
