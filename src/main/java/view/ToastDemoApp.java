@@ -21,11 +21,12 @@ import view.components.toast.ToastMode;
 
 /**
  * Demo application: <strong>Notifications</strong> tab hosts {@link NotificationsPanel};
- * <strong>Savings</strong> tab hosts {@link RegularSavingsPanel} with an {@link Exchange} loaded
- * from bundled CSV and {@link Player} "k" with starting balance 5000.
+ * <strong>Stocks</strong> tab hosts {@link StocksListPanel}; <strong>Savings</strong> tab hosts
+ * {@link RegularSavingsPanel} with an {@link Exchange} loaded from bundled CSV and {@link Player}
+ * "k" with starting balance 5000.
  *
  * @author kevindmazali
- * @version 1.3.0
+ * @version 1.4.0
  * @since 30-03-2026
  */
 public class ToastDemoApp extends Application {
@@ -44,6 +45,7 @@ public class ToastDemoApp extends Application {
     Tab notificationsTab = new Tab("Notifications", notificationsPanel);
     notificationsTab.setClosable(false);
 
+    Tab stocksTab;
     Tab savingsTab;
     if (stocks.isEmpty()) {
       notifications.show(
@@ -52,17 +54,31 @@ public class ToastDemoApp extends Application {
           "Missing or empty resource " + DEMO_CSV_RESOURCE + ".");
       Label error = new Label("Could not load demo-stocks.csv. Check resources.");
       error.setWrapText(true);
+      Label stocksError =
+          new Label("Could not load demo-stocks.csv. No listings to show.");
+      stocksError.setWrapText(true);
+      stocksTab = new Tab("Stocks", stocksError);
       savingsTab = new Tab("Savings", error);
     } else {
       Exchange demoExchange = new Exchange(DEMO_EXCHANGE_NAME, stocks);
       Player demoPlayer = new Player("k", new BigDecimal("5000"));
       showLoadedNotifications(notifications, demoExchange, stocks, demoPlayer);
+
+      StocksListPanel stocksPanel = new StocksListPanel(demoExchange);
+      stocksTab = new Tab("Stocks", stocksPanel);
+      stocksTab.selectedProperty().addListener((obs, ov, nv) -> {
+        if (Boolean.TRUE.equals(nv)) {
+          stocksPanel.refresh();
+        }
+      });
+
       savingsTab =
           new Tab("Savings", new RegularSavingsPanel(demoExchange, demoPlayer, notifications));
     }
+    stocksTab.setClosable(false);
     savingsTab.setClosable(false);
 
-    TabPane tabs = new TabPane(notificationsTab, savingsTab);
+    TabPane tabs = new TabPane(notificationsTab, stocksTab, savingsTab);
 
     stage.setScene(new Scene(tabs, 780, 560));
     stage.setTitle("Toast & Savings Demo");
