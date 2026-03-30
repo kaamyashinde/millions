@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -22,8 +23,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
+
+import controller.RegularSavingsPanelController;
 import model.Exchange;
 import model.Player;
+import model.Stock;
 import model.savings.RegularSavingsPlan;
 import model.savings.RegularSavingsProcessor;
 import model.savings.SavingsInstallmentMode;
@@ -32,7 +37,8 @@ import view.components.toast.ToastMode;
 
 /**
  * JavaFX panel for demoing {@link RegularSavingsPlan} against an {@link Exchange} and
- * {@link Player}: list plans, add (validates symbol via {@link Exchange#hasStock(String)}), edit in
+ * {@link Player}: list plans, add (stock chosen from {@link RegularSavingsPanelController}
+ * listing), edit in
  * place (symbol stays fixed; use remove + add to change ticker), remove, and advance the exchange one
  * day while running {@link RegularSavingsProcessor}. Skipped installments surface as warning
  * toasts.
@@ -48,6 +54,7 @@ public class RegularSavingsPanel extends BorderPane {
           + "-fx-background-radius: 6;";
 
   private final Exchange exchange;
+  private final RegularSavingsPanelController savingsController;
   private final Player player;
   private final NotificationService notifications;
 
@@ -55,7 +62,7 @@ public class RegularSavingsPanel extends BorderPane {
   private final TableView<RegularSavingsPlan> table = new TableView<>();
   private final ObservableList<RegularSavingsPlan> plans = FXCollections.observableArrayList();
 
-  private final TextField addSymbol = new TextField();
+  private final ComboBox<Stock> addStock = new ComboBox<>();
   private final ComboBox<SavingsInstallmentMode> addMode = new ComboBox<>(
       FXCollections.observableArrayList(SavingsInstallmentMode.values()));
   private final TextField addAmount = new TextField();
@@ -79,6 +86,7 @@ public class RegularSavingsPanel extends BorderPane {
    */
   public RegularSavingsPanel(Exchange exchange, Player player, NotificationService notifications) {
     this.exchange = exchange;
+    this.savingsController = new RegularSavingsPanelController(exchange);
     this.player = player;
     this.notifications = notifications;
 
@@ -101,10 +109,12 @@ public class RegularSavingsPanel extends BorderPane {
     setCenter(table);
 
     addMode.setValue(SavingsInstallmentMode.FIXED_SHARES);
-    addSymbol.setPromptText("Symbol");
+    addStock.setItems(savingsController.getListedStocks());
+    addStock.setPromptText("Stock");
+    configureStockCombo(addStock);
     addAmount.setPromptText("Amount");
     addInterval.setPromptText("Interval (days)");
-    styleField(addSymbol);
+    styleCombo(addStock);
     styleField(addAmount);
     styleField(addInterval);
     styleCombo(addMode);
@@ -117,7 +127,7 @@ public class RegularSavingsPanel extends BorderPane {
     GridPane addGrid = new GridPane();
     addGrid.setHgap(8);
     addGrid.setVgap(8);
-    addGrid.addRow(0, addHeading, addSymbol, addMode, addAmount, addInterval, addBtn);
+    addGrid.addRow(0, addHeading, addStock, addMode, addAmount, addInterval, addBtn);
 
     editMode.setValue(SavingsInstallmentMode.FIXED_SHARES);
     styleCombo(editMode);
@@ -205,11 +215,12 @@ public class RegularSavingsPanel extends BorderPane {
 
   private void addPlan() {
     status.setText("");
-    String sym = addSymbol.getText().trim().toUpperCase();
-    if (sym.isEmpty() || !exchange.hasStock(sym)) {
-      status.setText("Enter a symbol listed on this exchange.");
+    Stock picked = addStock.getValue();
+    if (picked == null) {
+      status.setText("Choose a stock.");
       return;
     }
+    String sym = picked.getSymbol();
     SavingsInstallmentMode mode = addMode.getValue();
     if (mode == null) {
       status.setText("Choose a mode.");
@@ -222,12 +233,51 @@ public class RegularSavingsPanel extends BorderPane {
           new RegularSavingsPlan(sym, mode, amount, interval, exchange.getDay());
       player.addRegularSavingsPlan(plan);
       refreshTable();
-      addSymbol.clear();
+      addStock.setValue(null);
       addAmount.clear();
       addInterval.clear();
     } catch (RuntimeException ex) {
       status.setText("Invalid amount or interval.");
     }
+  }
+
+  private static void configureStockCombo(ComboBox<Stock> combo) {
+    combo.setConverter(
+        new StringConverter<>() {
+          @Override
+          public String toString(Stock stock) {
+            return formatStockLabel(stock);
+          }
+
+          @Override
+          public Stock fromString(String s) {
+            return null;
+          }
+        });
+    combo.setCellFactory(
+        lv ->
+            new ListCell<>() {
+              @Override
+              protected void updateItem(Stock item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : formatStockLabel(item));
+              }
+            });
+    combo.setButtonCell(
+        new ListCell<>() {
+          @Override
+          protected void updateItem(Stock item, boolean empty) {
+            super.updateItem(item, empty);
+            setText(empty || item == null ? null : formatStockLabel(item));
+          }
+        });
+  }
+
+  private static String formatStockLabel(Stock stock) {
+    if (stock == null) {
+      return "";
+    }
+    return stock.getSymbol() + " — " + stock.getCompany();
   }
 
   private void applyEdit() {
