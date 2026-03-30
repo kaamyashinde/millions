@@ -60,4 +60,30 @@ class RegularSavingsProcessorTest {
     RegularSavingsProcessor.run(exchange, player, before, exchange.getDay());
     assertTrue(player.getPortfolio().totalQuantityForSymbol("AAPL").signum() > 0);
   }
+
+  @Test
+  void run_afterMidLifeAmountChange_usesUpdatedAmount() {
+    RegularSavingsPlan plan =
+        new RegularSavingsPlan("AAPL", SavingsInstallmentMode.FIXED_SHARES, new BigDecimal("1"),
+            2, exchange.getDay());
+    player.addRegularSavingsPlan(plan);
+    plan.setAmount(new BigDecimal("3"));
+    int before = exchange.getDay();
+    exchange.advance(2);
+    RegularSavingsProcessor.run(exchange, player, before, exchange.getDay());
+    assertEquals(new BigDecimal("3"), player.getPortfolio().totalQuantityForSymbol("AAPL"));
+  }
+
+  @Test
+  void run_afterMidLifeIntervalChange_usesUpdatedIntervalForReschedule() {
+    RegularSavingsPlan plan =
+        new RegularSavingsPlan("AAPL", SavingsInstallmentMode.FIXED_SHARES, new BigDecimal("1"),
+            1, exchange.getDay());
+    player.addRegularSavingsPlan(plan);
+    plan.setIntervalDays(5);
+    int before = exchange.getDay();
+    exchange.advance(1);
+    RegularSavingsProcessor.run(exchange, player, before, exchange.getDay());
+    assertEquals(7, plan.getNextDueDay());
+  }
 }
