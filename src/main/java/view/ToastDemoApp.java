@@ -1,5 +1,7 @@
 package view;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import javafx.application.Application;
@@ -8,6 +10,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -18,14 +22,22 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import model.Exchange;
+import model.Player;
+import model.Stock;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
 import view.components.toast.ToastMode;
 
 /**
- * A small demo application that showcases toast notifications via {@link NotificationService} and
- * {@link ToastTray}. On startup, sample notifications fill the tray for layout preview (long
- * auto-dismiss). Buttons still enqueue with the default 3 second dismiss.
+ * Demo application: <strong>Toasts</strong> tab showcases {@link NotificationService} and
+ * {@link ToastTray}; <strong>Savings</strong> tab hosts {@link RegularSavingsPanel} with a demo
+ * {@link Exchange} and {@link Player}. Sample notifications seed the tray on startup for layout
+ * preview.
+ *
+ * @author kevindmazali
+ * @version 1.1.0
+ * @since 30-03-2026
  */
 public class ToastDemoApp extends Application {
 
@@ -82,9 +94,23 @@ public class ToastDemoApp extends Application {
     HBox buttons = new HBox(14, errBtn, warnBtn, infoBtn, successBtn);
     buttons.setAlignment(Pos.CENTER);
 
-    VBox center = new VBox(28, heading, advanceRow, buttons);
-    center.setAlignment(Pos.CENTER);
-    center.setPadding(new Insets(40));
+    VBox toastContent = new VBox(28, heading, advanceRow, buttons);
+    toastContent.setAlignment(Pos.CENTER);
+    toastContent.setPadding(new Insets(40));
+
+    Exchange demoExchange = createDemoExchange();
+    Player demoPlayer = new Player("Demo", new BigDecimal("100000"));
+    RegularSavingsPanel savingsPanel =
+        new RegularSavingsPanel(demoExchange, demoPlayer, notifications);
+
+    Tab toastTab = new Tab("Toasts", toastContent);
+    toastTab.setClosable(false);
+    Tab savingsTab = new Tab("Savings", savingsPanel);
+    savingsTab.setClosable(false);
+
+    TabPane tabs = new TabPane(toastTab, savingsTab);
+    tabs.setStyle("-fx-background-color: #121212;");
+    StackPane.setAlignment(tabs, Pos.CENTER);
 
     ToastTray tray = new ToastTray(notifications.getItems());
 
@@ -94,12 +120,25 @@ public class ToastDemoApp extends Application {
     toastArea.getChildren().add(tray);
     seedDemoNotifications();
 
-    StackPane root = new StackPane(center, toastArea);
+    StackPane root = new StackPane(tabs, toastArea);
     root.setStyle("-fx-background-color: #121212;");
 
-    stage.setScene(new Scene(root, 680, 380));
-    stage.setTitle("Toast Notification Demo");
+    stage.setScene(new Scene(root, 780, 560));
+    stage.setTitle("Toast & Savings Demo");
     stage.show();
+  }
+
+  /**
+   * Demo exchange with two liquid stocks for savings symbol validation.
+   *
+   * @return a non-null exchange at trading day 1
+   */
+  private static Exchange createDemoExchange() {
+    Stock aapl = new Stock("AAPL", "Apple Inc.");
+    aapl.addNewSalesPrice(new BigDecimal("100.00"));
+    Stock msft = new Stock("MSFT", "Microsoft Corp.");
+    msft.addNewSalesPrice(new BigDecimal("200.00"));
+    return new Exchange("DEMO", List.of(aapl, msft));
   }
 
   private Button makeButton(String label, ToastMode mode, String title, String description,
