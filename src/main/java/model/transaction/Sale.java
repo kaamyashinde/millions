@@ -33,23 +33,19 @@ public class Sale extends Transaction {
    * Commits the sale transaction.
    *
    * @param player the player making the sale
-   * @throws ShareNotFoundException    if the player does not have the share being sold in their
-   *                                   portfolio.
+   * @throws ShareNotFoundException    if the portfolio does not hold a matching FIFO lot (symbol,
+   *                                   purchase price, and at least the slice quantity).
    * @throws AlreadyCommittedException if the transaction has already been committed.
    */
   public void commit(Player player) {
     if (this.isCommited()) {
       throw new AlreadyCommittedException();
     }
-    if (!player.getPortfolio().containsShare(this.getShare())) {
+    if (!player.getPortfolio().removeFifoSliceForSale(this.getShare())) {
       throw new ShareNotFoundException(this.getShare(), player);
-    } else {
-      player.getPortfolio().removeShare(this.getShare());
-      player.addMoney(saleCalc.calculateTotal());
-      player.getTransactionArchive().addTransaction(this);
-      this.commited = true;
     }
-
-
+    player.addMoney(saleCalc.calculateTotal());
+    player.getTransactionArchive().addTransaction(this);
+    this.commited = true;
   }
 }
