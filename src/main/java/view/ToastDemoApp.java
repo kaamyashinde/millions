@@ -1,7 +1,5 @@
 package view;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.UUID;
 
 import javafx.application.Application;
@@ -18,12 +16,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import model.Stock;
-import view.components.chart.AnalysisToolbar;
-import view.components.chart.StockChart;
-import view.components.chart.tool.ElliottWaveTool;
-import view.components.chart.tool.FibonacciTool;
-import view.components.chart.tool.MoonPhaseTool;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
 import view.components.toast.ToastMode;
@@ -32,10 +24,6 @@ import view.components.toast.ToastMode;
  * A small demo application that showcases toast notifications via {@link NotificationService} and
  * {@link ToastTray}. On startup, sample notifications fill the tray for layout preview (long
  * auto-dismiss). Buttons still enqueue with the default 3 second dismiss.
- *
- * @author kaamyashinde
- * @version 0.2.0
- * @since 30-03-2026
  */
 public class ToastDemoApp extends Application {
 
@@ -45,13 +33,6 @@ public class ToastDemoApp extends Application {
   private final NotificationService notifications = new NotificationService();
   private final StackPane toastArea = new StackPane();
 
-  /**
-   * Assembles and displays the demo scene, including a heading, the seeded stock chart with
-   * analysis tools, the analysis toolbar, notification trigger buttons, and the toast tray.
-   * Seed notifications are enqueued immediately so the tray is pre-populated on launch.
-   *
-   * @param stage the primary stage provided by the JavaFX runtime
-   */
   @Override
   public void start(Stage stage) {
     Text heading = new Text("Toast Demo");
@@ -70,18 +51,7 @@ public class ToastDemoApp extends Application {
     HBox buttons = new HBox(14, errBtn, warnBtn, infoBtn, successBtn);
     buttons.setAlignment(Pos.CENTER);
 
-    LocalDate simStart = LocalDate.of(2024, 1, 1);
-
-    StockChart chart = new StockChart(buildSeedStock());
-    chart.setPrefHeight(280);
-
-    chart.registerTool(new FibonacciTool());
-    chart.registerTool(new MoonPhaseTool(simStart));
-    chart.registerTool(new ElliottWaveTool());
-
-    AnalysisToolbar toolbar = new AnalysisToolbar(chart.getTools(), chart);
-
-    VBox center = new VBox(28, heading, chart, toolbar, buttons);
+    VBox center = new VBox(28, heading, buttons);
     center.setAlignment(Pos.CENTER);
     center.setPadding(new Insets(40));
 
@@ -96,21 +66,11 @@ public class ToastDemoApp extends Application {
     StackPane root = new StackPane(center, toastArea);
     root.setStyle("-fx-background-color: #121212;");
 
-    stage.setScene(new Scene(root, 800, 560));
+    stage.setScene(new Scene(root, 620, 380));
     stage.setTitle("Toast Notification Demo");
     stage.show();
   }
 
-  /**
-   * Creates a styled button that, when clicked, enqueues a notification with the given parameters.
-   *
-   * @param label       the button text
-   * @param mode        the toast severity mode (controls colour)
-   * @param title       the notification title
-   * @param description the notification body text
-   * @param actionLabel the action button label shown on the toast, or {@code null} for none
-   * @return the configured {@link Button}
-   */
   private Button makeButton(String label, ToastMode mode, String title, String description,
       String actionLabel) {
     Button btn = new Button(label);
@@ -133,10 +93,6 @@ public class ToastDemoApp extends Application {
     return btn;
   }
 
-  /**
-   * Enqueues one notification of each {@link ToastMode} (ERROR, WARNING, INFO, SUCCESS) with a
-   * long display duration so the stacked tray remains visible for layout preview.
-   */
   private void seedDemoNotifications() {
     discard(notifications.show(ToastMode.ERROR, "Something went wrong!",
         "Check the logs for more details.", "Dismiss", null, SEED_DISPLAY_DURATION));
@@ -148,31 +104,6 @@ public class ToastDemoApp extends Application {
         "10 AAPL shares purchased.", "View", null, SEED_DISPLAY_DURATION));
   }
 
-  /**
-   * Builds a 20-day AAPL seed stock with hardcoded closing prices for use as demo chart data.
-   *
-   * @return the constructed {@link Stock} populated with 20 daily price entries
-   */
-  private static Stock buildSeedStock() {
-    Stock stock = new Stock("AAPL", "Apple Inc.");
-    double[] prices = {
-        150.00, 151.20, 149.80, 152.50, 153.10,
-        151.75, 154.30, 155.00, 153.60, 156.20,
-        157.40, 155.90, 158.00, 159.30, 157.80,
-        160.10, 161.50, 159.90, 162.00, 163.25
-    };
-    for (double p : prices) {
-      stock.addNewSalesPrice(BigDecimal.valueOf(p));
-    }
-    return stock;
-  }
-
-  /**
-   * Intentional no-op that discards the notification {@link UUID} returned by
-   * {@link NotificationService#show} to suppress unused-return-value warnings.
-   *
-   * @param id the notification identifier to discard
-   */
   @SuppressWarnings("unused")
   private static void discard(UUID id) {}
 
