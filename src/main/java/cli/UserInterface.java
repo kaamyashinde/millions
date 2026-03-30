@@ -39,6 +39,7 @@ public class UserInterface {
   private static final int ADD_SAVINGS = 10;
   private static final int LIST_SAVINGS = 11;
   private static final int REMOVE_SAVINGS = 12;
+  private static final int EDIT_SAVINGS = 13;
   private static final int INVALID_MENU_CHOICE = -1;
 
   private static final Scanner input = new Scanner(System.in);
@@ -109,6 +110,7 @@ public class UserInterface {
     System.out.println(I18n.get("menu.option.savings.add"));
     System.out.println(I18n.get("menu.option.savings.list"));
     System.out.println(I18n.get("menu.option.savings.remove"));
+    System.out.println(I18n.get("menu.option.savings.edit"));
     System.out.println(I18n.get("menu.footer"));
     System.out.println(I18n.get("menu.prompt"));
     try {
@@ -138,6 +140,7 @@ public class UserInterface {
       case ADD_SAVINGS -> addSavingsPlan();
       case LIST_SAVINGS -> listSavingsPlans();
       case REMOVE_SAVINGS -> removeSavingsPlan();
+      case EDIT_SAVINGS -> editSavingsPlan();
       default -> System.out.println(I18n.get("invalid.input"));
     }
   }
@@ -500,26 +503,8 @@ public class UserInterface {
       return;
     }
     input.nextLine();
-    int interval;
-    if (freq == 1) {
-      interval = 5;
-    } else if (freq == 2) {
-      interval = 10;
-    } else if (freq == 3) {
-      interval = 22;
-    } else if (freq == 4) {
-      System.out.println(I18n.get("savings.prompt.customDays"));
-      try {
-        interval = Integer.parseInt(input.nextLine().trim());
-        if (interval <= 0) {
-          System.out.println(I18n.get("invalid.input"));
-          return;
-        }
-      } catch (NumberFormatException e) {
-        System.out.println(I18n.get("invalid.input"));
-        return;
-      }
-    } else {
+    int interval = readIntervalForFrequencyChoice(freq);
+    if (interval < 0) {
       System.out.println(I18n.get("invalid.input"));
       return;
     }
@@ -554,6 +539,154 @@ public class UserInterface {
           p.getNextDueDay(),
           p.isActive()));
     }
+  }
+
+  /**
+   * Resolves trading days between installments from a frequency menu choice, after the frequency
+   * line has been read with {@code nextInt} and consumed with {@code nextLine}.
+   *
+   * @param freq 1 = weekly, 2 = biweekly, 3 = monthly, 4 = custom (reads another line)
+   * @return positive interval, or -1 if invalid
+   */
+  private static int readIntervalForFrequencyChoice(int freq) {
+    if (freq == 1) {
+      return 5;
+    }
+    if (freq == 2) {
+      return 10;
+    }
+    if (freq == 3) {
+      return 22;
+    }
+    if (freq == 4) {
+      System.out.println(I18n.get("savings.prompt.customDays"));
+      try {
+        int custom = Integer.parseInt(input.nextLine().trim());
+        if (custom <= 0) {
+          return -1;
+        }
+        return custom;
+      } catch (NumberFormatException e) {
+        return -1;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Prompts for a plan index and updates mode, amount, interval, and active; symbol is unchanged.
+   */
+  private static void editSavingsPlan() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    List<RegularSavingsPlan> plans = player.getRegularSavingsPlans();
+    if (plans.isEmpty()) {
+      System.out.println(I18n.get("savings.list.empty"));
+      return;
+    }
+    for (int i = 0; i < plans.size(); i++) {
+      RegularSavingsPlan p = plans.get(i);
+      System.out.println(I18n.format(
+          "savings.list.line",
+          i + 1,
+          p.getSymbol(),
+          p.getMode(),
+          p.getAmount(),
+          p.getIntervalDays(),
+          p.getNextDueDay(),
+          p.isActive()));
+    }
+    System.out.println(I18n.format("savings.prompt.editIndex", plans.size()));
+    int idx;
+    try {
+      idx = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    if (idx < 1 || idx > plans.size()) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    RegularSavingsPlan plan = plans.get(idx - 1);
+    System.out.println(I18n.format("savings.prompt.symbolLocked", plan.getSymbol()));
+    System.out.println(I18n.get("savings.prompt.mode"));
+    int modeChoice;
+    try {
+      modeChoice = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    if (modeChoice != 1 && modeChoice != 2) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    SavingsInstallmentMode mode =
+        modeChoice == 1 ? SavingsInstallmentMode.FIXED_SHARES : SavingsInstallmentMode.BUDGET;
+    BigDecimal amount;
+    try {
+      if (mode == SavingsInstallmentMode.FIXED_SHARES) {
+        System.out.println(I18n.get("savings.prompt.amountShares"));
+        amount = new BigDecimal(input.nextLine().trim());
+      } else {
+        System.out.println(I18n.get("savings.prompt.amountBudget"));
+        amount = new BigDecimal(input.nextLine().trim());
+      }
+      if (amount.signum() <= 0) {
+        System.out.println(I18n.get("invalid.input"));
+        return;
+      }
+    } catch (NumberFormatException e) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("savings.prompt.frequency"));
+    int freq;
+    try {
+      freq = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    int interval = readIntervalForFrequencyChoice(freq);
+    if (interval < 0) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("savings.prompt.active"));
+    int activeChoice;
+    try {
+      activeChoice = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    if (activeChoice != 0 && activeChoice != 1) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    plan.setMode(mode);
+    try {
+      plan.setAmount(amount);
+      plan.setIntervalDays(interval);
+    } catch (IllegalArgumentException | NullPointerException ex) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    plan.setActive(activeChoice == 1);
+    System.out.println(I18n.get("savings.updated"));
   }
 
   /**
