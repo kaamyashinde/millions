@@ -139,8 +139,9 @@ class ToastTrayTest {
   }
 
   @Test
-  void toastNotificationStylesMatchesModeColor() {
-    String style = ToastTray.ToastNotificationStyles.toastBorderStyle(ToastMode.ERROR);
-    assertTrue(style.contains(ToastMode.ERROR.getColorHex()));
+  void toastNotificationStylesContainsGeometry() {
+    String style = ToastTray.ToastNotificationStyles.toastBorderStyle();
+    assertTrue(style.contains("-fx-border-width"));
+    assertTrue(style.contains("8"));
   }
 }

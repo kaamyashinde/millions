@@ -16,7 +16,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -51,29 +50,20 @@ public class ToastDemoApp extends Application {
   public void start(Stage stage) {
     Text heading = new Text("Toast Demo");
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
-    heading.setFill(Color.web("#e0e0e0"));
 
     Label daysLabel = new Label("Days:");
-    daysLabel.setTextFill(Color.web("#e0e0e0"));
 
     TextField daysField = new TextField();
     daysField.setPromptText("e.g. 14");
     daysField.setPrefWidth(100);
     daysField.setStyle(
-        "-fx-background-color: #2a2a2a;"
-            + "-fx-text-fill: #e0e0e0;"
-            + "-fx-prompt-text-fill: #888888;"
-            + "-fx-border-color: #3d3d3d;"
-            + "-fx-border-radius: 6;"
+        "-fx-border-radius: 6;"
             + "-fx-background-radius: 6;"
     );
 
     Button advanceWeeksBtn = new Button("Advance by weeks");
     advanceWeeksBtn.setStyle(
-        "-fx-background-color: #2a2a2a;"
-            + "-fx-text-fill: #e0e0e0;"
-            + "-fx-border-color: #3d3d3d;"
-            + "-fx-border-radius: 6;"
+        "-fx-border-radius: 6;"
             + "-fx-background-radius: 6;"
             + "-fx-cursor: hand;"
     );
@@ -109,7 +99,6 @@ public class ToastDemoApp extends Application {
     savingsTab.setClosable(false);
 
     TabPane tabs = new TabPane(toastTab, savingsTab);
-    tabs.setStyle("-fx-background-color: #121212;");
     StackPane.setAlignment(tabs, Pos.CENTER);
 
     ToastTray tray = new ToastTray(notifications.getItems());
@@ -121,7 +110,6 @@ public class ToastDemoApp extends Application {
     seedDemoNotifications();
 
     StackPane root = new StackPane(tabs, toastArea);
-    root.setStyle("-fx-background-color: #121212;");
 
     stage.setScene(new Scene(root, 780, 560));
     stage.setTitle("Toast & Savings Demo");
@@ -146,10 +134,7 @@ public class ToastDemoApp extends Application {
     Button btn = new Button(label);
     btn.setPrefWidth(110);
     btn.setStyle(
-        "-fx-background-color: #2a2a2a;"
-            + "-fx-text-fill: " + mode.getColorHex() + ";"
-            + "-fx-border-color: " + mode.getColorHex() + ";"
-            + "-fx-border-radius: 6;"
+        "-fx-border-radius: 6;"
             + "-fx-background-radius: 6;"
             + "-fx-cursor: hand;"
     );

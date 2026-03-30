@@ -8,7 +8,7 @@ import javafx.scene.shape.Shape;
 
 /**
  * Enum representing the different modes (severity levels) of a toast notification. Each mode
- * defines its own color, symbol, and icon shape.
+ * defines its own symbol, icon shape, and optional hex metadata ({@link #getColorHex()}).
  *
  * @author kaamyashinde
  * @version 1.0.0
@@ -17,7 +17,7 @@ import javafx.scene.shape.Shape;
 public enum ToastMode {
   ERROR("#FF4444", "i") {
     @Override
-    public Shape createShape(Color color) {
+    public Shape createShape() {
       double r = ICON_SIZE / 2.0;
       Polygon hex = new Polygon();
       for (int i = 0; i < 6; i++) {
@@ -25,7 +25,7 @@ public enum ToastMode {
         hex.getPoints().addAll(r * Math.cos(angle), r * Math.sin(angle));
       }
       hex.setFill(Color.TRANSPARENT);
-      hex.setStroke(color);
+      hex.setStroke(DEFAULT_STROKE);
       hex.setStrokeWidth(STROKE);
       return hex;
     }
@@ -33,7 +33,7 @@ public enum ToastMode {
 
   WARNING("#FFA500", "i") {
     @Override
-    public Shape createShape(Color color) {
+    public Shape createShape() {
       double h = ICON_SIZE / 2.0;
       Polygon triangle = new Polygon(
           0.0, -h,
@@ -41,7 +41,7 @@ public enum ToastMode {
           -h, h
       );
       triangle.setFill(Color.TRANSPARENT);
-      triangle.setStroke(color);
+      triangle.setStroke(DEFAULT_STROKE);
       triangle.setStrokeWidth(STROKE);
       return triangle;
     }
@@ -49,12 +49,12 @@ public enum ToastMode {
 
   INFO("#2196F3", "i") {
     @Override
-    public Shape createShape(Color color) {
+    public Shape createShape() {
       Rectangle rect = new Rectangle(ICON_SIZE, ICON_SIZE);
       rect.setArcWidth(6);
       rect.setArcHeight(6);
       rect.setFill(Color.TRANSPARENT);
-      rect.setStroke(color);
+      rect.setStroke(DEFAULT_STROKE);
       rect.setStrokeWidth(STROKE);
       return rect;
     }
@@ -62,10 +62,10 @@ public enum ToastMode {
 
   SUCCESS("#4CAF50", "✓") {
     @Override
-    public Shape createShape(Color color) {
+    public Shape createShape() {
       Circle circle = new Circle(ICON_SIZE / 2.0);
       circle.setFill(Color.TRANSPARENT);
-      circle.setStroke(color);
+      circle.setStroke(DEFAULT_STROKE);
       circle.setStrokeWidth(STROKE);
       return circle;
     }
@@ -73,6 +73,7 @@ public enum ToastMode {
 
   static final double ICON_SIZE = 40;
   static final double STROKE = 2;
+  private static final Color DEFAULT_STROKE = Color.BLACK;
 
   private final String colorHex;
   private final String symbol;
@@ -83,12 +84,11 @@ public enum ToastMode {
   }
 
   /**
-   * Builds and returns the outline shape for this mode, styled with the given color.
+   * Builds and returns the outline shape for this mode with a default stroke.
    *
-   * @param color the color to apply to the shape's stroke
    * @return the styled shape
    */
-  public abstract Shape createShape(Color color);
+  public abstract Shape createShape();
 
   /**
    * Returns the hex color associated with this toast mode.

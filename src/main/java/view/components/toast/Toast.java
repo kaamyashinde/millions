@@ -11,15 +11,14 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 /**
  * A reusable JavaFX toast notification component. Supports four severity levels (ERROR, WARNING,
- * INFO, SUCCESS) each with a distinct icon shape and color, a mandatory title, and optional
- * description and action button.
+ * INFO, SUCCESS) each with a distinct icon shape, a mandatory title, and optional description and
+ * action button.
  *
  * @author kaamyashinde
  * @version 1.0.0
@@ -77,20 +76,16 @@ public class Toast extends HBox {
     setMaxWidth(TOAST_WIDTH);
     setMinHeight(MIN_TOAST_HEIGHT);
 
-    Color color = Color.web(mode.getColorHex());
-
-    StackPane iconPane = buildIconPane(mode, color);
+    StackPane iconPane = buildIconPane(mode);
     VBox textBox = new VBox(4);
     textBox.setAlignment(Pos.CENTER_LEFT);
     textBox.setMaxWidth(Double.MAX_VALUE);
     HBox.setHgrow(textBox, Priority.ALWAYS);
 
     Label titleLabel = new Label(title);
-    titleLabel.setTextFill(color);
     titleLabel.setWrapText(true);
     if (description != null) {
       Label descLabel = new Label(description);
-      descLabel.setTextFill(Color.web("#aaaaaa"));
       descLabel.setWrapText(true);
       boolean _ = textBox.getChildren().addAll(titleLabel, descLabel);
     } else {
@@ -115,16 +110,14 @@ public class Toast extends HBox {
    * Builds the icon pane for the toast by combining the mode-specific outline and symbol.
    *
    * @param mode the toast mode that defines the icon shape and symbol
-   * @param color the accent color applied to the icon
    * @return the configured icon pane
    */
-  private StackPane buildIconPane(ToastMode mode, Color color) {
+  private StackPane buildIconPane(ToastMode mode) {
     StackPane pane = new StackPane();
     pane.setPrefSize(ICON_SIZE, ICON_SIZE);
 
-    Shape outline = mode.createShape(color);
+    Shape outline = mode.createShape();
     Text symbol = new Text(mode.getSymbol());
-    symbol.setFill(color);
     symbol.setFont(Font.font(SYMBOL_FONT_SIZE));
     boolean _ = pane.getChildren().addAll(outline, symbol);
 

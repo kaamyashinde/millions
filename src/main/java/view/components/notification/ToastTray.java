@@ -11,7 +11,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import view.components.toast.Toast;
-import view.components.toast.ToastMode;
 
 /**
  * A vertical tray that mirrors an {@link ObservableList} of {@link NotificationItem}: each item is
@@ -78,13 +77,13 @@ public class ToastTray extends VBox {
   private void insertToastAt(NotificationItem item, int index) {
     Toast toast =
         new Toast(item.mode(), item.title(), item.description(), item.actionLabel(), item.onAction());
-    toast.setStyle(ToastNotificationStyles.toastBorderStyle(item.mode()));
+    toast.setStyle(ToastNotificationStyles.toastBorderStyle());
     idToNode.put(item.id(), toast);
     getChildren().add(index, toast);
   }
 
   /**
-   * Shared toast chrome (background, border) aligned with {@link view.ToastDemoApp}.
+   * Shared toast border geometry (radii, border width).
    *
    * @author kaamyashinde
    * @version 1.0.0
@@ -99,15 +98,12 @@ public class ToastTray extends VBox {
     }
 
     /**
-     * Builds the shared border and background style for a toast of the given mode.
+     * Builds the shared border style for a toast container (radii and border width only).
      *
-     * @param mode the toast mode whose accent color should be used
      * @return the inline JavaFX style string for the toast container
      */
-    public static String toastBorderStyle(ToastMode mode) {
-      return "-fx-background-color: #1e1e1e;"
-          + "-fx-background-radius: 8;"
-          + "-fx-border-color: " + mode.getColorHex() + ";"
+    public static String toastBorderStyle() {
+      return "-fx-background-radius: 8;"
           + "-fx-border-radius: 8;"
           + "-fx-border-width: 1.5;";
     }

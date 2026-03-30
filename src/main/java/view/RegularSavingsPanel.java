@@ -22,7 +22,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import model.Exchange;
 import model.Player;
 import model.savings.RegularSavingsPlan;
@@ -45,11 +44,7 @@ import view.components.toast.ToastMode;
 public class RegularSavingsPanel extends BorderPane {
 
   private static final String FIELD_STYLE =
-      "-fx-background-color: #2a2a2a;"
-          + "-fx-text-fill: #e0e0e0;"
-          + "-fx-prompt-text-fill: #888888;"
-          + "-fx-border-color: #3d3d3d;"
-          + "-fx-border-radius: 6;"
+      "-fx-border-radius: 6;"
           + "-fx-background-radius: 6;";
 
   private final Exchange exchange;
@@ -88,9 +83,7 @@ public class RegularSavingsPanel extends BorderPane {
     this.notifications = notifications;
 
     setPadding(new Insets(16));
-    setStyle("-fx-background-color: #121212;");
 
-    dayLabel.setTextFill(Color.web("#e0e0e0"));
     dayLabel.setText("Trading day: " + exchange.getDay());
 
     Button advanceBtn = new Button("Advance 1 trading day");
@@ -121,7 +114,6 @@ public class RegularSavingsPanel extends BorderPane {
     addBtn.setOnAction(_ -> addPlan());
 
     Label addHeading = new Label("New plan");
-    addHeading.setTextFill(Color.web("#b0b0b0"));
     GridPane addGrid = new GridPane();
     addGrid.setHgap(8);
     addGrid.setVgap(8);
@@ -132,7 +124,6 @@ public class RegularSavingsPanel extends BorderPane {
     styleField(editAmount);
     styleField(editInterval);
     styleField(editNextDue);
-    editActive.setTextFill(Color.web("#e0e0e0"));
 
     Button applyBtn = new Button("Apply to selected");
     Button removeBtn = new Button("Remove selected");
@@ -142,7 +133,6 @@ public class RegularSavingsPanel extends BorderPane {
     removeBtn.setOnAction(_ -> removeSelected());
 
     Label editHeading = new Label("Edit selected");
-    editHeading.setTextFill(Color.web("#b0b0b0"));
     GridPane editGrid = new GridPane();
     editGrid.setHgap(8);
     editGrid.setVgap(8);
@@ -159,7 +149,6 @@ public class RegularSavingsPanel extends BorderPane {
       }
     });
 
-    status.setTextFill(Color.web("#ff8a80"));
     VBox bottom = new VBox(12, new Separator(), addGrid, editGrid, status);
     bottom.setPadding(new Insets(12, 0, 0, 0));
     setBottom(bottom);
@@ -286,10 +275,7 @@ public class RegularSavingsPanel extends BorderPane {
 
   private static void styleButton(Button b) {
     b.setStyle(
-        "-fx-background-color: #2a2a2a;"
-            + "-fx-text-fill: #e0e0e0;"
-            + "-fx-border-color: #3d3d3d;"
-            + "-fx-border-radius: 6;"
+        "-fx-border-radius: 6;"
             + "-fx-background-radius: 6;"
             + "-fx-cursor: hand;");
   }
