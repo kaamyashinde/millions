@@ -1,7 +1,13 @@
 package model;
 
+import static model.utils.Validator.checkNotNull;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import model.savings.RegularSavingsPlan;
 import model.transaction.TransactionArchive;
 
 /**
@@ -17,6 +23,9 @@ public class Player {
   private final Portfolio portfolio;
   private final TransactionArchive transactionArchive;
   private final PlayerLevel playerLevel;
+
+  /** Recurring purchase plans; list is modified only via add/remove helpers. */
+  private final List<RegularSavingsPlan> regularSavingsPlans;
   private BigDecimal money;
 
   /**
@@ -31,6 +40,7 @@ public class Player {
     this.money = startingMoney;
     this.portfolio = new Portfolio();
     this.transactionArchive = new TransactionArchive();
+    this.regularSavingsPlans = new ArrayList<>();
     this.playerLevel = setPlayerLevel();
   }
 
@@ -103,9 +113,9 @@ public class Player {
   }
 
   /**
-   * Gets the starting money of the player.
+   * Gets the player's stock holdings and FIFO lot list.
    *
-   * @return the starting money of the player
+   * @return the portfolio
    */
   public Portfolio getPortfolio() {
     return portfolio;
@@ -118,6 +128,40 @@ public class Player {
    */
   public TransactionArchive getTransactionArchive() {
     return transactionArchive;
+  }
+
+  /**
+   * Active and inactive regular savings plans for this player.
+   *
+   * @return an unmodifiable view of the plan list
+   */
+  public List<RegularSavingsPlan> getRegularSavingsPlans() {
+    return Collections.unmodifiableList(regularSavingsPlans);
+  }
+
+  /**
+   * Registers a new plan; mutates internal state only through this method and removal.
+   *
+   * @param plan non-null plan to append
+   * @throws NullPointerException if {@code plan} is null
+   */
+  public void addRegularSavingsPlan(RegularSavingsPlan plan) {
+    checkNotNull(plan, "plan");
+    regularSavingsPlans.add(plan);
+  }
+
+  /**
+   * Removes a plan by index (1-based for CLI) or returns false if out of range.
+   *
+   * @param oneBasedIndex 1-based index into {@link #getRegularSavingsPlans()}
+   * @return {@code true} if a plan was removed
+   */
+  public boolean removeRegularSavingsPlanAt(int oneBasedIndex) {
+    if (oneBasedIndex < 1 || oneBasedIndex > regularSavingsPlans.size()) {
+      return false;
+    }
+    regularSavingsPlans.remove(oneBasedIndex - 1);
+    return true;
   }
 
   /**

@@ -1,8 +1,12 @@
 package model.persistence;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -35,17 +39,35 @@ public class CsvReader {
     Path path = directory.resolve(fileName + ".csv");
 
     try (Stream<String> lines = Files.lines(path)) {
-      return lines
-          .map(String::trim)
-          .filter(line -> !line.isEmpty() && !line.startsWith("#"))
-          .map(line -> line.split(","))
-          .filter(tokens -> tokens.length == 3)
-          .map(CsvReader::setStock)
-          .toList();
-
+      return stocksFromLineStream(lines);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+  }
+
+  /**
+   * Reads stock data from an input stream (e.g. classpath resource). Uses the same line format as
+   * {@link #readCsv(Path, String)}.
+   *
+   * @param input UTF-8 text stream; not closed by this method
+   * @return a list of Stock objects created from the CSV data
+   */
+  public static List<Stock> readCsv(InputStream input) {
+    BufferedReader reader =
+        new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+    try (Stream<String> lines = reader.lines()) {
+      return stocksFromLineStream(lines);
+    }
+  }
+
+  private static List<Stock> stocksFromLineStream(Stream<String> lines) {
+    return lines
+        .map(String::trim)
+        .filter(line -> !line.isEmpty() && !line.startsWith("#"))
+        .map(line -> line.split(","))
+        .filter(tokens -> tokens.length == 3)
+        .map(CsvReader::setStock)
+        .toList();
   }
 
   /**

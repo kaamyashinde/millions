@@ -9,7 +9,11 @@ import model.Player;
 import model.Stock;
 import model.Share;
 import model.exception.InsufficientFundsException;
+import model.exception.InsufficientSharesException;
 import model.exception.ShareNotFoundException;
+import model.savings.RegularSavingsPlan;
+import model.savings.RegularSavingsProcessor;
+import model.savings.SavingsInstallmentMode;
 import model.transaction.Purchase;
 import model.transaction.Transaction;
 import util.I18n;
@@ -32,6 +36,10 @@ public class UserInterface {
   private static final int SELL_SHARES = 7;
   private static final int ADVANCE_DAY = 8;
   private static final int VIEW_TRANSACTIONS = 9;
+  private static final int ADD_SAVINGS = 10;
+  private static final int LIST_SAVINGS = 11;
+  private static final int REMOVE_SAVINGS = 12;
+  private static final int EDIT_SAVINGS = 13;
   private static final int INVALID_MENU_CHOICE = -1;
 
   private static final Scanner input = new Scanner(System.in);
@@ -99,6 +107,10 @@ public class UserInterface {
     System.out.println(I18n.get("menu.option.sell"));
     System.out.println(I18n.get("menu.option.day"));
     System.out.println(I18n.get("menu.option.transactions"));
+    System.out.println(I18n.get("menu.option.savings.add"));
+    System.out.println(I18n.get("menu.option.savings.list"));
+    System.out.println(I18n.get("menu.option.savings.remove"));
+    System.out.println(I18n.get("menu.option.savings.edit"));
     System.out.println(I18n.get("menu.footer"));
     System.out.println(I18n.get("menu.prompt"));
     try {
@@ -125,6 +137,10 @@ public class UserInterface {
       case SELL_SHARES -> sellShares();
       case ADVANCE_DAY -> advanceDay();
       case VIEW_TRANSACTIONS -> viewTransactions();
+      case ADD_SAVINGS -> addSavingsPlan();
+      case LIST_SAVINGS -> listSavingsPlans();
+      case REMOVE_SAVINGS -> removeSavingsPlan();
+      case EDIT_SAVINGS -> editSavingsPlan();
       default -> System.out.println(I18n.get("invalid.input"));
     }
   }
@@ -259,20 +275,45 @@ public class UserInterface {
       System.out.println(I18n.format("error.stockNotOnExchange", symbol));
       return;
     }
-    System.out.println(I18n.get("prompt.quantity.buy"));
+    System.out.println(I18n.get("prompt.buy.mode"));
+    int buyMode;
     try {
-      BigDecimal quantity = new BigDecimal(input.nextLine().trim());
-      if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
-        System.out.println(
-            I18n.get("invalid.input") + " " + I18n.get("validation.quantity.positive"));
-        return;
+      buyMode = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    try {
+      if (buyMode == 1) {
+        System.out.println(I18n.get("prompt.quantity.buy"));
+        BigDecimal quantity = new BigDecimal(input.nextLine().trim());
+        if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
+          System.out.println(
+              I18n.get("invalid.input") + " " + I18n.get("validation.quantity.positive"));
+          return;
+        }
+        exchange.buy(symbol, quantity, player);
+        System.out.println(I18n.format("buy.success", quantity, symbol));
+      } else if (buyMode == 2) {
+        System.out.println(I18n.get("prompt.maxSpend.buy"));
+        BigDecimal maxSpend = new BigDecimal(input.nextLine().trim());
+        if (maxSpend.compareTo(BigDecimal.ZERO) <= 0) {
+          System.out.println(I18n.get("invalid.input"));
+          return;
+        }
+        exchange.buyUpToBudget(symbol, maxSpend, player);
+        System.out.println(I18n.format("buy.success.budget", symbol, maxSpend));
+      } else {
+        System.out.println(I18n.get("invalid.input"));
       }
-      exchange.buy(symbol, quantity, player);
-      System.out.println(I18n.format("buy.success", quantity, symbol));
     } catch (NumberFormatException e) {
       System.out.println(I18n.get("invalid.input"));
     } catch (InsufficientFundsException ignored) {
       System.out.println(I18n.get("error.insufficientFunds"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(I18n.get("error.invalidArgument"));
     }
   }
 
@@ -288,6 +329,36 @@ public class UserInterface {
       System.out.println(I18n.get("portfolio.empty.sell"));
       return;
     }
+    input.nextLine();
+    System.out.println(I18n.get("prompt.sell.mode"));
+    int sellMode;
+    try {
+      sellMode = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    try {
+      switch (sellMode) {
+        case 1 -> sellWholeHolding(shares);
+        case 2 -> sellByQuantityCli();
+        case 3 -> sellByTargetNetCli();
+        default -> System.out.println(I18n.get("invalid.input"));
+      }
+    } catch (ShareNotFoundException e) {
+      System.out.println(I18n.format("error.shareNotFound", e.getStockSymbol(), e.getPlayerName()));
+    } catch (InsufficientSharesException e) {
+      System.out.println(I18n.format("error.insufficientShares", e.getSymbol()));
+    } catch (NumberFormatException e) {
+      System.out.println(I18n.get("invalid.input"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(I18n.get("error.invalidArgument"));
+    }
+  }
+
+  private static void sellWholeHolding(List<Share> shares) {
     System.out.println(I18n.get("holdings.header"));
     for (int i = 0; i < shares.size(); i++) {
       Share s = shares.get(i);
@@ -313,17 +384,337 @@ public class UserInterface {
     } catch (InputMismatchException e) {
       System.out.println(I18n.get("invalid.input"));
       input.nextLine();
-    } catch (ShareNotFoundException e) {
-      System.out.println(I18n.format("error.shareNotFound", e.getStockSymbol(), e.getPlayerName()));
     }
   }
 
   /**
-   * Advances the exchange to the next trading day and updates stock prices.
+   * Prompts for symbol and quantity and sells that many shares in FIFO order via
+   * {@link Exchange#sellByQuantity}.
+   */
+  private static void sellByQuantityCli() {
+    System.out.println(I18n.get("prompt.symbol"));
+    String symbol = input.nextLine().trim().toUpperCase();
+    if (symbol.isEmpty() || !exchange.hasStock(symbol)) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("prompt.sell.quantity"));
+    BigDecimal qty = new BigDecimal(input.nextLine().trim());
+    if (qty.signum() <= 0) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    List<Transaction> txs = exchange.sellByQuantity(symbol, qty, player);
+    System.out.println(I18n.format("sell.success.multi", txs.size(), symbol));
+  }
+
+  /**
+   * Prompts for symbol and target net proceeds and sells FIFO slices via
+   * {@link Exchange#sellUpToTargetNet}.
+   */
+  private static void sellByTargetNetCli() {
+    System.out.println(I18n.get("prompt.symbol"));
+    String symbol = input.nextLine().trim().toUpperCase();
+    if (symbol.isEmpty() || !exchange.hasStock(symbol)) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("prompt.sell.targetNet"));
+    BigDecimal target = new BigDecimal(input.nextLine().trim());
+    if (target.signum() <= 0) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    List<Transaction> txs = exchange.sellUpToTargetNet(symbol, target, player);
+    System.out.println(I18n.format("sell.success.multi", txs.size(), symbol));
+  }
+
+  /**
+   * Advances the exchange one trading day, then runs {@link RegularSavingsProcessor} for the
+   * skipped interval and prints any symbols whose installments were skipped for lack of funds.
    */
   private static void advanceDay() {
+    int before = exchange.getDay();
     exchange.advance();
     System.out.println(I18n.format("day.advanced", exchange.getDay()));
+    if (player != null) {
+      List<String> skipped =
+          RegularSavingsProcessor.run(exchange, player, before, exchange.getDay());
+      for (String sym : skipped) {
+        System.out.println(I18n.format("savings.warning.skip", sym));
+      }
+    }
+  }
+
+  /**
+   * Interactive flow to create a {@link RegularSavingsPlan} and attach it to the player.
+   */
+  private static void addSavingsPlan() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println(I18n.get("savings.prompt.symbol"));
+    String symbol = input.nextLine().trim().toUpperCase();
+    if (symbol.isEmpty() || !exchange.hasStock(symbol)) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("savings.prompt.mode"));
+    int modeChoice;
+    try {
+      modeChoice = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    SavingsInstallmentMode mode =
+        modeChoice == 1 ? SavingsInstallmentMode.FIXED_SHARES : SavingsInstallmentMode.BUDGET;
+    if (modeChoice != 1 && modeChoice != 2) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    BigDecimal amount;
+    try {
+      if (mode == SavingsInstallmentMode.FIXED_SHARES) {
+        System.out.println(I18n.get("savings.prompt.amountShares"));
+        amount = new BigDecimal(input.nextLine().trim());
+      } else {
+        System.out.println(I18n.get("savings.prompt.amountBudget"));
+        amount = new BigDecimal(input.nextLine().trim());
+      }
+      if (amount.signum() <= 0) {
+        System.out.println(I18n.get("invalid.input"));
+        return;
+      }
+    } catch (NumberFormatException e) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("savings.prompt.frequency"));
+    int freq;
+    try {
+      freq = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    int interval = readIntervalForFrequencyChoice(freq);
+    if (interval < 0) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    RegularSavingsPlan plan =
+        new RegularSavingsPlan(symbol, mode, amount, interval, exchange.getDay());
+    player.addRegularSavingsPlan(plan);
+    System.out.println(I18n.format("savings.added", symbol, plan.getNextDueDay()));
+  }
+
+  /**
+   * Prints all regular savings plans (1-based index, mode, amounts, next due day).
+   */
+  private static void listSavingsPlans() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    List<RegularSavingsPlan> plans = player.getRegularSavingsPlans();
+    if (plans.isEmpty()) {
+      System.out.println(I18n.get("savings.list.empty"));
+      return;
+    }
+    for (int i = 0; i < plans.size(); i++) {
+      RegularSavingsPlan p = plans.get(i);
+      System.out.println(I18n.format(
+          "savings.list.line",
+          i + 1,
+          p.getSymbol(),
+          p.getMode(),
+          p.getAmount(),
+          p.getIntervalDays(),
+          p.getNextDueDay(),
+          p.isActive()));
+    }
+  }
+
+  /**
+   * Resolves trading days between installments from a frequency menu choice, after the frequency
+   * line has been read with {@code nextInt} and consumed with {@code nextLine}.
+   *
+   * @param freq 1 = weekly, 2 = biweekly, 3 = monthly, 4 = custom (reads another line)
+   * @return positive interval, or -1 if invalid
+   */
+  private static int readIntervalForFrequencyChoice(int freq) {
+    if (freq == 1) {
+      return 5;
+    }
+    if (freq == 2) {
+      return 10;
+    }
+    if (freq == 3) {
+      return 22;
+    }
+    if (freq == 4) {
+      System.out.println(I18n.get("savings.prompt.customDays"));
+      try {
+        int custom = Integer.parseInt(input.nextLine().trim());
+        if (custom <= 0) {
+          return -1;
+        }
+        return custom;
+      } catch (NumberFormatException e) {
+        return -1;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Prompts for a plan index and updates mode, amount, interval, and active; symbol is unchanged.
+   */
+  private static void editSavingsPlan() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    List<RegularSavingsPlan> plans = player.getRegularSavingsPlans();
+    if (plans.isEmpty()) {
+      System.out.println(I18n.get("savings.list.empty"));
+      return;
+    }
+    for (int i = 0; i < plans.size(); i++) {
+      RegularSavingsPlan p = plans.get(i);
+      System.out.println(I18n.format(
+          "savings.list.line",
+          i + 1,
+          p.getSymbol(),
+          p.getMode(),
+          p.getAmount(),
+          p.getIntervalDays(),
+          p.getNextDueDay(),
+          p.isActive()));
+    }
+    System.out.println(I18n.format("savings.prompt.editIndex", plans.size()));
+    int idx;
+    try {
+      idx = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    if (idx < 1 || idx > plans.size()) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    RegularSavingsPlan plan = plans.get(idx - 1);
+    System.out.println(I18n.format("savings.prompt.symbolLocked", plan.getSymbol()));
+    System.out.println(I18n.get("savings.prompt.mode"));
+    int modeChoice;
+    try {
+      modeChoice = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    if (modeChoice != 1 && modeChoice != 2) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    SavingsInstallmentMode mode =
+        modeChoice == 1 ? SavingsInstallmentMode.FIXED_SHARES : SavingsInstallmentMode.BUDGET;
+    BigDecimal amount;
+    try {
+      if (mode == SavingsInstallmentMode.FIXED_SHARES) {
+        System.out.println(I18n.get("savings.prompt.amountShares"));
+        amount = new BigDecimal(input.nextLine().trim());
+      } else {
+        System.out.println(I18n.get("savings.prompt.amountBudget"));
+        amount = new BigDecimal(input.nextLine().trim());
+      }
+      if (amount.signum() <= 0) {
+        System.out.println(I18n.get("invalid.input"));
+        return;
+      }
+    } catch (NumberFormatException e) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("savings.prompt.frequency"));
+    int freq;
+    try {
+      freq = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    int interval = readIntervalForFrequencyChoice(freq);
+    if (interval < 0) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("savings.prompt.active"));
+    int activeChoice;
+    try {
+      activeChoice = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    if (activeChoice != 0 && activeChoice != 1) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    plan.setMode(mode);
+    try {
+      plan.setAmount(amount);
+      plan.setIntervalDays(interval);
+    } catch (IllegalArgumentException | NullPointerException ex) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    plan.setActive(activeChoice == 1);
+    System.out.println(I18n.get("savings.updated"));
+  }
+
+  /**
+   * Lists plans then prompts for a 1-based index to remove via {@link Player#removeRegularSavingsPlanAt(int)}.
+   */
+  private static void removeSavingsPlan() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    List<RegularSavingsPlan> plans = player.getRegularSavingsPlans();
+    if (plans.isEmpty()) {
+      System.out.println(I18n.get("savings.list.empty"));
+      return;
+    }
+    listSavingsPlans();
+    System.out.println(I18n.format("savings.prompt.removeIndex", plans.size()));
+    try {
+      int idx = input.nextInt();
+      if (player.removeRegularSavingsPlanAt(idx)) {
+        System.out.println(I18n.get("savings.removed"));
+      } else {
+        System.out.println(I18n.get("invalid.input"));
+      }
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+    }
   }
 
   /**
