@@ -32,6 +32,13 @@
       <version>${javafx.version}</version>
     </dependency>
 
+    <!-- CommonMark (Markdown → HTML) -->
+    <dependency>
+      <groupId>org.commonmark</groupId>
+      <artifactId>commonmark</artifactId>
+      <version>0.22.0</version>
+    </dependency>
+
     <!-- JUnit Jupiter -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
