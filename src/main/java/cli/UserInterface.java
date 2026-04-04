@@ -19,13 +19,21 @@ import model.exception.ShareNotFoundException;
 import model.fund.Fund;
 import model.fund.FundComponent;
 import model.persistence.MarketData;
+import model.persistence.GameStateRepository;
 import model.persistence.MarketDataLoader;
+import model.persistence.PinHashingService;
+import model.persistence.UserAccountRepository;
 import model.savings.RegularSavingsPlan;
 import model.savings.RegularSavingsProcessor;
 import model.savings.SavingsInstallmentMode;
+import model.session.ActiveSession;
+import model.session.AuthenticationException;
+import model.session.DuplicateUsernameException;
+import model.session.SessionService;
 import model.transaction.Purchase;
 import model.transaction.Transaction;
 import util.I18n;
+import java.nio.file.Path;
 
 /**
  * The UserInterface class is responsible for handling the user input and output
@@ -36,24 +44,29 @@ import util.I18n;
 public class UserInterface {
 
   private static final String DEMO_MARKET_DATA_RESOURCE = "/data/demo-stocks.csv";
+  private static final String EXCHANGE_NAME = "NYSE";
+  private static final Path PROFILES_ROOT =
+      Path.of(System.getProperty("user.home"), ".millions", "profiles");
 
   private static final int QUIT = 0;
-  private static final int SET_UP_PLAYER = 1;
-  private static final int VIEW_BALANCE = 2;
-  private static final int VIEW_PORTFOLIO = 3;
-  private static final int LIST_STOCKS = 4;
-  private static final int SEARCH_STOCKS = 5;
-  private static final int BUY_SHARES = 6;
-  private static final int SELL_SHARES = 7;
-  private static final int ADVANCE_DAY = 8;
-  private static final int VIEW_TRANSACTIONS = 9;
-  private static final int ADD_SAVINGS = 10;
-  private static final int LIST_SAVINGS = 11;
-  private static final int REMOVE_SAVINGS = 12;
-  private static final int EDIT_SAVINGS = 13;
-  private static final int LIST_FUNDS = 14;
-  private static final int SEARCH_FUNDS = 15;
-  private static final int VIEW_FUND_DETAILS = 16;
+  private static final int REGISTER_USER = 1;
+  private static final int LOGIN_USER = 2;
+  private static final int LOGOUT_USER = 3;
+  private static final int VIEW_BALANCE = 4;
+  private static final int VIEW_PORTFOLIO = 5;
+  private static final int LIST_STOCKS = 6;
+  private static final int SEARCH_STOCKS = 7;
+  private static final int BUY_SHARES = 8;
+  private static final int SELL_SHARES = 9;
+  private static final int ADVANCE_DAY = 10;
+  private static final int VIEW_TRANSACTIONS = 11;
+  private static final int ADD_SAVINGS = 12;
+  private static final int LIST_SAVINGS = 13;
+  private static final int REMOVE_SAVINGS = 14;
+  private static final int EDIT_SAVINGS = 15;
+  private static final int LIST_FUNDS = 16;
+  private static final int SEARCH_FUNDS = 17;
+  private static final int VIEW_FUND_DETAILS = 18;
   private static final int INVALID_MENU_CHOICE = -1;
 
   private static final Scanner input = new Scanner(System.in);
@@ -61,6 +74,7 @@ public class UserInterface {
       new PortfolioPerformanceService();
 
   private static boolean running = true;
+  private static SessionService sessionService;
   private static Exchange exchange;
   private static Player player;
 
@@ -79,18 +93,17 @@ public class UserInterface {
   }
 
   /**
-   * Initialises the UserInterface from the bundled demo market-data file.
+   * Initialises the session layer and starts with no active user.
    */
   private static void init() {
-    MarketData marketData = MarketDataLoader.loadFromResource(
-        UserInterface.class,
-        DEMO_MARKET_DATA_RESOURCE);
-    if (marketData.stocks().isEmpty()) {
-      throw new IllegalStateException("Could not load demo market data from "
-          + DEMO_MARKET_DATA_RESOURCE);
-    }
-    exchange = new Exchange("NYSE", marketData.stocks(), marketData.funds());
+    sessionService = new SessionService(
+        new UserAccountRepository(PROFILES_ROOT),
+        new GameStateRepository(PROFILES_ROOT),
+        new PinHashingService(),
+        UserInterface::loadMarketData,
+        EXCHANGE_NAME);
     player = null;
+    exchange = null;
   }
 
   /**
@@ -113,8 +126,11 @@ public class UserInterface {
    */
   private static int showMenu() {
     System.out.println(I18n.get("menu.header"));
+    System.out.println(activeUserSummary());
     System.out.println(I18n.get("menu.option.exit"));
-    System.out.println(I18n.get("menu.option.setup"));
+    System.out.println(I18n.get("menu.option.register"));
+    System.out.println(I18n.get("menu.option.login"));
+    System.out.println(I18n.get("menu.option.logout"));
     System.out.println(I18n.get("menu.option.balance"));
     System.out.println(I18n.get("menu.option.portfolio"));
     System.out.println(I18n.get("menu.option.list"));
@@ -147,7 +163,9 @@ public class UserInterface {
     int choice = showMenu();
     switch (choice) {
       case QUIT -> quit();
-      case SET_UP_PLAYER -> setUpPlayer();
+      case REGISTER_USER -> registerUser();
+      case LOGIN_USER -> loginUser();
+      case LOGOUT_USER -> logoutUser();
       case VIEW_BALANCE -> viewBalance();
       case VIEW_PORTFOLIO -> viewPortfolio();
       case LIST_STOCKS -> listStocks();
@@ -172,6 +190,7 @@ public class UserInterface {
    */
   private static void quit() {
     running = false;
+    sessionService.saveActiveSession();
     System.out.println(I18n.get("quit.thanks"));
     System.out.println(I18n.get("quit.success"));
     System.exit(0);
@@ -183,7 +202,7 @@ public class UserInterface {
    * @return true if player is null, false otherwise
    */
   private static boolean isPlayerMissing() {
-    if (player == null) {
+    if (player == null || exchange == null) {
       System.out.println(I18n.get("require.player"));
       return true;
     }
@@ -191,29 +210,66 @@ public class UserInterface {
   }
 
   /**
-   * Sets up the player. Prompts for name and starting money and creates a new Player.
+   * Registers a new local profile and makes it the active session.
    */
-  private static void setUpPlayer() {
+  private static void registerUser() {
     input.nextLine();
-    System.out.println(I18n.get("prompt.name"));
-    String name = input.nextLine().trim();
-    if (name.isEmpty()) {
-      System.out.println(I18n.get("invalid.input"));
-      return;
-    }
+    System.out.println(I18n.get("prompt.username"));
+    String username = input.nextLine().trim();
+    System.out.println(I18n.get("prompt.pin"));
+    char[] pin = input.nextLine().trim().toCharArray();
     System.out.println(I18n.get("prompt.startingMoney"));
     try {
       BigDecimal startingMoney = new BigDecimal(input.nextLine().trim());
-      if (startingMoney.compareTo(BigDecimal.ZERO) < 0) {
-        System.out.println(
-            I18n.get("invalid.input") + " " + I18n.get("validation.startingMoney.nonNegative"));
-        return;
-      }
-      player = new Player(name, startingMoney);
-      System.out.println(I18n.format("player.created", name, startingMoney));
+      ActiveSession session = sessionService.register(username, pin, startingMoney);
+      applyActiveSession(session);
+      System.out.println(I18n.format("auth.registered", session.username(), startingMoney));
     } catch (NumberFormatException e) {
       System.out.println(I18n.get("invalid.input"));
+    } catch (DuplicateUsernameException e) {
+      System.out.println(I18n.get("auth.duplicateUsername"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(authenticationValidationMessage(e.getMessage()));
     }
+  }
+
+  /**
+   * Logs into an existing local profile and loads its saved game state.
+   */
+  private static void loginUser() {
+    input.nextLine();
+    List<String> usernames = sessionService.listRegisteredUsers();
+    if (usernames.isEmpty()) {
+      System.out.println(I18n.get("auth.users.none"));
+      return;
+    }
+    System.out.println(I18n.get("auth.users.header"));
+    usernames.forEach(username -> System.out.println("   - " + username));
+    System.out.println(I18n.get("prompt.username"));
+    String username = input.nextLine().trim();
+    System.out.println(I18n.get("prompt.pin"));
+    char[] pin = input.nextLine().trim().toCharArray();
+    try {
+      ActiveSession session = sessionService.login(username, pin);
+      applyActiveSession(session);
+      System.out.println(I18n.format("auth.loggedIn", session.username()));
+    } catch (AuthenticationException e) {
+      System.out.println(I18n.get("auth.invalidCredentials"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(authenticationValidationMessage(e.getMessage()));
+    }
+  }
+
+  /**
+   * Logs out the current profile after saving its game state.
+   */
+  private static void logoutUser() {
+    if (!sessionService.logout()) {
+      System.out.println(I18n.get("auth.noActiveUser"));
+      return;
+    }
+    clearActiveSession();
+    System.out.println(I18n.get("auth.loggedOut"));
   }
 
   /**
@@ -255,6 +311,9 @@ public class UserInterface {
    * Lists all stocks available on the exchange with symbol, company and current price.
    */
   private static void listStocks() {
+    if (isPlayerMissing()) {
+      return;
+    }
     List<Stock> stocks = exchange.findStocks("");
     if (stocks.isEmpty()) {
       System.out.println(I18n.get("stocks.none"));
@@ -269,6 +328,9 @@ public class UserInterface {
    * Searches stocks by symbol or company name and prints matching results.
    */
   private static void searchStocks() {
+    if (isPlayerMissing()) {
+      return;
+    }
     input.nextLine();
     System.out.println(I18n.get("prompt.search"));
     String term = input.nextLine().trim();
@@ -286,6 +348,9 @@ public class UserInterface {
    * Lists all funds available on the exchange with symbol, name, and derived current price.
    */
   private static void listFunds() {
+    if (isPlayerMissing()) {
+      return;
+    }
     List<Fund> funds = exchange.findFunds("");
     if (funds.isEmpty()) {
       System.out.println(I18n.get("funds.none"));
@@ -300,6 +365,9 @@ public class UserInterface {
    * Searches listed funds by symbol or fund name.
    */
   private static void searchFunds() {
+    if (isPlayerMissing()) {
+      return;
+    }
     input.nextLine();
     System.out.println(I18n.get("prompt.search.funds"));
     String term = input.nextLine().trim();
@@ -317,6 +385,9 @@ public class UserInterface {
    * Shows one fund and its underlying stock weights.
    */
   private static void viewFundDetails() {
+    if (isPlayerMissing()) {
+      return;
+    }
     input.nextLine();
     System.out.println(I18n.get("prompt.fund.symbol"));
     String symbol = input.nextLine().trim().toUpperCase();
@@ -381,6 +452,7 @@ public class UserInterface {
           return;
         }
         exchange.buy(symbol, quantity, player);
+        persistActiveSession();
         System.out.println(I18n.format("buy.success", quantity, symbol));
         printPerformanceComparison();
       } else if (buyMode == 2) {
@@ -391,6 +463,7 @@ public class UserInterface {
           return;
         }
         exchange.buyUpToBudget(symbol, maxSpend, player);
+        persistActiveSession();
         System.out.println(I18n.format("buy.success.budget", symbol, maxSpend));
         printPerformanceComparison();
       } else {
@@ -468,6 +541,7 @@ public class UserInterface {
       }
       Share toSell = shares.get(index - 1);
       exchange.sell(toSell, player);
+      persistActiveSession();
       System.out.println(I18n.format("sell.success", toSell.getQuantity(),
           toSell.getAsset().getSymbol()));
       printPerformanceComparison();
@@ -495,6 +569,7 @@ public class UserInterface {
       return;
     }
     List<Transaction> txs = exchange.sellByQuantity(symbol, qty, player);
+    persistActiveSession();
     System.out.println(I18n.format("sell.success.multi", txs.size(), symbol));
     printPerformanceComparison();
   }
@@ -517,6 +592,7 @@ public class UserInterface {
       return;
     }
     List<Transaction> txs = exchange.sellUpToTargetNet(symbol, target, player);
+    persistActiveSession();
     System.out.println(I18n.format("sell.success.multi", txs.size(), symbol));
     printPerformanceComparison();
   }
@@ -526,6 +602,9 @@ public class UserInterface {
    * skipped interval and prints any symbols whose installments were skipped for lack of funds.
    */
   private static void advanceDay() {
+    if (isPlayerMissing()) {
+      return;
+    }
     int before = exchange.getDay();
     exchange.advance();
     System.out.println(I18n.format("day.advanced", exchange.getDay()));
@@ -535,6 +614,7 @@ public class UserInterface {
       for (String sym : skipped) {
         System.out.println(I18n.format("savings.warning.skip", sym));
       }
+      persistActiveSession();
       printPerformanceComparison();
     }
   }
@@ -693,6 +773,7 @@ public class UserInterface {
     RegularSavingsPlan plan =
         new RegularSavingsPlan(symbol, mode, amount, interval, exchange.getDay());
     player.addRegularSavingsPlan(plan);
+    persistActiveSession();
     System.out.println(I18n.format("savings.added", symbol, plan.getNextDueDay()));
   }
 
@@ -868,6 +949,7 @@ public class UserInterface {
       return;
     }
     plan.setActive(activeChoice == 1);
+    persistActiveSession();
     System.out.println(I18n.get("savings.updated"));
   }
 
@@ -889,6 +971,7 @@ public class UserInterface {
     try {
       int idx = input.nextInt();
       if (player.removeRegularSavingsPlanAt(idx)) {
+        persistActiveSession();
         System.out.println(I18n.get("savings.removed"));
       } else {
         System.out.println(I18n.get("invalid.input"));
@@ -919,5 +1002,77 @@ public class UserInterface {
       String qty = t.getShare().getQuantity().toString();
       System.out.println(I18n.format("transaction.line", t.getDay(), type, sym, qty));
     });
+  }
+
+  /**
+   * Loads the bundled market data used to create fresh per-user exchanges.
+   *
+   * @return bundled market-data payload
+   */
+  private static MarketData loadMarketData() {
+    MarketData marketData = MarketDataLoader.loadFromResource(
+        UserInterface.class,
+        DEMO_MARKET_DATA_RESOURCE);
+    if (marketData.stocks().isEmpty()) {
+      throw new IllegalStateException("Could not load demo market data from "
+          + DEMO_MARKET_DATA_RESOURCE);
+    }
+    return marketData;
+  }
+
+  /**
+   * Copies the in-memory state from the active session into the CLI fields used by existing actions.
+   *
+   * @param session logged-in session
+   */
+  private static void applyActiveSession(ActiveSession session) {
+    player = session.player();
+    exchange = session.exchange();
+  }
+
+  /**
+   * Clears the CLI's active player and exchange references after logout.
+   */
+  private static void clearActiveSession() {
+    player = null;
+    exchange = null;
+  }
+
+  /**
+   * Saves the current session after a mutating user action.
+   */
+  private static void persistActiveSession() {
+    sessionService.saveActiveSession();
+  }
+
+  /**
+   * Builds the short active-user line shown above the menu.
+   *
+   * @return user-facing session summary
+   */
+  private static String activeUserSummary() {
+    return sessionService.getActiveSession()
+        .map(session -> I18n.format("session.active.current", session.username(), session.exchange().getDay()))
+        .orElseGet(() -> I18n.get("session.active.none"));
+  }
+
+  /**
+   * Maps registration and PIN validation failures to translated CLI messages.
+   *
+   * @param message exception message from the session layer
+   * @return translated user-facing validation message
+   */
+  private static String authenticationValidationMessage(String message) {
+    if (message == null) {
+      return I18n.get("invalid.input");
+    }
+    return switch (message) {
+      case "Username must be 3-32 characters using letters, numbers, underscores, or hyphens." ->
+          I18n.get("auth.invalidUsername");
+      case "PIN must be 4 to 8 digits." -> I18n.get("auth.invalidPin");
+      case "Starting money must be non-negative." ->
+          I18n.get("invalid.input") + " " + I18n.get("validation.startingMoney.nonNegative");
+      default -> I18n.get("invalid.input");
+    };
   }
 }
