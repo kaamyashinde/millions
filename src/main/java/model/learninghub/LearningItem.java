@@ -5,16 +5,18 @@ import model.utils.Validator;
 /**
  * A single educational topic that belongs to a {@link LearningCategory}.
  *
- * @param id         unique identifier (e.g. {@code "what-is-a-stock"})
- * @param title      display title
- * @param slug       URL-friendly identifier for future navigation
- * @param summary    short description shown on a card
- * @param category   the category this item belongs to
- * @param difficulty difficulty level
- * @param featured   {@code true} if the item should appear in the "Featured Topics" row
+ * @param id          unique identifier (e.g. {@code "what-is-a-stock"})
+ * @param title       display title
+ * @param slug        URL-friendly identifier for future navigation
+ * @param summary     short description shown on a card
+ * @param category    the category this item belongs to
+ * @param difficulty  difficulty level
+ * @param featured    {@code true} if the item should appear in the "Featured Topics" row
+ * @param contentFile classpath resource path to the markdown content file
+ *                    (e.g. {@code "learninghub/what-is-a-stock.md"})
  *
  * @author kaamyashinde
- * @version 1.0.0
+ * @version 1.1.0
  * @since 04-04-2026
  */
 public record LearningItem(
@@ -24,7 +26,8 @@ public record LearningItem(
     String summary,
     LearningCategory category,
     Difficulty difficulty,
-    boolean featured) {
+    boolean featured,
+    String contentFile) {
 
   /** Validates that all non-primitive fields are non-null. */
   public LearningItem {
@@ -34,5 +37,6 @@ public record LearningItem(
     Validator.checkNotNull(summary, "summary");
     Validator.checkNotNull(category, "category");
     Validator.checkNotNull(difficulty, "difficulty");
+    Validator.checkNotNull(contentFile, "contentFile");
   }
 }
