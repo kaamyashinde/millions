@@ -71,7 +71,7 @@ public class StocksListPanel extends BorderPane {
     table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
     VBox.setVgrow(table, Priority.ALWAYS);
     table.getSelectionModel().selectedItemProperty().addListener((obs, previous, selected) ->
-        detailView.showStock(selected, exchange.getDay()));
+        detailView.showStock(selected, exchange.getDay(), exchange.getLastMarketEvent()));
 
     SplitPane splitPane = new SplitPane(table, detailView);
     splitPane.setDividerPositions(0.46);
@@ -115,7 +115,7 @@ public class StocksListPanel extends BorderPane {
       table.getSelectionModel().selectFirst();
     }
     table.refresh();
-    detailView.refresh(exchange.getDay());
+    detailView.refresh(exchange.getDay(), exchange.getLastMarketEvent());
   }
 
   /**

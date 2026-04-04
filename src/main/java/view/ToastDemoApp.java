@@ -91,7 +91,13 @@ public class ToastDemoApp extends Application {
       });
 
       savingsTab =
-          new Tab("Savings", new RegularSavingsPanel(demoExchange, demoPlayer, notifications));
+          new Tab(
+              "Savings",
+              new RegularSavingsPanel(
+                  demoExchange,
+                  demoPlayer,
+                  notifications,
+                  stocksPanel::refresh));
     }
     stocksTab.setClosable(false);
     savingsTab.setClosable(false);
