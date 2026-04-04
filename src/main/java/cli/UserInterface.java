@@ -1,6 +1,7 @@
 package cli;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -8,6 +9,10 @@ import model.Exchange;
 import model.Player;
 import model.Stock;
 import model.Share;
+import model.analysis.MetricStatus;
+import model.analysis.MetricValue;
+import model.analysis.PerformanceComparison;
+import model.analysis.PortfolioPerformanceService;
 import model.exception.InsufficientFundsException;
 import model.exception.InsufficientSharesException;
 import model.exception.ShareNotFoundException;
@@ -52,6 +57,8 @@ public class UserInterface {
   private static final int INVALID_MENU_CHOICE = -1;
 
   private static final Scanner input = new Scanner(System.in);
+  private static final PortfolioPerformanceService portfolioPerformanceService =
+      new PortfolioPerformanceService();
 
   private static boolean running = true;
   private static Exchange exchange;
@@ -228,6 +235,7 @@ public class UserInterface {
     }
     if (player.getPortfolio().getShares().isEmpty()) {
       System.out.println(I18n.get("portfolio.empty"));
+      printPerformanceComparison();
       return;
     }
     System.out.println(I18n.get("portfolio.header"));
@@ -240,6 +248,7 @@ public class UserInterface {
             share.getPurchasePrice(),
             share.getAsset().getSalesPrice(),
             share.getAsset().getAssetType())));
+    printPerformanceComparison();
   }
 
   /**
@@ -373,6 +382,7 @@ public class UserInterface {
         }
         exchange.buy(symbol, quantity, player);
         System.out.println(I18n.format("buy.success", quantity, symbol));
+        printPerformanceComparison();
       } else if (buyMode == 2) {
         System.out.println(I18n.get("prompt.maxSpend.buy"));
         BigDecimal maxSpend = new BigDecimal(input.nextLine().trim());
@@ -382,6 +392,7 @@ public class UserInterface {
         }
         exchange.buyUpToBudget(symbol, maxSpend, player);
         System.out.println(I18n.format("buy.success.budget", symbol, maxSpend));
+        printPerformanceComparison();
       } else {
         System.out.println(I18n.get("invalid.input"));
       }
@@ -459,6 +470,7 @@ public class UserInterface {
       exchange.sell(toSell, player);
       System.out.println(I18n.format("sell.success", toSell.getQuantity(),
           toSell.getAsset().getSymbol()));
+      printPerformanceComparison();
     } catch (InputMismatchException e) {
       System.out.println(I18n.get("invalid.input"));
       input.nextLine();
@@ -484,6 +496,7 @@ public class UserInterface {
     }
     List<Transaction> txs = exchange.sellByQuantity(symbol, qty, player);
     System.out.println(I18n.format("sell.success.multi", txs.size(), symbol));
+    printPerformanceComparison();
   }
 
   /**
@@ -505,6 +518,7 @@ public class UserInterface {
     }
     List<Transaction> txs = exchange.sellUpToTargetNet(symbol, target, player);
     System.out.println(I18n.format("sell.success.multi", txs.size(), symbol));
+    printPerformanceComparison();
   }
 
   /**
@@ -521,7 +535,97 @@ public class UserInterface {
       for (String sym : skipped) {
         System.out.println(I18n.format("savings.warning.skip", sym));
       }
+      printPerformanceComparison();
     }
+  }
+
+  /**
+   * Prints the player's portfolio metrics beside the market benchmark metrics.
+   */
+  private static void printPerformanceComparison() {
+    PerformanceComparison comparison = portfolioPerformanceService.compareAgainstMarket(player, exchange);
+    String rowFormat = "   %-18s %-26s %-26s%n";
+    System.out.println(I18n.get("performance.header"));
+    System.out.printf(
+        rowFormat,
+        I18n.get("performance.column.metric"),
+        I18n.get("performance.column.portfolio"),
+        I18n.get("performance.column.market"));
+    printMetricRow(
+        rowFormat,
+        I18n.get("performance.metric.return"),
+        comparison.portfolio().returnPercent(),
+        comparison.benchmark().returnPercent(),
+        true);
+    printMetricRow(
+        rowFormat,
+        I18n.get("performance.metric.volatility"),
+        comparison.portfolio().volatility(),
+        comparison.benchmark().volatility(),
+        true);
+    printMetricRow(
+        rowFormat,
+        I18n.get("performance.metric.sharpe"),
+        comparison.portfolio().sharpeRatio(),
+        comparison.benchmark().sharpeRatio(),
+        false);
+  }
+
+  /**
+   * Prints one side-by-side metric row.
+   *
+   * @param rowFormat printf row format
+   * @param label metric label
+   * @param portfolioMetric player metric
+   * @param benchmarkMetric market metric
+   * @param percentDisplay whether the metric should be formatted as a percent
+   */
+  private static void printMetricRow(
+      String rowFormat,
+      String label,
+      MetricValue portfolioMetric,
+      MetricValue benchmarkMetric,
+      boolean percentDisplay) {
+    System.out.printf(
+        rowFormat,
+        label,
+        formatMetricValue(portfolioMetric, percentDisplay),
+        formatMetricValue(benchmarkMetric, percentDisplay));
+  }
+
+  /**
+   * Formats one metric value for CLI display.
+   *
+   * @param metric metric to format
+   * @param percentDisplay whether the metric should be formatted as a percent
+   * @return user-facing metric text
+   */
+  private static String formatMetricValue(MetricValue metric, boolean percentDisplay) {
+    if (!metric.isAvailable()) {
+      return I18n.get(metricStatusKey(metric.status()));
+    }
+    BigDecimal value = metric.value();
+    if (percentDisplay) {
+      return value.multiply(BigDecimal.valueOf(100))
+          .setScale(2, RoundingMode.HALF_UP)
+          .toPlainString() + "%";
+    }
+    return value.setScale(3, RoundingMode.HALF_UP).toPlainString();
+  }
+
+  /**
+   * Maps analysis-layer metric statuses to CLI translation keys.
+   *
+   * @param status unavailable metric status
+   * @return translation key for that status
+   */
+  private static String metricStatusKey(MetricStatus status) {
+    return switch (status) {
+      case AVAILABLE -> throw new IllegalArgumentException("Available metrics do not need a status key.");
+      case NO_TRADES -> "performance.unavailable.noTrades";
+      case INSUFFICIENT_HISTORY -> "performance.unavailable.history";
+      case ZERO_VOLATILITY -> "performance.unavailable.zeroVolatility";
+    };
   }
 
   /**
