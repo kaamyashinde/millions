@@ -10,6 +10,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
@@ -37,6 +38,7 @@ public class StocksListPanel extends BorderPane {
   private final Label metaLabel = new Label();
   private final TableView<Stock> table = new TableView<>();
   private final ObservableList<Stock> rows = FXCollections.observableArrayList();
+  private final StockDetailView detailView = new StockDetailView();
 
   /**
    * Builds a read-only listing for the given exchange.
@@ -65,9 +67,15 @@ public class StocksListPanel extends BorderPane {
 
     buildTable();
     table.setItems(rows);
+    table.setPlaceholder(new Label("No stocks available."));
     table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
     VBox.setVgrow(table, Priority.ALWAYS);
-    setCenter(table);
+    table.getSelectionModel().selectedItemProperty().addListener((obs, previous, selected) ->
+        detailView.showStock(selected, exchange.getDay()));
+
+    SplitPane splitPane = new SplitPane(table, detailView);
+    splitPane.setDividerPositions(0.46);
+    setCenter(splitPane);
 
     refresh();
   }
@@ -100,8 +108,43 @@ public class StocksListPanel extends BorderPane {
             + " listing(s)");
     List<Stock> sorted = new ArrayList<>(exchange.findStocks(""));
     sorted.sort(Comparator.comparing(Stock::getSymbol));
+    Stock previousSelection = table.getSelectionModel().getSelectedItem();
     rows.setAll(sorted);
+    restoreSelection(previousSelection, sorted);
+    if (table.getSelectionModel().getSelectedItem() == null && !sorted.isEmpty()) {
+      table.getSelectionModel().selectFirst();
+    }
     table.refresh();
+    detailView.refresh(exchange.getDay());
+  }
+
+  /**
+   * Returns the embedded stock detail view used by this list panel.
+   *
+   * @return detail view bound to the current table selection
+   */
+  public StockDetailView getDetailView() {
+    return detailView;
+  }
+
+  /**
+   * Restores the previous stock selection after the backing rows are rebuilt.
+   *
+   * @param previousSelection previously selected stock, possibly null
+   * @param sorted current sorted table rows
+   */
+  private void restoreSelection(Stock previousSelection, List<Stock> sorted) {
+    if (previousSelection == null) {
+      table.getSelectionModel().clearSelection();
+      return;
+    }
+    for (Stock stock : sorted) {
+      if (stock.getSymbol().equals(previousSelection.getSymbol())) {
+        table.getSelectionModel().select(stock);
+        return;
+      }
+    }
+    table.getSelectionModel().clearSelection();
   }
 
   private static void styleButton(Button b) {

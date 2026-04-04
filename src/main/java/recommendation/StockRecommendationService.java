@@ -1,0 +1,83 @@
+package recommendation;
+
+import static model.utils.Validator.checkNotNull;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+import model.Stock;
+
+/**
+ * Computes a simplified recommendation from recent stock price trend data.
+ *
+ * <p>This service only reads historical prices. It does not mutate {@link Stock} instances or
+ * participate in exchange price generation, which keeps recommendation logic separate from actual
+ * price logic.
+ *
+ * @author kaamyashinde
+ * @version 1.0.0
+ * @since 2026-04-04
+ */
+public class StockRecommendationService {
+
+  private static final int LOOKBACK_PRICE_POINTS = 4;
+  private static final BigDecimal BUY_THRESHOLD = new BigDecimal("0.015");
+  private static final BigDecimal SELL_THRESHOLD = new BigDecimal("-0.015");
+  private static final int DIVISION_SCALE = 8;
+
+  /**
+   * Computes the recommendation for the given stock from its recent historical prices.
+   *
+   * @param stock stock whose recent trend should be analyzed
+   * @return trend-based recommendation
+   * @throws NullPointerException if {@code stock} is null
+   */
+  public StockRecommendation recommend(Stock stock) {
+    checkNotNull(stock, "Stock");
+    return recommend(stock.getHistoricalPrices());
+  }
+
+  /**
+   * Computes the recommendation from the provided ordered price history.
+   *
+   * <p>If there is not enough history to establish a trend, the recommendation defaults to
+   * {@link StockRecommendation#HOLD}.
+   *
+   * @param historicalPrices ordered price history, oldest to newest
+   * @return trend-based recommendation
+   * @throws NullPointerException if {@code historicalPrices} is null
+   */
+  public StockRecommendation recommend(List<BigDecimal> historicalPrices) {
+    checkNotNull(historicalPrices, "Historical prices");
+    if (historicalPrices.size() < 2) {
+      return StockRecommendation.HOLD;
+    }
+
+    BigDecimal startPrice = recentStartPrice(historicalPrices);
+    BigDecimal endPrice = historicalPrices.getLast();
+    if (startPrice.signum() == 0) {
+      return StockRecommendation.HOLD;
+    }
+
+    BigDecimal trendRatio =
+        endPrice.subtract(startPrice).divide(startPrice, DIVISION_SCALE, RoundingMode.HALF_UP);
+    if (trendRatio.compareTo(BUY_THRESHOLD) >= 0) {
+      return StockRecommendation.BUY;
+    }
+    if (trendRatio.compareTo(SELL_THRESHOLD) <= 0) {
+      return StockRecommendation.SELL;
+    }
+    return StockRecommendation.HOLD;
+  }
+
+  /**
+   * Returns the oldest price inside the recent lookback window used for trend comparison.
+   *
+   * @param historicalPrices ordered price history, oldest to newest
+   * @return starting price for the recent trend window
+   */
+  private BigDecimal recentStartPrice(List<BigDecimal> historicalPrices) {
+    int startIndex = Math.max(0, historicalPrices.size() - LOOKBACK_PRICE_POINTS);
+    return historicalPrices.get(startIndex);
+  }
+}
