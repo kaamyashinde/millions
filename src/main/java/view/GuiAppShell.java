@@ -135,6 +135,7 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
   private void showAuthView(boolean allowReturnToSession) {
     authPane = new AuthPane(
         listRegisteredUsers(),
+        listLeaderboardEntries(),
         allowReturnToSession,
         this::handleLogin,
         this::handleRegistration,
@@ -228,6 +229,10 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
 
   private List<String> listRegisteredUsers() {
     return sessionService.listRegisteredUsers();
+  }
+
+  private List<model.session.PlayerLeaderboardEntry> listLeaderboardEntries() {
+    return sessionService.listLeaderboardEntries();
   }
 
   private void disposeWorkspace() {

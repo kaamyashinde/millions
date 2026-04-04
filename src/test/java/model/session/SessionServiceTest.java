@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -78,6 +79,53 @@ class SessionServiceTest {
     assertEquals(3, reloadedBob.exchange().getDay());
     assertTrue(reloadedBob.player().getPortfolio().getShares().isEmpty(), "Bob should not see Alice's holdings");
     assertEquals(new BigDecimal("2025.00"), reloadedBob.player().getMoney());
+  }
+
+  @Test
+  void listLeaderboardEntries_usesLiveActiveSessionState() {
+    SessionService sessionService = createSessionService();
+
+    ActiveSession alice = sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    sessionService.saveActiveSession();
+    alice.player().addMoney(new BigDecimal("50.00"));
+
+    List<PlayerLeaderboardEntry> entries = sessionService.listLeaderboardEntries();
+
+    assertEquals(1, entries.size());
+    assertEquals("Alice", entries.getFirst().username());
+    assertEquals(
+        0,
+        entries.getFirst().netWorth().compareTo(new BigDecimal("1050.00")));
+    assertEquals(
+        0,
+        entries.getFirst().totalReturnPercent().compareTo(new BigDecimal("0.05000000")));
+  }
+
+  @Test
+  void listLeaderboardEntries_ordersTiesByReturnPercentThenUsername() {
+    SessionService sessionService = createSessionService();
+
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("100.00"));
+    sessionService.saveActiveSession();
+
+    ActiveSession charlie = sessionService.register("Charlie", "2345".toCharArray(), new BigDecimal("50.00"));
+    charlie.player().addMoney(new BigDecimal("50.00"));
+    sessionService.saveActiveSession();
+
+    ActiveSession bob = sessionService.register("Bob", "3456".toCharArray(), new BigDecimal("50.00"));
+    bob.player().addMoney(new BigDecimal("50.00"));
+    sessionService.saveActiveSession();
+
+    List<PlayerLeaderboardEntry> entries = sessionService.listLeaderboardEntries();
+
+    assertEquals(List.of("Bob", "Charlie", "Alice"), entries.stream()
+        .map(PlayerLeaderboardEntry::username)
+        .toList());
+    assertEquals(
+        List.of("100.00", "100.00", "100.00"),
+        entries.stream()
+            .map(entry -> entry.netWorth().setScale(2, RoundingMode.HALF_UP).toPlainString())
+            .toList());
   }
 
   @Test

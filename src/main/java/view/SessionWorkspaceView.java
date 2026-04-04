@@ -108,7 +108,7 @@ public class SessionWorkspaceView extends StackPane {
     Button profileButton = new Button("Profile");
     Button refreshButton = new Button("Refresh all");
     Button helpButton = new Button("Help");
-    Button switchUserButton = new Button("Switch user");
+    Button switchUserButton = new Button("Compare / switch user");
     Button logoutButton = new Button("Log out");
     styleButton(profileButton);
     styleButton(refreshButton);

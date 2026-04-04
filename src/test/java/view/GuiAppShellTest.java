@@ -122,6 +122,37 @@ class GuiAppShellTest {
     assertEquals(2, shell.getWorkspaceView().getNotificationService().getItems().size());
   }
 
+  @Test
+  void switchUserFlowShowsLiveLeaderboardAndCanReturnToCurrentSession() throws Exception {
+    SessionService sessionService = createSessionService();
+    GuiAppShell shell = runOnFxThread(() -> new GuiAppShell(sessionService));
+
+    runOnFxThread(() -> {
+      shell.submitRegistration("Alice", "1234", "1000.00");
+      return shell;
+    });
+
+    ActiveSession alice = sessionService.getActiveSession().orElseThrow();
+    sessionService.saveActiveSession();
+    alice.player().addMoney(new BigDecimal("50.00"));
+
+    runOnFxThread(() -> {
+      shell.beginSwitchUserFlow();
+      return shell;
+    });
+
+    assertTrue(shell.isShowingAuthView());
+    assertEquals("1050.00", shell.getAuthPane().getLeaderboardNetWorthForUser("Alice"));
+
+    runOnFxThread(() -> {
+      shell.getAuthPane().triggerReturnToSession();
+      return shell;
+    });
+
+    assertFalse(shell.isShowingAuthView());
+    assertEquals("Alice", shell.getWorkspaceView().getDisplayedUsername());
+  }
+
   private SessionService createSessionService() {
     return new SessionService(
         new UserAccountRepository(tempDir),
