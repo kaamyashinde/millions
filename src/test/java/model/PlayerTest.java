@@ -61,14 +61,14 @@ class PlayerTest {
 
   @Test
   void getPlayerLevel() {
-    assertEquals(PlayerLevel.NOVICE, player.getPlayerLevel());
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
   }
 
   @Test
   void recalculateLevel_updatesLevel() {
-    assertEquals(PlayerLevel.NOVICE, player.getPlayerLevel());
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
     player.recalculateLevel();
-    assertEquals(PlayerLevel.NOVICE, player.getPlayerLevel());
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
   }
 
   @Test
