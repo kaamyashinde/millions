@@ -46,6 +46,18 @@ class TrendRecommendationStrategyTest {
   }
 
   @Test
+  void recommend_returnsHoldWhenRecentStartPriceIsZero() {
+    List<BigDecimal> prices =
+        List.of(
+            BigDecimal.ZERO,
+            new BigDecimal("100.00"),
+            new BigDecimal("101.00"),
+            new BigDecimal("104.00"));
+
+    assertEquals(StockRecommendation.HOLD, strategy.recommend(prices));
+  }
+
+  @Test
   void recommend_matchesStockHistoricalPrices() {
     Stock stock = stockWithPrices("100.00", "101.00", "102.00", "104.00");
 

@@ -55,6 +55,14 @@ class StockRecommendationServiceTest {
   }
 
   @Test
+  void recommend_stockOverloadRejectsNull() {
+    NullPointerException error =
+        assertThrows(NullPointerException.class, () -> service.recommend((Stock) null));
+
+    assertEquals("Stock cannot be null", error.getMessage());
+  }
+
+  @Test
   void constructor_rejectsNullStrategy() {
     NullPointerException error =
         assertThrows(NullPointerException.class, () -> new StockRecommendationService(null));
