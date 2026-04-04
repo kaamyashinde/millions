@@ -1,5 +1,7 @@
 package model.persistence;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Persisted account metadata for one local profile.
  *
@@ -8,6 +10,7 @@ package model.persistence;
  * @param saltBase64 random salt used for PIN hashing
  * @param pinHashBase64 PBKDF2 hash of the PIN
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record UserAccountRecord(
     String username,
     String normalizedUsername,
