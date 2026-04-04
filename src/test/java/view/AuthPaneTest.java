@@ -44,7 +44,9 @@ class AuthPaneTest {
         },
         (username, pin, startingMoney) -> {
         },
-        () -> returned.set(true)));
+        () -> returned.set(true),
+        () -> {
+        }));
 
     assertEquals(List.of("Bob", "Alice"), pane.getLeaderboardDisplayedUsernames());
 
