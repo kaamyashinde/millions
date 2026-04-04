@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import model.exception.InsufficientFundsException;
 import model.exception.InsufficientSharesException;
+import model.exception.ShareNotFoundException;
 import model.fund.Fund;
 import model.fund.FundComponent;
 import model.marketevent.MarketEvent;
@@ -157,6 +158,13 @@ class ExchangeTest {
     assertNotNull(transaction);
     assertTrue(player.getMoney().compareTo(initialMoney) < 0);
     assertFalse(player.getPortfolio().getShares().isEmpty());
+    assertTrue(player.getTransactionArchive().getAllTransactions().contains(transaction));
+  }
+
+  @Test
+  void buy_unknownSymbol_throws() {
+    assertThrows(IllegalArgumentException.class,
+        () -> exchange.buy("UNKNOWN", BigDecimal.ONE, player));
   }
 
   @Test
@@ -184,6 +192,15 @@ class ExchangeTest {
 
     assertNotNull(transaction);
     assertTrue(player.getMoney().compareTo(moneyBeforeSale) > 0);
+    assertTrue(player.getTransactionArchive().getAllTransactions().contains(transaction));
+  }
+
+  @Test
+  void sell_shareNotInOtherPlayersPortfolio_throws() {
+    exchange.buy("AAPL", new BigDecimal("10"), player);
+    Share shareToSell = player.getPortfolio().getShares().getFirst();
+    Player other = new Player("Bob", new BigDecimal("1000"));
+    assertThrows(ShareNotFoundException.class, () -> exchange.sell(shareToSell, other));
   }
 
   @Test
@@ -365,6 +382,13 @@ class ExchangeTest {
     Player p = new Player("P", BigDecimal.ZERO);
     assertThrows(InsufficientFundsException.class,
         () -> exchange.buyUpToBudget("AAPL", new BigDecimal("50000"), p));
+  }
+
+  @Test
+  void buyUpToBudget_unknownSymbol_throws() {
+    Player p = new Player("P", new BigDecimal("1000"));
+    assertThrows(IllegalArgumentException.class,
+        () -> exchange.buyUpToBudget("NOTLISTED", new BigDecimal("100"), p));
   }
 
   @Test

@@ -1,26 +1,29 @@
 package model;
 
+import static model.utils.Validator.requirePositive;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
+import model.exception.InsufficientFundsException;
+import model.exception.InsufficientSharesException;
 import model.fund.Fund;
 import model.marketevent.DailyPriceMoveStrategy;
 import model.marketevent.MarketEvent;
 import model.marketevent.MarketEventStrategy;
 import model.marketevent.RandomMarketEventStrategy;
 import model.marketevent.UniformDailyPriceMoveStrategy;
-import model.trade.BuyCommand;
-import model.trade.BuyUpToBudgetCommand;
-import model.trade.SellByQuantityCommand;
-import model.trade.SellCommand;
-import model.trade.SellUpToTargetNetCommand;
+import model.transaction.Purchase;
+import model.transaction.Sale;
 import model.transaction.Transaction;
+import model.transaction.TransactionSizing;
+import model.transactioncalculator.SaleCalculator;
 
 /**
  * A class representing the Exchange Market in the system.
@@ -256,7 +259,7 @@ public class Exchange {
    * @return the Purchase transaction
    */
   public Transaction buy(String symbol, BigDecimal quantity, Player player) {
-    return new BuyCommand(this, symbol, quantity).execute(player).getFirst();
+    return executeBuy(player, symbol, quantity).getFirst();
   }
 
   /**
@@ -274,7 +277,7 @@ public class Exchange {
    * @throws InsufficientFundsException   if no positive quantity fits the budget and cash available
    */
   public Transaction buyUpToBudget(String symbol, BigDecimal maxSpend, Player player) {
-    return new BuyUpToBudgetCommand(this, symbol, maxSpend).execute(player).getFirst();
+    return executeBuyUpToBudget(player, symbol, maxSpend).getFirst();
   }
 
   /**
@@ -354,7 +357,7 @@ public class Exchange {
    * @return the Sale transaction
    */
   public Transaction sell(Share share, Player player) {
-    return new SellCommand(this, share).execute(player).getFirst();
+    return executeSell(player, share).getFirst();
   }
 
   /**
@@ -370,7 +373,7 @@ public class Exchange {
    * @throws IllegalArgumentException if {@code quantity} is not positive
    */
   public List<Transaction> sellByQuantity(String symbol, BigDecimal quantity, Player player) {
-    return new SellByQuantityCommand(this, symbol, quantity).execute(player);
+    return executeSellByQuantity(player, symbol, quantity);
   }
 
   /**
@@ -386,7 +389,76 @@ public class Exchange {
    * @throws IllegalArgumentException if {@code targetNet} is not positive
    */
   public List<Transaction> sellUpToTargetNet(String symbol, BigDecimal targetNet, Player player) {
-    return new SellUpToTargetNetCommand(this, symbol, targetNet).execute(player);
+    return executeSellUpToTargetNet(player, symbol, targetNet);
+  }
+
+  private List<Transaction> executeBuy(Player player, String symbol, BigDecimal quantity) {
+    InvestableAsset assetToBuy = getAsset(symbol);
+    if (assetToBuy == null) {
+      throw new IllegalArgumentException("Unknown asset symbol: " + symbol);
+    }
+    Share shareToBuy = new Share(assetToBuy, quantity, assetToBuy.getSalesPrice());
+    Purchase purchase = new Purchase(shareToBuy, getDay());
+    purchase.commit(player);
+    return List.of(purchase);
+  }
+
+  private List<Transaction> executeSell(Player player, Share share) {
+    Sale sale = new Sale(share, getDay());
+    sale.commit(player);
+    return List.of(sale);
+  }
+
+  private List<Transaction> executeBuyUpToBudget(
+      Player player, String symbol, BigDecimal maxSpend) {
+    InvestableAsset asset = getAsset(symbol);
+    if (asset == null) {
+      throw new IllegalArgumentException("Unknown asset symbol: " + symbol);
+    }
+    requirePositive(maxSpend, "maxSpend");
+    BigDecimal budget = maxSpend.min(player.getMoney());
+    BigDecimal quantity = TransactionSizing.maxQuantityForBudget(asset, budget);
+    if (quantity.signum() <= 0) {
+      throw new InsufficientFundsException();
+    }
+    return executeBuy(player, symbol, quantity);
+  }
+
+  private List<Transaction> executeSellByQuantity(
+      Player player, String symbol, BigDecimal quantity) {
+    requirePositive(quantity, "quantity");
+    if (player.getPortfolio().totalQuantityForSymbol(symbol).compareTo(quantity) < 0) {
+      throw new InsufficientSharesException(symbol, quantity);
+    }
+    List<Transaction> transactions = new ArrayList<>();
+    BigDecimal remaining = quantity;
+    while (remaining.signum() > 0) {
+      Share slice = player.getPortfolio().buildNextFifoSaleSlice(symbol, remaining);
+      if (slice == null) {
+        throw new InsufficientSharesException(symbol, quantity);
+      }
+      transactions.addAll(executeSell(player, slice));
+      remaining = remaining.subtract(slice.getQuantity());
+    }
+    return List.copyOf(transactions);
+  }
+
+  private List<Transaction> executeSellUpToTargetNet(
+      Player player, String symbol, BigDecimal targetNet) {
+    requirePositive(targetNet, "targetNet");
+    List<Transaction> transactions = new ArrayList<>();
+    BigDecimal remainingTarget = targetNet;
+    while (remainingTarget.signum() > 0
+        && player.getPortfolio().totalQuantityForSymbol(symbol).signum() > 0) {
+      Share slice = player.getPortfolio().buildNextFifoSliceForTargetNet(symbol, remainingTarget);
+      if (slice == null) {
+        break;
+      }
+      transactions.addAll(executeSell(player, slice));
+      BigDecimal net = new SaleCalculator(slice).calculateTotal();
+      remainingTarget = remainingTarget.subtract(net);
+    }
+    return List.copyOf(transactions);
   }
 
   /**
