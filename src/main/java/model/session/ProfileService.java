@@ -11,6 +11,8 @@ import model.persistence.PinHashingService;
 import model.persistence.ProfileImageService;
 import model.persistence.UserAccountRecord;
 import model.persistence.UserAccountRepository;
+import model.session.validation.PinValidator;
+import model.session.validation.ValidationResult;
 
 /**
  * Manages profile metadata: display names, avatars, and profile deletion.
@@ -107,7 +109,10 @@ public final class ProfileService {
    * @throws AuthenticationException if the PIN is incorrect
    */
   public void deleteActiveProfile(String username, char[] pin) {
-    AuthService.validatePin(pin);
+    ValidationResult pinFormat = new PinValidator().validate("", pin, null);
+    if (pinFormat instanceof ValidationResult.Failure(var error)) {
+      throw new RegistrationValidationException(error);
+    }
     UserAccountRecord account = userAccountRepository.findByUsername(username)
         .orElseThrow(() -> new IllegalStateException("Account not found."));
     if (!pinHashingService.verifyPin(pin, account.saltBase64(), account.pinHashBase64())) {

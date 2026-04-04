@@ -9,11 +9,22 @@ import model.persistence.PinHashingService;
 import model.persistence.ProfileDirectories;
 import model.persistence.UserAccountRecord;
 import model.persistence.UserAccountRepository;
+import model.session.validation.PinValidator;
+import model.session.validation.RegistrationValidator;
+import model.session.validation.StartingMoneyValidator;
+import model.session.validation.UsernameValidator;
+import model.session.validation.ValidationResult;
 
 /**
  * Handles user registration, authentication, and credential validation.
  */
 public final class AuthService {
+
+  private static final RegistrationValidator REGISTRATION_CHAIN =
+      new UsernameValidator().then(new PinValidator()).then(new StartingMoneyValidator());
+
+  private static final RegistrationValidator LOGIN_CREDENTIALS =
+      new UsernameValidator().then(new PinValidator());
 
   private final UserAccountRepository userAccountRepository;
   private final PinHashingService pinHashingService;
@@ -43,9 +54,13 @@ public final class AuthService {
    * @param startingMoney initial cash balance
    * @return new active session for the registered profile
    * @throws DuplicateUsernameException if the username is already taken
+   * @throws RegistrationValidationException if username, PIN, or starting money is invalid
    */
   public ActiveSession register(String username, char[] pin, BigDecimal startingMoney) {
-    validateRegistrationInput(username, pin, startingMoney);
+    ValidationResult registration = REGISTRATION_CHAIN.validate(username, pin, startingMoney);
+    if (registration instanceof ValidationResult.Failure(var error)) {
+      throw new RegistrationValidationException(error);
+    }
     String normalizedUsername = ProfileDirectories.normalizeUsername(username);
     if (userAccountRepository.exists(normalizedUsername)) {
       throw new DuplicateUsernameException("That username is already registered.");
@@ -106,32 +121,10 @@ public final class AuthService {
     return userAccountRepository;
   }
 
-  static void validateRegistrationInput(String username, char[] pin, BigDecimal startingMoney) {
-    if (!ProfileDirectories.isValidUsername(username)) {
-      throw new IllegalArgumentException(
-          "Username must be 3-32 characters using letters, numbers, underscores, or hyphens.");
-    }
-    validatePin(pin);
-    if (startingMoney == null || startingMoney.compareTo(BigDecimal.ZERO) < 0) {
-      throw new IllegalArgumentException("Starting money must be non-negative.");
-    }
-  }
-
   static void validateLoginInput(String username, char[] pin) {
-    if (!ProfileDirectories.isValidUsername(username)) {
+    ValidationResult credentials = LOGIN_CREDENTIALS.validate(username, pin, null);
+    if (credentials instanceof ValidationResult.Failure) {
       throw new AuthenticationException("Invalid username or PIN.");
-    }
-    validatePin(pin);
-  }
-
-  static void validatePin(char[] pin) {
-    if (pin == null || pin.length < 4 || pin.length > 8) {
-      throw new IllegalArgumentException("PIN must be 4 to 8 digits.");
-    }
-    for (char digit : pin) {
-      if (!Character.isDigit(digit)) {
-        throw new IllegalArgumentException("PIN must be 4 to 8 digits.");
-      }
     }
   }
 
