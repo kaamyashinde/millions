@@ -74,6 +74,35 @@ public class Exchange {
   }
 
   /**
+   * Rebuilds an exchange from previously persisted market state.
+   *
+   * @param name exchange name
+   * @param stocks listed stocks with restored price history
+   * @param funds listed funds backed by the restored stocks
+   * @param day current trading day
+   * @param marketEventHistory chronological event history
+   * @param lastMarketEvent latest event for the current day, if any
+   * @return restored exchange instance
+   */
+  public static Exchange restore(
+      String name,
+      List<Stock> stocks,
+      List<Fund> funds,
+      int day,
+      List<MarketEvent> marketEventHistory,
+      MarketEvent lastMarketEvent) {
+    if (day < 1) {
+      throw new IllegalArgumentException("Trading day must be at least 1.");
+    }
+    Exchange exchange = new Exchange(name, stocks, funds);
+    exchange.day = day;
+    exchange.marketEventHistory.clear();
+    exchange.marketEventHistory.addAll(marketEventHistory);
+    exchange.lastMarketEvent = Optional.ofNullable(lastMarketEvent);
+    return exchange;
+  }
+
+  /**
    * Creates an exchange with injected collaborators for deterministic stock-only tests.
    *
    * @param name the name of the exchange
@@ -469,6 +498,15 @@ public class Exchange {
    */
   public List<Stock> getLosers(int limit) {
     return getByPriceChange(limit, -1, false);
+  }
+
+  /**
+   * Returns all listed stocks.
+   *
+   * @return immutable stock list
+   */
+  public List<Stock> getStocks() {
+    return List.copyOf(stockMap.values());
   }
 
   /**
