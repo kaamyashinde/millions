@@ -2,10 +2,13 @@ package model.session;
 
 import java.nio.file.Path;
 import java.util.function.Supplier;
+import model.persistence.GameStateMapper;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketData;
 import model.persistence.PinHashingService;
+import model.persistence.ProfileImageService;
 import model.persistence.ProfilePreferencesRepository;
+import model.persistence.SavedRunMapper;
 import model.persistence.SavedRunRepository;
 import model.persistence.UserAccountRepository;
 
@@ -29,23 +32,43 @@ public final class SessionServiceFactory {
   /**
    * Creates a local-profile session service backed by JSON persistence.
    *
-   * @param profilesRoot base directory containing all user profiles
+   * @param profilesRoot       base directory containing all user profiles
    * @param marketDataSupplier supplier for fresh bundled market data
-   * @param exchangeName exchange name used for newly created profiles
+   * @param exchangeName       exchange name used for newly created profiles
    * @return fully wired session service
    */
   public static SessionService createLocalProfileSessionService(
       Path profilesRoot,
       Supplier<MarketData> marketDataSupplier,
       String exchangeName) {
-    return new SessionService(
-        new UserAccountRepository(profilesRoot),
+    UserAccountRepository userAccountRepository = new UserAccountRepository(profilesRoot);
+    PinHashingService pinHashingService = new PinHashingService();
+
+    GamePersistenceService gamePersistenceService = new GamePersistenceService(
         new GameStateRepository(profilesRoot),
-        new SavedRunRepository(profilesRoot),
-        new ProfilePreferencesRepository(profilesRoot),
-        new PinHashingService(),
-        marketDataSupplier,
-        exchangeName,
+        new GameStateMapper(exchangeName),
+        marketDataSupplier);
+
+    AuthService authService = new AuthService(
+        userAccountRepository, pinHashingService, gamePersistenceService);
+
+    ProfileService profileService = new ProfileService(
+        userAccountRepository,
+        new ProfileImageService(profilesRoot),
+        pinHashingService,
         profilesRoot);
+
+    SavedRunService savedRunService = new SavedRunService(
+        new SavedRunRepository(profilesRoot), new SavedRunMapper());
+
+    ProfilePreferencesService profilePreferencesService = new ProfilePreferencesService(
+        new ProfilePreferencesRepository(profilesRoot));
+
+    return new SessionService(
+        authService,
+        profileService,
+        gamePersistenceService,
+        savedRunService,
+        profilePreferencesService);
   }
 }

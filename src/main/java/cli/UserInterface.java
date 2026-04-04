@@ -18,19 +18,27 @@ import model.exception.InsufficientSharesException;
 import model.exception.ShareNotFoundException;
 import model.fund.Fund;
 import model.fund.FundComponent;
-import model.persistence.MarketData;
+import model.persistence.GameStateMapper;
 import model.persistence.GameStateRepository;
+import model.persistence.MarketData;
 import model.persistence.MarketDataLoader;
 import model.persistence.PinHashingService;
+import model.persistence.ProfileImageService;
 import model.persistence.ProfilePreferencesRepository;
+import model.persistence.SavedRunMapper;
 import model.persistence.SavedRunRepository;
 import model.persistence.UserAccountRepository;
 import model.savings.RegularSavingsPlan;
 import model.savings.RegularSavingsProcessor;
 import model.savings.SavingsInstallmentMode;
 import model.session.ActiveSession;
+import model.session.AuthService;
 import model.session.AuthenticationException;
 import model.session.DuplicateUsernameException;
+import model.session.GamePersistenceService;
+import model.session.ProfilePreferencesService;
+import model.session.ProfileService;
+import model.session.SavedRunService;
 import model.session.SessionService;
 import model.transaction.Purchase;
 import model.transaction.Transaction;
@@ -101,15 +109,35 @@ public class UserInterface {
    * Initialises the session layer and starts with no active user.
    */
   private static void init() {
-    sessionService = new SessionService(
-        new UserAccountRepository(PROFILES_ROOT),
+    UserAccountRepository userAccountRepository = new UserAccountRepository(PROFILES_ROOT);
+    PinHashingService pinHashingService = new PinHashingService();
+
+    GamePersistenceService gamePersistenceService = new GamePersistenceService(
         new GameStateRepository(PROFILES_ROOT),
-        new SavedRunRepository(PROFILES_ROOT),
-        new ProfilePreferencesRepository(PROFILES_ROOT),
-        new PinHashingService(),
-        UserInterface::loadMarketData,
-        EXCHANGE_NAME,
+        new GameStateMapper(EXCHANGE_NAME),
+        UserInterface::loadMarketData);
+
+    AuthService authService = new AuthService(
+        userAccountRepository, pinHashingService, gamePersistenceService);
+
+    ProfileService profileService = new ProfileService(
+        userAccountRepository,
+        new ProfileImageService(PROFILES_ROOT),
+        pinHashingService,
         PROFILES_ROOT);
+
+    SavedRunService savedRunService = new SavedRunService(
+        new SavedRunRepository(PROFILES_ROOT), new SavedRunMapper());
+
+    ProfilePreferencesService profilePreferencesService = new ProfilePreferencesService(
+        new ProfilePreferencesRepository(PROFILES_ROOT));
+
+    sessionService = new SessionService(
+        authService,
+        profileService,
+        gamePersistenceService,
+        savedRunService,
+        profilePreferencesService);
     player = null;
     exchange = null;
   }
