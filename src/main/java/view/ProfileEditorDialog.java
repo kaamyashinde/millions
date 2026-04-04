@@ -1,8 +1,5 @@
 package view;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,7 +8,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -23,6 +19,9 @@ import javafx.stage.Window;
 import model.session.ActiveSession;
 import model.session.AuthenticationException;
 import model.session.SessionService;
+import view.components.image.FileImageLoader;
+import view.components.image.ImageLoader;
+import view.components.image.ValidatingImageLoader;
 
 /**
  * Modal editor for display name, avatar image, and profile deletion.
@@ -64,27 +63,21 @@ public final class ProfileEditorDialog {
     Path[] pendingImage = {null};
     boolean[] removeAvatar = {false};
 
+    ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+
     Runnable reloadPreview = () -> {
-      preview.setImage(null);
-      try {
-        if (pendingImage[0] != null && Files.isRegularFile(pendingImage[0])) {
-          try (InputStream in = Files.newInputStream(pendingImage[0])) {
-            preview.setImage(new Image(in, 96, 96, true, true));
-          }
+      if (pendingImage[0] != null) {
+        preview.setImage(avatarLoader.load(pendingImage[0], 96));
+        if (preview.getImage() != null) {
           return;
         }
-        if (removeAvatar[0]) {
-          return;
-        }
-        Path avatarPath = sessionService.avatarPath(session.normalizedUsername());
-        if (Files.isRegularFile(avatarPath)) {
-          try (InputStream in = Files.newInputStream(avatarPath)) {
-            preview.setImage(new Image(in, 96, 96, true, true));
-          }
-        }
-      } catch (IOException exception) {
-        preview.setImage(null);
       }
+      if (removeAvatar[0]) {
+        preview.setImage(null);
+        return;
+      }
+      Path avatarPath = sessionService.avatarPath(session.normalizedUsername());
+      preview.setImage(avatarLoader.load(avatarPath, 96));
     };
     reloadPreview.run();
 

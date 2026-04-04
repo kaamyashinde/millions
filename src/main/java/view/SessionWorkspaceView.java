@@ -1,15 +1,11 @@
 package view;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -20,6 +16,9 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.session.ActiveSession;
 import model.session.SessionService;
+import view.components.image.FileImageLoader;
+import view.components.image.ImageLoader;
+import view.components.image.ValidatingImageLoader;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
 
@@ -40,6 +39,7 @@ public class SessionWorkspaceView extends StackPane {
   private final LeaderboardPanel leaderboardPanel;
   private final Label sessionSummaryLabel = new Label();
   private final ImageView headerAvatar = new ImageView();
+  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
 
   /**
    * Builds the logged-in workspace for one active session.
@@ -170,16 +170,8 @@ public class SessionWorkspaceView extends StackPane {
   }
 
   private void loadHeaderAvatar() {
-    headerAvatar.setImage(null);
     var path = sessionService.avatarPath(session.normalizedUsername());
-    if (!Files.isRegularFile(path)) {
-      return;
-    }
-    try (InputStream in = Files.newInputStream(path)) {
-      headerAvatar.setImage(new Image(in, 40, 40, true, true));
-    } catch (IOException exception) {
-      headerAvatar.setImage(null);
-    }
+    headerAvatar.setImage(avatarLoader.load(path, 40));
   }
 
   /**
