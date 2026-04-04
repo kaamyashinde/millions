@@ -261,7 +261,7 @@ public class LearningHubPanel extends BorderPane {
   }
 
   private void onItemCardClicked(LearningItem item) {
-    setCenter(new LearningItemDetailView(item, this::showLanding));
+    setCenter(new LearningItemDetailView(item, this::showLanding, this::onItemCardClicked));
   }
 
   private void onCategoryCardClicked(LearningCategory category) {
