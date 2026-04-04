@@ -23,6 +23,8 @@ import model.learninghub.LearningCategory;
 import model.learninghub.LearningContentStore;
 import model.learninghub.LearningItem;
 import model.learninghub.LearningResource;
+import model.learninghub.QuizAttempt;
+import model.learninghub.QuizSession;
 
 /**
  * Learning Hub landing page. Displays a featured-topics row, a 6-category grid, and a highlighted
@@ -261,7 +263,8 @@ public class LearningHubPanel extends BorderPane {
   }
 
   private void onItemCardClicked(LearningItem item) {
-    setCenter(new LearningItemDetailView(item, this::showLanding, this::onItemCardClicked));
+    setCenter(new LearningItemDetailView(
+        item, this::showLanding, this::onItemCardClicked, this::onTakeQuiz));
   }
 
   private void onCategoryCardClicked(LearningCategory category) {
@@ -270,5 +273,20 @@ public class LearningHubPanel extends BorderPane {
 
   private void onFeaturedCardClicked(LearningItem item) {
     onItemCardClicked(item);
+  }
+
+  private void onTakeQuiz(QuizAttempt attempt) {
+    LearningItem item = LearningContentStore
+        .getItemsByIds(List.of(attempt.quiz().linkedItemId())).get(0);
+    Runnable backToItem = () -> onItemCardClicked(item);
+    setCenter(new QuizView(
+        attempt,
+        backToItem,
+        () -> showQuizResult(attempt, backToItem)));
+  }
+
+  private void showQuizResult(QuizAttempt attempt, Runnable onBackToTopic) {
+    QuizSession.record(attempt);
+    setCenter(new QuizResultView(attempt, onBackToTopic, this::showLanding));
   }
 }

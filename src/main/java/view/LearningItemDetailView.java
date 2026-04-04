@@ -3,11 +3,13 @@ package view;
 import java.awt.Desktop;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -21,6 +23,9 @@ import model.learninghub.Difficulty;
 import model.learninghub.LearningContentStore;
 import model.learninghub.LearningItem;
 import model.learninghub.LearningResource;
+import model.learninghub.Quiz;
+import model.learninghub.QuizAttempt;
+import model.learninghub.QuizContentStore;
 import util.MarkdownLoader;
 
 /**
@@ -52,8 +57,13 @@ public class LearningItemDetailView extends BorderPane {
    * @param item          the learning item to display
    * @param onBack        called when the back button is clicked
    * @param onItemClicked called when a related topic card is clicked
+   * @param onTakeQuiz    called with a fresh {@link QuizAttempt} when the player starts the quiz
    */
-  public LearningItemDetailView(LearningItem item, Runnable onBack, Consumer<LearningItem> onItemClicked) {
+  public LearningItemDetailView(
+      LearningItem item,
+      Runnable onBack,
+      Consumer<LearningItem> onItemClicked,
+      Consumer<QuizAttempt> onTakeQuiz) {
     setPadding(new Insets(16));
 
     // ── TOP: back button ─────────────────────────────────────────────────────
@@ -65,15 +75,20 @@ public class LearningItemDetailView extends BorderPane {
     topBar.setPadding(new Insets(0, 0, 8, 0));
     setTop(topBar);
 
-    // ── CENTER: WebView for markdown + resource cards + related topics ────────
+    // ── CENTER: WebView for markdown + resource cards + related topics + quiz ──
     VBox content = new VBox(16);
     content.setPadding(new Insets(0, 0, 16, 0));
 
     content.getChildren().add(buildMarkdownView(item));
     content.getChildren().add(buildResourcesSection(item));
     content.getChildren().add(buildRelatedTopicsSection(item, onItemClicked));
+    content.getChildren().add(buildQuizSection(item, onTakeQuiz));
 
-    setCenter(content);
+    ScrollPane scroll = new ScrollPane(content);
+    scroll.setFitToWidth(true);
+    scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+    scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+    setCenter(scroll);
   }
 
   private static javafx.scene.Node buildMarkdownView(LearningItem item) {
@@ -257,6 +272,39 @@ public class LearningItemDetailView extends BorderPane {
         + "-fx-cursor: hand;");
     card.setOnMouseClicked(_ -> onItemClicked.accept(item));
     return card;
+  }
+
+  private static javafx.scene.Node buildQuizSection(
+      LearningItem item, Consumer<QuizAttempt> onTakeQuiz) {
+    Optional<Quiz> quiz = QuizContentStore.getQuizForItem(item.id());
+    if (quiz.isEmpty()) {
+      return new Region();
+    }
+
+    Label heading = new Label("Test Your Knowledge");
+    heading.setStyle(
+        "-fx-text-fill: " + COLOR_HEADING + ";"
+        + "-fx-font-weight: bold;"
+        + "-fx-font-size: 13;");
+
+    Button quizBtn = new Button("Take Quiz: " + quiz.get().title() + "  →");
+    quizBtn.setMaxWidth(Double.MAX_VALUE);
+    quizBtn.setWrapText(true);
+    quizBtn.setStyle(
+        "-fx-background-color: #2196F322;"
+        + "-fx-text-fill: " + COLOR_BORDER_ACCENT + ";"
+        + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
+        + "-fx-border-radius: 8;"
+        + "-fx-background-radius: 8;"
+        + "-fx-cursor: hand;"
+        + "-fx-font-size: 13;"
+        + "-fx-font-weight: bold;"
+        + "-fx-padding: 12 16 12 16;");
+    quizBtn.setOnAction(_ -> onTakeQuiz.accept(new QuizAttempt(quiz.get())));
+
+    VBox section = new VBox(8, heading, quizBtn);
+    section.setPadding(new Insets(8, 0, 0, 0));
+    return section;
   }
 
   private static String difficultyColor(Difficulty d) {
