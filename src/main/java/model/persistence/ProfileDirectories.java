@@ -12,6 +12,7 @@ public final class ProfileDirectories {
   private static final Pattern USERNAME_PATTERN = Pattern.compile("[A-Za-z0-9_-]{3,32}");
   private static final String ACCOUNT_FILE_NAME = "account.json";
   private static final String GAME_STATE_FILE_NAME = "game-state.json";
+  private static final String AVATAR_FILE_NAME = "avatar.png";
 
   private final Path profilesRoot;
 
@@ -76,6 +77,16 @@ public final class ProfileDirectories {
    */
   public Path gameStateFile(String username) {
     return profileDirectory(username).resolve(GAME_STATE_FILE_NAME);
+  }
+
+  /**
+   * Returns the path for the profile avatar image (PNG, written on upload).
+   *
+   * @param username raw or canonical username
+   * @return avatar file path within the profile directory
+   */
+  public Path avatarFile(String username) {
+    return profileDirectory(username).resolve(AVATAR_FILE_NAME);
   }
 
   /**
