@@ -57,6 +57,7 @@ public class RegularSavingsPanel extends BorderPane {
   private final RegularSavingsPanelController savingsController;
   private final Player player;
   private final NotificationService notifications;
+  private final Runnable afterAdvance;
 
   private final Label dayLabel = new Label();
   private final TableView<RegularSavingsPlan> table = new TableView<>();
@@ -85,10 +86,28 @@ public class RegularSavingsPanel extends BorderPane {
    * @param notifications service used for insufficient-fund skips after advancing a day
    */
   public RegularSavingsPanel(Exchange exchange, Player player, NotificationService notifications) {
+    this(exchange, player, notifications, () -> {
+    });
+  }
+
+  /**
+   * Builds a panel wired to the given exchange and player and invokes a callback after advancing.
+   *
+   * @param exchange exchange whose day advances and whose listed stocks validate new symbols
+   * @param player player whose plans are listed and edited
+   * @param notifications service used for insufficient-fund skips after advancing a day
+   * @param afterAdvance callback invoked after the day advance work completes
+   */
+  public RegularSavingsPanel(
+      Exchange exchange,
+      Player player,
+      NotificationService notifications,
+      Runnable afterAdvance) {
     this.exchange = exchange;
     this.savingsController = new RegularSavingsPanelController(exchange);
     this.player = player;
     this.notifications = notifications;
+    this.afterAdvance = afterAdvance;
 
     setPadding(new Insets(16));
 
@@ -207,10 +226,15 @@ public class RegularSavingsPanel extends BorderPane {
               + String.join(", ", skipped)
               + ". See Notifications.");
     }
+    exchange.getLastMarketEvent().ifPresent(event -> notifications.show(
+        ToastMode.INFO,
+        event.title(),
+        event.description()));
     for (String sym : skipped) {
       notifications.show(ToastMode.WARNING, "Regular savings skipped",
           "Insufficient funds for " + sym + ".");
     }
+    afterAdvance.run();
   }
 
   private void addPlan() {
