@@ -48,57 +48,57 @@ public final class LearningContentStore {
   private static final LearningItem ITEM_WHAT_IS_STOCK =
       new LearningItem("what-is-a-stock", "What Is a Stock?", "what-is-a-stock",
           "Learn what owning a share of a company actually means.",
-          CAT_BASICS, Difficulty.BEGINNER, true);
+          CAT_BASICS, Difficulty.BEGINNER, true, "learninghub/what-is-a-stock.md");
 
   private static final LearningItem ITEM_HOW_PRICES_MOVE =
       new LearningItem("how-stock-prices-move", "How Stock Prices Move", "how-stock-prices-move",
           "Discover the forces of supply and demand that drive price changes.",
-          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, true);
+          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, true, "learninghub/how-stock-prices-move.md");
 
   private static final LearningItem ITEM_WHAT_IS_RISK =
       new LearningItem("what-is-investment-risk", "What Is Investment Risk?",
           "what-is-investment-risk",
           "Understand why all investments carry some level of uncertainty.",
-          CAT_RISK, Difficulty.BEGINNER, true);
+          CAT_RISK, Difficulty.BEGINNER, true, "learninghub/what-is-investment-risk.md");
 
   private static final LearningItem ITEM_STOCK_VS_BOND =
       new LearningItem("stocks-vs-bonds", "Stocks vs. Bonds", "stocks-vs-bonds",
           "Compare the two most common asset classes side by side.",
-          CAT_BASICS, Difficulty.BEGINNER, false);
+          CAT_BASICS, Difficulty.BEGINNER, false, "learninghub/stocks-vs-bonds.md");
 
   private static final LearningItem ITEM_COMPOUND_INTEREST =
       new LearningItem("compound-interest", "The Power of Compound Interest",
           "compound-interest",
           "See how reinvesting returns accelerates portfolio growth over time.",
-          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, false);
+          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, false, "learninghub/compound-interest.md");
 
   private static final LearningItem ITEM_DIVERSIFICATION =
       new LearningItem("diversification-basics", "Diversification Basics",
           "diversification-basics",
           "Why spreading investments across assets reduces overall risk.",
-          CAT_RISK, Difficulty.INTERMEDIATE, false);
+          CAT_RISK, Difficulty.INTERMEDIATE, false, "learninghub/diversification-basics.md");
 
   private static final LearningItem ITEM_READING_CHARTS =
       new LearningItem("reading-stock-charts", "Reading Stock Charts", "reading-stock-charts",
           "Interpret candlestick charts and identify key price patterns.",
-          CAT_MARKET, Difficulty.INTERMEDIATE, false);
+          CAT_MARKET, Difficulty.INTERMEDIATE, false, "learninghub/reading-stock-charts.md");
 
   private static final LearningItem ITEM_INDEX_FUNDS =
       new LearningItem("index-funds-explained", "Index Funds Explained", "index-funds-explained",
           "Low-cost, passive investing through broad market indices.",
-          CAT_STRATEGIES, Difficulty.BEGINNER, false);
+          CAT_STRATEGIES, Difficulty.BEGINNER, false, "learninghub/index-funds-explained.md");
 
   private static final LearningItem ITEM_DOLLAR_COST =
       new LearningItem("dollar-cost-averaging", "Dollar-Cost Averaging",
           "dollar-cost-averaging",
           "Invest a fixed amount regularly to reduce timing risk.",
-          CAT_STRATEGIES, Difficulty.BEGINNER, false);
+          CAT_STRATEGIES, Difficulty.BEGINNER, false, "learninghub/dollar-cost-averaging.md");
 
   private static final LearningItem ITEM_PAPER_TRADING =
       new LearningItem("paper-trading", "Paper Trading: Practice Without Risk",
           "paper-trading",
           "Simulate real trades in a risk-free environment before going live.",
-          CAT_PRACTICAL, Difficulty.BEGINNER, false);
+          CAT_PRACTICAL, Difficulty.BEGINNER, false, "learninghub/paper-trading.md");
 
   // ── Resources ────────────────────────────────────────────────────────────────
 
