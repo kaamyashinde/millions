@@ -29,6 +29,7 @@ public class SessionWorkspaceView extends StackPane {
   private final FundsListPanel fundsPanel;
   private final NotificationsPanel notificationsPanel;
   private final RegularSavingsPanel savingsPanel;
+  private final SavedRunsPanel savedRunsPanel;
   private final Label sessionSummaryLabel = new Label();
 
   /**
@@ -40,6 +41,8 @@ public class SessionWorkspaceView extends StackPane {
    * @param playerPanel player summary tab
    * @param stocksPanel stocks listing tab
    * @param fundsPanel funds listing tab
+   * @param savedRunsPanel saved playthroughs tab
+   * @param helpAction callback to open help / welcome content
    * @param logoutAction callback invoked when the user logs out
    * @param switchUserAction callback invoked when the user wants to switch profiles
    * @param persistAction callback invoked after a successful model mutation
@@ -51,6 +54,8 @@ public class SessionWorkspaceView extends StackPane {
       PlayerPortfolioPanel playerPanel,
       StocksListPanel stocksPanel,
       FundsListPanel fundsPanel,
+      SavedRunsPanel savedRunsPanel,
+      Runnable helpAction,
       Runnable logoutAction,
       Runnable switchUserAction,
       Runnable persistAction) {
@@ -60,6 +65,8 @@ public class SessionWorkspaceView extends StackPane {
     this.stocksPanel = stocksPanel;
     this.fundsPanel = fundsPanel;
     this.notificationsPanel = notificationsPanel;
+    this.savedRunsPanel = savedRunsPanel;
+    sessionSummaryLabel.setStyle("-fx-text-fill: #bdbdbd;");
     this.savingsPanel = new RegularSavingsPanel(
         session.exchange(),
         session.player(),
@@ -77,16 +84,19 @@ public class SessionWorkspaceView extends StackPane {
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
 
     Button refreshButton = new Button("Refresh all");
+    Button helpButton = new Button("Help");
     Button switchUserButton = new Button("Switch user");
     Button logoutButton = new Button("Log out");
     styleButton(refreshButton);
+    styleButton(helpButton);
     styleButton(switchUserButton);
     styleButton(logoutButton);
     refreshButton.setOnAction(_ -> refreshAll());
+    helpButton.setOnAction(_ -> helpAction.run());
     switchUserButton.setOnAction(_ -> switchUserAction.run());
     logoutButton.setOnAction(_ -> logoutAction.run());
 
-    HBox actions = new HBox(10, refreshButton, switchUserButton, logoutButton);
+    HBox actions = new HBox(10, refreshButton, helpButton, switchUserButton, logoutButton);
     actions.setAlignment(Pos.CENTER_RIGHT);
 
     HBox topRow = new HBox(16, heading, sessionSummaryLabel, actions);
@@ -94,7 +104,7 @@ public class SessionWorkspaceView extends StackPane {
     HBox.setMargin(actions, new Insets(0, 0, 0, 16));
     topRow.setFillHeight(true);
 
-    TabPane tabs = createTabs();
+    TabPane tabs = createTabs(persistAction);
     VBox center = new VBox(14, topRow, tabs);
     content.setCenter(center);
 
@@ -117,6 +127,7 @@ public class SessionWorkspaceView extends StackPane {
     playerPanel.refresh();
     stocksPanel.refresh();
     fundsPanel.refresh();
+    savedRunsPanel.refresh();
   }
 
   /**
@@ -153,18 +164,20 @@ public class SessionWorkspaceView extends StackPane {
     return session.username();
   }
 
-  private TabPane createTabs() {
+  private TabPane createTabs(Runnable persistAction) {
     Tab notificationsTab = new Tab("Notifications", notificationsPanel);
     Tab playerTab = new Tab("Player", playerPanel);
     Tab stocksTab = new Tab("Stocks", stocksPanel);
     Tab fundsTab = new Tab("Funds", fundsPanel);
     Tab savingsTab = new Tab("Savings", savingsPanel);
+    Tab savedRunsTab = new Tab("Saved runs", savedRunsPanel);
 
     notificationsTab.setClosable(false);
     playerTab.setClosable(false);
     stocksTab.setClosable(false);
     fundsTab.setClosable(false);
     savingsTab.setClosable(false);
+    savedRunsTab.setClosable(false);
 
     playerTab.selectedProperty().addListener((obs, oldValue, selected) -> {
       if (Boolean.TRUE.equals(selected)) {
@@ -181,8 +194,15 @@ public class SessionWorkspaceView extends StackPane {
         fundsPanel.refresh();
       }
     });
+    savedRunsTab.selectedProperty().addListener((obs, oldValue, selected) -> {
+      if (Boolean.TRUE.equals(selected)) {
+        savedRunsPanel.refresh();
+        persistAction.run();
+      }
+    });
 
-    return new TabPane(notificationsTab, playerTab, stocksTab, fundsTab, savingsTab);
+    return new TabPane(
+        notificationsTab, playerTab, stocksTab, fundsTab, savingsTab, savedRunsTab);
   }
 
   private static void styleButton(Button button) {

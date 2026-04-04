@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import model.Stock;
 import model.session.ActiveSession;
+import model.session.SessionService;
 import view.components.notification.NotificationService;
 import view.components.toast.ToastMode;
 
@@ -18,6 +19,8 @@ public class SessionWorkspaceFactory {
    * Creates a new session workspace with fresh views and notifications.
    *
    * @param session active session supplying player and exchange state
+   * @param sessionService session service for saved runs and persistence
+   * @param helpAction callback to open help / welcome content
    * @param logoutAction callback invoked when the user logs out
    * @param switchUserAction callback invoked when the user wants to switch profiles
    * @param persistAction callback invoked after a successful model mutation
@@ -25,6 +28,8 @@ public class SessionWorkspaceFactory {
    */
   public SessionWorkspaceView create(
       ActiveSession session,
+      SessionService sessionService,
+      Runnable helpAction,
       Runnable logoutAction,
       Runnable switchUserAction,
       Runnable persistAction) {
@@ -33,6 +38,7 @@ public class SessionWorkspaceFactory {
     PlayerPortfolioPanel playerPanel = new PlayerPortfolioPanel(session.exchange(), session.player());
     StocksListPanel stocksPanel = new StocksListPanel(session.exchange());
     FundsListPanel fundsPanel = new FundsListPanel(session.exchange());
+    SavedRunsPanel savedRunsPanel = new SavedRunsPanel(sessionService, persistAction);
 
     showLoadedNotifications(notifications, session);
 
@@ -43,6 +49,8 @@ public class SessionWorkspaceFactory {
         playerPanel,
         stocksPanel,
         fundsPanel,
+        savedRunsPanel,
+        helpAction,
         logoutAction,
         switchUserAction,
         persistAction);

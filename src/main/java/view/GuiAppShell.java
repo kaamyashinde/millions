@@ -2,6 +2,8 @@ package view;
 
 import java.math.BigDecimal;
 import java.util.List;
+import javafx.application.Platform;
+import javafx.stage.Window;
 import model.session.ActiveSession;
 import model.session.AuthenticationException;
 import model.session.DuplicateUsernameException;
@@ -14,6 +16,7 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
 
   private final SessionService sessionService;
   private final SessionWorkspaceFactory workspaceFactory;
+  private final boolean showWelcomeOnFirstSession;
 
   private AuthPane authPane;
   private SessionWorkspaceView workspaceView;
@@ -24,7 +27,7 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
    * @param sessionService session service used for register, login, logout, and save operations
    */
   public GuiAppShell(SessionService sessionService) {
-    this(sessionService, new SessionWorkspaceFactory());
+    this(sessionService, new SessionWorkspaceFactory(), true);
   }
 
   /**
@@ -34,8 +37,23 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
    * @param workspaceFactory factory that creates one fresh workspace per active session
    */
   public GuiAppShell(SessionService sessionService, SessionWorkspaceFactory workspaceFactory) {
+    this(sessionService, workspaceFactory, true);
+  }
+
+  /**
+   * Builds a GUI shell with control over the first-login welcome dialog (disabled in headless tests).
+   *
+   * @param sessionService session service used for profile lifecycle operations
+   * @param workspaceFactory factory that creates one fresh workspace per active session
+   * @param showWelcomeOnFirstSession when {@code true}, shows welcome once per profile after login
+   */
+  public GuiAppShell(
+      SessionService sessionService,
+      SessionWorkspaceFactory workspaceFactory,
+      boolean showWelcomeOnFirstSession) {
     this.sessionService = sessionService;
     this.workspaceFactory = workspaceFactory;
+    this.showWelcomeOnFirstSession = showWelcomeOnFirstSession;
     setStyle("-fx-background-color: #121212;");
     showAuthView(false);
   }
@@ -120,7 +138,8 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
         allowReturnToSession,
         this::handleLogin,
         this::handleRegistration,
-        this::returnToCurrentSession);
+        this::returnToCurrentSession,
+        this::openHelpWindow);
     workspaceView = null;
     setCenter(authPane);
   }
@@ -129,11 +148,40 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
     disposeWorkspace();
     workspaceView = workspaceFactory.create(
         session,
+        sessionService,
+        this::openHelpWindow,
         this::logoutActiveUser,
         this::beginSwitchUserFlow,
         sessionService::saveActiveSession);
     authPane = null;
     setCenter(workspaceView);
+    Platform.runLater(this::showWelcomeIfNeeded);
+  }
+
+  private void openHelpWindow() {
+    Window owner = null;
+    if (workspaceView != null && workspaceView.getScene() != null) {
+      owner = workspaceView.getScene().getWindow();
+    } else if (authPane != null && authPane.getScene() != null) {
+      owner = authPane.getScene().getWindow();
+    }
+    WelcomeDialog.show(owner);
+  }
+
+  private void showWelcomeIfNeeded() {
+    if (!showWelcomeOnFirstSession) {
+      return;
+    }
+    try {
+      if (sessionService.hasSeenWelcome()) {
+        return;
+      }
+      Window owner = getScene() != null ? getScene().getWindow() : null;
+      WelcomeDialog.show(owner);
+      sessionService.markWelcomeSeen();
+    } catch (IllegalStateException ignored) {
+      // No active session (e.g. race); skip welcome.
+    }
   }
 
   private void handleRegistration(String username, String pin, String startingMoneyText) {

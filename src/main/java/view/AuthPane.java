@@ -7,6 +7,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -43,34 +45,41 @@ public class AuthPane extends BorderPane {
    * @param loginAction callback invoked for login requests
    * @param registerAction callback invoked for registration requests
    * @param returnAction callback invoked when returning to the current session
+   * @param helpAction callback to open the welcome / help content
    */
   public AuthPane(
       List<String> users,
       boolean allowReturnToSession,
       LoginAction loginAction,
       RegisterAction registerAction,
-      Runnable returnAction) {
+      Runnable returnAction,
+      Runnable helpAction) {
     setPadding(new Insets(20));
+    setStyle("-fx-background-color: #121212;");
 
-    Text heading = new Text("Millions GUI");
+    Text heading = new Text("Millions");
     heading.setFont(Font.font("System", FontWeight.BOLD, 28));
+    heading.setStyle("-fx-fill: #e0e0e0;");
 
-    Label intro = new Label("Register a profile or log into an existing one.");
+    Label intro = new Label("Log in or create a profile. Use Help anytime for a short tour.");
     intro.setWrapText(true);
+    intro.setStyle("-fx-text-fill: #bdbdbd;");
 
     VBox top = new VBox(8, heading, intro);
     setTop(top);
 
     registeredUsersView.getItems().setAll(users);
     registeredUsersView.setPlaceholder(new Label("No registered users yet."));
+    registeredUsersView.setStyle("-fx-background-color: #1e1e1e; -fx-control-inner-background: #1e1e1e;");
     registeredUsersView.getSelectionModel().selectedItemProperty().addListener((obs, oldUser, newUser) -> {
       if (newUser != null) {
         loginUsernameField.setText(newUser);
+        registerUsernameField.setText(newUser);
       }
     });
 
-    VBox usersBox = new VBox(8, new Label("Registered users"), registeredUsersView);
-    usersBox.setPrefWidth(180);
+    VBox usersBox = new VBox(8, labelMuted("Registered users"), registeredUsersView);
+    usersBox.setPrefWidth(200);
 
     loginUsernameField.setPromptText("Username");
     loginPinField.setPromptText("PIN (4-8 digits)");
@@ -78,7 +87,7 @@ public class AuthPane extends BorderPane {
     styleField(loginPinField);
 
     Button loginButton = new Button("Log in");
-    styleButton(loginButton);
+    styleAccentButton(loginButton);
     loginButton.setOnAction(_ -> loginAction.run(
         loginUsernameField.getText(),
         loginPinField.getText()));
@@ -86,12 +95,13 @@ public class AuthPane extends BorderPane {
     GridPane loginGrid = new GridPane();
     loginGrid.setHgap(10);
     loginGrid.setVgap(10);
-    loginGrid.addRow(0, new Label("Username"), loginUsernameField);
-    loginGrid.addRow(1, new Label("PIN"), loginPinField);
+    loginGrid.addRow(0, labelMuted("Username"), loginUsernameField);
+    loginGrid.addRow(1, labelMuted("PIN"), loginPinField);
     loginGrid.add(loginButton, 1, 2);
 
-    VBox loginBox = new VBox(10, new Label("Log into a profile"), loginGrid);
-    HBox.setHgrow(loginBox, Priority.ALWAYS);
+    VBox loginBox = new VBox(12, loginGrid);
+    Tab loginTab = new Tab("Log in", loginBox);
+    loginTab.setClosable(false);
 
     registerUsernameField.setPromptText("Username");
     registerPinField.setPromptText("PIN (4-8 digits)");
@@ -100,8 +110,8 @@ public class AuthPane extends BorderPane {
     styleField(registerPinField);
     styleField(registerStartingMoneyField);
 
-    Button registerButton = new Button("Register");
-    styleButton(registerButton);
+    Button registerButton = new Button("Create profile");
+    styleAccentButton(registerButton);
     registerButton.setOnAction(_ -> registerAction.run(
         registerUsernameField.getText(),
         registerPinField.getText(),
@@ -110,17 +120,26 @@ public class AuthPane extends BorderPane {
     GridPane registerGrid = new GridPane();
     registerGrid.setHgap(10);
     registerGrid.setVgap(10);
-    registerGrid.addRow(0, new Label("Username"), registerUsernameField);
-    registerGrid.addRow(1, new Label("PIN"), registerPinField);
-    registerGrid.addRow(2, new Label("Starting money"), registerStartingMoneyField);
+    registerGrid.addRow(0, labelMuted("Username"), registerUsernameField);
+    registerGrid.addRow(1, labelMuted("PIN"), registerPinField);
+    registerGrid.addRow(2, labelMuted("Starting money"), registerStartingMoneyField);
     registerGrid.add(registerButton, 1, 3);
 
-    VBox registerBox = new VBox(10, new Label("Create a profile"), registerGrid);
-    HBox.setHgrow(registerBox, Priority.ALWAYS);
+    VBox registerBox = new VBox(12, registerGrid);
+    Tab registerTab = new Tab("Create account", registerBox);
+    registerTab.setClosable(false);
 
-    HBox forms = new HBox(20, usersBox, loginBox, registerBox);
-    forms.setAlignment(Pos.TOP_LEFT);
-    setCenter(forms);
+    TabPane tabPane = new TabPane(loginTab, registerTab);
+    tabPane.setStyle("-fx-background-color: #1e1e1e;");
+    HBox.setHgrow(tabPane, Priority.ALWAYS);
+
+    HBox center = new HBox(24, usersBox, tabPane);
+    center.setAlignment(Pos.TOP_LEFT);
+    setCenter(center);
+
+    Button helpButton = new Button("Help");
+    styleButton(helpButton);
+    helpButton.setOnAction(_ -> helpAction.run());
 
     Button returnButton = new Button("Back to current session");
     styleButton(returnButton);
@@ -132,10 +151,17 @@ public class AuthPane extends BorderPane {
     HBox.setHgrow(spacer, Priority.ALWAYS);
 
     statusLabel.setWrapText(true);
-    HBox bottom = new HBox(12, statusLabel, spacer, returnButton);
+    statusLabel.setStyle("-fx-text-fill: #e57373;");
+    HBox bottom = new HBox(12, statusLabel, spacer, helpButton, returnButton);
     bottom.setAlignment(Pos.CENTER_LEFT);
     bottom.setPadding(new Insets(16, 0, 0, 0));
     setBottom(bottom);
+  }
+
+  private static Label labelMuted(String text) {
+    Label l = new Label(text);
+    l.setStyle("-fx-text-fill: #9e9e9e;");
+    return l;
   }
 
   /**
@@ -190,14 +216,26 @@ public class AuthPane extends BorderPane {
   }
 
   private static void styleField(TextField field) {
-    field.setStyle(FIELD_STYLE);
+    field.setStyle(
+        FIELD_STYLE
+            + "-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-prompt-text-fill: #757575;");
   }
 
   private static void styleButton(Button button) {
     button.setStyle(
         "-fx-border-radius: 6;"
             + "-fx-background-radius: 6;"
-            + "-fx-cursor: hand;");
+            + "-fx-cursor: hand;"
+            + "-fx-text-fill: #e0e0e0;");
+  }
+
+  private static void styleAccentButton(Button button) {
+    button.setStyle(
+        "-fx-border-radius: 6;"
+            + "-fx-background-radius: 6;"
+            + "-fx-cursor: hand;"
+            + "-fx-background-color: #2e7d32;"
+            + "-fx-text-fill: #ffffff;");
   }
 
   /**
