@@ -6,11 +6,17 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import model.exception.InsufficientFundsException;
 import model.exception.InsufficientSharesException;
+import model.marketevent.DailyPriceMoveStrategy;
+import model.marketevent.MarketEvent;
+import model.marketevent.MarketEventStrategy;
+import model.marketevent.RandomMarketEventStrategy;
+import model.marketevent.UniformDailyPriceMoveStrategy;
 import model.transactioncalculator.SaleCalculator;
 import model.transaction.Purchase;
 import model.transaction.Sale;
@@ -31,7 +37,10 @@ public class Exchange {
   private final String name;
   private final Map<String, Stock> stockMap;
   private final Random random;
+  private final DailyPriceMoveStrategy dailyPriceMoveStrategy;
+  private final MarketEventStrategy marketEventStrategy;
   private int day;
+  private Optional<MarketEvent> lastMarketEvent;
 
   /**
    * Constructor for Exchange.
@@ -40,11 +49,38 @@ public class Exchange {
    * @param stocks the list of stocks available in the exchange
    */
   public Exchange(String name, List<Stock> stocks) {
+    this(
+        name,
+        stocks,
+        new Random(),
+        new UniformDailyPriceMoveStrategy(DAILY_SIGMA),
+        new RandomMarketEventStrategy());
+  }
+
+  /**
+   * Creates an exchange with injected collaborators for deterministic tests and alternative market
+   * behavior.
+   *
+   * @param name the name of the exchange
+   * @param stocks the listed stocks
+   * @param random random source used for daily moves and event generation
+   * @param dailyPriceMoveStrategy strategy for baseline daily price movement
+   * @param marketEventStrategy strategy that may generate a rare market event each day
+   */
+  Exchange(
+      String name,
+      List<Stock> stocks,
+      Random random,
+      DailyPriceMoveStrategy dailyPriceMoveStrategy,
+      MarketEventStrategy marketEventStrategy) {
     this.name = name;
     this.day = 1;
     this.stockMap = stocks.stream()
         .collect(Collectors.toMap(Stock::getSymbol, s -> s));
-    this.random = new Random();
+    this.random = random;
+    this.dailyPriceMoveStrategy = dailyPriceMoveStrategy;
+    this.marketEventStrategy = marketEventStrategy;
+    this.lastMarketEvent = Optional.empty();
   }
 
   /**
@@ -142,6 +178,15 @@ public class Exchange {
    */
   public int getDay() {
     return day;
+  }
+
+  /**
+   * Returns the most recent market event generated during {@link #advance()}, if any.
+   *
+   * @return latest market event for the current trading day
+   */
+  public Optional<MarketEvent> getLastMarketEvent() {
+    return lastMarketEvent;
   }
 
   /**
@@ -247,10 +292,14 @@ public class Exchange {
    */
   private void advanceOneDay() {
     this.day += 1;
+    List<Stock> listedStocks = List.copyOf(this.stockMap.values());
+    this.lastMarketEvent = marketEventStrategy.maybeCreateEvent(listedStocks, this.day, this.random);
     this.stockMap.values().forEach(stock -> {
-      double factor = 1 + this.random.nextDouble(-DAILY_SIGMA, DAILY_SIGMA);
-      stock.addNewSalesPrice(
-          stock.getSalesPrice().multiply(BigDecimal.valueOf(factor)));
+      BigDecimal nextPrice = dailyPriceMoveStrategy.calculateNextPrice(stock, this.random);
+      if (lastMarketEvent.isPresent() && lastMarketEvent.get().affects(stock)) {
+        nextPrice = lastMarketEvent.get().applyTo(nextPrice);
+      }
+      stock.addNewSalesPrice(nextPrice);
     });
   }
 
