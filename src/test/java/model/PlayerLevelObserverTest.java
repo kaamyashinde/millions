@@ -22,18 +22,18 @@ class PlayerLevelObserverTest {
   @Test
   void observerRecalculatesLevel_afterAddMoney() {
     addDistinctTradingDays(1, 70);
-    assertEquals(PlayerLevel.NOVICE, player.getPlayerLevel());
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
 
     player.addMoney(new BigDecimal("200.00"));
 
-    assertEquals(PlayerLevel.INVESTOR, player.getPlayerLevel());
+    assertEquals(PlayerLevels.INVESTOR, player.getPlayerLevel());
   }
 
   @Test
   void levelStaysNovice_whenOnlyMoneyChanges() {
     player.addMoney(new BigDecimal("5000.00"));
 
-    assertEquals(PlayerLevel.NOVICE, player.getPlayerLevel());
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
   }
 
   @Test
@@ -47,7 +47,7 @@ class PlayerLevelObserverTest {
         new java.util.ArrayList<>(player.getTransactionArchive().getAllTransactions()),
         java.util.List.of());
 
-    assertEquals(PlayerLevel.INVESTOR, restored.getPlayerLevel());
+    assertEquals(PlayerLevels.INVESTOR, restored.getPlayerLevel());
   }
 
   private void addDistinctTradingDays(int fromDay, int toDay) {
