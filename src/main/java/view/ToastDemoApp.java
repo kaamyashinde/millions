@@ -127,7 +127,11 @@ public class ToastDemoApp extends Application {
     fundsTab.setClosable(false);
     savingsTab.setClosable(false);
 
-    TabPane tabs = new TabPane(notificationsTab, playerTab, stocksTab, fundsTab, savingsTab);
+    LearningHubPanel learningHubPanel = new LearningHubPanel();
+    Tab learningHubTab = new Tab("Learning Hub", learningHubPanel);
+    learningHubTab.setClosable(false);
+
+    TabPane tabs = new TabPane(notificationsTab, playerTab, stocksTab, fundsTab, savingsTab, learningHubTab);
 
     Text heading = new Text("Toast Demo");
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
@@ -159,7 +163,7 @@ public class ToastDemoApp extends Application {
 
     StackPane root = new StackPane(center, toastArea);
 
-    stage.setScene(new Scene(root, 780, 580));
+    stage.setScene(new Scene(root, 920, 600));
     stage.setTitle("Toast & Savings Demo");
     stage.show();
   }
