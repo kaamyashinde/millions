@@ -5,7 +5,7 @@ import java.net.URI;
 import java.util.List;
 
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
@@ -33,6 +33,8 @@ import model.learninghub.LearningResource;
  * @since 04-04-2026
  */
 public class LearningHubPanel extends BorderPane {
+
+  private javafx.scene.Node landingView;
 
   private static final String COLOR_BG_CARD = "#1e1e1e";
   private static final String COLOR_BORDER_DEFAULT = "#2a2a2a";
@@ -78,7 +80,9 @@ public class LearningHubPanel extends BorderPane {
     scroll.setFitToWidth(true);
     scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
     scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-    setCenter(scroll);
+
+    this.landingView = scroll;
+    setCenter(landingView);
   }
 
   // ── Section builders ────────────────────────────────────────────────────────
@@ -250,23 +254,21 @@ public class LearningHubPanel extends BorderPane {
     }
   }
 
-  // ── Phase 2 stubs ────────────────────────────────────────────────────────────
+  // ── Navigation ───────────────────────────────────────────────────────────────
 
-  /**
-   * Called when a category card is clicked. Navigation to be implemented in Phase 2.
-   *
-   * @param category the clicked category
-   */
-  private void onCategoryCardClicked(LearningCategory category) {
-    // Phase 2: navigate to category detail view
+  private void showLanding() {
+    setCenter(landingView);
   }
 
-  /**
-   * Called when a featured item card is clicked. Navigation to be implemented in Phase 2.
-   *
-   * @param item the clicked item
-   */
+  private void onItemCardClicked(LearningItem item) {
+    setCenter(new LearningItemDetailView(item, this::showLanding));
+  }
+
+  private void onCategoryCardClicked(LearningCategory category) {
+    setCenter(new LearningCategoryView(category, this::showLanding, this::onItemCardClicked));
+  }
+
   private void onFeaturedCardClicked(LearningItem item) {
-    // Phase 2: navigate to item detail view
+    onItemCardClicked(item);
   }
 }
