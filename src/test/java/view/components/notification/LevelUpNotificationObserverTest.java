@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import model.Player;
 import model.PlayerLevel;
+import model.PlayerLevels;
 import model.PlayerObserver;
 import model.Share;
 import model.Stock;
@@ -35,44 +36,44 @@ class LevelUpNotificationObserverTest {
 
   @Test
   void firesOnLevelUp() {
-    PlayerObserver spy = buildLevelTransitionSpy(PlayerLevel.NOVICE);
+    PlayerObserver spy = buildLevelTransitionSpy(PlayerLevels.NOVICE);
     player.addObserver(spy);
 
     addDistinctTradingDays(1, 70);
     player.addMoney(new BigDecimal("200.00"));
 
-    assertEquals(PlayerLevel.INVESTOR, player.getPlayerLevel());
+    assertEquals(PlayerLevels.INVESTOR, player.getPlayerLevel());
     assertEquals(1, levelTransitions.size());
-    assertEquals(PlayerLevel.INVESTOR, levelTransitions.getFirst());
+    assertEquals(PlayerLevels.INVESTOR, levelTransitions.getFirst());
   }
 
   @Test
   void doesNotFire_whenLevelUnchanged() {
-    PlayerObserver spy = buildLevelTransitionSpy(PlayerLevel.NOVICE);
+    PlayerObserver spy = buildLevelTransitionSpy(PlayerLevels.NOVICE);
     player.addObserver(spy);
 
     player.addMoney(new BigDecimal("10.00"));
 
-    assertEquals(PlayerLevel.NOVICE, player.getPlayerLevel());
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
     assertEquals(0, levelTransitions.size());
   }
 
   @Test
   void firesOnce_perDistinctTransition() {
-    PlayerObserver spy = buildLevelTransitionSpy(PlayerLevel.NOVICE);
+    PlayerObserver spy = buildLevelTransitionSpy(PlayerLevels.NOVICE);
     player.addObserver(spy);
 
     addDistinctTradingDays(1, 140);
 
     player.addMoney(new BigDecimal("200.00"));
-    assertEquals(PlayerLevel.INVESTOR, player.getPlayerLevel());
+    assertEquals(PlayerLevels.INVESTOR, player.getPlayerLevel());
 
     player.addMoney(new BigDecimal("800.00"));
-    assertEquals(PlayerLevel.SPECULATOR, player.getPlayerLevel());
+    assertEquals(PlayerLevels.SPECULATOR, player.getPlayerLevel());
 
     assertEquals(2, levelTransitions.size());
-    assertEquals(PlayerLevel.INVESTOR, levelTransitions.get(0));
-    assertEquals(PlayerLevel.SPECULATOR, levelTransitions.get(1));
+    assertEquals(PlayerLevels.INVESTOR, levelTransitions.get(0));
+    assertEquals(PlayerLevels.SPECULATOR, levelTransitions.get(1));
   }
 
   /**
