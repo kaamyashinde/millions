@@ -7,6 +7,7 @@ import model.Stock;
 import model.session.ActiveSession;
 import model.session.SessionService;
 import model.session.SessionService;
+import view.components.notification.LevelUpNotificationObserver;
 import view.components.notification.NotificationService;
 import view.components.toast.ToastMode;
 
@@ -48,6 +49,8 @@ public class SessionWorkspaceFactory {
     LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sessionService);
 
     showLoadedNotifications(notifications, session);
+    session.player().addObserver(
+        new LevelUpNotificationObserver(notifications, session.player().getPlayerLevel()));
 
     return new SessionWorkspaceView(
         session,
