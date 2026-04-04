@@ -1,6 +1,8 @@
 package model.session;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -164,6 +166,43 @@ public final class SessionService {
    */
   public List<String> listRegisteredUsers() {
     return userAccountRepository.listUsernames();
+  }
+
+  /**
+   * Lists leaderboard entries for all saved profiles, using live in-memory state for the active
+   * session when available.
+   *
+   * @return default-ranked leaderboard entries
+   */
+  public List<PlayerLeaderboardEntry> listLeaderboardEntries() {
+    List<PlayerLeaderboardEntry> entries = new ArrayList<>();
+    for (String username : userAccountRepository.listUsernames()) {
+      String normalizedUsername = ProfileDirectories.normalizeUsername(username);
+      if (activeSession != null && activeSession.normalizedUsername().equals(normalizedUsername)) {
+        entries.add(toLeaderboardEntry(activeSession.player()));
+        continue;
+      }
+
+      GameStateSnapshot snapshot = gameStateRepository.load(normalizedUsername)
+          .orElseThrow(() -> new IllegalStateException("Saved game state not found for " + username + "."));
+      Exchange exchange = gameStateMapper.restoreExchange(snapshot.exchange(), loadMarketData());
+      Player player = gameStateMapper.restorePlayer(snapshot.player(), exchange);
+      entries.add(toLeaderboardEntry(player));
+    }
+    return entries.stream()
+        .sorted(PlayerLeaderboardRanking.bestFirstComparator(PlayerLeaderboardMetric.NET_WORTH))
+        .toList();
+  }
+
+  private static PlayerLeaderboardEntry toLeaderboardEntry(Player player) {
+    BigDecimal netWorth = player.getNetWorth();
+    BigDecimal startingMoney = player.getStartingMoney();
+    BigDecimal totalReturnPercent = BigDecimal.ZERO;
+    if (startingMoney.compareTo(BigDecimal.ZERO) != 0) {
+      totalReturnPercent = netWorth.subtract(startingMoney)
+          .divide(startingMoney, 8, RoundingMode.HALF_UP);
+    }
+    return new PlayerLeaderboardEntry(player.getName(), netWorth, totalReturnPercent);
   }
 
   private MarketData loadMarketData() {
