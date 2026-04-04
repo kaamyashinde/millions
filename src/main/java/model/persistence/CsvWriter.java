@@ -5,33 +5,39 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import model.Stock;
+import model.fund.Fund;
+import model.fund.FundComponent;
 
 /**
- * A class responsible for writing the Stock Exchange data to a CSV file.
- *
- * @author kevindmazali
- * @version 1.0.0
- * @see Stock
- * @since 2026-02-28
+ * Writes mixed market-data CSV files containing both stocks and funds.
  */
-public class CsvWriter {
+public final class CsvWriter {
+
+  private static final String STOCK_RECORD = "STOCK";
+  private static final String FUND_RECORD = "FUND";
+
+  private CsvWriter() {
+  }
 
   /**
-   * Write the stock exchange data to a CSV file. The data should be in the format:
-   * symbol,company,price. Each line in the CSV file should represent a stock with its symbol,
-   * company name, and price.
+   * Writes mixed market data to a CSV file.
    *
-   * @param directory    the directory where the CSV file will be saved
-   * @param fileName     the name of the CSV file to write to (without the .csv extension)
-   * @param stocksToSave the list of stocks to write to the CSV file
+   * @param directory directory where the CSV file will be saved
+   * @param fileName name of the CSV file to write to without the {@code .csv} extension
+   * @param marketData stocks and funds to serialize
    */
-  public static void writeCsvToFile(Path directory, String fileName, List<Stock> stocksToSave) {
+  public static void writeMarketDataToFile(Path directory, String fileName, MarketData marketData) {
     Path path = directory.resolve(fileName + ".csv");
     try (BufferedWriter writer = Files.newBufferedWriter(path)) {
-      for (Stock stock : stocksToSave) {
+      for (Stock stock : marketData.stocks()) {
         writer.write(formatStock(stock));
+        writer.newLine();
+      }
+      for (Fund fund : marketData.funds()) {
+        writer.write(formatFund(fund));
         writer.newLine();
       }
     } catch (IOException e) {
@@ -40,16 +46,56 @@ public class CsvWriter {
   }
 
   /**
-   * Formats a Stock object into a CSV line format. The format is: symbol,company,price.
+   * Writes a stock-only market-data file in the mixed-format schema.
    *
-   * @param stock the Stock object to be formatted into a CSV line
-   * @return a String representing the Stock object in CSV line format
+   * @param directory directory where the CSV file will be saved
+   * @param fileName file name without the {@code .csv} extension
+   * @param stocksToSave stocks to serialize
+   */
+  public static void writeCsvToFile(Path directory, String fileName, List<Stock> stocksToSave) {
+    writeMarketDataToFile(directory, fileName, new MarketData(stocksToSave, List.of()));
+  }
+
+  /**
+   * Formats one stock into a mixed market-data CSV row.
+   *
+   * @param stock stock to serialize
+   * @return CSV row for the stock
    */
   private static String formatStock(Stock stock) {
     return String.join(",",
+        STOCK_RECORD,
         stock.getSymbol(),
         stock.getCompany(),
         stock.getSalesPrice().toString()
     );
+  }
+
+  /**
+   * Formats one fund into a mixed market-data CSV row.
+   *
+   * @param fund fund to serialize
+   * @return CSV row for the fund
+   */
+  private static String formatFund(Fund fund) {
+    List<String> parts = new java.util.ArrayList<>();
+    parts.add(FUND_RECORD);
+    parts.add(fund.getSymbol());
+    parts.add(fund.getDisplayName());
+    fund.getComponents().stream()
+        .sorted(Comparator.comparing(component -> component.stock().getSymbol()))
+        .map(CsvWriter::formatFundComponent)
+        .forEach(parts::add);
+    return String.join(",", parts);
+  }
+
+  /**
+   * Formats one fund component into {@code SYMBOL:weight} form.
+   *
+   * @param component fund component to serialize
+   * @return component CSV token
+   */
+  private static String formatFundComponent(FundComponent component) {
+    return component.stock().getSymbol() + ":" + component.weight().toPlainString();
   }
 }

@@ -1,6 +1,8 @@
 package model.persistence;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -8,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import model.Stock;
+import model.fund.Fund;
+import model.fund.FundComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -20,6 +24,7 @@ class CsvWriterTest {
   private Stock testStock1;
   private Stock testStock2;
   private Stock testStock3;
+  private Fund blendFund;
 
   @BeforeEach
   void setUp() {
@@ -31,39 +36,48 @@ class CsvWriterTest {
 
     testStock3 = new Stock("MSFT", "Microsoft Corp.");
     testStock3.addNewSalesPrice(new BigDecimal("380.75"));
+
+    blendFund = new Fund(
+        "BLEND",
+        "Blend Fund",
+        List.of(
+            new FundComponent(testStock3, new BigDecimal("0.20")),
+            new FundComponent(testStock1, new BigDecimal("0.50")),
+            new FundComponent(testStock2, new BigDecimal("0.30"))));
   }
 
   @Test
-  void writeCsvToFile_WithMultipleStocks_CreatesFileWithCorrectFormat() throws IOException {
-    List<Stock> stocks = List.of(testStock1, testStock2, testStock3);
+  void writeMarketDataToFile_writesStocksAndFundsInMixedFormat() throws IOException {
+    MarketData marketData = new MarketData(List.of(testStock1, testStock2, testStock3), List.of(blendFund));
 
-    CsvWriter.writeCsvToFile(tempDir, "test_multiple", stocks);
+    CsvWriter.writeMarketDataToFile(tempDir, "test_multiple", marketData);
 
     Path csvFile = tempDir.resolve("test_multiple.csv");
     assertTrue(Files.exists(csvFile), "CSV file should be created");
 
     List<String> lines = Files.readAllLines(csvFile);
-    assertEquals(3, lines.size(), "File should contain 3 lines");
-    assertEquals("AAPL,Apple Inc.,150.25", lines.get(0));
-    assertEquals("GOOGL,Alphabet Inc.,140.50", lines.get(1));
-    assertEquals("MSFT,Microsoft Corp.,380.75", lines.get(2));
+    assertEquals(4, lines.size(), "File should contain stock and fund rows");
+    assertEquals("STOCK,AAPL,Apple Inc.,150.25", lines.get(0));
+    assertEquals("STOCK,GOOGL,Alphabet Inc.,140.50", lines.get(1));
+    assertEquals("STOCK,MSFT,Microsoft Corp.,380.75", lines.get(2));
+    assertEquals("FUND,BLEND,Blend Fund,AAPL:0.50,GOOGL:0.30,MSFT:0.20", lines.get(3));
   }
 
   @Test
-  void writeCsvToFile_WithEmptyList_CreatesEmptyFile() throws IOException {
-    List<Stock> stocks = List.of();
+  void writeMarketDataToFile_withEmptyMarketData_createsEmptyFile() throws IOException {
+    MarketData marketData = MarketData.empty();
 
-    CsvWriter.writeCsvToFile(tempDir, "test_empty", stocks);
+    CsvWriter.writeMarketDataToFile(tempDir, "test_empty", marketData);
 
     Path csvFile = tempDir.resolve("test_empty.csv");
-    assertTrue(Files.exists(csvFile), "CSV file should be created even for empty list");
+    assertTrue(Files.exists(csvFile), "CSV file should be created even for empty market data");
 
     List<String> lines = Files.readAllLines(csvFile);
     assertEquals(0, lines.size(), "File should be empty");
   }
 
   @Test
-  void writeCsvToFile_WithSingleStock_CreatesFileWithOneEntry() throws IOException {
+  void writeCsvToFile_withSingleStock_stillUsesMixedSchema() throws IOException {
     List<Stock> stocks = List.of(testStock1);
 
     CsvWriter.writeCsvToFile(tempDir, "test_single", stocks);
@@ -73,24 +87,11 @@ class CsvWriterTest {
 
     List<String> lines = Files.readAllLines(csvFile);
     assertEquals(1, lines.size(), "File should contain 1 line");
-    assertEquals("AAPL,Apple Inc.,150.25", lines.get(0));
+    assertEquals("STOCK,AAPL,Apple Inc.,150.25", lines.get(0));
   }
 
   @Test
-  void writeCsvToFile_CorrectlyFormatsStockData() throws IOException {
-    Stock stock = new Stock("TSLA", "Tesla Inc.");
-    stock.addNewSalesPrice(new BigDecimal("250.99"));
-    List<Stock> stocks = List.of(stock);
-
-    CsvWriter.writeCsvToFile(tempDir, "test_format", stocks);
-
-    Path csvFile = tempDir.resolve("test_format.csv");
-    String content = Files.readString(csvFile).trim();
-    assertEquals("TSLA,Tesla Inc.,250.99", content);
-  }
-
-  @Test
-  void writeCsvToFile_AppendsExtension_ToCsvFileName() throws IOException {
+  void writeCsvToFile_appendsExtensionToCsvFileName() throws IOException {
     List<Stock> stocks = List.of(testStock1);
 
     CsvWriter.writeCsvToFile(tempDir, "test_extension", stocks);
@@ -101,16 +102,19 @@ class CsvWriterTest {
   }
 
   @Test
-  void writeAndRead_RoundTrip_PreservesStockData() throws IOException {
-    List<Stock> stocks = List.of(testStock1, testStock2, testStock3);
+  void writeAndRead_roundTrip_preservesStocksAndFunds() throws IOException {
+    MarketData original = new MarketData(List.of(testStock1, testStock2, testStock3), List.of(blendFund));
 
-    CsvWriter.writeCsvToFile(tempDir, "roundtrip", stocks);
+    CsvWriter.writeMarketDataToFile(tempDir, "roundtrip", original);
 
-    List<Stock> readStocks = CsvReader.readCsv(tempDir, "roundtrip");
+    MarketData loaded = CsvReader.readMarketData(tempDir, "roundtrip");
 
-    assertEquals(3, readStocks.size(), "Should read 3 stocks");
-    assertEquals("AAPL", readStocks.get(0).getSymbol());
-    assertEquals("Apple Inc.", readStocks.get(0).getCompany());
-    assertEquals(new BigDecimal("150.25"), readStocks.get(0).getSalesPrice());
+    assertEquals(3, loaded.stocks().size(), "Should read 3 stocks");
+    assertEquals(1, loaded.funds().size(), "Should read 1 fund");
+    assertEquals("AAPL", loaded.stocks().get(0).getSymbol());
+    assertEquals("Apple Inc.", loaded.stocks().get(0).getCompany());
+    assertEquals(new BigDecimal("150.25"), loaded.stocks().get(0).getSalesPrice());
+    assertEquals("BLEND", loaded.funds().getFirst().getSymbol());
+    assertEquals(new BigDecimal("0.50"), loaded.funds().getFirst().getComponents().getFirst().weight());
   }
 }
