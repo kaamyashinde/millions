@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ArrayList;
@@ -47,98 +48,20 @@ public class Exchange {
   private Optional<MarketEvent> lastMarketEvent;
 
   /**
-   * Constructor for Exchange.
-   *
-   * @param name   the name of the exchange
-   * @param stocks the list of stocks available in the exchange
+   * Full constructor used only by {@link Builder}; builds a complete exchange in one step.
    */
-  public Exchange(String name, List<Stock> stocks) {
-    this(name, stocks, List.of());
-  }
-
-  /**
-   * Creates an exchange with both direct stocks and funds listed for trading.
-   *
-   * @param name the name of the exchange
-   * @param stocks the listed stocks
-   * @param funds the listed funds
-   */
-  public Exchange(String name, List<Stock> stocks, List<Fund> funds) {
-    this(
-        name,
-        stocks,
-        funds,
-        new Random(),
-        new UniformDailyPriceMoveStrategy(DAILY_SIGMA),
-        new RandomMarketEventStrategy());
-  }
-
-  /**
-   * Rebuilds an exchange from previously persisted market state.
-   *
-   * @param name exchange name
-   * @param stocks listed stocks with restored price history
-   * @param funds listed funds backed by the restored stocks
-   * @param day current trading day
-   * @param marketEventHistory chronological event history
-   * @param lastMarketEvent latest event for the current day, if any
-   * @return restored exchange instance
-   */
-  public static Exchange restore(
+  private Exchange(
       String name,
       List<Stock> stocks,
       List<Fund> funds,
+      Random random,
+      DailyPriceMoveStrategy dailyPriceMoveStrategy,
+      MarketEventStrategy marketEventStrategy,
       int day,
-      List<MarketEvent> marketEventHistory,
-      MarketEvent lastMarketEvent) {
-    if (day < 1) {
-      throw new IllegalArgumentException("Trading day must be at least 1.");
-    }
-    Exchange exchange = new Exchange(name, stocks, funds);
-    exchange.day = day;
-    exchange.marketEventHistory.clear();
-    exchange.marketEventHistory.addAll(marketEventHistory);
-    exchange.lastMarketEvent = Optional.ofNullable(lastMarketEvent);
-    return exchange;
-  }
-
-  /**
-   * Creates an exchange with injected collaborators for deterministic stock-only tests.
-   *
-   * @param name the name of the exchange
-   * @param stocks the listed stocks
-   * @param random random source used for daily moves and event generation
-   * @param dailyPriceMoveStrategy strategy for baseline daily price movement
-   * @param marketEventStrategy strategy that may generate a rare market event each day
-   */
-  Exchange(
-      String name,
-      List<Stock> stocks,
-      Random random,
-      DailyPriceMoveStrategy dailyPriceMoveStrategy,
-      MarketEventStrategy marketEventStrategy) {
-    this(name, stocks, List.of(), random, dailyPriceMoveStrategy, marketEventStrategy);
-  }
-
-  /**
-   * Creates an exchange with injected collaborators for deterministic tests and alternative market
-   * behavior.
-   *
-   * @param name the name of the exchange
-   * @param stocks the listed stocks
-   * @param random random source used for daily moves and event generation
-   * @param dailyPriceMoveStrategy strategy for baseline daily price movement
-   * @param marketEventStrategy strategy that may generate a rare market event each day
-   */
-  Exchange(
-      String name,
-      List<Stock> stocks,
-      List<Fund> funds,
-      Random random,
-      DailyPriceMoveStrategy dailyPriceMoveStrategy,
-      MarketEventStrategy marketEventStrategy) {
+      ArrayList<MarketEvent> marketEventHistory,
+      Optional<MarketEvent> lastMarketEvent) {
     this.name = name;
-    this.day = 1;
+    this.day = day;
     this.stockMap = stocks.stream()
         .collect(Collectors.toMap(Stock::getSymbol, s -> s));
     this.fundMap = funds.stream()
@@ -147,8 +70,112 @@ public class Exchange {
     this.random = random;
     this.dailyPriceMoveStrategy = dailyPriceMoveStrategy;
     this.marketEventStrategy = marketEventStrategy;
-    this.marketEventHistory = new ArrayList<>();
-    this.lastMarketEvent = Optional.empty();
+    this.marketEventHistory = marketEventHistory;
+    this.lastMarketEvent = lastMarketEvent;
+  }
+
+  /**
+   * Fluent builder for {@link Exchange}. Supplies defaults that match the former public
+   * constructors (random source, price and event strategies, day 1, empty event history).
+   */
+  public static final class Builder {
+    private final String name;
+    private List<Stock> stocks = List.of();
+    private List<Fund> funds = List.of();
+    private int day = 1;
+    private Random random;
+    private DailyPriceMoveStrategy dailyPriceMoveStrategy;
+    private MarketEventStrategy marketEventStrategy;
+    private List<MarketEvent> marketEventHistory = List.of();
+    private MarketEvent lastMarketEvent;
+
+    /**
+     * @param name exchange display name (required)
+     */
+    public Builder(String name) {
+      this.name = Objects.requireNonNull(name, "name");
+    }
+
+    /** Listed stocks (default empty). */
+    public Builder stocks(List<Stock> stocks) {
+      this.stocks = stocks != null ? stocks : List.of();
+      return this;
+    }
+
+    /** Listed funds (default empty). */
+    public Builder funds(List<Fund> funds) {
+      this.funds = funds != null ? funds : List.of();
+      return this;
+    }
+
+    /** Current trading day (default {@code 1}; must be at least 1). */
+    public Builder day(int day) {
+      this.day = day;
+      return this;
+    }
+
+    /** Random source for simulation (default new {@link Random}). */
+    public Builder random(Random random) {
+      this.random = random;
+      return this;
+    }
+
+    /** Baseline daily price move strategy (default {@link UniformDailyPriceMoveStrategy}). */
+    public Builder dailyPriceMoveStrategy(DailyPriceMoveStrategy strategy) {
+      this.dailyPriceMoveStrategy = strategy;
+      return this;
+    }
+
+    /** Rare market event strategy (default {@link RandomMarketEventStrategy}). */
+    public Builder marketEventStrategy(MarketEventStrategy strategy) {
+      this.marketEventStrategy = strategy;
+      return this;
+    }
+
+    /** Prior market events, oldest first (default empty; copied into the exchange). */
+    public Builder marketEventHistory(List<MarketEvent> history) {
+      this.marketEventHistory = history != null ? history : List.of();
+      return this;
+    }
+
+    /** Latest event for the current day, if any (default none). */
+    public Builder lastMarketEvent(MarketEvent event) {
+      this.lastMarketEvent = event;
+      return this;
+    }
+
+    /**
+     * Validates inputs and returns a fully initialized exchange.
+     *
+     * @return new exchange instance
+     * @throws IllegalArgumentException if {@code day} is less than 1
+     */
+    public Exchange build() {
+      if (day < 1) {
+        throw new IllegalArgumentException("Trading day must be at least 1.");
+      }
+      Random resolvedRandom = random != null ? random : new Random();
+      DailyPriceMoveStrategy resolvedDaily =
+          dailyPriceMoveStrategy != null
+              ? dailyPriceMoveStrategy
+              : new UniformDailyPriceMoveStrategy(DAILY_SIGMA);
+      MarketEventStrategy resolvedEvents =
+          marketEventStrategy != null ? marketEventStrategy : new RandomMarketEventStrategy();
+      List<Stock> stockList = List.copyOf(stocks);
+      List<Fund> fundList = List.copyOf(funds);
+      ArrayList<MarketEvent> historyCopy = new ArrayList<>(marketEventHistory);
+      Optional<MarketEvent> last = Optional.ofNullable(lastMarketEvent);
+      return new Exchange(
+          name,
+          stockList,
+          fundList,
+          resolvedRandom,
+          resolvedDaily,
+          resolvedEvents,
+          day,
+          historyCopy,
+          last);
+    }
   }
 
   /**
