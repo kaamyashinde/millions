@@ -48,57 +48,77 @@ public final class LearningContentStore {
   private static final LearningItem ITEM_WHAT_IS_STOCK =
       new LearningItem("what-is-a-stock", "What Is a Stock?", "what-is-a-stock",
           "Learn what owning a share of a company actually means.",
-          CAT_BASICS, Difficulty.BEGINNER, true, "learninghub/what-is-a-stock.md");
+          CAT_BASICS, Difficulty.BEGINNER, true, "learninghub/what-is-a-stock.md",
+          List.of("stocks-vs-bonds", "how-stock-prices-move"),
+          List.of("res-aksjer-for-alle", "res-investopedia-stocks"));
 
   private static final LearningItem ITEM_HOW_PRICES_MOVE =
       new LearningItem("how-stock-prices-move", "How Stock Prices Move", "how-stock-prices-move",
           "Discover the forces of supply and demand that drive price changes.",
-          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, true, "learninghub/how-stock-prices-move.md");
+          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, true, "learninghub/how-stock-prices-move.md",
+          List.of("reading-stock-charts", "what-is-investment-risk"),
+          List.of("res-investopedia-stocks", "res-yt-investing-basics"));
 
   private static final LearningItem ITEM_WHAT_IS_RISK =
       new LearningItem("what-is-investment-risk", "What Is Investment Risk?",
           "what-is-investment-risk",
           "Understand why all investments carry some level of uncertainty.",
-          CAT_RISK, Difficulty.BEGINNER, true, "learninghub/what-is-investment-risk.md");
+          CAT_RISK, Difficulty.BEGINNER, true, "learninghub/what-is-investment-risk.md",
+          List.of("diversification-basics", "stocks-vs-bonds"),
+          List.of("res-nordnet-academy"));
 
   private static final LearningItem ITEM_STOCK_VS_BOND =
       new LearningItem("stocks-vs-bonds", "Stocks vs. Bonds", "stocks-vs-bonds",
           "Compare the two most common asset classes side by side.",
-          CAT_BASICS, Difficulty.BEGINNER, false, "learninghub/stocks-vs-bonds.md");
+          CAT_BASICS, Difficulty.BEGINNER, false, "learninghub/stocks-vs-bonds.md",
+          List.of("what-is-a-stock", "diversification-basics"),
+          List.of("res-investopedia-stocks", "res-nordnet-academy"));
 
   private static final LearningItem ITEM_COMPOUND_INTEREST =
       new LearningItem("compound-interest", "The Power of Compound Interest",
           "compound-interest",
           "See how reinvesting returns accelerates portfolio growth over time.",
-          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, false, "learninghub/compound-interest.md");
+          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, false, "learninghub/compound-interest.md",
+          List.of("index-funds-explained", "dollar-cost-averaging"),
+          List.of("res-nordnet-academy", "res-yt-investing-basics"));
 
   private static final LearningItem ITEM_DIVERSIFICATION =
       new LearningItem("diversification-basics", "Diversification Basics",
           "diversification-basics",
           "Why spreading investments across assets reduces overall risk.",
-          CAT_RISK, Difficulty.INTERMEDIATE, false, "learninghub/diversification-basics.md");
+          CAT_RISK, Difficulty.INTERMEDIATE, false, "learninghub/diversification-basics.md",
+          List.of("what-is-investment-risk", "index-funds-explained"),
+          List.of("res-nordnet-academy", "res-aksjer-for-alle"));
 
   private static final LearningItem ITEM_READING_CHARTS =
       new LearningItem("reading-stock-charts", "Reading Stock Charts", "reading-stock-charts",
           "Interpret candlestick charts and identify key price patterns.",
-          CAT_MARKET, Difficulty.INTERMEDIATE, false, "learninghub/reading-stock-charts.md");
+          CAT_MARKET, Difficulty.INTERMEDIATE, false, "learninghub/reading-stock-charts.md",
+          List.of("how-stock-prices-move", "dollar-cost-averaging"),
+          List.of("res-investopedia-stocks", "res-yt-investing-basics"));
 
   private static final LearningItem ITEM_INDEX_FUNDS =
       new LearningItem("index-funds-explained", "Index Funds Explained", "index-funds-explained",
           "Low-cost, passive investing through broad market indices.",
-          CAT_STRATEGIES, Difficulty.BEGINNER, false, "learninghub/index-funds-explained.md");
+          CAT_STRATEGIES, Difficulty.BEGINNER, false, "learninghub/index-funds-explained.md",
+          List.of("dollar-cost-averaging", "diversification-basics"),
+          List.of("res-nordnet-academy", "res-aksjer-for-alle"));
 
   private static final LearningItem ITEM_DOLLAR_COST =
       new LearningItem("dollar-cost-averaging", "Dollar-Cost Averaging",
           "dollar-cost-averaging",
           "Invest a fixed amount regularly to reduce timing risk.",
-          CAT_STRATEGIES, Difficulty.BEGINNER, false, "learninghub/dollar-cost-averaging.md");
+          CAT_STRATEGIES, Difficulty.BEGINNER, false, "learninghub/dollar-cost-averaging.md",
+          List.of("index-funds-explained", "paper-trading"),
+          List.of("res-nordnet-academy"));
 
   private static final LearningItem ITEM_PAPER_TRADING =
       new LearningItem("paper-trading", "Paper Trading: Practice Without Risk",
           "paper-trading",
           "Simulate real trades in a risk-free environment before going live.",
-          CAT_PRACTICAL, Difficulty.BEGINNER, false, "learninghub/paper-trading.md");
+          CAT_PRACTICAL, Difficulty.BEGINNER, false, "learninghub/paper-trading.md",
+          List.of("dollar-cost-averaging", "reading-stock-charts"),
+          List.of("res-yt-investing-basics"));
 
   // ── Resources ────────────────────────────────────────────────────────────────
 
@@ -178,6 +198,33 @@ public final class LearningContentStore {
         RES_INVESTOPEDIA,
         RES_NORDNET_ACADEMY,
         RES_YOUTUBE_BASICS);
+  }
+
+  /**
+   * Returns the items whose {@link LearningItem#id()} appears in {@code ids},
+   * preserving the order of {@code ids}. Items not found are silently skipped.
+   *
+   * @param ids list of item IDs to look up
+   * @return list of matching {@link LearningItem}s
+   */
+  public static List<LearningItem> getItemsByIds(List<String> ids) {
+    return ids.stream()
+        .flatMap(id -> getAllItems().stream().filter(item -> item.id().equals(id)))
+        .toList();
+  }
+
+  /**
+   * Returns the resources linked to the given item via {@link LearningItem#resourceIds()}.
+   * Resources not found are silently skipped.
+   *
+   * @param item the learning item whose linked resources are wanted
+   * @return list of matching {@link LearningResource}s
+   */
+  public static List<LearningResource> getResourcesForItem(LearningItem item) {
+    List<String> ids = item.resourceIds();
+    return ids.stream()
+        .flatMap(id -> getResources().stream().filter(r -> r.id().equals(id)))
+        .toList();
   }
 
   // ── Private helpers ──────────────────────────────────────────────────────────
