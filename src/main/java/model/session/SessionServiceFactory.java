@@ -41,6 +41,7 @@ public final class SessionServiceFactory {
         new GameStateRepository(profilesRoot),
         new PinHashingService(),
         marketDataSupplier,
-        exchangeName);
+        exchangeName,
+        profilesRoot);
   }
 }

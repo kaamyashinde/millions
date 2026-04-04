@@ -126,7 +126,8 @@ class GuiAppShellTest {
         new GameStateRepository(tempDir),
         new PinHashingService(),
         GuiAppShellTest::sampleMarketData,
-        "NYSE");
+        "NYSE",
+        tempDir);
   }
 
   private static MarketData sampleMarketData() {
