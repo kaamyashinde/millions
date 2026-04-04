@@ -18,8 +18,8 @@ import model.Stock;
 import model.marketevent.MarketEvent;
 import model.stockinfo.StockFinancialInfo;
 import model.stockinfo.StockFinancialInfoProvider;
-import recommendation.StockRecommendation;
-import recommendation.StockRecommendationService;
+import model.recommendation.StockRecommendation;
+import model.recommendation.StockRecommendationService;
 import view.components.chart.StockChart;
 import view.components.recommendation.StockRecommendationLabel;
 

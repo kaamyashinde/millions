@@ -5,7 +5,7 @@ import static model.utils.Validator.checkNotNull;
 import javafx.scene.control.Label;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import recommendation.StockRecommendation;
+import model.recommendation.StockRecommendation;
 
 /**
  * Reusable JavaFX label that renders a stock recommendation as a styled badge.

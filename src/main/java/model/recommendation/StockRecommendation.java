@@ -1,4 +1,4 @@
-package recommendation;
+package model.recommendation;
 
 /**
  * Recommendation levels shown to the player for a stock.

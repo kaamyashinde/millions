@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import recommendation.StockRecommendation;
+import model.recommendation.StockRecommendation;
 
 /**
  * Tests for the stock recommendation badge component.
