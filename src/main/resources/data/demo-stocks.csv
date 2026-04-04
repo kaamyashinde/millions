@@ -1,4 +1,7 @@
-# Toast demo — bundled exchange (symbol,company,price)
-NVDA,Nvidia,191.27
-AAPL,Apple Inc,152.54
-MSFT,Microsoft,404.43
+# Toast demo — bundled market data
+STOCK,NVDA,Nvidia,191.27
+STOCK,AAPL,Apple Inc,152.54
+STOCK,MSFT,Microsoft,404.43
+STOCK,GOOGL,Alphabet Inc,2800.00
+FUND,TECHX,Tech Titans Blend Fund,AAPL:0.40,GOOGL:0.35,MSFT:0.25
+FUND,STBL,Steady Growth Leaders Fund,MSFT:0.45,AAPL:0.30,GOOGL:0.25

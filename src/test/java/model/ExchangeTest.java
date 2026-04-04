@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import model.exception.InsufficientFundsException;
 import model.exception.InsufficientSharesException;
+import model.fund.Fund;
+import model.fund.FundComponent;
 import model.marketevent.MarketEvent;
 import model.marketevent.MarketEventStrategy;
 import model.marketevent.SymbolMarketEventTarget;
@@ -29,6 +31,7 @@ class ExchangeTest {
   private Stock appleStock;
   private Stock googleStock;
   private Stock microsoftStock;
+  private Fund techFund;
   private Player player;
 
   @BeforeEach
@@ -41,9 +44,16 @@ class ExchangeTest {
 
     microsoftStock = new Stock("MSFT", "Microsoft Corporation");
     microsoftStock.addNewSalesPrice(new BigDecimal("300.00"));
+    techFund = new Fund(
+        "TECHX",
+        "Tech Titans Blend Fund",
+        List.of(
+            new FundComponent(appleStock, new BigDecimal("0.40")),
+            new FundComponent(googleStock, new BigDecimal("0.35")),
+            new FundComponent(microsoftStock, new BigDecimal("0.25"))));
 
     List<Stock> stocks = List.of(appleStock, googleStock, microsoftStock);
-    exchange = new Exchange("NYSE", stocks);
+    exchange = new Exchange("NYSE", stocks, List.of(techFund));
 
     player = new Player("TestPlayer", new BigDecimal("100000.00"));
   }
@@ -69,6 +79,12 @@ class ExchangeTest {
   void hasStock_returnsFalseForNonExistingStock() {
     assertFalse(exchange.hasStock("TSLA"));
     assertFalse(exchange.hasStock("AMZN"));
+  }
+
+  @Test
+  void hasAsset_returnsTrueForExistingStockAndFund() {
+    assertTrue(exchange.hasAsset("AAPL"));
+    assertTrue(exchange.hasAsset("TECHX"));
   }
 
   @Test
@@ -122,6 +138,13 @@ class ExchangeTest {
   }
 
   @Test
+  void findFunds_findsByName() {
+    List<Fund> results = exchange.findFunds("Titans");
+    assertEquals(1, results.size());
+    assertEquals("TECHX", results.getFirst().getSymbol());
+  }
+
+  @Test
   void buy_createsTransactionAndUpdatesPlayer() {
     BigDecimal initialMoney = player.getMoney();
     BigDecimal quantity = new BigDecimal("10");
@@ -131,6 +154,14 @@ class ExchangeTest {
     assertNotNull(transaction);
     assertTrue(player.getMoney().compareTo(initialMoney) < 0);
     assertFalse(player.getPortfolio().getShares().isEmpty());
+  }
+
+  @Test
+  void buy_fundCreatesPortfolioHolding() {
+    Transaction transaction = exchange.buy("TECHX", new BigDecimal("2"), player);
+
+    assertNotNull(transaction);
+    assertEquals("TECHX", player.getPortfolio().getShares().getFirst().getAsset().getSymbol());
   }
 
   @Test

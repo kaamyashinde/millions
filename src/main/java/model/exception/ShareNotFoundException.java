@@ -25,7 +25,7 @@ public class ShareNotFoundException extends RuntimeException {
    * @param player the player who attempted to sell the share
    */
   public ShareNotFoundException(Share share, Player player) {
-    super("Share of stock" + share.getStock().getSymbol() + " was not found in the "
+    super("Share of asset " + share.getAsset().getSymbol() + " was not found in the "
         + player.getName() + "'s portfolio.");
     this.share = share;
     this.player = player;
@@ -37,7 +37,7 @@ public class ShareNotFoundException extends RuntimeException {
    * @return the symbol
    */
   public String getStockSymbol() {
-    return share.getStock().getSymbol();
+    return share.getAsset().getSymbol();
   }
 
   /**

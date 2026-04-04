@@ -11,6 +11,10 @@ import model.Share;
 import model.exception.InsufficientFundsException;
 import model.exception.InsufficientSharesException;
 import model.exception.ShareNotFoundException;
+import model.fund.Fund;
+import model.fund.FundComponent;
+import model.persistence.MarketData;
+import model.persistence.MarketDataLoader;
 import model.savings.RegularSavingsPlan;
 import model.savings.RegularSavingsProcessor;
 import model.savings.SavingsInstallmentMode;
@@ -26,6 +30,8 @@ import util.I18n;
  */
 public class UserInterface {
 
+  private static final String DEMO_MARKET_DATA_RESOURCE = "/data/demo-stocks.csv";
+
   private static final int QUIT = 0;
   private static final int SET_UP_PLAYER = 1;
   private static final int VIEW_BALANCE = 2;
@@ -40,6 +46,9 @@ public class UserInterface {
   private static final int LIST_SAVINGS = 11;
   private static final int REMOVE_SAVINGS = 12;
   private static final int EDIT_SAVINGS = 13;
+  private static final int LIST_FUNDS = 14;
+  private static final int SEARCH_FUNDS = 15;
+  private static final int VIEW_FUND_DETAILS = 16;
   private static final int INVALID_MENU_CHOICE = -1;
 
   private static final Scanner input = new Scanner(System.in);
@@ -63,17 +72,17 @@ public class UserInterface {
   }
 
   /**
-   * Initialises the UserInterface. Creates a default exchange with a set of stocks
-   * so that the user can list, search, buy and sell without loading from file.
+   * Initialises the UserInterface from the bundled demo market-data file.
    */
   private static void init() {
-    Stock apple = new Stock("AAPL", "Apple Inc.");
-    apple.addNewSalesPrice(new BigDecimal("150.00"));
-    Stock google = new Stock("GOOGL", "Alphabet Inc.");
-    google.addNewSalesPrice(new BigDecimal("2800.00"));
-    Stock microsoft = new Stock("MSFT", "Microsoft Corporation");
-    microsoft.addNewSalesPrice(new BigDecimal("300.00"));
-    exchange = new Exchange("NYSE", List.of(apple, google, microsoft));
+    MarketData marketData = MarketDataLoader.loadFromResource(
+        UserInterface.class,
+        DEMO_MARKET_DATA_RESOURCE);
+    if (marketData.stocks().isEmpty()) {
+      throw new IllegalStateException("Could not load demo market data from "
+          + DEMO_MARKET_DATA_RESOURCE);
+    }
+    exchange = new Exchange("NYSE", marketData.stocks(), marketData.funds());
     player = null;
   }
 
@@ -111,6 +120,9 @@ public class UserInterface {
     System.out.println(I18n.get("menu.option.savings.list"));
     System.out.println(I18n.get("menu.option.savings.remove"));
     System.out.println(I18n.get("menu.option.savings.edit"));
+    System.out.println(I18n.get("menu.option.funds.list"));
+    System.out.println(I18n.get("menu.option.funds.search"));
+    System.out.println(I18n.get("menu.option.funds.view"));
     System.out.println(I18n.get("menu.footer"));
     System.out.println(I18n.get("menu.prompt"));
     try {
@@ -141,6 +153,9 @@ public class UserInterface {
       case LIST_SAVINGS -> listSavingsPlans();
       case REMOVE_SAVINGS -> removeSavingsPlan();
       case EDIT_SAVINGS -> editSavingsPlan();
+      case LIST_FUNDS -> listFunds();
+      case SEARCH_FUNDS -> searchFunds();
+      case VIEW_FUND_DETAILS -> viewFundDetails();
       default -> System.out.println(I18n.get("invalid.input"));
     }
   }
@@ -219,11 +234,12 @@ public class UserInterface {
     player.getPortfolio().getShares().forEach(share -> System.out.println(
         I18n.format(
             "portfolio.line",
-            share.getStock().getSymbol(),
-            share.getStock().getCompany(),
+            share.getAsset().getSymbol(),
+            share.getAsset().getDisplayName(),
             share.getQuantity(),
             share.getPurchasePrice(),
-            share.getStock().getSalesPrice())));
+            share.getAsset().getSalesPrice(),
+            share.getAsset().getAssetType())));
   }
 
   /**
@@ -258,6 +274,67 @@ public class UserInterface {
   }
 
   /**
+   * Lists all funds available on the exchange with symbol, name, and derived current price.
+   */
+  private static void listFunds() {
+    List<Fund> funds = exchange.findFunds("");
+    if (funds.isEmpty()) {
+      System.out.println(I18n.get("funds.none"));
+      return;
+    }
+    System.out.println(I18n.format("funds.onExchange", exchange.getName()));
+    funds.forEach(fund -> System.out.println(
+        I18n.format("fund.line", fund.getSymbol(), fund.getDisplayName(), fund.getSalesPrice())));
+  }
+
+  /**
+   * Searches listed funds by symbol or fund name.
+   */
+  private static void searchFunds() {
+    input.nextLine();
+    System.out.println(I18n.get("prompt.search.funds"));
+    String term = input.nextLine().trim();
+    List<Fund> results = exchange.findFunds(term);
+    if (results.isEmpty()) {
+      System.out.println(I18n.format("fund.search.none", term));
+      return;
+    }
+    System.out.println(I18n.format("fund.search.found", results.size()));
+    results.forEach(fund -> System.out.println(
+        I18n.format("fund.line", fund.getSymbol(), fund.getDisplayName(), fund.getSalesPrice())));
+  }
+
+  /**
+   * Shows one fund and its underlying stock weights.
+   */
+  private static void viewFundDetails() {
+    input.nextLine();
+    System.out.println(I18n.get("prompt.fund.symbol"));
+    String symbol = input.nextLine().trim().toUpperCase();
+    if (symbol.isEmpty()) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    Fund fund = exchange.getFund(symbol);
+    if (fund == null) {
+      System.out.println(I18n.format("error.fundNotOnExchange", symbol));
+      return;
+    }
+    System.out.println(I18n.format(
+        "fund.details.header",
+        fund.getSymbol(),
+        fund.getDisplayName(),
+        fund.getSalesPrice()));
+    for (FundComponent component : fund.getComponents()) {
+      System.out.println(I18n.format(
+          "fund.details.line",
+          component.stock().getSymbol(),
+          component.stock().getCompany(),
+          component.weight()));
+    }
+  }
+
+  /**
    * Buys shares of a stock. Prompts for stock symbol and quantity, then commits the purchase.
    */
   private static void buyShares() {
@@ -271,8 +348,8 @@ public class UserInterface {
       System.out.println(I18n.get("invalid.input"));
       return;
     }
-    if (!exchange.hasStock(symbol)) {
-      System.out.println(I18n.format("error.stockNotOnExchange", symbol));
+    if (!exchange.hasAsset(symbol)) {
+      System.out.println(I18n.format("error.assetNotOnExchange", symbol));
       return;
     }
     System.out.println(I18n.get("prompt.buy.mode"));
@@ -365,10 +442,11 @@ public class UserInterface {
       System.out.println(I18n.format(
           "holding.line",
           i + 1,
-          s.getStock().getSymbol(),
+          s.getAsset().getSymbol(),
           s.getQuantity(),
           s.getPurchasePrice(),
-          s.getStock().getSalesPrice()));
+          s.getAsset().getSalesPrice(),
+          s.getAsset().getAssetType()));
     }
     System.out.println(I18n.format("prompt.holdingIndex", shares.size()));
     try {
@@ -380,7 +458,7 @@ public class UserInterface {
       Share toSell = shares.get(index - 1);
       exchange.sell(toSell, player);
       System.out.println(I18n.format("sell.success", toSell.getQuantity(),
-          toSell.getStock().getSymbol()));
+          toSell.getAsset().getSymbol()));
     } catch (InputMismatchException e) {
       System.out.println(I18n.get("invalid.input"));
       input.nextLine();
@@ -394,7 +472,7 @@ public class UserInterface {
   private static void sellByQuantityCli() {
     System.out.println(I18n.get("prompt.symbol"));
     String symbol = input.nextLine().trim().toUpperCase();
-    if (symbol.isEmpty() || !exchange.hasStock(symbol)) {
+    if (symbol.isEmpty() || !exchange.hasAsset(symbol)) {
       System.out.println(I18n.get("invalid.input"));
       return;
     }
@@ -415,7 +493,7 @@ public class UserInterface {
   private static void sellByTargetNetCli() {
     System.out.println(I18n.get("prompt.symbol"));
     String symbol = input.nextLine().trim().toUpperCase();
-    if (symbol.isEmpty() || !exchange.hasStock(symbol)) {
+    if (symbol.isEmpty() || !exchange.hasAsset(symbol)) {
       System.out.println(I18n.get("invalid.input"));
       return;
     }
@@ -456,7 +534,7 @@ public class UserInterface {
     input.nextLine();
     System.out.println(I18n.get("savings.prompt.symbol"));
     String symbol = input.nextLine().trim().toUpperCase();
-    if (symbol.isEmpty() || !exchange.hasStock(symbol)) {
+    if (symbol.isEmpty() || !exchange.hasAsset(symbol)) {
       System.out.println(I18n.get("invalid.input"));
       return;
     }
@@ -733,7 +811,7 @@ public class UserInterface {
     System.out.println(I18n.format("transactions.header", day));
     transactions.forEach(t -> {
       String type = t instanceof Purchase ? I18n.get("tx.type.purchase") : I18n.get("tx.type.sale");
-      String sym = t.getShare().getStock().getSymbol();
+      String sym = t.getShare().getAsset().getSymbol();
       String qty = t.getShare().getQuantity().toString();
       System.out.println(I18n.format("transaction.line", t.getDay(), type, sym, qty));
     });

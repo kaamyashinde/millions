@@ -21,8 +21,8 @@ class ShareTest {
   }
 
   @Test
-  void getStock() {
-    assertEquals(testStock, testShare.getStock());
+  void getAsset() {
+    assertEquals(testStock, testShare.getAsset());
   }
 
   @Test
@@ -46,7 +46,7 @@ class ShareTest {
     Share share = new Share(newStock, quantity, price);
     
     assertNotNull(share);
-    assertEquals(newStock, share.getStock());
+    assertEquals(newStock, share.getAsset());
     assertEquals(quantity, share.getQuantity());
     assertEquals(price, share.getPurchasePrice());
   }
