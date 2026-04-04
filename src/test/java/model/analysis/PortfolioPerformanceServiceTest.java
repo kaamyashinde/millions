@@ -21,7 +21,7 @@ class PortfolioPerformanceServiceTest {
   void setUp() {
     apple = new Stock("AAPL", "Apple Inc.");
     apple.addNewSalesPrice(new BigDecimal("100.00"));
-    exchange = new Exchange("NYSE", List.of(apple));
+    exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
     player = new Player("TestPlayer", new BigDecimal("1000.00"));
   }
 
