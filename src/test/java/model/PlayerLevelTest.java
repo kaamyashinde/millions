@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import model.transaction.Purchase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,28 @@ class PlayerLevelTest {
     player.recalculateLevel();
 
     assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
+  }
+
+  @Test
+  void levelStaysNovice_whenOnlyCashIncreasesWithoutInvestorCriteria() {
+    player.addMoney(new BigDecimal("5000.00"));
+
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
+  }
+
+  @Test
+  void restore_recalculatesLevelFromPersistedTransactionsAndCash() {
+    addDistinctTradingDays(1, 70);
+    Player restored =
+        Player.restore(
+            "Restored",
+            new BigDecimal("1000.00"),
+            new BigDecimal("1200.00"),
+            java.util.List.of(),
+            new ArrayList<>(player.getTransactionArchive().getAllTransactions()),
+            java.util.List.of());
+
+    assertEquals(PlayerLevels.INVESTOR, restored.getPlayerLevel());
   }
 
   /**

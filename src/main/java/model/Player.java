@@ -43,7 +43,6 @@ public class Player {
     this.transactionArchive = new TransactionArchive();
     this.regularSavingsPlans = new ArrayList<>();
     this.observers = new ArrayList<>();
-    this.observers.add(new PlayerLevelObserver());
     this.playerLevel = PlayerLevels.NOVICE.checkTransition(this);
   }
 
@@ -81,9 +80,9 @@ public class Player {
   }
 
   /**
-   * Re-evaluates and updates the player's level based on current state
-   * (net worth and trading history). Called automatically by the
-   * {@link PlayerLevelObserver} whenever player state changes.
+   * Re-evaluates and updates the player's level based on current state (net worth and trading
+   * history). Called after liquid cash changes via {@link #addMoney} and {@link #withdrawMoney},
+   * and from {@link #restore} after persisted state is applied.
    */
   public void recalculateLevel() {
     this.playerLevel = PlayerLevels.NOVICE.checkTransition(this);
@@ -149,6 +148,7 @@ public class Player {
 
   public void addMoney(BigDecimal amount) {
     this.money = this.money.add(amount);
+    recalculateLevel();
     notifyObservers();
   }
 
@@ -159,6 +159,7 @@ public class Player {
    */
   public void withdrawMoney(BigDecimal amount) {
     this.money = this.money.subtract(amount);
+    recalculateLevel();
     notifyObservers();
   }
 
