@@ -1,14 +1,21 @@
 package view;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.Stock;
+import model.marketevent.MarketEvent;
 import recommendation.StockRecommendation;
 import recommendation.StockRecommendationService;
 import view.components.chart.StockChart;
@@ -32,15 +39,20 @@ public class StockDetailView extends BorderPane {
   private final Label subtitleLabel = new Label("Select a stock to inspect its latest trend.");
   private final Label dayLabel = new Label("Trading day: -");
   private final Label latestPriceLabel = new Label("Latest price: -");
+  private final Label marketEventLabel = new Label("Latest market event: none");
+  private final Label marketHistoryHeading = new Label("Past events");
   private final Label basisLabel = new Label("Recommendation basis: recent price trend");
   private final StockRecommendationLabel recommendationLabel =
       new StockRecommendationLabel(StockRecommendation.HOLD);
   private final Label placeholderLabel =
       new Label("Choose a stock from the list to view chart and recommendation details.");
+  private final ListView<String> marketHistoryList = new ListView<>();
   private final VBox recommendationBox;
   private final VBox content = new VBox(16);
 
   private Stock selectedStock;
+  private Optional<MarketEvent> selectedMarketEvent = Optional.empty();
+  private List<MarketEvent> selectedMarketHistory = List.of();
 
   /**
    * Builds an initially empty stock detail view.
@@ -51,10 +63,16 @@ public class StockDetailView extends BorderPane {
 
     titleLabel.setFont(Font.font("System", FontWeight.BOLD, 20));
     subtitleLabel.setWrapText(true);
+    marketEventLabel.setWrapText(true);
+    marketHistoryHeading.setFont(Font.font("System", FontWeight.BOLD, 14));
     basisLabel.setWrapText(true);
     placeholderLabel.setWrapText(true);
+    marketHistoryList.setPlaceholder(new Label("No past events for this stock yet."));
+    marketHistoryList.setFocusTraversable(false);
+    marketHistoryList.setMouseTransparent(true);
+    marketHistoryList.setMaxHeight(140);
 
-    VBox header = new VBox(6, titleLabel, subtitleLabel, dayLabel, latestPriceLabel);
+    VBox header = new VBox(6, titleLabel, subtitleLabel, dayLabel, latestPriceLabel, marketEventLabel);
     recommendationBox = new VBox(8, new Label("Recommendation"), recommendationLabel, basisLabel);
     recommendationBox.setStyle(
         "-fx-background-color: #f6f7fb;"
@@ -78,13 +96,44 @@ public class StockDetailView extends BorderPane {
    * @param tradingDay current exchange trading day
    */
   public void showStock(Stock stock, int tradingDay) {
+    showStock(stock, tradingDay, Optional.empty(), List.of());
+  }
+
+  /**
+   * Displays details for the selected stock and the latest market event relevant to the current day.
+   *
+   * @param stock selected stock, or {@code null} to show the empty state
+   * @param tradingDay current exchange trading day
+   * @param marketEvent latest market event, if one occurred on the current day
+   */
+  public void showStock(Stock stock, int tradingDay, Optional<MarketEvent> marketEvent) {
+    showStock(stock, tradingDay, marketEvent, List.of());
+  }
+
+  /**
+   * Displays details for the selected stock together with the latest and past market events.
+   *
+   * @param stock selected stock, or {@code null} to show the empty state
+   * @param tradingDay current exchange trading day
+   * @param marketEvent latest market event, if one occurred on the current day
+   * @param marketHistory past market events relevant to the selected stock
+   */
+  public void showStock(
+      Stock stock,
+      int tradingDay,
+      Optional<MarketEvent> marketEvent,
+      List<MarketEvent> marketHistory) {
     selectedStock = stock;
+    selectedMarketEvent = marketEvent;
+    selectedMarketHistory = List.copyOf(marketHistory);
     dayLabel.setText("Trading day: " + (tradingDay > 0 ? tradingDay : "-"));
 
     if (stock == null) {
       titleLabel.setText("Stock details");
       subtitleLabel.setText("Select a stock to inspect its latest trend.");
       latestPriceLabel.setText("Latest price: -");
+      marketEventLabel.setText("Latest market event: none");
+      marketHistoryList.setItems(FXCollections.observableArrayList());
       recommendationLabel.setRecommendation(StockRecommendation.HOLD);
       placeholderLabel.setText("Choose a stock from the list to view chart and recommendation details.");
       content.getChildren().setAll(recommendationBox, placeholderLabel);
@@ -94,18 +143,20 @@ public class StockDetailView extends BorderPane {
     titleLabel.setText(stock.getSymbol() + " · " + stock.getCompany());
     subtitleLabel.setText("Single-stock detail view with trend recommendation.");
     latestPriceLabel.setText("Latest price: " + formatLatestPrice(stock));
+    marketEventLabel.setText(buildMarketEventText(stock, marketEvent));
+    marketHistoryList.setItems(FXCollections.observableArrayList(buildMarketHistoryItems(marketHistory)));
     recommendationLabel.setRecommendation(recommendationService.recommend(stock));
 
     if (stock.getHistoricalPrices().isEmpty()) {
       placeholderLabel.setText("No price history is available for this stock yet.");
-      content.getChildren().setAll(recommendationBox, placeholderLabel);
+      content.getChildren().setAll(recommendationBox, marketHistoryHeading, marketHistoryList, placeholderLabel);
       return;
     }
 
     StockChart chart = new StockChart(stock);
     chart.setMinHeight(280);
     VBox.setVgrow(chart, Priority.ALWAYS);
-    content.getChildren().setAll(recommendationBox, chart);
+    content.getChildren().setAll(recommendationBox, marketHistoryHeading, marketHistoryList, chart);
   }
 
   /**
@@ -114,7 +165,28 @@ public class StockDetailView extends BorderPane {
    * @param tradingDay current exchange trading day
    */
   public void refresh(int tradingDay) {
-    showStock(selectedStock, tradingDay);
+    showStock(selectedStock, tradingDay, selectedMarketEvent, selectedMarketHistory);
+  }
+
+  /**
+   * Refreshes the view while also updating the latest market event context.
+   *
+   * @param tradingDay current exchange trading day
+   * @param marketEvent latest market event, if one occurred on the current day
+   */
+  public void refresh(int tradingDay, Optional<MarketEvent> marketEvent) {
+    showStock(selectedStock, tradingDay, marketEvent, selectedMarketHistory);
+  }
+
+  /**
+   * Refreshes the view while also updating the stored event history.
+   *
+   * @param tradingDay current exchange trading day
+   * @param marketEvent latest market event, if one occurred on the current day
+   * @param marketHistory past market events relevant to the selected stock
+   */
+  public void refresh(int tradingDay, Optional<MarketEvent> marketEvent, List<MarketEvent> marketHistory) {
+    showStock(selectedStock, tradingDay, marketEvent, marketHistory);
   }
 
   /**
@@ -145,6 +217,24 @@ public class StockDetailView extends BorderPane {
   }
 
   /**
+   * Returns the market-event label text currently shown in the detail view.
+   *
+   * @return market-event label text
+   */
+  public String getMarketEventText() {
+    return marketEventLabel.getText();
+  }
+
+  /**
+   * Returns the rendered past-event rows currently displayed in the detail view.
+   *
+   * @return immutable copy of the current past-event rows
+   */
+  public List<String> getDisplayedMarketHistory() {
+    return List.copyOf(marketHistoryList.getItems());
+  }
+
+  /**
    * Formats the latest price if one exists.
    *
    * @param stock stock whose latest price should be shown
@@ -156,5 +246,37 @@ public class StockDetailView extends BorderPane {
     }
     BigDecimal latestPrice = stock.getSalesPrice();
     return latestPrice.toPlainString();
+  }
+
+  /**
+   * Builds the text shown for the latest market event in the detail view.
+   *
+   * @param stock currently selected stock
+   * @param marketEvent latest market event for the exchange
+   * @return user-facing market-event text
+   */
+  private static String buildMarketEventText(Stock stock, Optional<MarketEvent> marketEvent) {
+    if (marketEvent.isEmpty()) {
+      return "Latest market event: none";
+    }
+    MarketEvent event = marketEvent.get();
+    if (!event.affects(stock)) {
+      return "Latest market event: no active event for " + stock.getSymbol();
+    }
+    return "Latest market event: " + event.title() + " - " + event.description();
+  }
+
+  /**
+   * Builds newest-first text rows for the past-events list.
+   *
+   * @param marketHistory past events relevant to the selected stock
+   * @return rendered rows for the list view
+   */
+  private static List<String> buildMarketHistoryItems(List<MarketEvent> marketHistory) {
+    List<MarketEvent> reversedHistory = new ArrayList<>(marketHistory);
+    Collections.reverse(reversedHistory);
+    return reversedHistory.stream()
+        .map(event -> "Day " + event.day() + " - " + event.title() + ": " + event.description())
+        .toList();
   }
 }

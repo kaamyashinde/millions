@@ -6,10 +6,10 @@ import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Exchange;
-import model.Stock;
+import model.InvestableAsset;
 
 /**
- * Supplies UI-ready data for {@link view.RegularSavingsPanel}: stocks listed on an
+ * Supplies UI-ready data for {@link view.RegularSavingsPanel}: investable assets listed on an
  * {@link Exchange}, sorted by symbol, for combo-box selection when creating a plan.
  *
  * @author kevindmazali
@@ -19,35 +19,35 @@ import model.Stock;
 public class RegularSavingsPanelController {
 
   private final Exchange exchange;
-  private final ObservableList<Stock> listedStocks = FXCollections.observableArrayList();
+  private final ObservableList<InvestableAsset> listedAssets = FXCollections.observableArrayList();
 
   /**
-   * Creates a controller for the given exchange and loads the initial stock list.
+   * Creates a controller for the given exchange and loads the initial asset list.
    *
    * @param exchange exchange whose listings populate the observable list
    */
   public RegularSavingsPanelController(Exchange exchange) {
     this.exchange = exchange;
-    refreshListedStocks();
+    refreshListedAssets();
   }
 
   /**
-   * Returns the mutable observable list backing stock pickers; sorted by symbol after each
-   * {@link #refreshListedStocks()}.
+   * Returns the mutable observable list backing asset pickers; sorted by symbol after each
+   * {@link #refreshListedAssets()}.
    *
-   * @return stocks on this exchange, for {@link javafx.scene.control.ComboBox} items
+   * @return assets on this exchange, for {@link javafx.scene.control.ComboBox} items
    */
-  public ObservableList<Stock> getListedStocks() {
-    return listedStocks;
+  public ObservableList<InvestableAsset> getListedAssets() {
+    return listedAssets;
   }
 
   /**
-   * Rebuilds the listed stocks from the exchange (same order: symbol ascending). Call if listings
+   * Rebuilds the listed assets from the exchange (same order: symbol ascending). Call if listings
    * can change at runtime.
    */
-  public void refreshListedStocks() {
-    List<Stock> sorted = new ArrayList<>(exchange.findStocks(""));
-    sorted.sort(Comparator.comparing(Stock::getSymbol));
-    listedStocks.setAll(sorted);
+  public void refreshListedAssets() {
+    List<InvestableAsset> sorted = new ArrayList<>(exchange.findAssets(""));
+    sorted.sort(Comparator.comparing(InvestableAsset::getSymbol));
+    listedAssets.setAll(sorted);
   }
 }

@@ -1,12 +1,9 @@
 package view;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -27,17 +24,20 @@ import javafx.util.Duration;
 import model.Exchange;
 import model.Player;
 import model.Stock;
-import model.persistence.CsvReader;
+import model.persistence.MarketData;
+import model.persistence.MarketDataLoader;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
 import view.components.toast.ToastMode;
 
 /**
  * Demo application: <strong>Notifications</strong> tab hosts {@link NotificationsPanel};
- * <strong>Stocks</strong> tab hosts {@link StocksListPanel}; <strong>Savings</strong> tab hosts
- * {@link RegularSavingsPanel} with an {@link Exchange} loaded from bundled CSV and {@link Player}
- * "k" with starting balance 5000. A heading and four toast-trigger buttons sit above the tabs;
- * toasts float over the top-right corner of the scene.
+ * <strong>Player</strong> tab hosts {@link PlayerPortfolioPanel}; <strong>Stocks</strong> tab
+ * hosts {@link StocksListPanel}; <strong>Funds</strong> tab hosts {@link FundsListPanel};
+ * <strong>Savings</strong> tab hosts {@link RegularSavingsPanel} with an {@link Exchange} loaded
+ * from bundled CSV and demo funds, and {@link Player} "k" with starting balance 5000. A heading
+ * and four toast-trigger buttons sit above the tabs; toasts float over the top-right corner of the
+ * scene.
  *
  * @author kaamyashinde
  * @version 1.5.0
@@ -57,13 +57,16 @@ public class ToastDemoApp extends Application {
 
   @Override
   public void start(Stage stage) {
-    List<Stock> stocks = loadStocksFromClasspath();
+    MarketData marketData = MarketDataLoader.loadFromResource(ToastDemoApp.class, DEMO_CSV_RESOURCE);
+    List<Stock> stocks = marketData.stocks();
     NotificationsPanel notificationsPanel = new NotificationsPanel(notifications);
 
     Tab notificationsTab = new Tab("Notifications", notificationsPanel);
     notificationsTab.setClosable(false);
 
+    Tab playerTab;
     Tab stocksTab;
+    Tab fundsTab;
     Tab savingsTab;
     if (stocks.isEmpty()) {
       notifications.show(
@@ -75,32 +78,60 @@ public class ToastDemoApp extends Application {
       Label stocksError =
           new Label("Could not load demo-stocks.csv. No listings to show.");
       stocksError.setWrapText(true);
+      playerTab = new Tab("Player", new Label("Could not load demo-stocks.csv. Player view unavailable."));
       stocksTab = new Tab("Stocks", stocksError);
+      fundsTab = new Tab("Funds", new Label("Could not build funds without demo stocks."));
       savingsTab = new Tab("Savings", error);
     } else {
-      Exchange demoExchange = new Exchange(DEMO_EXCHANGE_NAME, stocks);
+      Exchange demoExchange = new Exchange(DEMO_EXCHANGE_NAME, stocks, marketData.funds());
       Player demoPlayer = new Player("k", new BigDecimal("5000"));
       showLoadedNotifications(notifications, demoExchange, stocks, demoPlayer);
 
+      PlayerPortfolioPanel playerPanel = new PlayerPortfolioPanel(demoExchange, demoPlayer);
       StocksListPanel stocksPanel = new StocksListPanel(demoExchange);
+      FundsListPanel fundsPanel = new FundsListPanel(demoExchange);
+      playerTab = new Tab("Player", playerPanel);
+      playerTab.selectedProperty().addListener((obs, ov, nv) -> {
+        if (Boolean.TRUE.equals(nv)) {
+          playerPanel.refresh();
+        }
+      });
       stocksTab = new Tab("Stocks", stocksPanel);
       stocksTab.selectedProperty().addListener((obs, ov, nv) -> {
         if (Boolean.TRUE.equals(nv)) {
           stocksPanel.refresh();
         }
       });
+      fundsTab = new Tab("Funds", fundsPanel);
+      fundsTab.selectedProperty().addListener((obs, ov, nv) -> {
+        if (Boolean.TRUE.equals(nv)) {
+          fundsPanel.refresh();
+        }
+      });
 
       savingsTab =
-          new Tab("Savings", new RegularSavingsPanel(demoExchange, demoPlayer, notifications));
+          new Tab(
+              "Savings",
+              new RegularSavingsPanel(
+                  demoExchange,
+                  demoPlayer,
+                  notifications,
+                  () -> {
+                    playerPanel.refresh();
+                    stocksPanel.refresh();
+                    fundsPanel.refresh();
+                  }));
     }
+    playerTab.setClosable(false);
     stocksTab.setClosable(false);
+    fundsTab.setClosable(false);
     savingsTab.setClosable(false);
 
     LearningHubPanel learningHubPanel = new LearningHubPanel();
     Tab learningHubTab = new Tab("Learning Hub", learningHubPanel);
     learningHubTab.setClosable(false);
 
-    TabPane tabs = new TabPane(notificationsTab, stocksTab, savingsTab, learningHubTab);
+    TabPane tabs = new TabPane(notificationsTab, playerTab, stocksTab, fundsTab, savingsTab, learningHubTab);
 
     Text heading = new Text("Toast Demo");
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
@@ -192,17 +223,6 @@ public class ToastDemoApp extends Application {
    */
   @SuppressWarnings("unused")
   private static void discard(UUID id) {}
-
-  private static List<Stock> loadStocksFromClasspath() {
-    try (InputStream in = ToastDemoApp.class.getResourceAsStream(DEMO_CSV_RESOURCE)) {
-      if (in == null) {
-        return List.of();
-      }
-      return CsvReader.readCsv(in);
-    } catch (IOException e) {
-      return List.of();
-    }
-  }
 
   private static void showLoadedNotifications(
       NotificationService notifications,

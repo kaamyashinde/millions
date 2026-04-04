@@ -77,7 +77,7 @@ public class Portfolio {
    */
   public List<Share> getSharesBasedOnSymbol(String symbol) {
     checkNotNull(symbol, "Symbol");
-    return shares.stream().filter(share -> share.getStock().getSymbol().equals(symbol)).toList();
+    return shares.stream().filter(share -> share.getAsset().getSymbol().equals(symbol)).toList();
   }
 
   /**
@@ -98,7 +98,7 @@ public class Portfolio {
   public BigDecimal totalQuantityForSymbol(String symbol) {
     checkNotNull(symbol, "Symbol");
     return shares.stream()
-        .filter(s -> s.getStock().getSymbol().equals(symbol))
+        .filter(s -> s.getAsset().getSymbol().equals(symbol))
         .map(Share::getQuantity)
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
@@ -112,14 +112,14 @@ public class Portfolio {
     checkNotNull(symbol, "Symbol");
     checkNotNull(maxQuantity, "maxQuantity");
     for (Share lot : shares) {
-      if (!lot.getStock().getSymbol().equals(symbol)) {
+      if (!lot.getAsset().getSymbol().equals(symbol)) {
         continue;
       }
       BigDecimal take = lot.getQuantity().min(maxQuantity);
       if (take.signum() <= 0) {
         continue;
       }
-      return new Share(lot.getStock(), take, lot.getPurchasePrice());
+      return new Share(lot.getAsset(), take, lot.getPurchasePrice());
     }
     return null;
   }
@@ -132,14 +132,14 @@ public class Portfolio {
     checkNotNull(symbol, "Symbol");
     checkNotNull(targetNet, "targetNet");
     for (Share lot : shares) {
-      if (!lot.getStock().getSymbol().equals(symbol)) {
+      if (!lot.getAsset().getSymbol().equals(symbol)) {
         continue;
       }
       BigDecimal q = TransactionSizing.maxQuantityForTargetNet(lot, targetNet);
       if (q.signum() <= 0) {
         continue;
       }
-      return new Share(lot.getStock(), q, lot.getPurchasePrice());
+      return new Share(lot.getAsset(), q, lot.getPurchasePrice());
     }
     return null;
   }
@@ -154,7 +154,7 @@ public class Portfolio {
     checkNotNullOnShare(slice);
     for (int i = 0; i < shares.size(); i++) {
       Share lot = shares.get(i);
-      if (!lot.getStock().getSymbol().equals(slice.getStock().getSymbol())) {
+      if (!lot.getAsset().getSymbol().equals(slice.getAsset().getSymbol())) {
         continue;
       }
       if (lot.getPurchasePrice().compareTo(slice.getPurchasePrice()) != 0) {
@@ -168,7 +168,7 @@ public class Portfolio {
         return true;
       }
       BigDecimal remainderQty = lot.getQuantity().subtract(slice.getQuantity());
-      shares.set(i, new Share(lot.getStock(), remainderQty, lot.getPurchasePrice()));
+      shares.set(i, new Share(lot.getAsset(), remainderQty, lot.getPurchasePrice()));
       return true;
     }
     return false;

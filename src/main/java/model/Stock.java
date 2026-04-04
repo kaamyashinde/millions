@@ -14,7 +14,7 @@ import java.util.List;
  */
 
 
-public class Stock {
+public class Stock implements InvestableAsset {
 
 
   private final String symbol;
@@ -42,6 +42,7 @@ public class Stock {
    *
    * @return The symbol of the stock.
    */
+  @Override
   public String getSymbol() {
     return symbol;
   }
@@ -52,6 +53,16 @@ public class Stock {
    * @return The company name of the stock.
    */
   public String getCompany() {
+    return company;
+  }
+
+  /**
+   * Returns the user-facing display name for this stock.
+   *
+   * @return company name
+   */
+  @Override
+  public String getDisplayName() {
     return company;
   }
 
@@ -116,8 +127,19 @@ public class Stock {
    *
    * @return The latest price of the stock.
    */
+  @Override
   public BigDecimal getSalesPrice() {
     return price.getLast();
+  }
+
+  /**
+   * Returns the asset type label used in user-facing views.
+   *
+   * @return the string {@code Stock}
+   */
+  @Override
+  public String getAssetType() {
+    return "Stock";
   }
 
   /**

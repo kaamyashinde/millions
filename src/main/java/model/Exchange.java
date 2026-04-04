@@ -6,11 +6,18 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import model.exception.InsufficientFundsException;
 import model.exception.InsufficientSharesException;
+import model.fund.Fund;
+import model.marketevent.DailyPriceMoveStrategy;
+import model.marketevent.MarketEvent;
+import model.marketevent.MarketEventStrategy;
+import model.marketevent.RandomMarketEventStrategy;
+import model.marketevent.UniformDailyPriceMoveStrategy;
 import model.transactioncalculator.SaleCalculator;
 import model.transaction.Purchase;
 import model.transaction.Sale;
@@ -29,9 +36,15 @@ public class Exchange {
 
   private static final double DAILY_SIGMA = 0.05 / Math.sqrt(7);
   private final String name;
+  private final Map<String, InvestableAsset> assetMap;
   private final Map<String, Stock> stockMap;
+  private final Map<String, Fund> fundMap;
   private final Random random;
+  private final DailyPriceMoveStrategy dailyPriceMoveStrategy;
+  private final MarketEventStrategy marketEventStrategy;
+  private final List<MarketEvent> marketEventHistory;
   private int day;
+  private Optional<MarketEvent> lastMarketEvent;
 
   /**
    * Constructor for Exchange.
@@ -40,11 +53,73 @@ public class Exchange {
    * @param stocks the list of stocks available in the exchange
    */
   public Exchange(String name, List<Stock> stocks) {
+    this(name, stocks, List.of());
+  }
+
+  /**
+   * Creates an exchange with both direct stocks and funds listed for trading.
+   *
+   * @param name the name of the exchange
+   * @param stocks the listed stocks
+   * @param funds the listed funds
+   */
+  public Exchange(String name, List<Stock> stocks, List<Fund> funds) {
+    this(
+        name,
+        stocks,
+        funds,
+        new Random(),
+        new UniformDailyPriceMoveStrategy(DAILY_SIGMA),
+        new RandomMarketEventStrategy());
+  }
+
+  /**
+   * Creates an exchange with injected collaborators for deterministic stock-only tests.
+   *
+   * @param name the name of the exchange
+   * @param stocks the listed stocks
+   * @param random random source used for daily moves and event generation
+   * @param dailyPriceMoveStrategy strategy for baseline daily price movement
+   * @param marketEventStrategy strategy that may generate a rare market event each day
+   */
+  Exchange(
+      String name,
+      List<Stock> stocks,
+      Random random,
+      DailyPriceMoveStrategy dailyPriceMoveStrategy,
+      MarketEventStrategy marketEventStrategy) {
+    this(name, stocks, List.of(), random, dailyPriceMoveStrategy, marketEventStrategy);
+  }
+
+  /**
+   * Creates an exchange with injected collaborators for deterministic tests and alternative market
+   * behavior.
+   *
+   * @param name the name of the exchange
+   * @param stocks the listed stocks
+   * @param random random source used for daily moves and event generation
+   * @param dailyPriceMoveStrategy strategy for baseline daily price movement
+   * @param marketEventStrategy strategy that may generate a rare market event each day
+   */
+  Exchange(
+      String name,
+      List<Stock> stocks,
+      List<Fund> funds,
+      Random random,
+      DailyPriceMoveStrategy dailyPriceMoveStrategy,
+      MarketEventStrategy marketEventStrategy) {
     this.name = name;
     this.day = 1;
     this.stockMap = stocks.stream()
         .collect(Collectors.toMap(Stock::getSymbol, s -> s));
-    this.random = new Random();
+    this.fundMap = funds.stream()
+        .collect(Collectors.toMap(Fund::getSymbol, f -> f));
+    this.assetMap = buildAssetMap(stocks, funds);
+    this.random = random;
+    this.dailyPriceMoveStrategy = dailyPriceMoveStrategy;
+    this.marketEventStrategy = marketEventStrategy;
+    this.marketEventHistory = new ArrayList<>();
+    this.lastMarketEvent = Optional.empty();
   }
 
   /**
@@ -63,7 +138,17 @@ public class Exchange {
    * @return the stock object
    */
   public boolean hasStock(String symbol) {
-    return stockMap.containsKey(symbol);
+    return stockMap.containsKey(symbol.toUpperCase());
+  }
+
+  /**
+   * Checks whether any investable asset with the given symbol is listed.
+   *
+   * @param symbol stock or fund symbol
+   * @return {@code true} when the asset exists
+   */
+  public boolean hasAsset(String symbol) {
+    return assetMap.containsKey(symbol.toUpperCase());
   }
 
   /**
@@ -81,6 +166,34 @@ public class Exchange {
   }
 
   /**
+   * Finds funds by symbol or display name.
+   *
+   * @param searchTerm search term
+   * @return matching funds
+   */
+  public List<Fund> findFunds(String searchTerm) {
+    String lowerCaseTerm = searchTerm.toLowerCase();
+    return fundMap.values().stream()
+        .filter(fund -> fund.getSymbol().toLowerCase().contains(lowerCaseTerm)
+            || fund.getDisplayName().toLowerCase().contains(lowerCaseTerm))
+        .toList();
+  }
+
+  /**
+   * Finds all listed investable assets by symbol or display name.
+   *
+   * @param searchTerm search term
+   * @return matching assets
+   */
+  public List<InvestableAsset> findAssets(String searchTerm) {
+    String lowerCaseTerm = searchTerm.toLowerCase();
+    return assetMap.values().stream()
+        .filter(asset -> asset.getSymbol().toLowerCase().contains(lowerCaseTerm)
+            || asset.getDisplayName().toLowerCase().contains(lowerCaseTerm))
+        .toList();
+  }
+
+  /**
    * Buys shares of a stock for a player. This method creates a Purchase transaction and commits
    * it.
    *
@@ -90,8 +203,11 @@ public class Exchange {
    * @return the Purchase transaction
    */
   public Transaction buy(String symbol, BigDecimal quantity, Player player) {
-    Stock stockToBuy = this.getStock(symbol);
-    Share shareToBuy = new Share(stockToBuy, quantity, stockToBuy.getSalesPrice());
+    InvestableAsset assetToBuy = this.getAsset(symbol);
+    if (assetToBuy == null) {
+      throw new IllegalArgumentException("Unknown asset symbol: " + symbol);
+    }
+    Share shareToBuy = new Share(assetToBuy, quantity, assetToBuy.getSalesPrice());
     Purchase purchase = new Purchase(shareToBuy, this.getDay());
     purchase.commit(player);
     return purchase;
@@ -112,13 +228,13 @@ public class Exchange {
    * @throws InsufficientFundsException   if no positive quantity fits the budget and cash available
    */
   public Transaction buyUpToBudget(String symbol, BigDecimal maxSpend, Player player) {
-    Stock stock = this.getStock(symbol);
-    if (stock == null) {
-      throw new IllegalArgumentException("Unknown stock symbol: " + symbol);
+    InvestableAsset asset = this.getAsset(symbol);
+    if (asset == null) {
+      throw new IllegalArgumentException("Unknown asset symbol: " + symbol);
     }
     requirePositive(maxSpend, "maxSpend");
     BigDecimal budget = maxSpend.min(player.getMoney());
-    BigDecimal quantity = TransactionSizing.maxQuantityForBudget(stock, budget);
+    BigDecimal quantity = TransactionSizing.maxQuantityForBudget(asset, budget);
     if (quantity.signum() <= 0) {
       throw new InsufficientFundsException();
     }
@@ -132,7 +248,27 @@ public class Exchange {
    * @return the stock object
    */
   public Stock getStock(String symbol) {
-    return stockMap.get(symbol);
+    return stockMap.get(symbol.toUpperCase());
+  }
+
+  /**
+   * Gets the fund by its symbol.
+   *
+   * @param symbol the fund symbol
+   * @return the fund object
+   */
+  public Fund getFund(String symbol) {
+    return fundMap.get(symbol.toUpperCase());
+  }
+
+  /**
+   * Gets any listed investable asset by symbol.
+   *
+   * @param symbol stock or fund symbol
+   * @return the matching asset, or {@code null}
+   */
+  public InvestableAsset getAsset(String symbol) {
+    return assetMap.get(symbol.toUpperCase());
   }
 
   /**
@@ -142,6 +278,36 @@ public class Exchange {
    */
   public int getDay() {
     return day;
+  }
+
+  /**
+   * Returns the most recent market event generated during {@link #advance()}, if any.
+   *
+   * @return latest market event for the current trading day
+   */
+  public Optional<MarketEvent> getLastMarketEvent() {
+    return lastMarketEvent;
+  }
+
+  /**
+   * Returns the chronological market-event history recorded by the exchange.
+   *
+   * @return immutable list of generated market events, oldest first
+   */
+  public List<MarketEvent> getMarketEventHistory() {
+    return List.copyOf(marketEventHistory);
+  }
+
+  /**
+   * Returns the recorded market events that affected the given stock symbol.
+   *
+   * @param symbol stock symbol whose relevant events should be returned
+   * @return immutable list of matching market events, oldest first
+   */
+  public List<MarketEvent> getMarketEventsForStock(String symbol) {
+    return marketEventHistory.stream()
+        .filter(event -> event.getAffectedSymbols().contains(symbol))
+        .toList();
   }
 
   /**
@@ -247,10 +413,15 @@ public class Exchange {
    */
   private void advanceOneDay() {
     this.day += 1;
+    List<Stock> listedStocks = List.copyOf(this.stockMap.values());
+    this.lastMarketEvent = marketEventStrategy.maybeCreateEvent(listedStocks, this.day, this.random);
+    this.lastMarketEvent.ifPresent(marketEventHistory::add);
     this.stockMap.values().forEach(stock -> {
-      double factor = 1 + this.random.nextDouble(-DAILY_SIGMA, DAILY_SIGMA);
-      stock.addNewSalesPrice(
-          stock.getSalesPrice().multiply(BigDecimal.valueOf(factor)));
+      BigDecimal nextPrice = dailyPriceMoveStrategy.calculateNextPrice(stock, this.random);
+      if (lastMarketEvent.isPresent() && lastMarketEvent.get().affects(stock)) {
+        nextPrice = lastMarketEvent.get().applyTo(nextPrice);
+      }
+      stock.addNewSalesPrice(nextPrice);
     });
   }
 
@@ -298,6 +469,38 @@ public class Exchange {
    */
   public List<Stock> getLosers(int limit) {
     return getByPriceChange(limit, -1, false);
+  }
+
+  /**
+   * Returns all listed funds.
+   *
+   * @return immutable fund list
+   */
+  public List<Fund> getFunds() {
+    return List.copyOf(fundMap.values());
+  }
+
+  /**
+   * Returns all listed assets.
+   *
+   * @return immutable asset list
+   */
+  public List<InvestableAsset> getAssets() {
+    return List.copyOf(assetMap.values());
+  }
+
+  /**
+   * Combines stock and fund listings into one symbol-keyed registry.
+   *
+   * @param stocks listed stocks
+   * @param funds listed funds
+   * @return combined symbol map
+   */
+  private static Map<String, InvestableAsset> buildAssetMap(List<Stock> stocks, List<Fund> funds) {
+    Map<String, InvestableAsset> assets = new java.util.HashMap<>();
+    stocks.forEach(stock -> assets.put(stock.getSymbol(), stock));
+    funds.forEach(fund -> assets.put(fund.getSymbol(), fund));
+    return Map.copyOf(assets);
   }
 
 }

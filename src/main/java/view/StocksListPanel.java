@@ -22,6 +22,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.Exchange;
 import model.Stock;
+import model.marketevent.MarketEvent;
 
 /**
  * JavaFX panel listing all stocks on an {@link Exchange}: symbol, company, and latest price.
@@ -71,7 +72,11 @@ public class StocksListPanel extends BorderPane {
     table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
     VBox.setVgrow(table, Priority.ALWAYS);
     table.getSelectionModel().selectedItemProperty().addListener((obs, previous, selected) ->
-        detailView.showStock(selected, exchange.getDay()));
+        detailView.showStock(
+            selected,
+            exchange.getDay(),
+            exchange.getLastMarketEvent(),
+            getMarketHistoryForStock(selected)));
 
     SplitPane splitPane = new SplitPane(table, detailView);
     splitPane.setDividerPositions(0.46);
@@ -115,7 +120,10 @@ public class StocksListPanel extends BorderPane {
       table.getSelectionModel().selectFirst();
     }
     table.refresh();
-    detailView.refresh(exchange.getDay());
+    detailView.refresh(
+        exchange.getDay(),
+        exchange.getLastMarketEvent(),
+        getMarketHistoryForStock(detailView.getSelectedStock()));
   }
 
   /**
@@ -145,6 +153,19 @@ public class StocksListPanel extends BorderPane {
       }
     }
     table.getSelectionModel().clearSelection();
+  }
+
+  /**
+   * Returns the market-event history relevant to the given stock.
+   *
+   * @param stock selected stock, or {@code null} when no row is selected
+   * @return immutable list of relevant market events
+   */
+  private List<MarketEvent> getMarketHistoryForStock(Stock stock) {
+    if (stock == null) {
+      return List.of();
+    }
+    return exchange.getMarketEventsForStock(stock.getSymbol());
   }
 
   private static void styleButton(Button b) {
