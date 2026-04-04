@@ -77,7 +77,7 @@ public class SessionWorkspaceView extends StackPane {
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
 
     Button refreshButton = new Button("Refresh all");
-    Button switchUserButton = new Button("Switch user");
+    Button switchUserButton = new Button("Compare / switch user");
     Button logoutButton = new Button("Log out");
     styleButton(refreshButton);
     styleButton(switchUserButton);

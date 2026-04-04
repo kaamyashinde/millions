@@ -17,6 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import model.session.PlayerLeaderboardEntry;
 
 /**
  * Collects login and registration input for the session-based GUI shell.
@@ -34,6 +35,8 @@ public class AuthPane extends BorderPane {
   private final PasswordField registerPinField = new PasswordField();
   private final TextField registerStartingMoneyField = new TextField();
   private final Label statusLabel = new Label();
+  private final Button returnButton = new Button("Back to current session");
+  private final PlayerLeaderboardPanel leaderboardPanel;
 
   /**
    * Builds the authentication view with login and registration forms.
@@ -46,6 +49,7 @@ public class AuthPane extends BorderPane {
    */
   public AuthPane(
       List<String> users,
+      List<PlayerLeaderboardEntry> leaderboardEntries,
       boolean allowReturnToSession,
       LoginAction loginAction,
       RegisterAction registerAction,
@@ -120,9 +124,13 @@ public class AuthPane extends BorderPane {
 
     HBox forms = new HBox(20, usersBox, loginBox, registerBox);
     forms.setAlignment(Pos.TOP_LEFT);
-    setCenter(forms);
+    HBox.setHgrow(forms, Priority.ALWAYS);
 
-    Button returnButton = new Button("Back to current session");
+    leaderboardPanel = new PlayerLeaderboardPanel(leaderboardEntries);
+    leaderboardPanel.setPrefWidth(440);
+    HBox.setHgrow(leaderboardPanel, Priority.ALWAYS);
+    setCenter(new HBox(24, forms, leaderboardPanel));
+
     styleButton(returnButton);
     returnButton.setVisible(allowReturnToSession);
     returnButton.setManaged(allowReturnToSession);
@@ -163,6 +171,43 @@ public class AuthPane extends BorderPane {
    */
   public int getRegisteredUserCount() {
     return registeredUsersView.getItems().size();
+  }
+
+  /**
+   * Returns the embedded leaderboard panel for test assertions.
+   *
+   * @return auth-screen leaderboard panel
+   */
+  public PlayerLeaderboardPanel getLeaderboardPanel() {
+    return leaderboardPanel;
+  }
+
+  /**
+   * Returns the visible leaderboard usernames in display order.
+   *
+   * @return displayed leaderboard usernames
+   */
+  public List<String> getLeaderboardDisplayedUsernames() {
+    return leaderboardPanel.getDisplayedUsernames();
+  }
+
+  /**
+   * Returns the formatted net worth shown for a specific leaderboard user.
+   *
+   * @param username target username
+   * @return formatted net worth text or {@code null} if missing
+   */
+  public String getLeaderboardNetWorthForUser(String username) {
+    return leaderboardPanel.getDisplayedNetWorthForUser(username);
+  }
+
+  /**
+   * Simulates pressing the return button when it is visible.
+   */
+  public void triggerReturnToSession() {
+    if (returnButton.isManaged()) {
+      returnButton.fire();
+    }
   }
 
   /**
