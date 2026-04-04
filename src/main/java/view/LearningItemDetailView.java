@@ -2,35 +2,46 @@ package view;
 
 import java.awt.Desktop;
 import java.net.URI;
+import java.util.List;
+import java.util.function.Consumer;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
+import model.learninghub.Difficulty;
+import model.learninghub.LearningContentStore;
 import model.learninghub.LearningItem;
+import model.learninghub.LearningResource;
 import util.MarkdownLoader;
 
 /**
  * Detail view for a single {@link LearningItem}. Renders the item's markdown content file in a
- * {@link WebView} with a dark theme, followed by the item's curated further-reading links.
+ * {@link WebView} with a dark theme, followed by item-specific resource cards and suggested next
+ * topics.
  *
  * @author kaamyashinde
- * @version 1.1.0
+ * @version 1.2.0
  * @since 04-04-2026
  */
 public class LearningItemDetailView extends BorderPane {
 
   private static final String COLOR_BG_CARD = "#1e1e1e";
+  private static final String COLOR_BORDER_ACCENT = "#2196F3";
   private static final String COLOR_BORDER_RESOURCE = "#4CAF50";
   private static final String COLOR_HEADING = "#e0e0e0";
   private static final String COLOR_SUBTITLE = "#9e9e9e";
+  private static final String COLOR_DIFFICULTY_BEGINNER = "#4CAF50";
+  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#FFA500";
+  private static final String COLOR_DIFFICULTY_ADVANCED = "#FF4444";
 
   private static final Parser MD_PARSER = Parser.builder().build();
   private static final HtmlRenderer HTML_RENDERER = HtmlRenderer.builder().build();
@@ -38,10 +49,11 @@ public class LearningItemDetailView extends BorderPane {
   /**
    * Builds the detail view for the given item.
    *
-   * @param item   the learning item to display
-   * @param onBack called when the back button is clicked
+   * @param item          the learning item to display
+   * @param onBack        called when the back button is clicked
+   * @param onItemClicked called when a related topic card is clicked
    */
-  public LearningItemDetailView(LearningItem item, Runnable onBack) {
+  public LearningItemDetailView(LearningItem item, Runnable onBack, Consumer<LearningItem> onItemClicked) {
     setPadding(new Insets(16));
 
     // ── TOP: back button ─────────────────────────────────────────────────────
@@ -53,12 +65,13 @@ public class LearningItemDetailView extends BorderPane {
     topBar.setPadding(new Insets(0, 0, 8, 0));
     setTop(topBar);
 
-    // ── CENTER: WebView for markdown + further reading cards ─────────────────
+    // ── CENTER: WebView for markdown + resource cards + related topics ────────
     VBox content = new VBox(16);
     content.setPadding(new Insets(0, 0, 16, 0));
 
     content.getChildren().add(buildMarkdownView(item));
-    content.getChildren().add(buildFurtherReadingSection(item));
+    content.getChildren().add(buildResourcesSection(item));
+    content.getChildren().add(buildRelatedTopicsSection(item, onItemClicked));
 
     setCenter(content);
   }
@@ -120,16 +133,138 @@ public class LearningItemDetailView extends BorderPane {
     return webView;
   }
 
-  private static javafx.scene.Node buildFurtherReadingSection(LearningItem item) {
-    // Parse the Further Reading links out of the markdown file directly from the rendered HTML.
-    // Simpler approach: re-parse the markdown and extract the last section's links.
-    // For now, show a generic "Further Reading" heading — the links are rendered inside the WebView.
-    // This section is intentionally left minimal; the WebView already contains the Further Reading
-    // section from the markdown content.
-    Label heading = new Label("Open links above in the Further Reading section to explore more.");
-    heading.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11; -fx-font-style: italic;");
-    heading.setWrapText(true);
-    return heading;
+  private static javafx.scene.Node buildResourcesSection(LearningItem item) {
+    List<LearningResource> resources = LearningContentStore.getResourcesForItem(item);
+
+    VBox section = new VBox(10);
+    section.setPadding(new Insets(8, 0, 0, 0));
+
+    Label heading = new Label("Further Reading");
+    heading.setStyle(
+        "-fx-text-fill: " + COLOR_HEADING + ";"
+        + "-fx-font-weight: bold;"
+        + "-fx-font-size: 13;");
+    section.getChildren().add(heading);
+
+    if (resources.isEmpty()) {
+      Label fallback = new Label(
+          "Open links in the Further Reading section above to explore more.");
+      fallback.setStyle(
+          "-fx-text-fill: " + COLOR_SUBTITLE + ";"
+          + "-fx-font-size: 11;"
+          + "-fx-font-style: italic;");
+      fallback.setWrapText(true);
+      section.getChildren().add(fallback);
+    } else {
+      for (LearningResource res : resources) {
+        section.getChildren().add(buildResourceCard(res));
+      }
+    }
+
+    return section;
+  }
+
+  private static javafx.scene.Node buildResourceCard(LearningResource resource) {
+    Label sourceLabel = new Label(resource.sourceLabel());
+    sourceLabel.setStyle(
+        "-fx-background-color: " + COLOR_BORDER_RESOURCE + "22;"
+        + "-fx-text-fill: " + COLOR_BORDER_RESOURCE + ";"
+        + "-fx-background-radius: 4;"
+        + "-fx-padding: 2 6 2 6;"
+        + "-fx-font-size: 10;");
+
+    Label title = new Label(resource.title());
+    title.setStyle(
+        "-fx-text-fill: " + COLOR_HEADING + ";"
+        + "-fx-font-weight: bold;"
+        + "-fx-font-size: 13;");
+
+    Label desc = new Label(resource.description());
+    desc.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    desc.setWrapText(true);
+
+    Label cta = new Label("Open →");
+    cta.setStyle("-fx-text-fill: " + COLOR_BORDER_RESOURCE + "; -fx-font-size: 11;");
+
+    VBox card = new VBox(6, sourceLabel, title, desc, cta);
+    card.setPadding(new Insets(12));
+    card.setMaxWidth(Double.MAX_VALUE);
+    card.setStyle(
+        "-fx-background-color: " + COLOR_BG_CARD + ";"
+        + "-fx-border-color: " + COLOR_BORDER_RESOURCE + ";"
+        + "-fx-border-radius: 8;"
+        + "-fx-background-radius: 8;"
+        + "-fx-cursor: hand;");
+    card.setOnMouseClicked(_ -> openUrl(resource.url()));
+    return card;
+  }
+
+  private static javafx.scene.Node buildRelatedTopicsSection(
+      LearningItem item, Consumer<LearningItem> onItemClicked) {
+    List<LearningItem> related = LearningContentStore.getItemsByIds(item.relatedTopicIds());
+    if (related.isEmpty()) {
+      return new Region();
+    }
+
+    VBox section = new VBox(10);
+    section.setPadding(new Insets(8, 0, 0, 0));
+
+    Label heading = new Label("Suggested Next Topics");
+    heading.setStyle(
+        "-fx-text-fill: " + COLOR_HEADING + ";"
+        + "-fx-font-weight: bold;"
+        + "-fx-font-size: 13;");
+    section.getChildren().add(heading);
+
+    for (LearningItem relatedItem : related) {
+      section.getChildren().add(buildRelatedTopicCard(relatedItem, onItemClicked));
+    }
+
+    return section;
+  }
+
+  private static javafx.scene.Node buildRelatedTopicCard(
+      LearningItem item, Consumer<LearningItem> onItemClicked) {
+    String badgeColor = difficultyColor(item.difficulty());
+
+    Label badge = new Label(item.difficulty().name());
+    badge.setStyle(
+        "-fx-background-color: " + badgeColor + "22;"
+        + "-fx-text-fill: " + badgeColor + ";"
+        + "-fx-background-radius: 4;"
+        + "-fx-padding: 2 6 2 6;"
+        + "-fx-font-size: 10;");
+
+    Label title = new Label(item.title());
+    title.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-weight: bold;");
+    title.setWrapText(true);
+
+    Label summary = new Label(item.summary());
+    summary.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    summary.setWrapText(true);
+
+    Label category = new Label(item.category().emoji() + "  " + item.category().name());
+    category.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 10;");
+
+    VBox card = new VBox(6, badge, title, summary, category);
+    card.setPadding(new Insets(12));
+    card.setMaxWidth(Double.MAX_VALUE);
+    card.setStyle(
+        "-fx-background-color: " + COLOR_BG_CARD + ";"
+        + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
+        + "-fx-border-radius: 8;"
+        + "-fx-background-radius: 8;"
+        + "-fx-cursor: hand;");
+    card.setOnMouseClicked(_ -> onItemClicked.accept(item));
+    return card;
+  }
+
+  private static String difficultyColor(Difficulty d) {
+    return switch (d) {
+      case BEGINNER -> COLOR_DIFFICULTY_BEGINNER;
+      case INTERMEDIATE -> COLOR_DIFFICULTY_INTERMEDIATE;
+      case ADVANCED -> COLOR_DIFFICULTY_ADVANCED;
+    };
   }
 
   private static void openUrl(String url) {
