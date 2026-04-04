@@ -131,7 +131,10 @@ public class ToastDemoApp extends Application {
     Tab learningHubTab = new Tab("Learning Hub", learningHubPanel);
     learningHubTab.setClosable(false);
 
-    TabPane tabs = new TabPane(notificationsTab, playerTab, stocksTab, fundsTab, savingsTab, learningHubTab);
+    Tab quizTab = new Tab("Quiz", new QuizLauncherPanel());
+    quizTab.setClosable(false);
+
+    TabPane tabs = new TabPane(notificationsTab, playerTab, stocksTab, fundsTab, savingsTab, learningHubTab, quizTab);
 
     Text heading = new Text("Toast Demo");
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
