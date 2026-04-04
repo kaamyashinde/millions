@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import model.Stock;
 import model.marketevent.MarketEvent;
+import model.stockinfo.StockFinancialInfo;
+import model.stockinfo.StockFinancialInfoProvider;
 import model.marketevent.SymbolMarketEventTarget;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,41 @@ class StockDetailViewTest {
     } catch (IllegalStateException ignored) {
       // toolkit already running
     }
+  }
+
+  @Test
+  void initialView_showsPlaceholderFundamentals() throws Exception {
+    StockDetailView view =
+        runOnFxThread(
+            () -> {
+              StockDetailView detailView = new StockDetailView();
+              detailView.showStock(null, 0);
+              return detailView;
+            });
+
+    assertEquals("Revenue: -", view.getRevenueLabelText());
+    assertEquals("Profit: -", view.getProfitLabelText());
+    assertEquals("Health: -", view.getHealthLabelText());
+  }
+
+  @Test
+  void showStock_displaysMockFundamentalsMatchingProvider() throws Exception {
+    Stock stock = new Stock("AAPL", "Apple Inc.");
+    stock.addNewSalesPrice(new BigDecimal("100.00"));
+    StockFinancialInfoProvider provider = new StockFinancialInfoProvider();
+    StockFinancialInfo expected = provider.forStock(stock);
+
+    StockDetailView view =
+        runOnFxThread(
+            () -> {
+              StockDetailView detailView = new StockDetailView();
+              detailView.showStock(stock, 1);
+              return detailView;
+            });
+
+    assertEquals("Revenue: " + provider.formatMoney(expected.revenue()), view.getRevenueLabelText());
+    assertEquals("Profit: " + provider.formatMoney(expected.profit()), view.getProfitLabelText());
+    assertEquals("Health: " + expected.health().displayLabel(), view.getHealthLabelText());
   }
 
   @Test
