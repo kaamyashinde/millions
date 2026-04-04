@@ -16,16 +16,20 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.Stock;
 import model.marketevent.MarketEvent;
+import model.stockinfo.StockFinancialInfo;
+import model.stockinfo.StockFinancialInfoProvider;
 import recommendation.StockRecommendation;
 import recommendation.StockRecommendationService;
 import view.components.chart.StockChart;
 import view.components.recommendation.StockRecommendationLabel;
 
 /**
- * Dedicated stock detail view showing summary data, trend-based recommendation, and price history.
+ * Dedicated stock detail view showing summary data, mock company fundamentals, trend-based
+ * recommendation, and price history.
  *
  * <p>The recommendation is computed through {@link StockRecommendationService}, keeping expert
- * advice presentation separate from the stock's actual price-update logic.
+ * advice presentation separate from the stock's actual price-update logic. Mock revenue and profit
+ * come from {@link StockFinancialInfoProvider}.
  *
  * @author kaamyashinde
  * @version 1.0.0
@@ -34,12 +38,18 @@ import view.components.recommendation.StockRecommendationLabel;
 public class StockDetailView extends BorderPane {
 
   private final StockRecommendationService recommendationService = new StockRecommendationService();
+  private final StockFinancialInfoProvider financialInfoProvider = new StockFinancialInfoProvider();
 
   private final Label titleLabel = new Label("Stock details");
   private final Label subtitleLabel = new Label("Select a stock to inspect its latest trend.");
   private final Label dayLabel = new Label("Trading day: -");
   private final Label latestPriceLabel = new Label("Latest price: -");
   private final Label marketEventLabel = new Label("Latest market event: none");
+  private final Label fundamentalsHeading = new Label("Company fundamentals");
+  private final Label revenueLabel = new Label("Revenue: -");
+  private final Label profitLabel = new Label("Profit: -");
+  private final Label healthLabel = new Label("Health: -");
+  private final VBox fundamentalsBox;
   private final Label marketHistoryHeading = new Label("Past events");
   private final Label basisLabel = new Label("Recommendation basis: recent price trend");
   private final StockRecommendationLabel recommendationLabel =
@@ -72,7 +82,28 @@ public class StockDetailView extends BorderPane {
     marketHistoryList.setMouseTransparent(true);
     marketHistoryList.setMaxHeight(140);
 
-    VBox header = new VBox(6, titleLabel, subtitleLabel, dayLabel, latestPriceLabel, marketEventLabel);
+    fundamentalsHeading.setFont(Font.font("System", FontWeight.BOLD, 14));
+    revenueLabel.setWrapText(true);
+    profitLabel.setWrapText(true);
+    healthLabel.setWrapText(true);
+    fundamentalsBox =
+        new VBox(4, fundamentalsHeading, revenueLabel, profitLabel, healthLabel);
+    fundamentalsBox.setStyle(
+        "-fx-background-color: #f9fafc;"
+            + "-fx-border-color: #e2e6ee;"
+            + "-fx-background-radius: 10;"
+            + "-fx-border-radius: 10;"
+            + "-fx-padding: 12;");
+
+    VBox header =
+        new VBox(
+            10,
+            titleLabel,
+            subtitleLabel,
+            dayLabel,
+            latestPriceLabel,
+            marketEventLabel,
+            fundamentalsBox);
     recommendationBox = new VBox(8, new Label("Recommendation"), recommendationLabel, basisLabel);
     recommendationBox.setStyle(
         "-fx-background-color: #f6f7fb;"
@@ -133,6 +164,7 @@ public class StockDetailView extends BorderPane {
       subtitleLabel.setText("Select a stock to inspect its latest trend.");
       latestPriceLabel.setText("Latest price: -");
       marketEventLabel.setText("Latest market event: none");
+      clearFundamentalsLabels();
       marketHistoryList.setItems(FXCollections.observableArrayList());
       recommendationLabel.setRecommendation(StockRecommendation.HOLD);
       placeholderLabel.setText("Choose a stock from the list to view chart and recommendation details.");
@@ -144,6 +176,7 @@ public class StockDetailView extends BorderPane {
     subtitleLabel.setText("Single-stock detail view with trend recommendation.");
     latestPriceLabel.setText("Latest price: " + formatLatestPrice(stock));
     marketEventLabel.setText(buildMarketEventText(stock, marketEvent));
+    applyFundamentalsLabels(stock);
     marketHistoryList.setItems(FXCollections.observableArrayList(buildMarketHistoryItems(marketHistory)));
     recommendationLabel.setRecommendation(recommendationService.recommend(stock));
 
@@ -235,11 +268,51 @@ public class StockDetailView extends BorderPane {
   }
 
   /**
+   * Returns the revenue line currently shown under company fundamentals.
+   *
+   * @return revenue label text
+   */
+  public String getRevenueLabelText() {
+    return revenueLabel.getText();
+  }
+
+  /**
+   * Returns the profit line currently shown under company fundamentals.
+   *
+   * @return profit label text
+   */
+  public String getProfitLabelText() {
+    return profitLabel.getText();
+  }
+
+  /**
+   * Returns the health line currently shown under company fundamentals.
+   *
+   * @return health label text
+   */
+  public String getHealthLabelText() {
+    return healthLabel.getText();
+  }
+
+  /**
    * Formats the latest price if one exists.
    *
    * @param stock stock whose latest price should be shown
    * @return formatted latest price or placeholder text
    */
+  private void clearFundamentalsLabels() {
+    revenueLabel.setText("Revenue: -");
+    profitLabel.setText("Profit: -");
+    healthLabel.setText("Health: -");
+  }
+
+  private void applyFundamentalsLabels(Stock stock) {
+    StockFinancialInfo fin = financialInfoProvider.forStock(stock);
+    revenueLabel.setText("Revenue: " + financialInfoProvider.formatMoney(fin.revenue()));
+    profitLabel.setText("Profit: " + financialInfoProvider.formatMoney(fin.profit()));
+    healthLabel.setText("Health: " + fin.health().displayLabel());
+  }
+
   private static String formatLatestPrice(Stock stock) {
     if (stock.getHistoricalPrices().isEmpty()) {
       return "-";
