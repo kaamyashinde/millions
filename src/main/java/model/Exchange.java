@@ -39,6 +39,7 @@ public class Exchange {
   private final Random random;
   private final DailyPriceMoveStrategy dailyPriceMoveStrategy;
   private final MarketEventStrategy marketEventStrategy;
+  private final List<MarketEvent> marketEventHistory;
   private int day;
   private Optional<MarketEvent> lastMarketEvent;
 
@@ -80,6 +81,7 @@ public class Exchange {
     this.random = random;
     this.dailyPriceMoveStrategy = dailyPriceMoveStrategy;
     this.marketEventStrategy = marketEventStrategy;
+    this.marketEventHistory = new ArrayList<>();
     this.lastMarketEvent = Optional.empty();
   }
 
@@ -190,6 +192,27 @@ public class Exchange {
   }
 
   /**
+   * Returns the chronological market-event history recorded by the exchange.
+   *
+   * @return immutable list of generated market events, oldest first
+   */
+  public List<MarketEvent> getMarketEventHistory() {
+    return List.copyOf(marketEventHistory);
+  }
+
+  /**
+   * Returns the recorded market events that affected the given stock symbol.
+   *
+   * @param symbol stock symbol whose relevant events should be returned
+   * @return immutable list of matching market events, oldest first
+   */
+  public List<MarketEvent> getMarketEventsForStock(String symbol) {
+    return marketEventHistory.stream()
+        .filter(event -> event.getAffectedSymbols().contains(symbol))
+        .toList();
+  }
+
+  /**
    * Sells shares of a stock for a player. This method creates a Sale transaction and commits it.
    *
    * @param share  the share to sell
@@ -294,6 +317,7 @@ public class Exchange {
     this.day += 1;
     List<Stock> listedStocks = List.copyOf(this.stockMap.values());
     this.lastMarketEvent = marketEventStrategy.maybeCreateEvent(listedStocks, this.day, this.random);
+    this.lastMarketEvent.ifPresent(marketEventHistory::add);
     this.stockMap.values().forEach(stock -> {
       BigDecimal nextPrice = dailyPriceMoveStrategy.calculateNextPrice(stock, this.random);
       if (lastMarketEvent.isPresent() && lastMarketEvent.get().affects(stock)) {

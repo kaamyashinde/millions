@@ -384,6 +384,8 @@ class ExchangeTest {
 
     assertTrue(eventExchange.getLastMarketEvent().isPresent());
     assertEquals("AAPL: Earnings beat expectations", eventExchange.getLastMarketEvent().get().title());
+    assertEquals(1, eventExchange.getMarketEventHistory().size());
+    assertEquals("AAPL: Earnings beat expectations", eventExchange.getMarketEventHistory().getFirst().title());
     assertEquals(0,
         appleStock.getSalesPrice().compareTo(initialApplePrice
             .multiply(new BigDecimal("1.01"))
@@ -422,9 +424,61 @@ class ExchangeTest {
 
     eventExchange.advance();
     assertTrue(eventExchange.getLastMarketEvent().isPresent());
+    assertEquals(1, eventExchange.getMarketEventHistory().size());
 
     eventExchange.advance();
     assertTrue(eventExchange.getLastMarketEvent().isEmpty());
+    assertEquals(1, eventExchange.getMarketEventHistory().size());
+  }
+
+  @Test
+  void getMarketEventsForStock_returnsOnlyMatchingEventsInChronologicalOrder() {
+    AtomicInteger calls = new AtomicInteger();
+    Exchange eventExchange =
+        new Exchange(
+            "NYSE",
+            List.of(appleStock, googleStock, microsoftStock),
+            new Random(15),
+            (stock, random) -> stock.getSalesPrice(),
+            (stocks, tradingDay, random) -> switch (calls.getAndIncrement()) {
+              case 0 -> Optional.of(
+                  new MarketEvent(
+                      tradingDay,
+                      "AAPL: Earnings beat expectations",
+                      "Apple Inc. reported stronger earnings than expected.",
+                      new SymbolMarketEventTarget(Set.of("AAPL")),
+                      new BigDecimal("1.10")));
+              case 1 -> Optional.of(
+                  new MarketEvent(
+                      tradingDay,
+                      "MSFT: Regulatory setback",
+                      "Microsoft faces a regulatory setback.",
+                      new SymbolMarketEventTarget(Set.of("MSFT")),
+                      new BigDecimal("0.88")));
+              case 2 -> Optional.of(
+                  new MarketEvent(
+                      tradingDay,
+                      "AAPL: Product launch gains traction",
+                      "Apple Inc. announced strong demand for a new release.",
+                      new SymbolMarketEventTarget(Set.of("AAPL")),
+                      new BigDecimal("1.09")));
+              default -> Optional.empty();
+            });
+
+    eventExchange.advance(4);
+
+    List<MarketEvent> fullHistory = eventExchange.getMarketEventHistory();
+    assertEquals(3, fullHistory.size());
+    assertEquals(2, fullHistory.getFirst().day());
+    assertEquals(4, fullHistory.getLast().day());
+
+    List<MarketEvent> appleEvents = eventExchange.getMarketEventsForStock("AAPL");
+    assertEquals(2, appleEvents.size());
+    assertEquals("AAPL: Earnings beat expectations", appleEvents.getFirst().title());
+    assertEquals("AAPL: Product launch gains traction", appleEvents.getLast().title());
+
+    List<MarketEvent> googleEvents = eventExchange.getMarketEventsForStock("GOOGL");
+    assertTrue(googleEvents.isEmpty());
   }
 
   @Test
