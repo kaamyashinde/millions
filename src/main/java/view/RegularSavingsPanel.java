@@ -27,8 +27,8 @@ import javafx.util.StringConverter;
 
 import controller.RegularSavingsPanelController;
 import model.Exchange;
+import model.InvestableAsset;
 import model.Player;
-import model.Stock;
 import model.savings.RegularSavingsPlan;
 import model.savings.RegularSavingsProcessor;
 import model.savings.SavingsInstallmentMode;
@@ -37,7 +37,7 @@ import view.components.toast.ToastMode;
 
 /**
  * JavaFX panel for demoing {@link RegularSavingsPlan} against an {@link Exchange} and
- * {@link Player}: list plans, add (stock chosen from {@link RegularSavingsPanelController}
+ * {@link Player}: list plans, add (asset chosen from {@link RegularSavingsPanelController}
  * listing), edit in
  * place (symbol stays fixed; use remove + add to change ticker), remove, and advance the exchange one
  * day while running {@link RegularSavingsProcessor}. Skipped installments surface as warning
@@ -63,7 +63,7 @@ public class RegularSavingsPanel extends BorderPane {
   private final TableView<RegularSavingsPlan> table = new TableView<>();
   private final ObservableList<RegularSavingsPlan> plans = FXCollections.observableArrayList();
 
-  private final ComboBox<Stock> addStock = new ComboBox<>();
+  private final ComboBox<InvestableAsset> addAsset = new ComboBox<>();
   private final ComboBox<SavingsInstallmentMode> addMode = new ComboBox<>(
       FXCollections.observableArrayList(SavingsInstallmentMode.values()));
   private final TextField addAmount = new TextField();
@@ -81,7 +81,7 @@ public class RegularSavingsPanel extends BorderPane {
   /**
    * Builds a panel wired to the given exchange and player; mutations go through the domain API.
    *
-   * @param exchange      exchange whose day advances and whose listed stocks validate new symbols
+   * @param exchange      exchange whose day advances and whose listed assets validate new symbols
    * @param player        player whose plans are listed and edited
    * @param notifications service used for insufficient-fund skips after advancing a day
    */
@@ -93,7 +93,7 @@ public class RegularSavingsPanel extends BorderPane {
   /**
    * Builds a panel wired to the given exchange and player and invokes a callback after advancing.
    *
-   * @param exchange exchange whose day advances and whose listed stocks validate new symbols
+   * @param exchange exchange whose day advances and whose listed assets validate new symbols
    * @param player player whose plans are listed and edited
    * @param notifications service used for insufficient-fund skips after advancing a day
    * @param afterAdvance callback invoked after the day advance work completes
@@ -128,12 +128,12 @@ public class RegularSavingsPanel extends BorderPane {
     setCenter(table);
 
     addMode.setValue(SavingsInstallmentMode.FIXED_SHARES);
-    addStock.setItems(savingsController.getListedStocks());
-    addStock.setPromptText("Stock");
-    configureStockCombo(addStock);
+    addAsset.setItems(savingsController.getListedAssets());
+    addAsset.setPromptText("Asset");
+    configureAssetCombo(addAsset);
     addAmount.setPromptText("Amount");
     addInterval.setPromptText("Interval (days)");
-    styleCombo(addStock);
+    styleCombo(addAsset);
     styleField(addAmount);
     styleField(addInterval);
     styleCombo(addMode);
@@ -146,7 +146,7 @@ public class RegularSavingsPanel extends BorderPane {
     GridPane addGrid = new GridPane();
     addGrid.setHgap(8);
     addGrid.setVgap(8);
-    addGrid.addRow(0, addHeading, addStock, addMode, addAmount, addInterval, addBtn);
+    addGrid.addRow(0, addHeading, addAsset, addMode, addAmount, addInterval, addBtn);
 
     editMode.setValue(SavingsInstallmentMode.FIXED_SHARES);
     styleCombo(editMode);
@@ -239,9 +239,9 @@ public class RegularSavingsPanel extends BorderPane {
 
   private void addPlan() {
     status.setText("");
-    Stock picked = addStock.getValue();
+    InvestableAsset picked = addAsset.getValue();
     if (picked == null) {
-      status.setText("Choose a stock.");
+      status.setText("Choose an asset.");
       return;
     }
     String sym = picked.getSymbol();
@@ -257,7 +257,7 @@ public class RegularSavingsPanel extends BorderPane {
           new RegularSavingsPlan(sym, mode, amount, interval, exchange.getDay());
       player.addRegularSavingsPlan(plan);
       refreshTable();
-      addStock.setValue(null);
+      addAsset.setValue(null);
       addAmount.clear();
       addInterval.clear();
     } catch (RuntimeException ex) {
@@ -265,16 +265,16 @@ public class RegularSavingsPanel extends BorderPane {
     }
   }
 
-  private static void configureStockCombo(ComboBox<Stock> combo) {
+  private static void configureAssetCombo(ComboBox<InvestableAsset> combo) {
     combo.setConverter(
         new StringConverter<>() {
           @Override
-          public String toString(Stock stock) {
-            return formatStockLabel(stock);
+          public String toString(InvestableAsset asset) {
+            return formatAssetLabel(asset);
           }
 
           @Override
-          public Stock fromString(String s) {
+          public InvestableAsset fromString(String s) {
             return null;
           }
         });
@@ -282,26 +282,26 @@ public class RegularSavingsPanel extends BorderPane {
         lv ->
             new ListCell<>() {
               @Override
-              protected void updateItem(Stock item, boolean empty) {
+              protected void updateItem(InvestableAsset item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : formatStockLabel(item));
+                setText(empty || item == null ? null : formatAssetLabel(item));
               }
             });
     combo.setButtonCell(
         new ListCell<>() {
           @Override
-          protected void updateItem(Stock item, boolean empty) {
+          protected void updateItem(InvestableAsset item, boolean empty) {
             super.updateItem(item, empty);
-            setText(empty || item == null ? null : formatStockLabel(item));
+            setText(empty || item == null ? null : formatAssetLabel(item));
           }
         });
   }
 
-  private static String formatStockLabel(Stock stock) {
-    if (stock == null) {
+  private static String formatAssetLabel(InvestableAsset asset) {
+    if (asset == null) {
       return "";
     }
-    return stock.getSymbol() + " — " + stock.getCompany();
+    return asset.getSymbol() + " — " + asset.getDisplayName() + " (" + asset.getAssetType() + ")";
   }
 
   private void applyEdit() {
