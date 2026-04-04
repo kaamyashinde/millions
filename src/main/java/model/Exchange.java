@@ -1,7 +1,5 @@
 package model;
 
-import static model.utils.Validator.requirePositive;
-
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
@@ -11,19 +9,18 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-import model.exception.InsufficientFundsException;
-import model.exception.InsufficientSharesException;
 import model.fund.Fund;
 import model.marketevent.DailyPriceMoveStrategy;
 import model.marketevent.MarketEvent;
 import model.marketevent.MarketEventStrategy;
 import model.marketevent.RandomMarketEventStrategy;
 import model.marketevent.UniformDailyPriceMoveStrategy;
-import model.transactioncalculator.SaleCalculator;
-import model.transaction.Purchase;
-import model.transaction.Sale;
+import model.trade.BuyCommand;
+import model.trade.BuyUpToBudgetCommand;
+import model.trade.SellByQuantityCommand;
+import model.trade.SellCommand;
+import model.trade.SellUpToTargetNetCommand;
 import model.transaction.Transaction;
-import model.transaction.TransactionSizing;
 
 /**
  * A class representing the Exchange Market in the system.
@@ -259,14 +256,7 @@ public class Exchange {
    * @return the Purchase transaction
    */
   public Transaction buy(String symbol, BigDecimal quantity, Player player) {
-    InvestableAsset assetToBuy = this.getAsset(symbol);
-    if (assetToBuy == null) {
-      throw new IllegalArgumentException("Unknown asset symbol: " + symbol);
-    }
-    Share shareToBuy = new Share(assetToBuy, quantity, assetToBuy.getSalesPrice());
-    Purchase purchase = new Purchase(shareToBuy, this.getDay());
-    purchase.commit(player);
-    return purchase;
+    return new BuyCommand(this, symbol, quantity).execute(player).getFirst();
   }
 
   /**
@@ -284,17 +274,7 @@ public class Exchange {
    * @throws InsufficientFundsException   if no positive quantity fits the budget and cash available
    */
   public Transaction buyUpToBudget(String symbol, BigDecimal maxSpend, Player player) {
-    InvestableAsset asset = this.getAsset(symbol);
-    if (asset == null) {
-      throw new IllegalArgumentException("Unknown asset symbol: " + symbol);
-    }
-    requirePositive(maxSpend, "maxSpend");
-    BigDecimal budget = maxSpend.min(player.getMoney());
-    BigDecimal quantity = TransactionSizing.maxQuantityForBudget(asset, budget);
-    if (quantity.signum() <= 0) {
-      throw new InsufficientFundsException();
-    }
-    return buy(symbol, quantity, player);
+    return new BuyUpToBudgetCommand(this, symbol, maxSpend).execute(player).getFirst();
   }
 
   /**
@@ -374,9 +354,7 @@ public class Exchange {
    * @return the Sale transaction
    */
   public Transaction sell(Share share, Player player) {
-    Sale sale = new Sale(share, this.getDay());
-    sale.commit(player);
-    return sale;
+    return new SellCommand(this, share).execute(player).getFirst();
   }
 
   /**
@@ -392,21 +370,7 @@ public class Exchange {
    * @throws IllegalArgumentException if {@code quantity} is not positive
    */
   public List<Transaction> sellByQuantity(String symbol, BigDecimal quantity, Player player) {
-    requirePositive(quantity, "quantity");
-    if (player.getPortfolio().totalQuantityForSymbol(symbol).compareTo(quantity) < 0) {
-      throw new InsufficientSharesException(symbol, quantity);
-    }
-    List<Transaction> transactions = new ArrayList<>();
-    BigDecimal remaining = quantity;
-    while (remaining.signum() > 0) {
-      Share slice = player.getPortfolio().buildNextFifoSaleSlice(symbol, remaining);
-      if (slice == null) {
-        throw new InsufficientSharesException(symbol, quantity);
-      }
-      transactions.add(sell(slice, player));
-      remaining = remaining.subtract(slice.getQuantity());
-    }
-    return transactions;
+    return new SellByQuantityCommand(this, symbol, quantity).execute(player);
   }
 
   /**
@@ -422,21 +386,7 @@ public class Exchange {
    * @throws IllegalArgumentException if {@code targetNet} is not positive
    */
   public List<Transaction> sellUpToTargetNet(String symbol, BigDecimal targetNet, Player player) {
-    requirePositive(targetNet, "targetNet");
-    List<Transaction> transactions = new ArrayList<>();
-    BigDecimal remainingTarget = targetNet;
-    while (remainingTarget.signum() > 0
-        && player.getPortfolio().totalQuantityForSymbol(symbol).signum() > 0) {
-      Share slice =
-          player.getPortfolio().buildNextFifoSliceForTargetNet(symbol, remainingTarget);
-      if (slice == null) {
-        break;
-      }
-      transactions.add(sell(slice, player));
-      BigDecimal net = new SaleCalculator(slice).calculateTotal();
-      remainingTarget = remainingTarget.subtract(net);
-    }
-    return transactions;
+    return new SellUpToTargetNetCommand(this, symbol, targetNet).execute(player);
   }
 
   /**
