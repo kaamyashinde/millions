@@ -2,8 +2,12 @@ package view;
 
 import static model.utils.Validator.checkNotNull;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -14,6 +18,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -43,6 +49,7 @@ public class PlayerPortfolioPanel extends BorderPane {
 
   private final Exchange exchange;
   private final Player player;
+  private final Path avatarPath;
   private final PortfolioPerformanceService performanceService = new PortfolioPerformanceService();
 
   private final Label playerLabel = new Label();
@@ -59,18 +66,22 @@ public class PlayerPortfolioPanel extends BorderPane {
 
   private final TableView<Share> holdingsTable = new TableView<>();
   private final ObservableList<Share> holdings = FXCollections.observableArrayList();
+  private final ImageView avatarView = new ImageView();
 
   /**
    * Builds a player summary panel backed by the given exchange and player.
    *
    * @param exchange exchange supplying market and trading-day state
    * @param player player whose summary and holdings should be shown
+   * @param avatarPath path to profile avatar image (may not exist yet)
    */
-  public PlayerPortfolioPanel(Exchange exchange, Player player) {
+  public PlayerPortfolioPanel(Exchange exchange, Player player, Path avatarPath) {
     checkNotNull(exchange, "Exchange");
     checkNotNull(player, "Player");
+    checkNotNull(avatarPath, "avatarPath");
     this.exchange = exchange;
     this.player = player;
+    this.avatarPath = avatarPath;
 
     setPadding(new Insets(16));
 
@@ -81,7 +92,12 @@ public class PlayerPortfolioPanel extends BorderPane {
     refreshButton.setOnAction(_ -> refresh());
     styleButton(refreshButton);
 
-    HBox topRow = new HBox(16, heading, refreshButton);
+    avatarView.setFitWidth(56);
+    avatarView.setFitHeight(56);
+    avatarView.setPreserveRatio(true);
+    avatarView.setSmooth(true);
+
+    HBox topRow = new HBox(16, avatarView, heading, refreshButton);
     topRow.setAlignment(Pos.CENTER_LEFT);
 
     GridPane summaryGrid = new GridPane();
@@ -166,6 +182,7 @@ public class PlayerPortfolioPanel extends BorderPane {
    * Refreshes the labels, holdings list, and side-by-side metrics from the live model state.
    */
   public void refresh() {
+    loadAvatarThumbnail();
     playerLabel.setText(player.getName());
     tradingDayLabel.setText(Integer.toString(exchange.getDay()));
     balanceLabel.setText(player.getMoney().setScale(2, RoundingMode.HALF_UP).toPlainString());
@@ -180,6 +197,18 @@ public class PlayerPortfolioPanel extends BorderPane {
     benchmarkVolatilityValueLabel.setText(formatMetricValue(comparison.benchmark().volatility(), true));
     benchmarkSharpeValueLabel.setText(formatMetricValue(comparison.benchmark().sharpeRatio(), false));
     holdingsTable.refresh();
+  }
+
+  private void loadAvatarThumbnail() {
+    avatarView.setImage(null);
+    if (!Files.isRegularFile(avatarPath)) {
+      return;
+    }
+    try (InputStream in = Files.newInputStream(avatarPath)) {
+      avatarView.setImage(new Image(in, 56, 56, true, true));
+    } catch (IOException exception) {
+      avatarView.setImage(null);
+    }
   }
 
   /**

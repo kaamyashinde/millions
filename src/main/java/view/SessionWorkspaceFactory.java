@@ -1,9 +1,12 @@
 package view;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import model.Stock;
 import model.session.ActiveSession;
+import model.session.SessionService;
+import model.session.SessionService;
 import view.components.notification.NotificationService;
 import view.components.toast.ToastMode;
 
@@ -18,34 +21,49 @@ public class SessionWorkspaceFactory {
    * Creates a new session workspace with fresh views and notifications.
    *
    * @param session active session supplying player and exchange state
+   * @param sessionService session service for saved runs and persistence
+   * @param helpAction callback to open help / welcome content
+   * @param sessionService session service for avatars and leaderboard
    * @param logoutAction callback invoked when the user logs out
    * @param switchUserAction callback invoked when the user wants to switch profiles
    * @param persistAction callback invoked after a successful model mutation
+   * @param onProfileAccountDeleted callback after the active profile was deleted from the editor
    * @return fresh workspace bound to the supplied session
    */
   public SessionWorkspaceView create(
       ActiveSession session,
+      SessionService sessionService,
+      Runnable helpAction,
       Runnable logoutAction,
       Runnable switchUserAction,
-      Runnable persistAction) {
+      Runnable persistAction,
+      Runnable onProfileAccountDeleted) {
     NotificationService notifications = new NotificationService();
     NotificationsPanel notificationsPanel = new NotificationsPanel(notifications);
-    PlayerPortfolioPanel playerPanel = new PlayerPortfolioPanel(session.exchange(), session.player());
+    Path avatarPath = sessionService.avatarPath(session.normalizedUsername());
+    PlayerPortfolioPanel playerPanel = new PlayerPortfolioPanel(session.exchange(), session.player(), avatarPath);
     StocksListPanel stocksPanel = new StocksListPanel(session.exchange());
     FundsListPanel fundsPanel = new FundsListPanel(session.exchange());
+    SavedRunsPanel savedRunsPanel = new SavedRunsPanel(sessionService, persistAction);
+    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sessionService);
 
     showLoadedNotifications(notifications, session);
 
     return new SessionWorkspaceView(
         session,
+        sessionService,
         notifications,
         notificationsPanel,
         playerPanel,
         stocksPanel,
         fundsPanel,
+        savedRunsPanel,
+        helpAction,
+        leaderboardPanel,
         logoutAction,
         switchUserAction,
-        persistAction);
+        persistAction,
+        onProfileAccountDeleted);
   }
 
   private void showLoadedNotifications(NotificationService notifications, ActiveSession session) {

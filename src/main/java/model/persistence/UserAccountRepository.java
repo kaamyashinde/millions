@@ -81,4 +81,27 @@ public final class UserAccountRepository {
       throw new PersistenceException("Could not list user profiles in " + root, exception);
     }
   }
+
+  /**
+   * Loads all account records sorted by username.
+   *
+   * @return account metadata for every profile on disk
+   */
+  public List<UserAccountRecord> listAccounts() {
+    Path root = profileDirectories.profilesRoot();
+    if (!Files.exists(root)) {
+      return List.of();
+    }
+    try (Stream<Path> children = Files.list(root)) {
+      return children
+          .filter(Files::isDirectory)
+          .map(path -> path.resolve("account.json"))
+          .filter(Files::exists)
+          .map(path -> jsonStorage.read(path, UserAccountRecord.class))
+          .sorted(Comparator.comparing(UserAccountRecord::username))
+          .toList();
+    } catch (IOException exception) {
+      throw new PersistenceException("Could not list user profiles in " + root, exception);
+    }
+  }
 }

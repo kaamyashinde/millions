@@ -22,6 +22,8 @@ import model.persistence.MarketData;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketDataLoader;
 import model.persistence.PinHashingService;
+import model.persistence.ProfilePreferencesRepository;
+import model.persistence.SavedRunRepository;
 import model.persistence.UserAccountRepository;
 import model.savings.RegularSavingsPlan;
 import model.savings.RegularSavingsProcessor;
@@ -67,6 +69,9 @@ public class UserInterface {
   private static final int LIST_FUNDS = 16;
   private static final int SEARCH_FUNDS = 17;
   private static final int VIEW_FUND_DETAILS = 18;
+  private static final int PROFILE_DISPLAY_NAME = 19;
+  private static final int PROFILE_AVATAR_PATH = 20;
+  private static final int PROFILE_DELETE = 21;
   private static final int INVALID_MENU_CHOICE = -1;
 
   private static final Scanner input = new Scanner(System.in);
@@ -99,9 +104,12 @@ public class UserInterface {
     sessionService = new SessionService(
         new UserAccountRepository(PROFILES_ROOT),
         new GameStateRepository(PROFILES_ROOT),
+        new SavedRunRepository(PROFILES_ROOT),
+        new ProfilePreferencesRepository(PROFILES_ROOT),
         new PinHashingService(),
         UserInterface::loadMarketData,
-        EXCHANGE_NAME);
+        EXCHANGE_NAME,
+        PROFILES_ROOT);
     player = null;
     exchange = null;
   }
@@ -146,6 +154,9 @@ public class UserInterface {
     System.out.println(I18n.get("menu.option.funds.list"));
     System.out.println(I18n.get("menu.option.funds.search"));
     System.out.println(I18n.get("menu.option.funds.view"));
+    System.out.println(I18n.get("menu.option.profile.name"));
+    System.out.println(I18n.get("menu.option.profile.avatar"));
+    System.out.println(I18n.get("menu.option.profile.delete"));
     System.out.println(I18n.get("menu.footer"));
     System.out.println(I18n.get("menu.prompt"));
     try {
@@ -181,6 +192,9 @@ public class UserInterface {
       case LIST_FUNDS -> listFunds();
       case SEARCH_FUNDS -> searchFunds();
       case VIEW_FUND_DETAILS -> viewFundDetails();
+      case PROFILE_DISPLAY_NAME -> editProfileDisplayName();
+      case PROFILE_AVATAR_PATH -> setProfileAvatarFromPath();
+      case PROFILE_DELETE -> deleteMyProfile();
       default -> System.out.println(I18n.get("invalid.input"));
     }
   }
@@ -1052,8 +1066,72 @@ public class UserInterface {
    */
   private static String activeUserSummary() {
     return sessionService.getActiveSession()
-        .map(session -> I18n.format("session.active.current", session.username(), session.exchange().getDay()))
+        .map(session -> I18n.format(
+            "session.active.current",
+            session.player().getName(),
+            session.username(),
+            session.exchange().getDay()))
         .orElseGet(() -> I18n.get("session.active.none"));
+  }
+
+  private static void editProfileDisplayName() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println(I18n.get("prompt.profile.displayName"));
+    String line = input.nextLine();
+    try {
+      sessionService.updateDisplayName(line);
+      System.out.println(I18n.get("profile.name.saved"));
+    } catch (IllegalArgumentException exception) {
+      System.out.println(exception.getMessage());
+    } catch (IllegalStateException exception) {
+      System.out.println(I18n.get("require.player"));
+    }
+  }
+
+  private static void setProfileAvatarFromPath() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println(I18n.get("prompt.profile.avatarPath"));
+    String line = input.nextLine().trim();
+    if (line.isEmpty()) {
+      System.out.println(I18n.get("profile.avatar.emptyPath"));
+      return;
+    }
+    try {
+      sessionService.saveAvatarFromFile(Path.of(line));
+      System.out.println(I18n.get("profile.avatar.saved"));
+    } catch (RuntimeException exception) {
+      System.out.println(
+          exception.getMessage() != null ? exception.getMessage() : I18n.get("profile.avatar.failed"));
+    }
+  }
+
+  private static void deleteMyProfile() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println(I18n.get("prompt.profile.deleteConfirm"));
+    System.out.println(I18n.get("prompt.pin"));
+    String pinLine = input.nextLine();
+    char[] pin = pinLine.toCharArray();
+    try {
+      sessionService.deleteActiveProfile(pin);
+      clearActiveSession();
+      System.out.println(I18n.get("profile.deleted"));
+    } catch (AuthenticationException exception) {
+      System.out.println(I18n.get("auth.invalidCredentials"));
+    } catch (RuntimeException exception) {
+      System.out.println(
+          exception.getMessage() != null ? exception.getMessage() : I18n.get("profile.delete.failed"));
+    } finally {
+      java.util.Arrays.fill(pin, '0');
+    }
   }
 
   /**

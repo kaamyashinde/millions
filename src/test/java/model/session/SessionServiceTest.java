@@ -1,20 +1,29 @@
 package model.session;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 import model.Stock;
 import model.fund.Fund;
 import model.fund.FundComponent;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketData;
 import model.persistence.PinHashingService;
+import model.persistence.ProfilePreferencesRepository;
+import model.persistence.SavedRunRecord;
+import model.persistence.SavedRunRepository;
+import model.persistence.ProfileDirectories;
 import model.persistence.UserAccountRepository;
+import model.persistence.UserAccountRecord;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -119,13 +128,77 @@ class SessionServiceTest {
             .toList());
   }
 
+  @Test
+  void welcomePreferences_roundTripForActiveSession() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("weluser", "1234".toCharArray(), new BigDecimal("1000.00"));
+    assertFalse(sessionService.hasSeenWelcome());
+    sessionService.markWelcomeSeen();
+    assertTrue(sessionService.hasSeenWelcome());
+  }
+
+  @Test
+  void saveCurrentRun_persistsSnapshotForActiveUser() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    ActiveSession session = sessionService.getActiveSession().orElseThrow();
+    session.exchange().buy("AAPL", new BigDecimal("1.0"), session.player());
+
+    SavedRunRecord saved = sessionService.saveCurrentRun("strategy-a");
+
+    assertEquals("strategy-a", saved.label());
+    assertEquals(1, saved.holdings().size());
+    assertEquals("AAPL", saved.holdings().getFirst().symbol());
+    assertEquals(1, sessionService.listSavedRuns().size());
+    UUID runId = UUID.fromString(saved.runId());
+    assertTrue(sessionService.setRunLeaderboardEligible(runId, true));
+    assertTrue(sessionService.listSavedRuns().getFirst().eligibleForLeaderboard());
+    assertTrue(sessionService.deleteSavedRun(runId));
+    assertTrue(sessionService.listSavedRuns().isEmpty());
+  }
+
+  @Test
+  void updateDisplayName_persistsAcrossLogin() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    sessionService.updateDisplayName("Allie");
+    sessionService.logout();
+
+    ActiveSession back = sessionService.login("Alice", "1234".toCharArray());
+    assertEquals("Allie", back.player().getName());
+    UserAccountRecord account = new UserAccountRepository(tempDir).findByUsername("Alice").orElseThrow();
+    assertEquals("Allie", account.displayName());
+  }
+
+  @Test
+  void deleteActiveProfile_removesFiles() throws Exception {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Zed", "1234".toCharArray(), new BigDecimal("100.00"));
+    Path profileDir = tempDir.resolve(ProfileDirectories.normalizeUsername("Zed"));
+    assertTrue(Files.isDirectory(profileDir));
+    sessionService.deleteActiveProfile("1234".toCharArray());
+    assertFalse(Files.exists(profileDir));
+  }
+
+  @Test
+  void deleteProfile_throwsWhenTargetIsActiveSession() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    assertThrows(
+        ProfileInUseException.class,
+        () -> sessionService.deleteProfile("Alice", "1234".toCharArray()));
+  }
+
   private SessionService createSessionService() {
     return new SessionService(
         new UserAccountRepository(tempDir),
         new GameStateRepository(tempDir),
+        new SavedRunRepository(tempDir),
+        new ProfilePreferencesRepository(tempDir),
         new PinHashingService(),
         SessionServiceTest::sampleMarketData,
-        "NYSE");
+        "NYSE",
+        tempDir);
   }
 
   private static MarketData sampleMarketData() {

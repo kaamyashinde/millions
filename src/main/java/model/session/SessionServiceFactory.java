@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketData;
 import model.persistence.PinHashingService;
+import model.persistence.ProfilePreferencesRepository;
+import model.persistence.SavedRunRepository;
 import model.persistence.UserAccountRepository;
 
 /**
@@ -39,8 +41,11 @@ public final class SessionServiceFactory {
     return new SessionService(
         new UserAccountRepository(profilesRoot),
         new GameStateRepository(profilesRoot),
+        new SavedRunRepository(profilesRoot),
+        new ProfilePreferencesRepository(profilesRoot),
         new PinHashingService(),
         marketDataSupplier,
-        exchangeName);
+        exchangeName,
+        profilesRoot);
   }
 }
