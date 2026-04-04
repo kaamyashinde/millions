@@ -4,7 +4,6 @@ import static model.utils.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import model.savings.RegularSavingsPlan;
@@ -45,7 +44,7 @@ public class Player {
     this.regularSavingsPlans = new ArrayList<>();
     this.observers = new ArrayList<>();
     this.observers.add(new PlayerLevelObserver());
-    this.playerLevel = computePlayerLevel();
+    this.playerLevel = PlayerLevels.NOVICE.checkTransition(this);
   }
 
   /**
@@ -87,19 +86,7 @@ public class Player {
    * {@link PlayerLevelObserver} whenever player state changes.
    */
   public void recalculateLevel() {
-    this.playerLevel = computePlayerLevel();
-  }
-
-  /**
-   * Determines the highest qualifying level for this player.
-   *
-   * @return the player's status as a PlayerLevel
-   */
-  private PlayerLevel computePlayerLevel() {
-    return Arrays.stream(PlayerLevel.values())
-        .filter(status -> status.qualifies(this))
-        .findFirst()
-        .orElse(PlayerLevel.NOVICE);
+    this.playerLevel = PlayerLevels.NOVICE.checkTransition(this);
   }
 
   /**
