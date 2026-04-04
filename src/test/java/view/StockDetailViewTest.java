@@ -17,7 +17,7 @@ import model.stockinfo.StockFinancialInfoProvider;
 import model.marketevent.SymbolMarketEventTarget;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import recommendation.StockRecommendation;
+import model.recommendation.StockRecommendation;
 
 /**
  * Tests refresh behavior of the stock detail view.
