@@ -3,7 +3,6 @@ package model.transaction;
 
 import model.Player;
 import model.Share;
-import model.exception.AlreadyCommittedException;
 import model.exception.ShareNotFoundException;
 import model.transactioncalculator.SaleCalculator;
 
@@ -30,22 +29,26 @@ public class Sale extends Transaction {
   }
 
   /**
-   * Commits the sale transaction.
+   * No separate precondition check needed; the share removal in
+   * {@link #execute(Player)} is atomic (validates and removes in one step).
    *
    * @param player the player making the sale
-   * @throws ShareNotFoundException    if the portfolio does not hold a matching FIFO lot (symbol,
-   *                                   purchase price, and at least the slice quantity).
-   * @throws AlreadyCommittedException if the transaction has already been committed.
    */
-  public void commit(Player player) {
-    if (this.isCommited()) {
-      throw new AlreadyCommittedException();
-    }
+  @Override
+  protected void validatePreconditions(Player player) {
+  }
+
+  /**
+   * Removes the share from the player's portfolio and credits the sale proceeds.
+   *
+   * @param player the player making the sale
+   * @throws ShareNotFoundException if the portfolio does not hold a matching FIFO lot
+   */
+  @Override
+  protected void execute(Player player) {
     if (!player.getPortfolio().removeFifoSliceForSale(this.getShare())) {
       throw new ShareNotFoundException(this.getShare(), player);
     }
     player.addMoney(saleCalc.calculateTotal());
-    player.getTransactionArchive().addTransaction(this);
-    this.commited = true;
   }
 }
