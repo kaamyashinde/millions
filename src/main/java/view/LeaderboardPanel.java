@@ -1,9 +1,6 @@
 package view;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.RoundingMode;
-import java.nio.file.Files;
 import java.util.List;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
@@ -16,7 +13,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
@@ -24,6 +20,9 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.session.LocalLeaderboardService.LeaderboardRow;
 import model.session.SessionService;
+import view.components.image.FileImageLoader;
+import view.components.image.ImageLoader;
+import view.components.image.ValidatingImageLoader;
 
 /**
  * Local leaderboard ranked by net worth with avatars.
@@ -31,6 +30,7 @@ import model.session.SessionService;
 public class LeaderboardPanel extends BorderPane {
 
   private final SessionService sessionService;
+  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
   private final TableView<LeaderboardRow> table = new TableView<>();
   private final ObservableList<LeaderboardRow> rows = FXCollections.observableArrayList();
 
@@ -71,19 +71,12 @@ public class LeaderboardPanel extends BorderPane {
           imageView.setImage(null);
           return;
         }
-        imageView.setImage(null);
         if (!row.hasAvatar()) {
+          imageView.setImage(null);
           return;
         }
         var path = sessionService.avatarPath(row.normalizedUsername());
-        if (!Files.isRegularFile(path)) {
-          return;
-        }
-        try (InputStream in = Files.newInputStream(path)) {
-          imageView.setImage(new Image(in, 40, 40, true, true));
-        } catch (IOException exception) {
-          imageView.setImage(null);
-        }
+        imageView.setImage(avatarLoader.load(path, 40));
       }
     });
 

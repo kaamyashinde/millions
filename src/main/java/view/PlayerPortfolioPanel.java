@@ -2,11 +2,8 @@ package view;
 
 import static model.utils.Validator.checkNotNull;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
@@ -18,7 +15,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -34,6 +30,9 @@ import model.Share;
 import model.analysis.MetricValue;
 import model.analysis.PerformanceComparison;
 import model.analysis.PortfolioPerformanceService;
+import view.components.image.FileImageLoader;
+import view.components.image.ImageLoader;
+import view.components.image.ValidatingImageLoader;
 
 /**
  * JavaFX panel showing player summary data, current holdings, and portfolio-vs-market metrics.
@@ -67,6 +66,7 @@ public class PlayerPortfolioPanel extends BorderPane {
   private final TableView<Share> holdingsTable = new TableView<>();
   private final ObservableList<Share> holdings = FXCollections.observableArrayList();
   private final ImageView avatarView = new ImageView();
+  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
 
   /**
    * Builds a player summary panel backed by the given exchange and player.
@@ -200,15 +200,7 @@ public class PlayerPortfolioPanel extends BorderPane {
   }
 
   private void loadAvatarThumbnail() {
-    avatarView.setImage(null);
-    if (!Files.isRegularFile(avatarPath)) {
-      return;
-    }
-    try (InputStream in = Files.newInputStream(avatarPath)) {
-      avatarView.setImage(new Image(in, 56, 56, true, true));
-    } catch (IOException exception) {
-      avatarView.setImage(null);
-    }
+    avatarView.setImage(avatarLoader.load(avatarPath, 56));
   }
 
   /**
