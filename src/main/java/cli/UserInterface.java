@@ -38,8 +38,10 @@ import model.session.DuplicateUsernameException;
 import model.session.GamePersistenceService;
 import model.session.ProfilePreferencesService;
 import model.session.ProfileService;
+import model.session.RegistrationValidationException;
 import model.session.SavedRunService;
 import model.session.SessionService;
+import model.session.validation.ValidationError;
 import model.transaction.Purchase;
 import model.transaction.Transaction;
 import util.I18n;
@@ -270,8 +272,8 @@ public class UserInterface {
       System.out.println(I18n.get("invalid.input"));
     } catch (DuplicateUsernameException e) {
       System.out.println(I18n.get("auth.duplicateUsername"));
-    } catch (IllegalArgumentException e) {
-      System.out.println(authenticationValidationMessage(e.getMessage()));
+    } catch (RegistrationValidationException e) {
+      System.out.println(registrationValidationMessage(e.error()));
     }
   }
 
@@ -297,8 +299,6 @@ public class UserInterface {
       System.out.println(I18n.format("auth.loggedIn", session.username()));
     } catch (AuthenticationException e) {
       System.out.println(I18n.get("auth.invalidCredentials"));
-    } catch (IllegalArgumentException e) {
-      System.out.println(authenticationValidationMessage(e.getMessage()));
     }
   }
 
@@ -1163,22 +1163,17 @@ public class UserInterface {
   }
 
   /**
-   * Maps registration and PIN validation failures to translated CLI messages.
+   * Maps typed registration validation failures to translated CLI messages.
    *
-   * @param message exception message from the session layer
-   * @return translated user-facing validation message
+   * @param error validation failure from the session layer
+   * @return translated user-facing message
    */
-  private static String authenticationValidationMessage(String message) {
-    if (message == null) {
-      return I18n.get("invalid.input");
-    }
-    return switch (message) {
-      case "Username must be 3-32 characters using letters, numbers, underscores, or hyphens." ->
-          I18n.get("auth.invalidUsername");
-      case "PIN must be 4 to 8 digits." -> I18n.get("auth.invalidPin");
-      case "Starting money must be non-negative." ->
+  private static String registrationValidationMessage(ValidationError error) {
+    return switch (error) {
+      case INVALID_USERNAME -> I18n.get("auth.invalidUsername");
+      case INVALID_PIN -> I18n.get("auth.invalidPin");
+      case NEGATIVE_STARTING_MONEY ->
           I18n.get("invalid.input") + " " + I18n.get("validation.startingMoney.nonNegative");
-      default -> I18n.get("invalid.input");
     };
   }
 }

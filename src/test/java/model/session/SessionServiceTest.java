@@ -27,6 +27,7 @@ import model.persistence.SavedRunRepository;
 import model.persistence.ProfileDirectories;
 import model.persistence.UserAccountRepository;
 import model.persistence.UserAccountRecord;
+import model.session.validation.ValidationError;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -44,6 +45,17 @@ class SessionServiceTest {
     assertThrows(
         DuplicateUsernameException.class,
         () -> sessionService.register("alice", "5678".toCharArray(), new BigDecimal("500.00")));
+  }
+
+  @Test
+  void register_rejectsInvalidUsernameWithTypedValidationError() {
+    SessionService sessionService = createSessionService();
+
+    RegistrationValidationException thrown = assertThrows(
+        RegistrationValidationException.class,
+        () -> sessionService.register("ab", "1234".toCharArray(), new BigDecimal("100.00")));
+
+    assertEquals(ValidationError.INVALID_USERNAME, thrown.error());
   }
 
   @Test
