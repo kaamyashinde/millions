@@ -7,8 +7,10 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
-
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -20,10 +22,10 @@ import model.learninghub.LearningItem;
 
 /**
  * Category view for the Learning Hub. Shows all {@link LearningItem}s in a single
- * {@link LearningCategory} as clickable cards.
+ * {@link LearningCategory} as clickable cards, with difficulty filter toggle buttons.
  *
  * @author kaamyashinde
- * @version 1.0.0
+ * @version 1.1.0
  * @since 04-04-2026
  */
 public class LearningCategoryView extends BorderPane {
@@ -36,6 +38,10 @@ public class LearningCategoryView extends BorderPane {
   private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#FFA500";
   private static final String COLOR_DIFFICULTY_ADVANCED = "#FF4444";
 
+  private final VBox content = new VBox(12);
+  private List<LearningItem> items;
+  private Consumer<LearningItem> onItemClicked;
+
   /**
    * Builds the category view.
    *
@@ -46,6 +52,9 @@ public class LearningCategoryView extends BorderPane {
   public LearningCategoryView(
       LearningCategory category, Runnable onBack, Consumer<LearningItem> onItemClicked) {
     setPadding(new Insets(16));
+
+    this.items = LearningContentStore.getItemsByCategory(category);
+    this.onItemClicked = onItemClicked;
 
     // ── TOP: back button + category header ───────────────────────────────────
     Button backBtn = new Button("← Back");
@@ -63,31 +72,65 @@ public class LearningCategoryView extends BorderPane {
     desc.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 12;");
     desc.setWrapText(true);
 
-    VBox header = new VBox(4, backBtn, emoji, name, desc);
+    // ── Filter bar ───────────────────────────────────────────────────────────
+    ToggleGroup filterGroup = new ToggleGroup();
+    ToggleButton btnAll = makeFilterToggle("All", null, filterGroup);
+    ToggleButton btnBeginner = makeFilterToggle("Beginner", Difficulty.BEGINNER, filterGroup);
+    ToggleButton btnIntermediate = makeFilterToggle("Intermediate", Difficulty.INTERMEDIATE, filterGroup);
+    ToggleButton btnAdvanced = makeFilterToggle("Advanced", Difficulty.ADVANCED, filterGroup);
+    btnAll.setSelected(true);
+
+    HBox filterBar = new HBox(8, btnAll, btnBeginner, btnIntermediate, btnAdvanced);
+    filterBar.setPadding(new Insets(0, 0, 8, 0));
+
+    VBox header = new VBox(4, backBtn, emoji, name, desc, filterBar);
     header.setPadding(new Insets(0, 0, 16, 0));
     setTop(header);
 
     // ── CENTER: item cards ───────────────────────────────────────────────────
-    List<LearningItem> items = LearningContentStore.getItemsByCategory(category);
-
-    VBox content = new VBox(12);
     content.setPadding(new Insets(4, 0, 16, 0));
-
-    if (items.isEmpty()) {
-      Label empty = new Label("No topics yet in this category.");
-      empty.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + ";");
-      content.getChildren().add(empty);
-    } else {
-      for (LearningItem item : items) {
-        content.getChildren().add(buildItemCard(item, onItemClicked));
-      }
-    }
+    applyFilter(null);
 
     ScrollPane scroll = new ScrollPane(content);
     scroll.setFitToWidth(true);
     scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
     scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
     setCenter(scroll);
+  }
+
+  private ToggleButton makeFilterToggle(String label, Difficulty difficulty, ToggleGroup group) {
+    ToggleButton btn = new ToggleButton(label);
+    btn.setToggleGroup(group);
+    btn.setStyle(
+        "-fx-background-radius: 4;"
+        + "-fx-border-radius: 4;"
+        + "-fx-cursor: hand;"
+        + "-fx-font-size: 11;");
+    btn.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+      if (isNowSelected) {
+        applyFilter(difficulty);
+      }
+      if (!isNowSelected && group.getSelectedToggle() == null) {
+        btn.setSelected(true);
+      }
+    });
+    return btn;
+  }
+
+  private void applyFilter(Difficulty difficulty) {
+    content.getChildren().clear();
+    List<LearningItem> filtered = (difficulty == null)
+        ? items
+        : items.stream().filter(i -> i.difficulty() == difficulty).toList();
+    if (filtered.isEmpty()) {
+      Label empty = new Label("No " + difficulty.name().toLowerCase() + " topics in this category.");
+      empty.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + ";");
+      content.getChildren().add(empty);
+    } else {
+      for (LearningItem item : filtered) {
+        content.getChildren().add(buildItemCard(item, onItemClicked));
+      }
+    }
   }
 
   private static javafx.scene.Node buildItemCard(LearningItem item, Consumer<LearningItem> onItemClicked) {
