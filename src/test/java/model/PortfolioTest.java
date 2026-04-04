@@ -121,6 +121,14 @@ class PortfolioTest {
   }
 
   @Test
+  void getSharesIsUnmodifiable() {
+    portfolio.addShare(appleShare);
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> portfolio.getShares().add(googleShare));
+  }
+
+  @Test
   void getNetWorthOfEmptyPortfolio() {
     assertEquals(0, BigDecimal.ZERO.compareTo(portfolio.getNetWorth()));
   }
