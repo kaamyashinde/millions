@@ -2,6 +2,7 @@ package model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,5 +71,16 @@ class PlayerTest {
     assertEquals(new BigDecimal("1000.00"), player.getNetWorth());
     player.withdrawMoney(new BigDecimal("100.00"));
     assertEquals(new BigDecimal("900.00"), player.getNetWorth());
+  }
+
+  @Test
+  void setName_updatesDisplayName() {
+    player.setName("Alicia");
+    assertEquals("Alicia", player.getName());
+  }
+
+  @Test
+  void setName_rejectsBlank() {
+    assertThrows(IllegalArgumentException.class, () -> player.setName("   "));
   }
 }
