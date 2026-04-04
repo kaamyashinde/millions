@@ -55,6 +55,15 @@ public class TransactionArchive {
   }
 
   /**
+   * Gets the full transaction history in insertion order.
+   *
+   * @return immutable snapshot of all transactions
+   */
+  public List<Transaction> getAllTransactions() {
+    return List.copyOf(transactions);
+  }
+
+  /**
    * Gets the list of purchases up to a specified trading day.
    *
    * @param day the day up to which purchases are retrieved

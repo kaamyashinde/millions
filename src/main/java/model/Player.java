@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import model.savings.RegularSavingsPlan;
+import model.transaction.Transaction;
 import model.transaction.TransactionArchive;
 
 /**
@@ -42,6 +43,38 @@ public class Player {
     this.transactionArchive = new TransactionArchive();
     this.regularSavingsPlans = new ArrayList<>();
     this.playerLevel = setPlayerLevel();
+  }
+
+  /**
+   * Rebuilds a player from previously persisted state.
+   *
+   * @param name player name to restore
+   * @param startingMoney initial balance recorded when the profile was created
+   * @param currentMoney current liquid balance
+   * @param shares portfolio lots to restore
+   * @param transactions transaction history to restore
+   * @param savingsPlans recurring savings plans to restore
+   * @return restored player instance containing the supplied state
+   */
+  public static Player restore(
+      String name,
+      BigDecimal startingMoney,
+      BigDecimal currentMoney,
+      List<Share> shares,
+      List<Transaction> transactions,
+      List<RegularSavingsPlan> savingsPlans) {
+    checkNotNull(name, "name");
+    checkNotNull(startingMoney, "startingMoney");
+    checkNotNull(currentMoney, "currentMoney");
+    checkNotNull(shares, "shares");
+    checkNotNull(transactions, "transactions");
+    checkNotNull(savingsPlans, "savingsPlans");
+    Player player = new Player(name, startingMoney);
+    player.money = currentMoney;
+    shares.forEach(player.portfolio::addShare);
+    transactions.forEach(player.transactionArchive::addTransaction);
+    savingsPlans.forEach(player.regularSavingsPlans::add);
+    return player;
   }
 
   /**

@@ -57,7 +57,7 @@ public class RegularSavingsPanel extends BorderPane {
   private final RegularSavingsPanelController savingsController;
   private final Player player;
   private final NotificationService notifications;
-  private final Runnable afterAdvance;
+  private final Runnable afterModelChange;
 
   private final Label dayLabel = new Label();
   private final TableView<RegularSavingsPlan> table = new TableView<>();
@@ -91,23 +91,24 @@ public class RegularSavingsPanel extends BorderPane {
   }
 
   /**
-   * Builds a panel wired to the given exchange and player and invokes a callback after advancing.
+   * Builds a panel wired to the given exchange and player and invokes a callback after each
+   * successful model mutation.
    *
    * @param exchange exchange whose day advances and whose listed assets validate new symbols
    * @param player player whose plans are listed and edited
    * @param notifications service used for insufficient-fund skips after advancing a day
-   * @param afterAdvance callback invoked after the day advance work completes
+   * @param afterModelChange callback invoked after a successful add, edit, remove, or day advance
    */
   public RegularSavingsPanel(
       Exchange exchange,
       Player player,
       NotificationService notifications,
-      Runnable afterAdvance) {
+      Runnable afterModelChange) {
     this.exchange = exchange;
     this.savingsController = new RegularSavingsPanelController(exchange);
     this.player = player;
     this.notifications = notifications;
-    this.afterAdvance = afterAdvance;
+    this.afterModelChange = afterModelChange;
 
     setPadding(new Insets(16));
 
@@ -234,7 +235,7 @@ public class RegularSavingsPanel extends BorderPane {
       notifications.show(ToastMode.WARNING, "Regular savings skipped",
           "Insufficient funds for " + sym + ".");
     }
-    afterAdvance.run();
+    afterModelChange.run();
   }
 
   private void addPlan() {
@@ -260,6 +261,7 @@ public class RegularSavingsPanel extends BorderPane {
       addAsset.setValue(null);
       addAmount.clear();
       addInterval.clear();
+      afterModelChange.run();
     } catch (RuntimeException ex) {
       status.setText("Invalid amount or interval.");
     }
@@ -324,6 +326,7 @@ public class RegularSavingsPanel extends BorderPane {
       p.setActive(editActive.isSelected());
       refreshTable();
       table.getSelectionModel().select(p);
+      afterModelChange.run();
     } catch (RuntimeException ex) {
       status.setText("Invalid edit: check numbers and positive values.");
     }
@@ -338,6 +341,7 @@ public class RegularSavingsPanel extends BorderPane {
     }
     if (player.removeRegularSavingsPlanAt(idx + 1)) {
       refreshTable();
+      afterModelChange.run();
     }
   }
 
