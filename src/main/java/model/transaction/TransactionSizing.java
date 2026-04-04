@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.function.Function;
+import model.InvestableAsset;
 import model.Share;
-import model.Stock;
 import model.transactioncalculator.PurchaseCalculator;
 import model.transactioncalculator.SaleCalculator;
 import model.utils.Validator;
@@ -34,23 +34,23 @@ public final class TransactionSizing {
    * {@code maxSpend}. Returns zero if {@code maxSpend} is null, non-positive, or too small for any
    * positive quantity.
    *
-   * @param stock    the stock (current sales price is used)
+   * @param asset    the asset (current sales price is used)
    * @param maxSpend maximum total cash to spend
    * @return non-negative quantity
    */
-  public static BigDecimal maxQuantityForBudget(Stock stock, BigDecimal maxSpend) {
-    Validator.checkNotNull(stock, "Stock");
+  public static BigDecimal maxQuantityForBudget(InvestableAsset asset, BigDecimal maxSpend) {
+    Validator.checkNotNull(asset, "Asset");
     if (maxSpend == null || maxSpend.signum() <= 0) {
       return BigDecimal.ZERO;
     }
-    BigDecimal price = stock.getSalesPrice();
+    BigDecimal price = asset.getSalesPrice();
     if (price.signum() <= 0) {
       return BigDecimal.ZERO;
     }
     BigDecimal high = maxSpend.divide(price, MC).add(BigDecimal.ONE);
     BigDecimal low = BigDecimal.ZERO;
     Function<BigDecimal, BigDecimal> metric =
-        q -> new PurchaseCalculator(new Share(stock, q, price)).calculateTotal();
+        q -> new PurchaseCalculator(new Share(asset, q, price)).calculateTotal();
     low = binarySearchMaxFeasible(low, high, maxSpend, metric);
     BigDecimal q = refineDown(low, maxSpend, metric);
     return q.signum() <= 0 ? BigDecimal.ZERO : q.stripTrailingZeros();
@@ -75,9 +75,9 @@ public final class TransactionSizing {
       return BigDecimal.ZERO;
     }
     Function<BigDecimal, BigDecimal> metric =
-        q -> new SaleCalculator(new Share(lot.getStock(), q, lot.getPurchasePrice()))
+        q -> new SaleCalculator(new Share(lot.getAsset(), q, lot.getPurchasePrice()))
             .calculateTotal();
-    Share full = new Share(lot.getStock(), maxQ, lot.getPurchasePrice());
+    Share full = new Share(lot.getAsset(), maxQ, lot.getPurchasePrice());
     BigDecimal fullNet = new SaleCalculator(full).calculateTotal();
     if (fullNet.compareTo(targetNet) <= 0) {
       return maxQ;
