@@ -1,4 +1,4 @@
-package recommendation;
+package model.recommendation;
 
 import static model.utils.Validator.checkNotNull;
 
