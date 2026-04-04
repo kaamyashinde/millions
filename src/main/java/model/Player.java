@@ -23,7 +23,8 @@ public class Player {
   private final BigDecimal startingMoney;
   private final Portfolio portfolio;
   private final TransactionArchive transactionArchive;
-  private final PlayerLevel playerLevel;
+  private PlayerLevel playerLevel;
+  private final List<PlayerObserver> observers;
 
   /** Recurring purchase plans; list is modified only via add/remove helpers. */
   private final List<RegularSavingsPlan> regularSavingsPlans;
@@ -42,7 +43,9 @@ public class Player {
     this.portfolio = new Portfolio();
     this.transactionArchive = new TransactionArchive();
     this.regularSavingsPlans = new ArrayList<>();
-    this.playerLevel = setPlayerLevel();
+    this.observers = new ArrayList<>();
+    this.observers.add(new PlayerLevelObserver());
+    this.playerLevel = computePlayerLevel();
   }
 
   /**
@@ -74,15 +77,25 @@ public class Player {
     shares.forEach(player.portfolio::addShare);
     transactions.forEach(player.transactionArchive::addTransaction);
     savingsPlans.forEach(player.regularSavingsPlans::add);
+    player.recalculateLevel();
     return player;
   }
 
   /**
-   * Determines the player's status based on their net worth.
+   * Re-evaluates and updates the player's level based on current state
+   * (net worth and trading history). Called automatically by the
+   * {@link PlayerLevelObserver} whenever player state changes.
+   */
+  public void recalculateLevel() {
+    this.playerLevel = computePlayerLevel();
+  }
+
+  /**
+   * Determines the highest qualifying level for this player.
    *
    * @return the player's status as a PlayerLevel
    */
-  public PlayerLevel setPlayerLevel() {
+  private PlayerLevel computePlayerLevel() {
     return Arrays.stream(PlayerLevel.values())
         .filter(status -> status.qualifies(this))
         .findFirst()
@@ -149,6 +162,7 @@ public class Player {
 
   public void addMoney(BigDecimal amount) {
     this.money = this.money.add(amount);
+    notifyObservers();
   }
 
   /**
@@ -158,6 +172,7 @@ public class Player {
    */
   public void withdrawMoney(BigDecimal amount) {
     this.money = this.money.subtract(amount);
+    notifyObservers();
   }
 
   /**
@@ -220,5 +235,33 @@ public class Player {
    */
   public BigDecimal getNetWorth() {
     return this.money.add(this.portfolio.getNetWorth());
+  }
+
+  /**
+   * Registers an observer to be notified whenever this player's state changes.
+   *
+   * @param observer the observer to register
+   */
+  public void addObserver(PlayerObserver observer) {
+    checkNotNull(observer, "observer");
+    observers.add(observer);
+  }
+
+  /**
+   * Removes a previously registered observer.
+   *
+   * @param observer the observer to remove
+   */
+  public void removeObserver(PlayerObserver observer) {
+    observers.remove(observer);
+  }
+
+  /**
+   * Notifies all registered observers that this player's state has changed.
+   */
+  private void notifyObservers() {
+    for (PlayerObserver observer : observers) {
+      observer.onPlayerStateChanged(this);
+    }
   }
 }
