@@ -1,6 +1,7 @@
 package view;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -87,7 +88,8 @@ public class ToastDemoApp extends Application {
       Player demoPlayer = new Player("k", new BigDecimal("5000"));
       showLoadedNotifications(notifications, demoExchange, stocks, demoPlayer);
 
-      PlayerPortfolioPanel playerPanel = new PlayerPortfolioPanel(demoExchange, demoPlayer);
+      PlayerPortfolioPanel playerPanel =
+          new PlayerPortfolioPanel(demoExchange, demoPlayer, Path.of("/nonexistent/millions-demo-avatar.png"));
       StocksListPanel stocksPanel = new StocksListPanel(demoExchange);
       FundsListPanel fundsPanel = new FundsListPanel(demoExchange);
       playerTab = new Tab("Player", playerPanel);

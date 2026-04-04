@@ -152,7 +152,11 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
         this::openHelpWindow,
         this::logoutActiveUser,
         this::beginSwitchUserFlow,
-        sessionService::saveActiveSession);
+        sessionService::saveActiveSession,
+        () -> {
+          disposeWorkspace();
+          showAuthView(false);
+        });
     authPane = null;
     setCenter(workspaceView);
     Platform.runLater(this::showWelcomeIfNeeded);

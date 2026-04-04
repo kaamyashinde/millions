@@ -130,7 +130,8 @@ class GuiAppShellTest {
         new ProfilePreferencesRepository(tempDir),
         new PinHashingService(),
         GuiAppShellTest::sampleMarketData,
-        "NYSE");
+        "NYSE",
+        tempDir);
   }
 
   private static MarketData sampleMarketData() {

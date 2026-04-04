@@ -1,16 +1,22 @@
 package model.session;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import model.Exchange;
 import model.Player;
 import model.persistence.GameStateMapper;
 import model.persistence.GameStateRepository;
 import model.persistence.GameStateSnapshot;
 import model.persistence.MarketData;
+import model.persistence.PersistenceException;
 import model.persistence.PinHashingService;
 import model.persistence.ProfileDirectories;
 import model.persistence.ProfilePreferences;
@@ -18,6 +24,7 @@ import model.persistence.ProfilePreferencesRepository;
 import model.persistence.SavedRunMapper;
 import model.persistence.SavedRunRecord;
 import model.persistence.SavedRunRepository;
+import model.persistence.ProfileImageService;
 import model.persistence.UserAccountRecord;
 import model.persistence.UserAccountRepository;
 
@@ -34,6 +41,8 @@ public final class SessionService {
   private final Supplier<MarketData> marketDataSupplier;
   private final GameStateMapper gameStateMapper;
   private final SavedRunMapper savedRunMapper = new SavedRunMapper();
+  private final ProfileImageService profileImageService;
+  private final Path profilesRoot;
 
   private ActiveSession activeSession;
 
@@ -47,6 +56,7 @@ public final class SessionService {
    * @param pinHashingService PIN hashing helper
    * @param marketDataSupplier supplier that returns fresh bundled market data
    * @param exchangeName default exchange name used for new profiles
+   * @param profilesRoot base directory containing all profile folders (same path as repositories)
    */
   public SessionService(
       UserAccountRepository userAccountRepository,
@@ -55,7 +65,8 @@ public final class SessionService {
       ProfilePreferencesRepository profilePreferencesRepository,
       PinHashingService pinHashingService,
       Supplier<MarketData> marketDataSupplier,
-      String exchangeName) {
+      String exchangeName,
+      Path profilesRoot) {
     this.userAccountRepository = userAccountRepository;
     this.gameStateRepository = gameStateRepository;
     this.savedRunRepository = savedRunRepository;
@@ -63,6 +74,8 @@ public final class SessionService {
     this.pinHashingService = pinHashingService;
     this.marketDataSupplier = marketDataSupplier;
     this.gameStateMapper = new GameStateMapper(exchangeName);
+    this.profileImageService = new ProfileImageService(profilesRoot);
+    this.profilesRoot = profilesRoot;
   }
 
   /**
@@ -124,6 +137,7 @@ public final class SessionService {
         .orElseThrow(() -> new IllegalStateException("Saved game state not found for " + account.username() + "."));
     Exchange exchange = gameStateMapper.restoreExchange(snapshot.exchange(), loadMarketData());
     Player player = gameStateMapper.restorePlayer(snapshot.player(), exchange);
+    applyAccountDisplayName(account, player);
     activeSession = new ActiveSession(account.username(), account.normalizedUsername(), player, exchange);
     return activeSession;
   }
@@ -249,11 +263,141 @@ public final class SessionService {
         session.normalizedUsername(), new ProfilePreferences(true));
   }
 
+
+  /**
+   * Updates the display name for the active profile and persists account + game state.
+   *
+   * @param displayName new name, or blank to reset to login username
+   */
+  public void updateDisplayName(String displayName) {
+    ActiveSession session = requireActiveSession();
+    UserAccountRecord account = userAccountRepository.findByUsername(session.username())
+        .orElseThrow(() -> new IllegalStateException("Account not found."));
+    String trimmed = displayName == null ? "" : displayName.trim();
+    String effective;
+    String stored;
+    if (trimmed.isEmpty()) {
+      effective = account.username();
+      stored = null;
+    } else {
+      effective = trimmed;
+      stored = trimmed.equals(account.username()) ? null : trimmed;
+    }
+    session.player().setName(effective);
+    UserAccountRecord updated = new UserAccountRecord(
+        account.username(),
+        account.normalizedUsername(),
+        account.saltBase64(),
+        account.pinHashBase64(),
+        stored);
+    userAccountRepository.save(updated);
+    saveActiveSession();
+  }
+
+  /**
+   * Copies an image file into the active profile as the avatar.
+   *
+   * @param sourceImage path to PNG or JPEG
+   */
+  public void saveAvatarFromFile(Path sourceImage) {
+    ActiveSession session = requireActiveSession();
+    profileImageService.saveAvatarFromFile(sourceImage, session.normalizedUsername());
+  }
+
+  /** Removes the avatar image for the active profile. */
+  public void clearAvatar() {
+    ActiveSession session = requireActiveSession();
+    profileImageService.deleteAvatar(session.normalizedUsername());
+  }
+
+  /**
+   * Deletes the active profile after PIN verification and clears the session.
+   *
+   * @param pin PIN for the current user
+   */
+  public void deleteActiveProfile(char[] pin) {
+    ActiveSession session = requireActiveSession();
+    UserAccountRecord account = userAccountRepository.findByUsername(session.username())
+        .orElseThrow(() -> new IllegalStateException("Account not found."));
+    validatePin(pin);
+    if (!pinHashingService.verifyPin(pin, account.saltBase64(), account.pinHashBase64())) {
+      throw new AuthenticationException("Invalid PIN.");
+    }
+    String normalized = session.normalizedUsername();
+    activeSession = null;
+    deleteProfileDirectory(profilesRoot.resolve(normalized));
+  }
+
+  /**
+   * Deletes a profile after PIN verification. The profile must not be the active session.
+   *
+   * @param username profile login name
+   * @param pin PIN
+   * @throws ProfileInUseException when that user is logged in
+   */
+  public void deleteProfile(String username, char[] pin) {
+    validateLoginInput(username, pin);
+    String normalized = ProfileDirectories.normalizeUsername(username);
+    UserAccountRecord account = userAccountRepository.findByUsername(username)
+        .orElseThrow(() -> new AuthenticationException("Invalid username or PIN."));
+    if (!pinHashingService.verifyPin(pin, account.saltBase64(), account.pinHashBase64())) {
+      throw new AuthenticationException("Invalid username or PIN.");
+    }
+    if (activeSession != null && activeSession.normalizedUsername().equals(normalized)) {
+      throw new ProfileInUseException("Log out before deleting this profile.");
+    }
+    Path dir = profilesRoot.resolve(normalized);
+    deleteProfileDirectory(dir);
+  }
+
+  /**
+   * Resolves the avatar file path for a normalized username (file may be absent).
+   */
+  public Path avatarPath(String normalizedUsername) {
+    return profileImageService.avatarPath(normalizedUsername);
+  }
+
+  /**
+   * Builds a leaderboard view over all local profiles.
+   */
+  public LocalLeaderboardService leaderboardService() {
+    return new LocalLeaderboardService(
+        userAccountRepository,
+        gameStateRepository,
+        gameStateMapper,
+        marketDataSupplier,
+        profileImageService);
+  }
+
   private ActiveSession requireActiveSession() {
     if (activeSession == null) {
       throw new IllegalStateException("No active session.");
     }
     return activeSession;
+  }
+
+  private static void applyAccountDisplayName(UserAccountRecord account, Player player) {
+    if (account.displayName() != null && !account.displayName().isBlank()) {
+      try {
+        player.setName(account.displayName().trim());
+      } catch (IllegalArgumentException ignored) {
+        // keep snapshot name when stored value is invalid
+      }
+    }
+  }
+
+  private static void deleteProfileDirectory(Path dir) {
+    if (!Files.exists(dir)) {
+      return;
+    }
+    try (Stream<Path> walk = Files.walk(dir)) {
+      List<Path> paths = walk.sorted(Comparator.reverseOrder()).toList();
+      for (Path path : paths) {
+        Files.deleteIfExists(path);
+      }
+    } catch (IOException exception) {
+      throw new PersistenceException("Could not delete profile directory: " + dir, exception);
+    }
   }
 
   private MarketData loadMarketData() {

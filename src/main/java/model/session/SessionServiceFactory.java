@@ -45,6 +45,7 @@ public final class SessionServiceFactory {
         new ProfilePreferencesRepository(profilesRoot),
         new PinHashingService(),
         marketDataSupplier,
-        exchangeName);
+        exchangeName,
+        profilesRoot);
   }
 }
