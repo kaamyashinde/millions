@@ -3,6 +3,7 @@ package view;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -84,6 +85,7 @@ class StockDetailViewTest {
         "Latest market event: AAPL: Earnings beat expectations - "
             + "Apple Inc. reported stronger earnings than expected.",
         view.getMarketEventText());
+    assertEquals(List.of(), view.getDisplayedMarketHistory());
   }
 
   @Test
@@ -115,6 +117,47 @@ class StockDetailViewTest {
         });
 
     assertEquals("Latest market event: none", view.getMarketEventText());
+  }
+
+  @Test
+  void showStock_displaysPastEventsNewestFirst() throws Exception {
+    Stock stock = new Stock("AAPL", "Apple Inc.");
+    stock.addNewSalesPrice(new BigDecimal("100.00"));
+    stock.addNewSalesPrice(new BigDecimal("104.00"));
+    MarketEvent firstEvent =
+        new MarketEvent(
+            2,
+            "AAPL: Earnings beat expectations",
+            "Apple Inc. reported stronger earnings than expected.",
+            new SymbolMarketEventTarget(Set.of("AAPL")),
+            new BigDecimal("1.12"));
+    MarketEvent secondEvent =
+        new MarketEvent(
+            5,
+            "AAPL: Product launch gains traction",
+            "Apple Inc. announced strong demand for a new release.",
+            new SymbolMarketEventTarget(Set.of("AAPL")),
+            new BigDecimal("1.08"));
+
+    StockDetailView view =
+        runOnFxThread(
+            () -> {
+              StockDetailView detailView = new StockDetailView();
+              detailView.showStock(
+                  stock,
+                  5,
+                  Optional.of(secondEvent),
+                  List.of(firstEvent, secondEvent));
+              return detailView;
+            });
+
+    assertEquals(
+        List.of(
+            "Day 5 - AAPL: Product launch gains traction: "
+                + "Apple Inc. announced strong demand for a new release.",
+            "Day 2 - AAPL: Earnings beat expectations: "
+                + "Apple Inc. reported stronger earnings than expected."),
+        view.getDisplayedMarketHistory());
   }
 
   /**
