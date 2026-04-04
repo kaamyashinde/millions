@@ -22,10 +22,12 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.Exchange;
 import model.Stock;
+import model.stockinfo.StockFinancialInfoProvider;
 import model.marketevent.MarketEvent;
 
 /**
- * JavaFX panel listing all stocks on an {@link Exchange}: symbol, company, and latest price.
+ * JavaFX panel listing all stocks on an {@link Exchange}: symbol, company, latest price, mock
+ * revenue, and health indicator.
  * Prices reflect the same {@link Stock} instances as the rest of the demo; use {@link #refresh()}
  * after trading days advance so the table re-renders updated values.
  *
@@ -36,6 +38,7 @@ import model.marketevent.MarketEvent;
 public class StocksListPanel extends BorderPane {
 
   private final Exchange exchange;
+  private final StockFinancialInfoProvider financialInfoProvider = new StockFinancialInfoProvider();
   private final Label metaLabel = new Label();
   private final TableView<Stock> table = new TableView<>();
   private final ObservableList<Stock> rows = FXCollections.observableArrayList();
@@ -96,7 +99,20 @@ public class StocksListPanel extends BorderPane {
     colPrice.setCellValueFactory(
         c -> new SimpleStringProperty(c.getValue().getSalesPrice().toPlainString()));
 
-    table.getColumns().setAll(List.of(colSym, colCompany, colPrice));
+    TableColumn<Stock, String> colRevenue = new TableColumn<>("Revenue (mock)");
+    colRevenue.setCellValueFactory(
+        c ->
+            new SimpleStringProperty(
+                financialInfoProvider.formatMoney(
+                    financialInfoProvider.forStock(c.getValue()).revenue())));
+
+    TableColumn<Stock, String> colHealth = new TableColumn<>("Health");
+    colHealth.setCellValueFactory(
+        c ->
+            new SimpleStringProperty(
+                financialInfoProvider.forStock(c.getValue()).health().displayLabel()));
+
+    table.getColumns().setAll(List.of(colSym, colCompany, colPrice, colRevenue, colHealth));
   }
 
   /**
