@@ -1,10 +1,12 @@
 package model.session;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import model.Stock;
@@ -13,7 +15,9 @@ import model.fund.FundComponent;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketData;
 import model.persistence.PinHashingService;
+import model.persistence.ProfileDirectories;
 import model.persistence.UserAccountRepository;
+import model.persistence.UserAccountRecord;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -71,13 +75,46 @@ class SessionServiceTest {
     assertEquals(new BigDecimal("2025.00"), reloadedBob.player().getMoney());
   }
 
+  @Test
+  void updateDisplayName_persistsAcrossLogin() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    sessionService.updateDisplayName("Allie");
+    sessionService.logout();
+
+    ActiveSession back = sessionService.login("Alice", "1234".toCharArray());
+    assertEquals("Allie", back.player().getName());
+    UserAccountRecord account = new UserAccountRepository(tempDir).findByUsername("Alice").orElseThrow();
+    assertEquals("Allie", account.displayName());
+  }
+
+  @Test
+  void deleteActiveProfile_removesFiles() throws Exception {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Zed", "1234".toCharArray(), new BigDecimal("100.00"));
+    Path profileDir = tempDir.resolve(ProfileDirectories.normalizeUsername("Zed"));
+    assertTrue(Files.isDirectory(profileDir));
+    sessionService.deleteActiveProfile("1234".toCharArray());
+    assertFalse(Files.exists(profileDir));
+  }
+
+  @Test
+  void deleteProfile_throwsWhenTargetIsActiveSession() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    assertThrows(
+        ProfileInUseException.class,
+        () -> sessionService.deleteProfile("Alice", "1234".toCharArray()));
+  }
+
   private SessionService createSessionService() {
     return new SessionService(
         new UserAccountRepository(tempDir),
         new GameStateRepository(tempDir),
         new PinHashingService(),
         SessionServiceTest::sampleMarketData,
-        "NYSE");
+        "NYSE",
+        tempDir);
   }
 
   private static MarketData sampleMarketData() {

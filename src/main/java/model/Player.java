@@ -19,7 +19,7 @@ import model.transaction.TransactionArchive;
  */
 public class Player {
 
-  private final String name;
+  private String name;
   private final BigDecimal startingMoney;
   private final Portfolio portfolio;
   private final TransactionArchive transactionArchive;
@@ -96,6 +96,21 @@ public class Player {
    */
   public String getName() {
     return name;
+  }
+
+  /**
+   * Updates the display name shown in the UI. Persists via game-state save.
+   *
+   * @param name non-blank trimmed name, at most 48 characters
+   * @throws IllegalArgumentException if the name is invalid
+   */
+  public void setName(String name) {
+    checkNotNull(name, "name");
+    String trimmed = name.trim();
+    if (trimmed.isEmpty() || trimmed.length() > 48) {
+      throw new IllegalArgumentException("Display name must be 1-48 characters.");
+    }
+    this.name = trimmed;
   }
 
   /**

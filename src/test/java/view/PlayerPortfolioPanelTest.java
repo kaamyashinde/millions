@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +38,8 @@ class PlayerPortfolioPanelTest {
     Exchange exchange = new Exchange("NYSE", List.of(apple));
     Player player = new Player("k", new BigDecimal("5000.00"));
 
-    PlayerPortfolioPanel panel = runOnFxThread(() -> new PlayerPortfolioPanel(exchange, player));
+    PlayerPortfolioPanel panel =
+        runOnFxThread(() -> new PlayerPortfolioPanel(exchange, player, Path.of("/no/avatar.png")));
 
     assertEquals("k", panel.getDisplayedPlayerName());
     assertEquals("5000.00", panel.getDisplayedBalance());
@@ -51,7 +53,8 @@ class PlayerPortfolioPanelTest {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
     Exchange exchange = new Exchange("NYSE", List.of(apple));
     Player player = new Player("k", new BigDecimal("5000.00"));
-    PlayerPortfolioPanel panel = runOnFxThread(() -> new PlayerPortfolioPanel(exchange, player));
+    PlayerPortfolioPanel panel =
+        runOnFxThread(() -> new PlayerPortfolioPanel(exchange, player, Path.of("/no/avatar.png")));
 
     exchange.buy("AAPL", BigDecimal.ONE, player);
     exchange.advance();
