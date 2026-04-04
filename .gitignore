@@ -1,5 +1,8 @@
 notes.txt
 
+# Local assignment brief (not part of source)
+Millions.pdf
+
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
