@@ -36,6 +36,7 @@ public class SessionWorkspaceView extends StackPane {
   private final FundsListPanel fundsPanel;
   private final NotificationsPanel notificationsPanel;
   private final RegularSavingsPanel savingsPanel;
+  private final SavedRunsPanel savedRunsPanel;
   private final LeaderboardPanel leaderboardPanel;
   private final Label sessionSummaryLabel = new Label();
   private final ImageView headerAvatar = new ImageView();
@@ -50,6 +51,8 @@ public class SessionWorkspaceView extends StackPane {
    * @param playerPanel player summary tab
    * @param stocksPanel stocks listing tab
    * @param fundsPanel funds listing tab
+   * @param savedRunsPanel saved playthroughs tab
+   * @param helpAction callback to open help / welcome content
    * @param leaderboardPanel local leaderboard tab
    * @param logoutAction callback invoked when the user logs out
    * @param switchUserAction callback invoked when the user wants to switch profiles
@@ -64,6 +67,8 @@ public class SessionWorkspaceView extends StackPane {
       PlayerPortfolioPanel playerPanel,
       StocksListPanel stocksPanel,
       FundsListPanel fundsPanel,
+      SavedRunsPanel savedRunsPanel,
+      Runnable helpAction,
       LeaderboardPanel leaderboardPanel,
       Runnable logoutAction,
       Runnable switchUserAction,
@@ -76,6 +81,8 @@ public class SessionWorkspaceView extends StackPane {
     this.stocksPanel = stocksPanel;
     this.fundsPanel = fundsPanel;
     this.notificationsPanel = notificationsPanel;
+    this.savedRunsPanel = savedRunsPanel;
+    sessionSummaryLabel.setStyle("-fx-text-fill: #bdbdbd;");
     this.leaderboardPanel = leaderboardPanel;
     this.savingsPanel = new RegularSavingsPanel(
         session.exchange(),
@@ -100,10 +107,12 @@ public class SessionWorkspaceView extends StackPane {
 
     Button profileButton = new Button("Profile");
     Button refreshButton = new Button("Refresh all");
+    Button helpButton = new Button("Help");
     Button switchUserButton = new Button("Switch user");
     Button logoutButton = new Button("Log out");
     styleButton(profileButton);
     styleButton(refreshButton);
+    styleButton(helpButton);
     styleButton(switchUserButton);
     styleButton(logoutButton);
     profileButton.setOnAction(_ -> ProfileEditorDialog.show(
@@ -115,10 +124,11 @@ public class SessionWorkspaceView extends StackPane {
         },
         onProfileAccountDeleted));
     refreshButton.setOnAction(_ -> refreshAll());
+    helpButton.setOnAction(_ -> helpAction.run());
     switchUserButton.setOnAction(_ -> switchUserAction.run());
     logoutButton.setOnAction(_ -> logoutAction.run());
 
-    HBox actions = new HBox(10, profileButton, refreshButton, switchUserButton, logoutButton);
+    HBox actions = new HBox(10, profileButton, refreshButton, helpButton, switchUserButton, logoutButton);
     actions.setAlignment(Pos.CENTER_RIGHT);
 
     HBox topRow = new HBox(16, heading, headerAvatar, sessionSummaryLabel, actions);
@@ -126,7 +136,7 @@ public class SessionWorkspaceView extends StackPane {
     HBox.setMargin(actions, new Insets(0, 0, 0, 16));
     topRow.setFillHeight(true);
 
-    TabPane tabs = createTabs();
+    TabPane tabs = createTabs(persistAction);
     VBox center = new VBox(14, topRow, tabs);
     content.setCenter(center);
 
@@ -155,6 +165,7 @@ public class SessionWorkspaceView extends StackPane {
     playerPanel.refresh();
     stocksPanel.refresh();
     fundsPanel.refresh();
+    savedRunsPanel.refresh();
     leaderboardPanel.refresh();
   }
 
@@ -205,12 +216,13 @@ public class SessionWorkspaceView extends StackPane {
     return session.username();
   }
 
-  private TabPane createTabs() {
+  private TabPane createTabs(Runnable persistAction) {
     Tab notificationsTab = new Tab("Notifications", notificationsPanel);
     Tab playerTab = new Tab("Player", playerPanel);
     Tab stocksTab = new Tab("Stocks", stocksPanel);
     Tab fundsTab = new Tab("Funds", fundsPanel);
     Tab savingsTab = new Tab("Savings", savingsPanel);
+    Tab savedRunsTab = new Tab("Saved runs", savedRunsPanel);
     Tab leaderboardTab = new Tab("Leaderboard", leaderboardPanel);
 
     notificationsTab.setClosable(false);
@@ -218,6 +230,7 @@ public class SessionWorkspaceView extends StackPane {
     stocksTab.setClosable(false);
     fundsTab.setClosable(false);
     savingsTab.setClosable(false);
+    savedRunsTab.setClosable(false);
     leaderboardTab.setClosable(false);
 
     playerTab.selectedProperty().addListener((obs, oldValue, selected) -> {
@@ -235,13 +248,20 @@ public class SessionWorkspaceView extends StackPane {
         fundsPanel.refresh();
       }
     });
+    savedRunsTab.selectedProperty().addListener((obs, oldValue, selected) -> {
+      if (Boolean.TRUE.equals(selected)) {
+        savedRunsPanel.refresh();
+        persistAction.run();
+      }
+    });
     leaderboardTab.selectedProperty().addListener((obs, oldValue, selected) -> {
       if (Boolean.TRUE.equals(selected)) {
         leaderboardPanel.refresh();
       }
     });
 
-    return new TabPane(notificationsTab, playerTab, stocksTab, fundsTab, savingsTab, leaderboardTab);
+    return new TabPane(
+        notificationsTab, playerTab, stocksTab, fundsTab, savingsTab, savedRunsTab, leaderboardTab);
   }
 
   private static void styleButton(Button button) {

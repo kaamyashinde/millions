@@ -17,6 +17,8 @@ import model.fund.FundComponent;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketData;
 import model.persistence.PinHashingService;
+import model.persistence.ProfilePreferencesRepository;
+import model.persistence.SavedRunRepository;
 import model.persistence.UserAccountRepository;
 import model.session.ActiveSession;
 import model.session.SessionService;
@@ -47,7 +49,7 @@ class GuiAppShellTest {
   @Test
   void registerThenLogoutSwapsBetweenAuthAndWorkspace() throws Exception {
     SessionService sessionService = createSessionService();
-    GuiAppShell shell = runOnFxThread(() -> new GuiAppShell(sessionService));
+    GuiAppShell shell = runOnFxThread(() -> new GuiAppShell(sessionService, new SessionWorkspaceFactory(), false));
 
     assertTrue(shell.isShowingAuthView());
 
@@ -71,7 +73,7 @@ class GuiAppShellTest {
   @Test
   void switchingUsersRebuildsWorkspaceAndAvoidsCrossUserLeakage() throws Exception {
     SessionService sessionService = createSessionService();
-    GuiAppShell shell = runOnFxThread(() -> new GuiAppShell(sessionService));
+    GuiAppShell shell = runOnFxThread(() -> new GuiAppShell(sessionService, new SessionWorkspaceFactory(), false));
 
     runOnFxThread(() -> {
       shell.submitRegistration("Alice", "1234", "1000.00");
@@ -124,6 +126,8 @@ class GuiAppShellTest {
     return new SessionService(
         new UserAccountRepository(tempDir),
         new GameStateRepository(tempDir),
+        new SavedRunRepository(tempDir),
+        new ProfilePreferencesRepository(tempDir),
         new PinHashingService(),
         GuiAppShellTest::sampleMarketData,
         "NYSE",

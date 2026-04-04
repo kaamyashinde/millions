@@ -22,6 +22,8 @@ import model.persistence.MarketData;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketDataLoader;
 import model.persistence.PinHashingService;
+import model.persistence.ProfilePreferencesRepository;
+import model.persistence.SavedRunRepository;
 import model.persistence.UserAccountRepository;
 import model.savings.RegularSavingsPlan;
 import model.savings.RegularSavingsProcessor;
@@ -102,6 +104,8 @@ public class UserInterface {
     sessionService = new SessionService(
         new UserAccountRepository(PROFILES_ROOT),
         new GameStateRepository(PROFILES_ROOT),
+        new SavedRunRepository(PROFILES_ROOT),
+        new ProfilePreferencesRepository(PROFILES_ROOT),
         new PinHashingService(),
         UserInterface::loadMarketData,
         EXCHANGE_NAME,

@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import model.Exchange;
@@ -18,6 +19,11 @@ import model.persistence.MarketData;
 import model.persistence.PersistenceException;
 import model.persistence.PinHashingService;
 import model.persistence.ProfileDirectories;
+import model.persistence.ProfilePreferences;
+import model.persistence.ProfilePreferencesRepository;
+import model.persistence.SavedRunMapper;
+import model.persistence.SavedRunRecord;
+import model.persistence.SavedRunRepository;
 import model.persistence.ProfileImageService;
 import model.persistence.UserAccountRecord;
 import model.persistence.UserAccountRepository;
@@ -29,9 +35,12 @@ public final class SessionService {
 
   private final UserAccountRepository userAccountRepository;
   private final GameStateRepository gameStateRepository;
+  private final SavedRunRepository savedRunRepository;
+  private final ProfilePreferencesRepository profilePreferencesRepository;
   private final PinHashingService pinHashingService;
   private final Supplier<MarketData> marketDataSupplier;
   private final GameStateMapper gameStateMapper;
+  private final SavedRunMapper savedRunMapper = new SavedRunMapper();
   private final ProfileImageService profileImageService;
   private final Path profilesRoot;
 
@@ -42,6 +51,8 @@ public final class SessionService {
    *
    * @param userAccountRepository account metadata repository
    * @param gameStateRepository saved game-state repository
+   * @param savedRunRepository saved playthrough snapshots per profile
+   * @param profilePreferencesRepository per-profile UI preferences
    * @param pinHashingService PIN hashing helper
    * @param marketDataSupplier supplier that returns fresh bundled market data
    * @param exchangeName default exchange name used for new profiles
@@ -50,12 +61,16 @@ public final class SessionService {
   public SessionService(
       UserAccountRepository userAccountRepository,
       GameStateRepository gameStateRepository,
+      SavedRunRepository savedRunRepository,
+      ProfilePreferencesRepository profilePreferencesRepository,
       PinHashingService pinHashingService,
       Supplier<MarketData> marketDataSupplier,
       String exchangeName,
       Path profilesRoot) {
     this.userAccountRepository = userAccountRepository;
     this.gameStateRepository = gameStateRepository;
+    this.savedRunRepository = savedRunRepository;
+    this.profilePreferencesRepository = profilePreferencesRepository;
     this.pinHashingService = pinHashingService;
     this.marketDataSupplier = marketDataSupplier;
     this.gameStateMapper = new GameStateMapper(exchangeName);
@@ -179,6 +194,75 @@ public final class SessionService {
   public List<String> listRegisteredUsers() {
     return userAccountRepository.listUsernames();
   }
+
+  /**
+   * Persists the active game, then saves a snapshot of the current run for later comparison.
+   *
+   * @param label optional name for the run
+   * @return the persisted run record
+   */
+  public SavedRunRecord saveCurrentRun(String label) {
+    ActiveSession session = requireActiveSession();
+    saveActiveSession();
+    SavedRunRecord record = savedRunMapper.toSavedRun(
+        session.player(), session.exchange(), label, false);
+    savedRunRepository.save(session.normalizedUsername(), record);
+    return record;
+  }
+
+  /**
+   * Lists saved runs for the logged-in profile (newest first).
+   *
+   * @return run snapshots
+   */
+  public List<SavedRunRecord> listSavedRuns() {
+    ActiveSession session = requireActiveSession();
+    return savedRunRepository.list(session.normalizedUsername());
+  }
+
+  /**
+   * Deletes one saved run for the current profile.
+   *
+   * @param runId run identifier
+   * @return {@code true} when a run file was removed
+   */
+  public boolean deleteSavedRun(UUID runId) {
+    ActiveSession session = requireActiveSession();
+    return savedRunRepository.delete(session.normalizedUsername(), runId);
+  }
+
+  /**
+   * Updates leaderboard eligibility for one saved run.
+   *
+   * @param runId                  run identifier
+   * @param eligibleForLeaderboard new value
+   * @return {@code true} when the run existed and was updated
+   */
+  public boolean setRunLeaderboardEligible(UUID runId, boolean eligibleForLeaderboard) {
+    ActiveSession session = requireActiveSession();
+    return savedRunRepository.updateLeaderboardFlag(
+        session.normalizedUsername(), runId, eligibleForLeaderboard);
+  }
+
+  /**
+   * Whether the current profile has already seen the welcome dialog.
+   *
+   * @return {@code true} when welcome was dismissed previously
+   */
+  public boolean hasSeenWelcome() {
+    ActiveSession session = requireActiveSession();
+    return profilePreferencesRepository.load(session.normalizedUsername()).hasSeenWelcome();
+  }
+
+  /**
+   * Marks the welcome dialog as seen for the current profile.
+   */
+  public void markWelcomeSeen() {
+    ActiveSession session = requireActiveSession();
+    profilePreferencesRepository.save(
+        session.normalizedUsername(), new ProfilePreferences(true));
+  }
+
 
   /**
    * Updates the display name for the active profile and persists account + game state.
