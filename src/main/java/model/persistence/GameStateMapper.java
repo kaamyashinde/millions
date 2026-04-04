@@ -54,7 +54,10 @@ public final class GameStateMapper {
                 List.copyOf(stock.getHistoricalPrices())))
             .toList());
     List<Fund> restoredFunds = rebuildFunds(marketData.funds(), restoredStocks);
-    return new Exchange(exchangeName, List.copyOf(restoredStocks.values()), restoredFunds);
+    return new Exchange.Builder(exchangeName)
+        .stocks(List.copyOf(restoredStocks.values()))
+        .funds(restoredFunds)
+        .build();
   }
 
   /**
@@ -87,13 +90,13 @@ public final class GameStateMapper {
     MarketEvent lastMarketEvent = snapshot.lastMarketEvent() == null
         ? null
         : toMarketEvent(snapshot.lastMarketEvent());
-    return Exchange.restore(
-        snapshot.name(),
-        List.copyOf(restoredStocks.values()),
-        restoredFunds,
-        snapshot.day(),
-        history,
-        lastMarketEvent);
+    return new Exchange.Builder(snapshot.name())
+        .stocks(List.copyOf(restoredStocks.values()))
+        .funds(restoredFunds)
+        .day(snapshot.day())
+        .marketEventHistory(history)
+        .lastMarketEvent(lastMarketEvent)
+        .build();
   }
 
   /**

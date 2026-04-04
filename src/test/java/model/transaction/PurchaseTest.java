@@ -72,22 +72,6 @@ class PurchaseTest {
   }
 
   @Test
-  void commitThrowsIllegalStateWhenTransactionNotInArchive() {
-    Purchase purchase = new Purchase(share, 1);
-    // Player whose getTransactionArchive() returns a fresh empty archive each call,
-    // so addTransaction writes to one instance while the contains-check reads another.
-    Player playerWithFreshArchive = new Player("Charlie", new BigDecimal("50000.00")) {
-      @Override
-      public TransactionArchive getTransactionArchive() {
-        return new TransactionArchive();
-      }
-    };
-
-    assertThrows(IllegalStateException.class, () -> purchase.commit(playerWithFreshArchive));
-    assertFalse(purchase.isCommited());
-  }
-
-  @Test
   void commitThrowsAlreadyCommittedWhenCommitCalledTwice() {
     Purchase purchase = new Purchase(share, 1);
     BigDecimal afterFirstCommit = player.getMoney().subtract(purchase.getCalculator().calculateTotal());

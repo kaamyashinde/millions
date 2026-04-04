@@ -7,6 +7,7 @@ import javafx.stage.Window;
 import model.session.ActiveSession;
 import model.session.AuthenticationException;
 import model.session.DuplicateUsernameException;
+import model.session.RegistrationValidationException;
 import model.session.SessionService;
 
 /**
@@ -201,8 +202,8 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
       showAuthStatus("Starting money must be a valid number.");
     } catch (DuplicateUsernameException exception) {
       showAuthStatus("That username is already registered.");
-    } catch (IllegalArgumentException exception) {
-      showAuthStatus(mapValidationMessage(exception.getMessage()));
+    } catch (RegistrationValidationException exception) {
+      showAuthStatus(exception.getMessage());
     }
   }
 
@@ -212,8 +213,6 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
       showWorkspace(session);
     } catch (AuthenticationException exception) {
       showAuthStatus("Invalid username or PIN.");
-    } catch (IllegalArgumentException exception) {
-      showAuthStatus(mapValidationMessage(exception.getMessage()));
     }
   }
 
@@ -240,18 +239,5 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
       workspaceView.dispose();
       workspaceView = null;
     }
-  }
-
-  private static String mapValidationMessage(String message) {
-    if (message == null) {
-      return "Invalid input.";
-    }
-    return switch (message) {
-      case "Username must be 3-32 characters using letters, numbers, underscores, or hyphens." ->
-          "Username must be 3-32 characters using letters, numbers, underscores, or hyphens.";
-      case "PIN must be 4 to 8 digits." -> "PIN must be 4 to 8 digits.";
-      case "Starting money must be non-negative." -> "Starting money must be non-negative.";
-      default -> "Invalid input.";
-    };
   }
 }

@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -65,21 +66,7 @@ public final class UserAccountRepository {
    * @return stored usernames
    */
   public List<String> listUsernames() {
-    Path root = profileDirectories.profilesRoot();
-    if (!Files.exists(root)) {
-      return List.of();
-    }
-    try (Stream<Path> children = Files.list(root)) {
-      return children
-          .filter(Files::isDirectory)
-          .map(path -> path.resolve("account.json"))
-          .filter(Files::exists)
-          .map(path -> jsonStorage.read(path, UserAccountRecord.class).username())
-          .sorted(Comparator.naturalOrder())
-          .toList();
-    } catch (IOException exception) {
-      throw new PersistenceException("Could not list user profiles in " + root, exception);
-    }
+    return listProfiles(UserAccountRecord::username, Comparator.naturalOrder());
   }
 
   /**
@@ -88,6 +75,21 @@ public final class UserAccountRepository {
    * @return account metadata for every profile on disk
    */
   public List<UserAccountRecord> listAccounts() {
+    return listProfiles(Function.identity(), Comparator.comparing(UserAccountRecord::username));
+  }
+
+  /**
+   * Walks the profiles directory, deserializes each account, maps it through
+   * the supplied function, and returns the results sorted by the given comparator.
+   *
+   * @param <T>        the target element type
+   * @param mapper     transforms a deserialized account into the desired result type
+   * @param comparator ordering applied to the mapped results
+   * @return sorted list of mapped profile entries, or an empty list if the root does not exist
+   * @throws PersistenceException if the directory cannot be listed
+   */
+  private <T> List<T> listProfiles(Function<UserAccountRecord, T> mapper,
+      Comparator<T> comparator) {
     Path root = profileDirectories.profilesRoot();
     if (!Files.exists(root)) {
       return List.of();
@@ -98,7 +100,8 @@ public final class UserAccountRepository {
           .map(path -> path.resolve("account.json"))
           .filter(Files::exists)
           .map(path -> jsonStorage.read(path, UserAccountRecord.class))
-          .sorted(Comparator.comparing(UserAccountRecord::username))
+          .map(mapper)
+          .sorted(comparator)
           .toList();
     } catch (IOException exception) {
       throw new PersistenceException("Could not list user profiles in " + root, exception);

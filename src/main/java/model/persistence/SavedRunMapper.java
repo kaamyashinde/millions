@@ -90,7 +90,7 @@ public final class SavedRunMapper {
 
   private static SavedRunRecord.SavedRunStatsSnapshot toStatsSnapshot(
       Player player, PerformanceComparison comparison) {
-    PlayerLevel level = player.setPlayerLevel();
+    PlayerLevel level = player.getPlayerLevel();
     PerformanceMetrics portfolio = comparison.portfolio();
     PerformanceMetrics benchmark = comparison.benchmark();
     return new SavedRunRecord.SavedRunStatsSnapshot(

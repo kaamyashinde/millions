@@ -84,7 +84,10 @@ public class ToastDemoApp extends Application {
       fundsTab = new Tab("Funds", new Label("Could not build funds without demo stocks."));
       savingsTab = new Tab("Savings", error);
     } else {
-      Exchange demoExchange = new Exchange(DEMO_EXCHANGE_NAME, stocks, marketData.funds());
+      Exchange demoExchange = new Exchange.Builder(DEMO_EXCHANGE_NAME)
+          .stocks(stocks)
+          .funds(marketData.funds())
+          .build();
       Player demoPlayer = new Player("k", new BigDecimal("5000"));
       showLoadedNotifications(notifications, demoExchange, stocks, demoPlayer);
 

@@ -1,28 +1,26 @@
 package model;
 
-import static model.utils.Validator.requirePositive;
-
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-import model.exception.InsufficientFundsException;
-import model.exception.InsufficientSharesException;
 import model.fund.Fund;
 import model.marketevent.DailyPriceMoveStrategy;
 import model.marketevent.MarketEvent;
 import model.marketevent.MarketEventStrategy;
 import model.marketevent.RandomMarketEventStrategy;
 import model.marketevent.UniformDailyPriceMoveStrategy;
-import model.transactioncalculator.SaleCalculator;
-import model.transaction.Purchase;
-import model.transaction.Sale;
+import model.trade.BuyCommand;
+import model.trade.BuyUpToBudgetCommand;
+import model.trade.SellByQuantityCommand;
+import model.trade.SellCommand;
+import model.trade.SellUpToTargetNetCommand;
 import model.transaction.Transaction;
-import model.transaction.TransactionSizing;
 
 /**
  * A class representing the Exchange Market in the system.
@@ -47,98 +45,20 @@ public class Exchange {
   private Optional<MarketEvent> lastMarketEvent;
 
   /**
-   * Constructor for Exchange.
-   *
-   * @param name   the name of the exchange
-   * @param stocks the list of stocks available in the exchange
+   * Full constructor used only by {@link Builder}; builds a complete exchange in one step.
    */
-  public Exchange(String name, List<Stock> stocks) {
-    this(name, stocks, List.of());
-  }
-
-  /**
-   * Creates an exchange with both direct stocks and funds listed for trading.
-   *
-   * @param name the name of the exchange
-   * @param stocks the listed stocks
-   * @param funds the listed funds
-   */
-  public Exchange(String name, List<Stock> stocks, List<Fund> funds) {
-    this(
-        name,
-        stocks,
-        funds,
-        new Random(),
-        new UniformDailyPriceMoveStrategy(DAILY_SIGMA),
-        new RandomMarketEventStrategy());
-  }
-
-  /**
-   * Rebuilds an exchange from previously persisted market state.
-   *
-   * @param name exchange name
-   * @param stocks listed stocks with restored price history
-   * @param funds listed funds backed by the restored stocks
-   * @param day current trading day
-   * @param marketEventHistory chronological event history
-   * @param lastMarketEvent latest event for the current day, if any
-   * @return restored exchange instance
-   */
-  public static Exchange restore(
+  private Exchange(
       String name,
       List<Stock> stocks,
       List<Fund> funds,
+      Random random,
+      DailyPriceMoveStrategy dailyPriceMoveStrategy,
+      MarketEventStrategy marketEventStrategy,
       int day,
-      List<MarketEvent> marketEventHistory,
-      MarketEvent lastMarketEvent) {
-    if (day < 1) {
-      throw new IllegalArgumentException("Trading day must be at least 1.");
-    }
-    Exchange exchange = new Exchange(name, stocks, funds);
-    exchange.day = day;
-    exchange.marketEventHistory.clear();
-    exchange.marketEventHistory.addAll(marketEventHistory);
-    exchange.lastMarketEvent = Optional.ofNullable(lastMarketEvent);
-    return exchange;
-  }
-
-  /**
-   * Creates an exchange with injected collaborators for deterministic stock-only tests.
-   *
-   * @param name the name of the exchange
-   * @param stocks the listed stocks
-   * @param random random source used for daily moves and event generation
-   * @param dailyPriceMoveStrategy strategy for baseline daily price movement
-   * @param marketEventStrategy strategy that may generate a rare market event each day
-   */
-  Exchange(
-      String name,
-      List<Stock> stocks,
-      Random random,
-      DailyPriceMoveStrategy dailyPriceMoveStrategy,
-      MarketEventStrategy marketEventStrategy) {
-    this(name, stocks, List.of(), random, dailyPriceMoveStrategy, marketEventStrategy);
-  }
-
-  /**
-   * Creates an exchange with injected collaborators for deterministic tests and alternative market
-   * behavior.
-   *
-   * @param name the name of the exchange
-   * @param stocks the listed stocks
-   * @param random random source used for daily moves and event generation
-   * @param dailyPriceMoveStrategy strategy for baseline daily price movement
-   * @param marketEventStrategy strategy that may generate a rare market event each day
-   */
-  Exchange(
-      String name,
-      List<Stock> stocks,
-      List<Fund> funds,
-      Random random,
-      DailyPriceMoveStrategy dailyPriceMoveStrategy,
-      MarketEventStrategy marketEventStrategy) {
+      ArrayList<MarketEvent> marketEventHistory,
+      Optional<MarketEvent> lastMarketEvent) {
     this.name = name;
-    this.day = 1;
+    this.day = day;
     this.stockMap = stocks.stream()
         .collect(Collectors.toMap(Stock::getSymbol, s -> s));
     this.fundMap = funds.stream()
@@ -147,8 +67,112 @@ public class Exchange {
     this.random = random;
     this.dailyPriceMoveStrategy = dailyPriceMoveStrategy;
     this.marketEventStrategy = marketEventStrategy;
-    this.marketEventHistory = new ArrayList<>();
-    this.lastMarketEvent = Optional.empty();
+    this.marketEventHistory = marketEventHistory;
+    this.lastMarketEvent = lastMarketEvent;
+  }
+
+  /**
+   * Fluent builder for {@link Exchange}. Supplies defaults that match the former public
+   * constructors (random source, price and event strategies, day 1, empty event history).
+   */
+  public static final class Builder {
+    private final String name;
+    private List<Stock> stocks = List.of();
+    private List<Fund> funds = List.of();
+    private int day = 1;
+    private Random random;
+    private DailyPriceMoveStrategy dailyPriceMoveStrategy;
+    private MarketEventStrategy marketEventStrategy;
+    private List<MarketEvent> marketEventHistory = List.of();
+    private MarketEvent lastMarketEvent;
+
+    /**
+     * @param name exchange display name (required)
+     */
+    public Builder(String name) {
+      this.name = Objects.requireNonNull(name, "name");
+    }
+
+    /** Listed stocks (default empty). */
+    public Builder stocks(List<Stock> stocks) {
+      this.stocks = stocks != null ? stocks : List.of();
+      return this;
+    }
+
+    /** Listed funds (default empty). */
+    public Builder funds(List<Fund> funds) {
+      this.funds = funds != null ? funds : List.of();
+      return this;
+    }
+
+    /** Current trading day (default {@code 1}; must be at least 1). */
+    public Builder day(int day) {
+      this.day = day;
+      return this;
+    }
+
+    /** Random source for simulation (default new {@link Random}). */
+    public Builder random(Random random) {
+      this.random = random;
+      return this;
+    }
+
+    /** Baseline daily price move strategy (default {@link UniformDailyPriceMoveStrategy}). */
+    public Builder dailyPriceMoveStrategy(DailyPriceMoveStrategy strategy) {
+      this.dailyPriceMoveStrategy = strategy;
+      return this;
+    }
+
+    /** Rare market event strategy (default {@link RandomMarketEventStrategy}). */
+    public Builder marketEventStrategy(MarketEventStrategy strategy) {
+      this.marketEventStrategy = strategy;
+      return this;
+    }
+
+    /** Prior market events, oldest first (default empty; copied into the exchange). */
+    public Builder marketEventHistory(List<MarketEvent> history) {
+      this.marketEventHistory = history != null ? history : List.of();
+      return this;
+    }
+
+    /** Latest event for the current day, if any (default none). */
+    public Builder lastMarketEvent(MarketEvent event) {
+      this.lastMarketEvent = event;
+      return this;
+    }
+
+    /**
+     * Validates inputs and returns a fully initialized exchange.
+     *
+     * @return new exchange instance
+     * @throws IllegalArgumentException if {@code day} is less than 1
+     */
+    public Exchange build() {
+      if (day < 1) {
+        throw new IllegalArgumentException("Trading day must be at least 1.");
+      }
+      Random resolvedRandom = random != null ? random : new Random();
+      DailyPriceMoveStrategy resolvedDaily =
+          dailyPriceMoveStrategy != null
+              ? dailyPriceMoveStrategy
+              : new UniformDailyPriceMoveStrategy(DAILY_SIGMA);
+      MarketEventStrategy resolvedEvents =
+          marketEventStrategy != null ? marketEventStrategy : new RandomMarketEventStrategy();
+      List<Stock> stockList = List.copyOf(stocks);
+      List<Fund> fundList = List.copyOf(funds);
+      ArrayList<MarketEvent> historyCopy = new ArrayList<>(marketEventHistory);
+      Optional<MarketEvent> last = Optional.ofNullable(lastMarketEvent);
+      return new Exchange(
+          name,
+          stockList,
+          fundList,
+          resolvedRandom,
+          resolvedDaily,
+          resolvedEvents,
+          day,
+          historyCopy,
+          last);
+    }
   }
 
   /**
@@ -232,14 +256,7 @@ public class Exchange {
    * @return the Purchase transaction
    */
   public Transaction buy(String symbol, BigDecimal quantity, Player player) {
-    InvestableAsset assetToBuy = this.getAsset(symbol);
-    if (assetToBuy == null) {
-      throw new IllegalArgumentException("Unknown asset symbol: " + symbol);
-    }
-    Share shareToBuy = new Share(assetToBuy, quantity, assetToBuy.getSalesPrice());
-    Purchase purchase = new Purchase(shareToBuy, this.getDay());
-    purchase.commit(player);
-    return purchase;
+    return new BuyCommand(this, symbol, quantity).execute(player).getFirst();
   }
 
   /**
@@ -257,17 +274,7 @@ public class Exchange {
    * @throws InsufficientFundsException   if no positive quantity fits the budget and cash available
    */
   public Transaction buyUpToBudget(String symbol, BigDecimal maxSpend, Player player) {
-    InvestableAsset asset = this.getAsset(symbol);
-    if (asset == null) {
-      throw new IllegalArgumentException("Unknown asset symbol: " + symbol);
-    }
-    requirePositive(maxSpend, "maxSpend");
-    BigDecimal budget = maxSpend.min(player.getMoney());
-    BigDecimal quantity = TransactionSizing.maxQuantityForBudget(asset, budget);
-    if (quantity.signum() <= 0) {
-      throw new InsufficientFundsException();
-    }
-    return buy(symbol, quantity, player);
+    return new BuyUpToBudgetCommand(this, symbol, maxSpend).execute(player).getFirst();
   }
 
   /**
@@ -347,9 +354,7 @@ public class Exchange {
    * @return the Sale transaction
    */
   public Transaction sell(Share share, Player player) {
-    Sale sale = new Sale(share, this.getDay());
-    sale.commit(player);
-    return sale;
+    return new SellCommand(this, share).execute(player).getFirst();
   }
 
   /**
@@ -365,21 +370,7 @@ public class Exchange {
    * @throws IllegalArgumentException if {@code quantity} is not positive
    */
   public List<Transaction> sellByQuantity(String symbol, BigDecimal quantity, Player player) {
-    requirePositive(quantity, "quantity");
-    if (player.getPortfolio().totalQuantityForSymbol(symbol).compareTo(quantity) < 0) {
-      throw new InsufficientSharesException(symbol, quantity);
-    }
-    List<Transaction> transactions = new ArrayList<>();
-    BigDecimal remaining = quantity;
-    while (remaining.signum() > 0) {
-      Share slice = player.getPortfolio().buildNextFifoSaleSlice(symbol, remaining);
-      if (slice == null) {
-        throw new InsufficientSharesException(symbol, quantity);
-      }
-      transactions.add(sell(slice, player));
-      remaining = remaining.subtract(slice.getQuantity());
-    }
-    return transactions;
+    return new SellByQuantityCommand(this, symbol, quantity).execute(player);
   }
 
   /**
@@ -395,21 +386,7 @@ public class Exchange {
    * @throws IllegalArgumentException if {@code targetNet} is not positive
    */
   public List<Transaction> sellUpToTargetNet(String symbol, BigDecimal targetNet, Player player) {
-    requirePositive(targetNet, "targetNet");
-    List<Transaction> transactions = new ArrayList<>();
-    BigDecimal remainingTarget = targetNet;
-    while (remainingTarget.signum() > 0
-        && player.getPortfolio().totalQuantityForSymbol(symbol).signum() > 0) {
-      Share slice =
-          player.getPortfolio().buildNextFifoSliceForTargetNet(symbol, remainingTarget);
-      if (slice == null) {
-        break;
-      }
-      transactions.add(sell(slice, player));
-      BigDecimal net = new SaleCalculator(slice).calculateTotal();
-      remainingTarget = remainingTarget.subtract(net);
-    }
-    return transactions;
+    return new SellUpToTargetNetCommand(this, symbol, targetNet).execute(player);
   }
 
   /**

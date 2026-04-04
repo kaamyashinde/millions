@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -58,12 +61,14 @@ class PlayerTest {
 
   @Test
   void getPlayerLevel() {
-    assertEquals(PlayerLevel.NOVICE, player.getPlayerLevel());
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
   }
 
   @Test
-  void setPlayerLevel() {
-    assertEquals(PlayerLevel.NOVICE, player.setPlayerLevel());
+  void recalculateLevel_updatesLevel() {
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
+    player.recalculateLevel();
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
   }
 
   @Test
@@ -82,5 +87,34 @@ class PlayerTest {
   @Test
   void setName_rejectsBlank() {
     assertThrows(IllegalArgumentException.class, () -> player.setName("   "));
+  }
+
+  @Test
+  void addMoney_notifiesObservers() {
+    List<Player> notifications = new ArrayList<>();
+    player.addObserver(notifications::add);
+    player.addMoney(new BigDecimal("100.00"));
+    assertEquals(1, notifications.size());
+  }
+
+  @Test
+  void withdrawMoney_notifiesObservers() {
+    List<Player> notifications = new ArrayList<>();
+    player.addObserver(notifications::add);
+    player.withdrawMoney(new BigDecimal("50.00"));
+    assertEquals(1, notifications.size());
+  }
+
+  @Test
+  void removeObserver_stopsNotifications() {
+    List<Player> notifications = new ArrayList<>();
+    PlayerObserver observer = notifications::add;
+    player.addObserver(observer);
+    player.addMoney(new BigDecimal("10.00"));
+    assertEquals(1, notifications.size());
+
+    player.removeObserver(observer);
+    player.addMoney(new BigDecimal("10.00"));
+    assertEquals(1, notifications.size());
   }
 }

@@ -114,4 +114,11 @@ class StockTest {
     singlePriceStock.addNewSalesPrice(BigDecimal.valueOf(150.00));
     assertEquals(BigDecimal.ZERO, singlePriceStock.getLatestPriceChange());
   }
+
+  @Test
+  void getHistoricalPricesIsUnmodifiable() {
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> stock.getHistoricalPrices().add(BigDecimal.ONE));
+  }
 }
