@@ -16,9 +16,8 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.session.ActiveSession;
 import model.session.SessionService;
-import view.components.image.FileImageLoader;
+import view.components.image.DiskImageLoader;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
 
@@ -39,7 +38,7 @@ public class SessionWorkspaceView extends StackPane {
   private final LeaderboardPanel leaderboardPanel;
   private final Label sessionSummaryLabel = new Label();
   private final ImageView headerAvatar = new ImageView();
-  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+  private final ImageLoader avatarLoader = new DiskImageLoader();
 
   /**
    * Builds the logged-in workspace for one active session.

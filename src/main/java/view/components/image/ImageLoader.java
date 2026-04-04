@@ -5,8 +5,6 @@ import javafx.scene.image.Image;
 
 /**
  * Loads a JavaFX {@link Image} from a file path at a square display size.
- *
- * <p>Implementations may compose behavior using the Decorator pattern (validation, fallbacks).
  */
 @FunctionalInterface
 public interface ImageLoader {

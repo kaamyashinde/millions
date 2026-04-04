@@ -30,9 +30,8 @@ import model.Share;
 import model.analysis.MetricValue;
 import model.analysis.PerformanceComparison;
 import model.analysis.PortfolioPerformanceService;
-import view.components.image.FileImageLoader;
+import view.components.image.DiskImageLoader;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
 
 /**
  * JavaFX panel showing player summary data, current holdings, and portfolio-vs-market metrics.
@@ -66,7 +65,7 @@ public class PlayerPortfolioPanel extends BorderPane {
   private final TableView<Share> holdingsTable = new TableView<>();
   private final ObservableList<Share> holdings = FXCollections.observableArrayList();
   private final ImageView avatarView = new ImageView();
-  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+  private final ImageLoader avatarLoader = new DiskImageLoader();
 
   /**
    * Builds a player summary panel backed by the given exchange and player.

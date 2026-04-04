@@ -10,16 +10,16 @@ import java.util.Base64;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
+import javafx.scene.image.Image;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Tests {@link FileImageLoader}. Requires JavaFX for {@link javafx.scene.image.Image}.
+ * Tests {@link DiskImageLoader}. Requires JavaFX for {@link javafx.scene.image.Image}.
  */
-class FileImageLoaderTest {
+class DiskImageLoaderTest {
 
-  /** Minimal valid 1x1 PNG (transparent pixel). */
   private static final byte[] ONE_PIXEL_PNG = Base64.getDecoder().decode(
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==");
 
@@ -35,8 +35,14 @@ class FileImageLoaderTest {
   }
 
   @Test
-  void loadMissingFileReturnsNull() {
-    FileImageLoader loader = new FileImageLoader();
+  void nullPathReturnsNull() {
+    DiskImageLoader loader = new DiskImageLoader();
+    assertNull(loader.load(null, 40));
+  }
+
+  @Test
+  void missingOrNonRegularPathReturnsNull() {
+    DiskImageLoader loader = new DiskImageLoader();
     assertNull(loader.load(Path.of("/no/such/avatar/file.png"), 40));
   }
 
@@ -45,7 +51,8 @@ class FileImageLoaderTest {
     Path file = tempDir.resolve("avatar.png");
     Files.write(file, ONE_PIXEL_PNG);
 
-    FileImageLoader loader = new FileImageLoader();
-    assertNotNull(loader.load(file, 32));
+    DiskImageLoader loader = new DiskImageLoader();
+    Image image = loader.load(file, 32);
+    assertNotNull(image);
   }
 }

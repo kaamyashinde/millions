@@ -19,9 +19,8 @@ import javafx.stage.Window;
 import model.session.ActiveSession;
 import model.session.AuthenticationException;
 import model.session.SessionService;
-import view.components.image.FileImageLoader;
+import view.components.image.DiskImageLoader;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
 
 /**
  * Modal editor for display name, avatar image, and profile deletion.
@@ -63,7 +62,7 @@ public final class ProfileEditorDialog {
     Path[] pendingImage = {null};
     boolean[] removeAvatar = {false};
 
-    ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+    ImageLoader avatarLoader = new DiskImageLoader();
 
     Runnable reloadPreview = () -> {
       if (pendingImage[0] != null) {

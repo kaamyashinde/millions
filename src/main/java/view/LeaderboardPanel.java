@@ -20,9 +20,8 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.session.LocalLeaderboardService.LeaderboardRow;
 import model.session.SessionService;
-import view.components.image.FileImageLoader;
+import view.components.image.DiskImageLoader;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
 
 /**
  * Local leaderboard ranked by net worth with avatars.
@@ -30,7 +29,7 @@ import view.components.image.ValidatingImageLoader;
 public class LeaderboardPanel extends BorderPane {
 
   private final SessionService sessionService;
-  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+  private final ImageLoader avatarLoader = new DiskImageLoader();
   private final TableView<LeaderboardRow> table = new TableView<>();
   private final ObservableList<LeaderboardRow> rows = FXCollections.observableArrayList();
 
