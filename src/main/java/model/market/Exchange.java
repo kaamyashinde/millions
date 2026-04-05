@@ -19,11 +19,11 @@ import model.market.marketevent.daily.UniformDailyPriceMoveStrategy;
 import model.market.marketevent.unexpected.MarketEvent;
 import model.market.marketevent.unexpected.strategy.MarketEventStrategy;
 import model.market.marketevent.unexpected.strategy.RandomMarketEventStrategy;
-import model.transaction.Purchase;
-import model.transaction.Sale;
-import model.transaction.Transaction;
-import model.transaction.TransactionSizing;
-import model.transactioncalculator.SaleCalculator;
+import model.trading.transaction.Purchase;
+import model.trading.transaction.Sale;
+import model.trading.transaction.Transaction;
+import model.trading.transaction.TransactionSizing;
+import model.trading.transactioncalculator.SaleCalculator;
 
 /**
  * A class representing the Exchange Market in the system.

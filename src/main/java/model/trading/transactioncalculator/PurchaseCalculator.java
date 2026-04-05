@@ -1,4 +1,4 @@
-package model.transactioncalculator;
+package model.trading.transactioncalculator;
 
 
 import java.math.BigDecimal;

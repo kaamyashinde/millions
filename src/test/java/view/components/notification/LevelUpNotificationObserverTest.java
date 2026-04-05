@@ -10,7 +10,7 @@ import model.PlayerLevels;
 import model.PlayerObserver;
 import model.market.Share;
 import model.market.Stock;
-import model.transaction.Purchase;
+import model.trading.transaction.Purchase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

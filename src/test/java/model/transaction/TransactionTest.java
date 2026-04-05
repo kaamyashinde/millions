@@ -9,8 +9,10 @@ import java.math.BigDecimal;
 import model.Player;
 import model.market.Share;
 import model.market.Stock;
-import model.transactioncalculator.PurchaseCalculator;
-import model.transactioncalculator.SaleCalculator;
+import model.trading.transaction.Purchase;
+import model.trading.transaction.Sale;
+import model.trading.transactioncalculator.PurchaseCalculator;
+import model.trading.transactioncalculator.SaleCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

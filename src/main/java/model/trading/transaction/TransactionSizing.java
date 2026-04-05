@@ -1,4 +1,4 @@
-package model.transaction;
+package model.trading.transaction;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -6,8 +6,8 @@ import java.math.RoundingMode;
 import java.util.function.Function;
 import model.market.InvestableAsset;
 import model.market.Share;
-import model.transactioncalculator.PurchaseCalculator;
-import model.transactioncalculator.SaleCalculator;
+import model.trading.transactioncalculator.PurchaseCalculator;
+import model.trading.transactioncalculator.SaleCalculator;
 import model.utils.Validator;
 
 /**

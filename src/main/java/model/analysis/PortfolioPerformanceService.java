@@ -9,10 +9,10 @@ import model.Portfolio;
 import model.market.Exchange;
 import model.market.InvestableAsset;
 import model.market.Share;
-import model.transaction.Purchase;
-import model.transaction.Sale;
-import model.transaction.Transaction;
-import model.transactioncalculator.SaleCalculator;
+import model.trading.transaction.Purchase;
+import model.trading.transaction.Sale;
+import model.trading.transaction.Transaction;
+import model.trading.transactioncalculator.SaleCalculator;
 
 /**
  * Reconstructs the player's daily net worth and compares it with the market benchmark.

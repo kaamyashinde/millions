@@ -1,9 +1,9 @@
-package model.transaction;
+package model.trading.transaction;
 
 import model.Player;
 import model.exception.InsufficientFundsException;
 import model.market.Share;
-import model.transactioncalculator.PurchaseCalculator;
+import model.trading.transactioncalculator.PurchaseCalculator;
 
 /**
  * A class that represents a purchase transaction.

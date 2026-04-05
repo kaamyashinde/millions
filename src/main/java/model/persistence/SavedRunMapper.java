@@ -14,7 +14,7 @@ import model.analysis.PerformanceMetrics;
 import model.analysis.PortfolioPerformanceService;
 import model.market.Exchange;
 import model.market.Share;
-import model.transactioncalculator.SaleCalculator;
+import model.trading.transactioncalculator.SaleCalculator;
 
 /**
  * Builds {@link SavedRunRecord} snapshots from live {@link Player} and {@link Exchange} state.

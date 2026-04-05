@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import model.market.Share;
 import model.savings.RegularSavingsPlan;
-import model.transaction.Transaction;
-import model.transaction.TransactionArchive;
+import model.trading.transaction.Transaction;
+import model.trading.transaction.TransactionArchive;
 
 /**
  * A class representing a Player in the system.

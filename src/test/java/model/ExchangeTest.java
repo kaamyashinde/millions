@@ -25,7 +25,9 @@ import model.market.marketevent.daily.UniformDailyPriceMoveStrategy;
 import model.market.marketevent.unexpected.MarketEvent;
 import model.market.marketevent.unexpected.strategy.MarketEventStrategy;
 import model.market.marketevent.unexpected.target.SymbolMarketEventTarget;
-import model.transaction.Transaction;
+import model.trading.transaction.Transaction;
+import model.trading.transactioncalculator.PurchaseCalculator;
+import model.trading.transactioncalculator.SaleCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -376,7 +378,7 @@ class ExchangeTest {
     exchange.buyUpToBudget("AAPL", new BigDecimal("1600"), p);
     assertTrue(p.getMoney().signum() >= 0);
     Share sh = p.getPortfolio().getShares().getFirst();
-    BigDecimal total = new model.transactioncalculator.PurchaseCalculator(sh).calculateTotal();
+    BigDecimal total = new PurchaseCalculator(sh).calculateTotal();
     assertTrue(total.compareTo(new BigDecimal("1600")) <= 0);
   }
 
@@ -417,7 +419,7 @@ class ExchangeTest {
     BigDecimal target = new BigDecimal("500");
     List<Transaction> txs = exchange.sellUpToTargetNet("AAPL", target, player);
     BigDecimal sumNet = txs.stream()
-        .map(t -> new model.transactioncalculator.SaleCalculator(t.getShare()).calculateTotal())
+        .map(t -> new SaleCalculator(t.getShare()).calculateTotal())
         .reduce(BigDecimal.ZERO, BigDecimal::add);
     assertTrue(sumNet.compareTo(target) <= 0);
     assertTrue(sumNet.signum() > 0);

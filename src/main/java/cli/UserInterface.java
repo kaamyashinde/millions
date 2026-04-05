@@ -43,8 +43,8 @@ import model.session.RegistrationValidationException;
 import model.session.SavedRunService;
 import model.session.SessionService;
 import model.session.validation.ValidationError;
-import model.transaction.Purchase;
-import model.transaction.Transaction;
+import model.trading.transaction.Purchase;
+import model.trading.transaction.Transaction;
 import util.I18n;
 
 /**

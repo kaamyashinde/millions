@@ -1,9 +1,9 @@
-package model.transaction;
+package model.trading.transaction;
 
 import model.Player;
 import model.exception.AlreadyCommittedException;
 import model.market.Share;
-import model.transactioncalculator.TransactionCalculator;
+import model.trading.transactioncalculator.TransactionCalculator;
 
 /**
  * An abstract class representing a financial transaction.

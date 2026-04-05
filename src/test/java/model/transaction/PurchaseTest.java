@@ -12,7 +12,8 @@ import model.exception.AlreadyCommittedException;
 import model.exception.InsufficientFundsException;
 import model.market.Share;
 import model.market.Stock;
-import model.transactioncalculator.PurchaseCalculator;
+import model.trading.transaction.Purchase;
+import model.trading.transactioncalculator.PurchaseCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import model.market.Share;
 import model.market.Stock;
-import model.transaction.Purchase;
+import model.trading.transaction.Purchase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -15,9 +15,9 @@ import model.market.fund.FundComponent;
 import model.market.marketevent.unexpected.MarketEvent;
 import model.market.marketevent.unexpected.target.SymbolMarketEventTarget;
 import model.savings.RegularSavingsPlan;
-import model.transaction.Purchase;
-import model.transaction.Sale;
-import model.transaction.Transaction;
+import model.trading.transaction.Purchase;
+import model.trading.transaction.Sale;
+import model.trading.transaction.Transaction;
 
 /**
  * Converts between mutable domain objects and immutable persisted snapshots.

@@ -5,8 +5,9 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import model.market.Share;
-import model.transaction.TransactionSizing;
-import model.transactioncalculator.SaleCalculator;
+import model.trading.transaction.Sale;
+import model.trading.transaction.TransactionSizing;
+import model.trading.transactioncalculator.SaleCalculator;
 
 /**
  * Represents a portfolio of stocks and shares.This would belong to a user.
@@ -107,7 +108,7 @@ public class Portfolio {
 
   /**
    * Describes the next FIFO slice for a sale (does not mutate the portfolio). The caller passes
-   * this slice to {@link model.transaction.Sale#commit(Player)}, which removes it via
+   * this slice to {@link Sale#commit(Player)}, which removes it via
    * {@link #removeFifoSliceForSale(Share)}.
    */
   public Share buildNextFifoSaleSlice(String symbol, BigDecimal maxQuantity) {

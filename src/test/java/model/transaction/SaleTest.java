@@ -12,7 +12,8 @@ import model.exception.AlreadyCommittedException;
 import model.exception.ShareNotFoundException;
 import model.market.Share;
 import model.market.Stock;
-import model.transactioncalculator.SaleCalculator;
+import model.trading.transaction.Sale;
+import model.trading.transactioncalculator.SaleCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
