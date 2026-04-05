@@ -47,6 +47,17 @@ class StockRecommendationServiceTest {
   }
 
   @Test
+  void recommend_returnsHoldWhenRecentStartPriceIsZero() {
+    List<BigDecimal> prices = List.of(
+        BigDecimal.ZERO,
+        new BigDecimal("100.00"),
+        new BigDecimal("101.00"),
+        new BigDecimal("104.00"));
+
+    assertEquals(StockRecommendation.HOLD, service.recommend(prices));
+  }
+
+  @Test
   void recommend_listOverloadRejectsNull() {
     NullPointerException error =
         assertThrows(NullPointerException.class, () -> service.recommend((List<BigDecimal>) null));
@@ -60,34 +71,6 @@ class StockRecommendationServiceTest {
         assertThrows(NullPointerException.class, () -> service.recommend((Stock) null));
 
     assertEquals("Stock cannot be null", error.getMessage());
-  }
-
-  @Test
-  void constructor_rejectsNullStrategy() {
-    NullPointerException error =
-        assertThrows(NullPointerException.class, () -> new StockRecommendationService(null));
-
-    assertEquals("Recommendation strategy cannot be null", error.getMessage());
-  }
-
-  @Test
-  void recommend_delegatesToInjectedStrategy() {
-    RecommendationStrategy alwaysSell =
-        prices -> prices.size() >= 2 ? StockRecommendation.SELL : StockRecommendation.HOLD;
-    StockRecommendationService custom = new StockRecommendationService(alwaysSell);
-    Stock stock = stockWithPrices("100.00", "101.00");
-
-    assertEquals(StockRecommendation.SELL, custom.recommend(stock));
-  }
-
-  @Test
-  void recommend_listDelegatesToInjectedStrategy() {
-    RecommendationStrategy alwaysBuy = prices -> StockRecommendation.BUY;
-    StockRecommendationService custom = new StockRecommendationService(alwaysBuy);
-
-    assertEquals(
-        StockRecommendation.BUY,
-        custom.recommend(List.of(new BigDecimal("1"), new BigDecimal("2"))));
   }
 
   /**

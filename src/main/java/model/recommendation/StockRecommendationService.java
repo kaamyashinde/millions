@@ -1,17 +1,20 @@
 package model.recommendation;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import model.Stock;
 
 /**
- * Computes a simplified recommendation from recent stock price data using a pluggable {@link RecommendationStrategy}.
+ * Computes a trend-based recommendation from recent stock price data.
+ *
+ * <p>Compares the start of a recent lookback window to the latest price. If the relative change
+ * exceeds positive or negative thresholds, returns {@link StockRecommendation#BUY} or
+ * {@link StockRecommendation#SELL}; otherwise {@link StockRecommendation#HOLD}.
  *
  * <p>This service only reads historical prices. It does not mutate {@link Stock} instances or
- * participate in exchange price generation, which keeps recommendation logic separate from actual
- * price logic.
+ * participate in exchange price generation.
  *
  * @author kaamyashinde
  * @version 1.0.0
@@ -19,31 +22,16 @@ import model.Stock;
  */
 public class StockRecommendationService {
 
-  private final RecommendationStrategy strategy;
-
-  /**
-   * Creates a service that uses {@link TrendRecommendationStrategy} by default.
-   */
-  public StockRecommendationService() {
-    this(new TrendRecommendationStrategy());
-  }
-
-  /**
-   * Creates a service that delegates to the given strategy.
-   *
-   * @param strategy recommendation algorithm to use
-   * @throws NullPointerException if {@code strategy} is null
-   */
-  public StockRecommendationService(RecommendationStrategy strategy) {
-    checkNotNull(strategy, "Recommendation strategy");
-    this.strategy = strategy;
-  }
+  private static final int LOOKBACK_PRICE_POINTS = 4;
+  private static final BigDecimal BUY_THRESHOLD = new BigDecimal("0.015");
+  private static final BigDecimal SELL_THRESHOLD = new BigDecimal("-0.015");
+  private static final int DIVISION_SCALE = 8;
 
   /**
    * Computes the recommendation for the given stock from its recent historical prices.
    *
    * @param stock stock whose recent trend should be analyzed
-   * @return recommendation from the configured strategy
+   * @return recommendation for the stock
    * @throws NullPointerException if {@code stock} is null
    */
   public StockRecommendation recommend(Stock stock) {
@@ -54,15 +42,38 @@ public class StockRecommendationService {
   /**
    * Computes the recommendation from the provided ordered price history.
    *
-   * <p>If there is not enough history for the strategy, the recommendation typically defaults to
-   * {@link StockRecommendation#HOLD} (see the active {@link RecommendationStrategy}).
+   * <p>Returns {@link StockRecommendation#HOLD} when history has fewer than two prices or when the
+   * lookback start price is zero.
    *
    * @param historicalPrices ordered price history, oldest to newest
-   * @return recommendation from the configured strategy
+   * @return recommendation based on recent price trend
    * @throws NullPointerException if {@code historicalPrices} is null
    */
   public StockRecommendation recommend(List<BigDecimal> historicalPrices) {
     checkNotNull(historicalPrices, "Historical prices");
-    return strategy.recommend(historicalPrices);
+    if (historicalPrices.size() < 2) {
+      return StockRecommendation.HOLD;
+    }
+
+    BigDecimal startPrice = recentStartPrice(historicalPrices);
+    BigDecimal endPrice = historicalPrices.getLast();
+    if (startPrice.signum() == 0) {
+      return StockRecommendation.HOLD;
+    }
+
+    BigDecimal trendRatio =
+        endPrice.subtract(startPrice).divide(startPrice, DIVISION_SCALE, RoundingMode.HALF_UP);
+    if (trendRatio.compareTo(BUY_THRESHOLD) >= 0) {
+      return StockRecommendation.BUY;
+    }
+    if (trendRatio.compareTo(SELL_THRESHOLD) <= 0) {
+      return StockRecommendation.SELL;
+    }
+    return StockRecommendation.HOLD;
+  }
+
+  private BigDecimal recentStartPrice(List<BigDecimal> historicalPrices) {
+    int startIndex = Math.max(0, historicalPrices.size() - LOOKBACK_PRICE_POINTS);
+    return historicalPrices.get(startIndex);
   }
 }
