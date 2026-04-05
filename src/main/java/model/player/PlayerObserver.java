@@ -1,9 +1,9 @@
-package model;
+package model.player;
 
 /**
  * Observer interface for receiving notifications when a {@link Player}'s state changes.
- * Implementations are notified after mutations such as money deposits, withdrawals,
- * or portfolio modifications.
+ * Implementations are notified after mutations such as money deposits, withdrawals, or portfolio
+ * modifications.
  *
  * @author kaamyashinde
  * @version 1.0.0

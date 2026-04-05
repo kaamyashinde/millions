@@ -1,6 +1,7 @@
-package model;
+package model.player.levels;
 
 import java.math.BigDecimal;
+import model.player.Player;
 
 /**
  * Investor level: requires 70 distinct trading days and net worth at least 1.2x starting money;
@@ -12,10 +13,13 @@ import java.math.BigDecimal;
  */
 public final class InvestorLevel implements PlayerLevel {
 
-  /** Singleton instance for the investor state. */
+  /**
+   * Singleton instance for the investor state.
+   */
   public static final InvestorLevel INSTANCE = new InvestorLevel();
 
-  private InvestorLevel() {}
+  private InvestorLevel() {
+  }
 
   @Override
   public String name() {
@@ -36,8 +40,8 @@ public final class InvestorLevel implements PlayerLevel {
   public boolean qualifies(Player player) {
     return player.getTransactionArchive().countDistinctDay() >= 70
         && player
-            .getNetWorth()
-            .compareTo(player.getStartingMoney().multiply(BigDecimal.valueOf(1.20)))
-            >= 0;
+        .getNetWorth()
+        .compareTo(player.getStartingMoney().multiply(BigDecimal.valueOf(1.20)))
+        >= 0;
   }
 }

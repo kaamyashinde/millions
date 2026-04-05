@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-import model.Player;
+import model.player.Player;
 import model.exception.InsufficientFundsException;
 import model.exception.InsufficientSharesException;
 import model.market.fund.Fund;

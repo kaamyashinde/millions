@@ -1,6 +1,7 @@
-package model;
+package model.player.levels;
 
 import java.math.BigDecimal;
+import model.player.Player;
 
 /**
  * Novice player level: always qualifies as a fallback; limits trade size to 10x starting money.
@@ -11,10 +12,13 @@ import java.math.BigDecimal;
  */
 public final class NoviceLevel implements PlayerLevel {
 
-  /** Singleton instance for the novice state. */
+  /**
+   * Singleton instance for the novice state.
+   */
   public static final NoviceLevel INSTANCE = new NoviceLevel();
 
-  private NoviceLevel() {}
+  private NoviceLevel() {
+  }
 
   @Override
   public String name() {

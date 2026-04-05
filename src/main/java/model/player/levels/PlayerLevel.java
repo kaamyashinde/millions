@@ -1,11 +1,12 @@
-package model;
+package model.player.levels;
 
 import java.math.BigDecimal;
+import model.player.Player;
 
 /**
- * Sealed state hierarchy for player progression. Each level defines qualification rules,
- * display metadata, trade limits, and delegates transitions via {@link #checkTransition(Player)}.
- * Use {@link PlayerLevels} for stable singleton references ({@code NOVICE}, {@code INVESTOR},
+ * Sealed state hierarchy for player progression. Each level defines qualification rules, display
+ * metadata, trade limits, and delegates transitions via {@link #checkTransition(Player)}. Use
+ * {@link PlayerLevels} for stable singleton references ({@code NOVICE}, {@code INVESTOR},
  * {@code SPECULATOR}) without circular class-init issues.
  *
  * @author kaamyashinde

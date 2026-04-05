@@ -25,6 +25,7 @@ import model.market.marketevent.daily.UniformDailyPriceMoveStrategy;
 import model.market.marketevent.unexpected.MarketEvent;
 import model.market.marketevent.unexpected.strategy.MarketEventStrategy;
 import model.market.marketevent.unexpected.target.SymbolMarketEventTarget;
+import model.player.Player;
 import model.trading.transaction.Transaction;
 import model.trading.transactioncalculator.PurchaseCalculator;
 import model.trading.transactioncalculator.SaleCalculator;

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import model.Player;
+import model.player.Player;
 import model.market.Exchange;
 import model.persistence.GameStateSnapshot;
 import model.persistence.ProfileDirectories;

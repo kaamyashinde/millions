@@ -1,7 +1,7 @@
 package model.trading.transaction;
 
 
-import model.Player;
+import model.player.Player;
 import model.exception.ShareNotFoundException;
 import model.market.Share;
 import model.trading.transactioncalculator.SaleCalculator;

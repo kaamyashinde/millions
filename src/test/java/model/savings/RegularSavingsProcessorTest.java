@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
-import model.Player;
+import model.player.Player;
 import model.market.Exchange;
 import model.market.Stock;
 import model.market.fund.Fund;

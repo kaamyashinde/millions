@@ -2,7 +2,7 @@ package model.session;
 
 import java.math.BigDecimal;
 import java.util.List;
-import model.Player;
+import model.player.Player;
 import model.market.Exchange;
 import model.persistence.GameStateSnapshot;
 import model.persistence.PinHashingService;

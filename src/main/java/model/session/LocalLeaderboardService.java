@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import model.Player;
+import model.player.Player;
 import model.market.Exchange;
 import model.persistence.GameStateMapper;
 import model.persistence.GameStateRepository;

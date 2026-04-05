@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import model.Player;
+import model.player.Player;
 import model.market.Exchange;
 import model.market.InvestableAsset;
 import model.market.Share;

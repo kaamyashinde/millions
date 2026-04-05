@@ -1,6 +1,7 @@
-package model;
+package model.player.levels;
 
 import java.math.BigDecimal;
+import model.player.Player;
 
 /**
  * Speculator level: requires 140 distinct trading days and net worth at least 2x starting money;
@@ -12,13 +13,18 @@ import java.math.BigDecimal;
  */
 public final class SpeculatorLevel implements PlayerLevel {
 
-  /** Singleton instance for the speculator state. */
+  /**
+   * Singleton instance for the speculator state.
+   */
   public static final SpeculatorLevel INSTANCE = new SpeculatorLevel();
 
-  /** Effectively uncapped trade size for top tier. */
+  /**
+   * Effectively uncapped trade size for top tier.
+   */
   private static final BigDecimal UNCAPPED = BigDecimal.valueOf(Long.MAX_VALUE);
 
-  private SpeculatorLevel() {}
+  private SpeculatorLevel() {
+  }
 
   @Override
   public String name() {
@@ -39,6 +45,6 @@ public final class SpeculatorLevel implements PlayerLevel {
   public boolean qualifies(Player player) {
     return player.getTransactionArchive().countDistinctDay() >= 140
         && player.getNetWorth().compareTo(player.getStartingMoney().multiply(BigDecimal.valueOf(2)))
-            >= 0;
+        >= 0;
   }
 }

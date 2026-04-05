@@ -1,6 +1,6 @@
 package model.trading.transaction;
 
-import model.Player;
+import model.player.Player;
 import model.exception.AlreadyCommittedException;
 import model.market.Share;
 import model.trading.transactioncalculator.TransactionCalculator;

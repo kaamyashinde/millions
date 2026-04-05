@@ -3,7 +3,7 @@ package model.analysis;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
 import java.util.List;
-import model.Player;
+import model.player.Player;
 import model.market.Exchange;
 import model.market.InvestableAsset;
 import model.market.Stock;

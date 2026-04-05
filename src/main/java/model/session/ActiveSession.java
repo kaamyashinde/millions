@@ -1,6 +1,6 @@
 package model.session;
 
-import model.Player;
+import model.player.Player;
 import model.market.Exchange;
 
 /**

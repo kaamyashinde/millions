@@ -23,7 +23,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.Player;
+import model.player.Player;
 import model.analysis.MetricValue;
 import model.analysis.PerformanceComparison;
 import model.analysis.PortfolioPerformanceService;

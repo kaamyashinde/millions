@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
-import model.Player;
+import model.player.Player;
 import model.exception.AlreadyCommittedException;
 import model.exception.InsufficientFundsException;
 import model.market.Share;

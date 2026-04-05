@@ -3,19 +3,21 @@ package model.persistence;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 import java.util.List;
+import model.player.levels.PlayerLevel;
 
 /**
- * JSON-serialized snapshot of one saved playthrough for comparison and optional leaderboard intent.
+ * JSON-serialized snapshot of one saved playthrough for comparison and optional leaderboard
+ * intent.
  *
- * @param schemaVersion            format version for forward compatibility
- * @param runId                    unique id (UUID string)
- * @param savedAt                  ISO-8601 instant string
- * @param label                    optional user label
- * @param tradingDays              in-game duration (exchange day count at save)
- * @param cash                     liquid balance at save
- * @param holdings                 denormalized lots with mark-to-market values
- * @param stats                    net worth, level, and performance metrics at save
- * @param eligibleForLeaderboard   user-selected flag for a future leaderboard submission flow
+ * @param schemaVersion          format version for forward compatibility
+ * @param runId                  unique id (UUID string)
+ * @param savedAt                ISO-8601 instant string
+ * @param label                  optional user label
+ * @param tradingDays            in-game duration (exchange day count at save)
+ * @param cash                   liquid balance at save
+ * @param holdings               denormalized lots with mark-to-market values
+ * @param stats                  net worth, level, and performance metrics at save
+ * @param eligibleForLeaderboard user-selected flag for a future leaderboard submission flow
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record SavedRunRecord(
@@ -29,17 +31,19 @@ public record SavedRunRecord(
     SavedRunStatsSnapshot stats,
     boolean eligibleForLeaderboard) {
 
-  /** Current on-disk format version. */
+  /**
+   * Current on-disk format version.
+   */
   public static final int CURRENT_SCHEMA_VERSION = 1;
 
   /**
    * One portfolio lot at save time.
    *
-   * @param symbol                trading symbol
-   * @param assetName             display name
-   * @param quantity              shares held in this lot
-   * @param purchasePricePerUnit  cost basis per unit for this lot
-   * @param marketValueNet        mark-to-market net liquidation value for this lot
+   * @param symbol               trading symbol
+   * @param assetName            display name
+   * @param quantity             shares held in this lot
+   * @param purchasePricePerUnit cost basis per unit for this lot
+   * @param marketValueNet       mark-to-market net liquidation value for this lot
    */
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record SavedRunHoldingSnapshot(
@@ -48,20 +52,21 @@ public record SavedRunRecord(
       BigDecimal quantity,
       BigDecimal purchasePricePerUnit,
       BigDecimal marketValueNet) {
+
   }
 
   /**
    * Performance and summary stats at save time.
    *
-   * @param netWorth                  total net worth (cash + holdings)
-   * @param startingMoney             profile starting balance
-   * @param playerLevel               resolved {@link model.PlayerLevel} name
-   * @param portfolioReturnPercent    total return % when available
-   * @param portfolioVolatility       volatility metric when available
-   * @param portfolioSharpeRatio      Sharpe ratio when available
-   * @param benchmarkReturnPercent    benchmark return % when available
-   * @param benchmarkVolatility       benchmark volatility when available
-   * @param benchmarkSharpeRatio      benchmark Sharpe when available
+   * @param netWorth               total net worth (cash + holdings)
+   * @param startingMoney          profile starting balance
+   * @param playerLevel            resolved {@link PlayerLevel} name
+   * @param portfolioReturnPercent total return % when available
+   * @param portfolioVolatility    volatility metric when available
+   * @param portfolioSharpeRatio   Sharpe ratio when available
+   * @param benchmarkReturnPercent benchmark return % when available
+   * @param benchmarkVolatility    benchmark volatility when available
+   * @param benchmarkSharpeRatio   benchmark Sharpe when available
    */
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record SavedRunStatsSnapshot(
@@ -74,5 +79,6 @@ public record SavedRunRecord(
       BigDecimal benchmarkReturnPercent,
       BigDecimal benchmarkVolatility,
       BigDecimal benchmarkSharpeRatio) {
+
   }
 }

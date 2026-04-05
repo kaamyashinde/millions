@@ -25,7 +25,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
-import model.Player;
+import model.player.Player;
 import model.market.Exchange;
 import model.market.InvestableAsset;
 import model.savings.RegularSavingsPlan;

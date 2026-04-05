@@ -22,7 +22,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import model.Player;
+import model.player.Player;
 import model.market.Exchange;
 import model.market.Stock;
 import model.persistence.MarketData;

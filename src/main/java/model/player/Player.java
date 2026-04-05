@@ -1,10 +1,12 @@
-package model;
+package model.player;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import model.player.levels.PlayerLevel;
+import model.player.levels.PlayerLevels;
 import model.market.Share;
 import model.savings.RegularSavingsPlan;
 import model.trading.transaction.Transaction;

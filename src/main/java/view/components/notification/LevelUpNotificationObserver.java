@@ -2,15 +2,15 @@ package view.components.notification;
 
 import static model.utils.Validator.checkNotNull;
 
-import model.Player;
-import model.PlayerLevel;
-import model.PlayerObserver;
+import model.player.Player;
+import model.player.levels.PlayerLevel;
+import model.player.PlayerObserver;
 import view.components.toast.ToastMode;
 
 /**
- * View-layer observer that fires a toast notification via {@link NotificationService}
- * when a player's level changes. Tracks the previous level so that only actual
- * transitions trigger a notification.
+ * View-layer observer that fires a toast notification via {@link NotificationService} when a
+ * player's level changes. Tracks the previous level so that only actual transitions trigger a
+ * notification.
  *
  * @author kaamyashinde
  * @version 1.0.0
@@ -35,8 +35,8 @@ public class LevelUpNotificationObserver implements PlayerObserver {
   }
 
   /**
-   * Checks whether the player's level has changed since the last notification,
-   * and if so, shows a congratulatory toast.
+   * Checks whether the player's level has changed since the last notification, and if so, shows a
+   * congratulatory toast.
    *
    * @param player the player whose state changed
    */

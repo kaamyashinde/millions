@@ -2,7 +2,7 @@ package model.savings;
 
 import java.util.ArrayList;
 import java.util.List;
-import model.Player;
+import model.player.Player;
 import model.exception.InsufficientFundsException;
 import model.market.Exchange;
 

@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import model.market.Share;
 import model.market.Stock;
+import model.player.Portfolio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

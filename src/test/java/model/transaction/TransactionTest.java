@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
-import model.Player;
+import model.player.Player;
 import model.market.Share;
 import model.market.Stock;
 import model.trading.transaction.Purchase;

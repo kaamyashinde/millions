@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-import model.Player;
+import model.player.Player;
 import model.analysis.MetricStatus;
 import model.analysis.MetricValue;
 import model.analysis.PerformanceComparison;
