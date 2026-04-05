@@ -1,4 +1,4 @@
-package model.analysis;
+package model.analysis.technical.chartanalysis;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,12 +23,15 @@ public class FibonacciRetracement {
    * @param name  the human-readable ratio label (e.g. "61.8%")
    * @param price the retracement price at this level
    */
-  public record Level(String name, BigDecimal price) {}
+  public record Level(String name, BigDecimal price) {
+
+  }
 
   private static final double[] RATIOS = {0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0};
   private static final String[] NAMES = {"0%", "23.6%", "38.2%", "50%", "61.8%", "78.6%", "100%"};
 
-  private FibonacciRetracement() {}
+  private FibonacciRetracement() {
+  }
 
   /**
    * Computes the seven retracement levels between {@code high} and {@code low}.

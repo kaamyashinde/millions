@@ -6,7 +6,7 @@ import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import model.analysis.MoonPhaseCalculator;
+import model.analysis.technical.chartanalysis.MoonPhaseCalculator;
 
 /**
  * Chart tool that auto-draws vertical markers for new-moon and full-moon days.
@@ -20,13 +20,19 @@ import model.analysis.MoonPhaseCalculator;
  */
 public class MoonPhaseTool extends AbstractChartTool {
 
-  /** Grey hex colour used for vertical dashed lines marking new-moon days. */
+  /**
+   * Grey hex colour used for vertical dashed lines marking new-moon days.
+   */
   private static final String NEW_MOON_COLOR = "#aaaaaa";
 
-  /** Gold hex colour used for vertical dashed lines marking full-moon days. */
+  /**
+   * Gold hex colour used for vertical dashed lines marking full-moon days.
+   */
   private static final String FULL_MOON_COLOR = "#ffd700";
 
-  /** Calendar date corresponding to day index 1 on the chart's x-axis. */
+  /**
+   * Calendar date corresponding to day index 1 on the chart's x-axis.
+   */
   private final LocalDate startDate;
 
   /**
@@ -50,8 +56,8 @@ public class MoonPhaseTool extends AbstractChartTool {
 
   /**
    * Computes all moon phase events for the loaded price series via {@link MoonPhaseCalculator},
-   * reads the y-axis bounds, and draws one dashed vertical series per phase event — grey for
-   * new moons and gold for full moons.
+   * reads the y-axis bounds, and draws one dashed vertical series per phase event — grey for new
+   * moons and gold for full moons.
    *
    * @param chart the chart on which the moon phase markers are drawn
    */
@@ -98,7 +104,9 @@ public class MoonPhaseTool extends AbstractChartTool {
     status.set("");
   }
 
-  /** No-op: this tool draws automatically on activation and requires no click interaction. */
+  /**
+   * No-op: this tool draws automatically on activation and requires no click interaction.
+   */
   @Override
   public void onChartClick(LineChart<Number, Number> chart, double price, int dayIndex) {
     // intentional no-op

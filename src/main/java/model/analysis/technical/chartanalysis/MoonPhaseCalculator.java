@@ -1,4 +1,4 @@
-package model.analysis;
+package model.analysis.technical.chartanalysis;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -17,7 +17,9 @@ import java.util.Map;
  */
 public class MoonPhaseCalculator {
 
-  /** Lunar phases tracked by this calculator. */
+  /**
+   * Lunar phases tracked by this calculator.
+   */
   public enum Phase {
     NEW_MOON,
     FULL_MOON
@@ -27,7 +29,8 @@ public class MoonPhaseCalculator {
   private static final double CYCLE_DAYS = 29.53059;
   private static final double HALF_CYCLE = CYCLE_DAYS / 2.0; // ≈14.77 days
 
-  private MoonPhaseCalculator() {}
+  private MoonPhaseCalculator() {
+  }
 
   /**
    * Computes phase events for each 1-based day index in {@code [1, totalDays]}.
