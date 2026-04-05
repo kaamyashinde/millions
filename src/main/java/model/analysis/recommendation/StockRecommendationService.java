@@ -1,4 +1,4 @@
-package model.recommendation;
+package model.analysis.recommendation;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;

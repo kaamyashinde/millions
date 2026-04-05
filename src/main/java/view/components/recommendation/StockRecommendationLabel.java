@@ -1,11 +1,10 @@
 package view.components.recommendation;
 
 import static model.utils.Validator.checkNotNull;
-
 import javafx.scene.control.Label;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.recommendation.StockRecommendation;
+import model.analysis.recommendation.StockRecommendation;
 
 /**
  * Reusable JavaFX label that renders a stock recommendation as a styled badge.

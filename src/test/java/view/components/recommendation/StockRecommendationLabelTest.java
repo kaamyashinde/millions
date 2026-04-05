@@ -3,14 +3,13 @@ package view.components.recommendation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
+import model.analysis.recommendation.StockRecommendation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import model.recommendation.StockRecommendation;
 
 /**
  * Tests for the stock recommendation badge component.
@@ -30,7 +29,8 @@ class StockRecommendationLabelTest {
 
   @Test
   void constructorRendersBuyTextAndStyle() throws Exception {
-    StockRecommendationLabel label = runOnFxThread(() -> new StockRecommendationLabel(StockRecommendation.BUY));
+    StockRecommendationLabel label =
+        runOnFxThread(() -> new StockRecommendationLabel(StockRecommendation.BUY));
 
     assertEquals(StockRecommendation.BUY, label.getRecommendation());
     assertEquals("BUY", label.getText());
@@ -39,7 +39,8 @@ class StockRecommendationLabelTest {
 
   @Test
   void setRecommendationUpdatesBadgeText() throws Exception {
-    StockRecommendationLabel label = runOnFxThread(() -> new StockRecommendationLabel(StockRecommendation.HOLD));
+    StockRecommendationLabel label =
+        runOnFxThread(() -> new StockRecommendationLabel(StockRecommendation.HOLD));
 
     runOnFxThread(
         () -> {
@@ -55,7 +56,8 @@ class StockRecommendationLabelTest {
   @Test
   void constructorRejectsNullRecommendation() {
     NullPointerException error =
-        assertThrows(NullPointerException.class, () -> runOnFxThread(() -> new StockRecommendationLabel(null)));
+        assertThrows(NullPointerException.class,
+            () -> runOnFxThread(() -> new StockRecommendationLabel(null)));
 
     assertEquals("Recommendation cannot be null", error.getMessage());
   }
@@ -90,6 +92,7 @@ class StockRecommendationLabelTest {
 
   @FunctionalInterface
   private interface LabelSupplier {
+
     StockRecommendationLabel get() throws Exception;
   }
 }
