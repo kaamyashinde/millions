@@ -4,13 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import model.Stock;
+import model.marketevent.unexpected.MarketEvent;
+import model.marketevent.unexpected.strategy.RandomMarketEventStrategy;
+import model.marketevent.unexpected.target.SymbolMarketEventTarget;
 import org.junit.jupiter.api.Test;
 
 class RandomMarketEventStrategyTest {

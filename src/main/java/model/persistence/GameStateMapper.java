@@ -1,6 +1,5 @@
 package model.persistence;
 
-import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +12,8 @@ import model.Share;
 import model.Stock;
 import model.fund.Fund;
 import model.fund.FundComponent;
-import model.marketevent.MarketEvent;
-import model.marketevent.SymbolMarketEventTarget;
+import model.marketevent.unexpected.MarketEvent;
+import model.marketevent.unexpected.target.SymbolMarketEventTarget;
 import model.savings.RegularSavingsPlan;
 import model.transaction.Purchase;
 import model.transaction.Sale;
@@ -25,7 +24,9 @@ import model.transaction.Transaction;
  */
 public final class GameStateMapper {
 
-  /** Current JSON snapshot schema version. */
+  /**
+   * Current JSON snapshot schema version.
+   */
   public static final int SCHEMA_VERSION = 1;
 
   private final String exchangeName;
@@ -63,7 +64,7 @@ public final class GameStateMapper {
   /**
    * Converts the current player and exchange into a persisted snapshot.
    *
-   * @param player active player
+   * @param player   active player
    * @param exchange active exchange
    * @return persisted snapshot
    */
@@ -77,11 +78,12 @@ public final class GameStateMapper {
   /**
    * Rebuilds an exchange from persisted state and bundled market definitions.
    *
-   * @param snapshot stored exchange snapshot
+   * @param snapshot   stored exchange snapshot
    * @param marketData latest bundled market definitions
    * @return restored exchange instance
    */
-  public Exchange restoreExchange(GameStateSnapshot.ExchangeSnapshot snapshot, MarketData marketData) {
+  public Exchange restoreExchange(GameStateSnapshot.ExchangeSnapshot snapshot,
+      MarketData marketData) {
     Map<String, Stock> restoredStocks = rebuildStocks(snapshot.stocks());
     List<Fund> restoredFunds = rebuildFunds(marketData.funds(), restoredStocks);
     List<MarketEvent> history = snapshot.marketEventHistory().stream()
@@ -180,7 +182,8 @@ public final class GameStateMapper {
         transaction.getDay());
   }
 
-  private GameStateSnapshot.RegularSavingsPlanSnapshot toSavingsPlanSnapshot(RegularSavingsPlan plan) {
+  private GameStateSnapshot.RegularSavingsPlanSnapshot toSavingsPlanSnapshot(
+      RegularSavingsPlan plan) {
     return new GameStateSnapshot.RegularSavingsPlanSnapshot(
         plan.getSymbol(),
         plan.getMode(),
@@ -232,7 +235,8 @@ public final class GameStateMapper {
     return new Share(asset, snapshot.quantity(), snapshot.purchasePrice());
   }
 
-  private Transaction toTransaction(GameStateSnapshot.TransactionSnapshot snapshot, Exchange exchange) {
+  private Transaction toTransaction(GameStateSnapshot.TransactionSnapshot snapshot,
+      Exchange exchange) {
     Share share = toShare(
         new GameStateSnapshot.ShareSnapshot(
             snapshot.assetSymbol(),
@@ -245,7 +249,8 @@ public final class GameStateMapper {
     if ("SALE".equals(snapshot.type())) {
       return new Sale(share, snapshot.day());
     }
-    throw new IllegalStateException("Unknown transaction type in saved profile: " + snapshot.type());
+    throw new IllegalStateException(
+        "Unknown transaction type in saved profile: " + snapshot.type());
   }
 
   private RegularSavingsPlan toSavingsPlan(GameStateSnapshot.RegularSavingsPlanSnapshot snapshot) {

@@ -1,18 +1,19 @@
-package model.marketevent;
+package model.marketevent.unexpected.strategy;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import model.Stock;
+import model.marketevent.unexpected.MarketEvent;
+import model.marketevent.unexpected.target.SymbolMarketEventTarget;
 
 /**
  * Creates occasional stock-specific market events with a larger shock than the normal daily band.
  *
- * @author OpenAI
+ * @author kevindmazali
  * @version 1.0.0
  * @since 2026-04-04
  */
@@ -34,7 +35,7 @@ public class RandomMarketEventStrategy implements MarketEventStrategy {
    * Creates a strategy with the given probability and templates.
    *
    * @param eventProbability probability that any given advance generates an event
-   * @param templates candidate event templates used when an event is triggered
+   * @param templates        candidate event templates used when an event is triggered
    */
   public RandomMarketEventStrategy(double eventProbability, List<EventTemplate> templates) {
     this.eventProbability = eventProbability;
@@ -45,12 +46,13 @@ public class RandomMarketEventStrategy implements MarketEventStrategy {
    * Generates a stock-specific event when the probability check succeeds.
    *
    * @param listedStocks stocks available on the exchange
-   * @param tradingDay current trading day
-   * @param random random source used for event selection
+   * @param tradingDay   current trading day
+   * @param random       random source used for event selection
    * @return generated event, or empty when no event occurs
    */
   @Override
-  public Optional<MarketEvent> maybeCreateEvent(List<Stock> listedStocks, int tradingDay, Random random) {
+  public Optional<MarketEvent> maybeCreateEvent(List<Stock> listedStocks, int tradingDay,
+      Random random) {
     checkNotNull(listedStocks, "Listed stocks");
     checkNotNull(random, "Random");
     if (listedStocks.isEmpty() || random.nextDouble() >= eventProbability) {
@@ -96,10 +98,10 @@ public class RandomMarketEventStrategy implements MarketEventStrategy {
   /**
    * Defines a reusable text template and shock range for a random market event.
    *
-   * @param title short event title
+   * @param title               short event title
    * @param descriptionTemplate sentence template with company then symbol placeholders
-   * @param minFactor minimum multiplicative shock
-   * @param maxFactor maximum multiplicative shock
+   * @param minFactor           minimum multiplicative shock
+   * @param maxFactor           maximum multiplicative shock
    */
   public record EventTemplate(
       String title,

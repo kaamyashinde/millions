@@ -18,10 +18,10 @@ import model.exception.InsufficientSharesException;
 import model.exception.ShareNotFoundException;
 import model.fund.Fund;
 import model.fund.FundComponent;
-import model.marketevent.MarketEvent;
-import model.marketevent.MarketEventStrategy;
-import model.marketevent.SymbolMarketEventTarget;
-import model.marketevent.UniformDailyPriceMoveStrategy;
+import model.marketevent.daily.UniformDailyPriceMoveStrategy;
+import model.marketevent.unexpected.MarketEvent;
+import model.marketevent.unexpected.strategy.MarketEventStrategy;
+import model.marketevent.unexpected.target.SymbolMarketEventTarget;
 import model.transaction.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -397,7 +397,8 @@ class ExchangeTest {
     exchange.buy("AAPL", new BigDecimal("2"), player);
     List<Transaction> txs = exchange.sellByQuantity("AAPL", new BigDecimal("4"), player);
     assertEquals(2, txs.size());
-    assertTrue(player.getPortfolio().totalQuantityForSymbol("AAPL").compareTo(new BigDecimal("1")) == 0);
+    assertEquals(0,
+        player.getPortfolio().totalQuantityForSymbol("AAPL").compareTo(new BigDecimal("1")));
   }
 
   @Test
@@ -443,9 +444,11 @@ class ExchangeTest {
     eventExchange.advance();
 
     assertTrue(eventExchange.getLastMarketEvent().isPresent());
-    assertEquals("AAPL: Earnings beat expectations", eventExchange.getLastMarketEvent().get().title());
+    assertEquals("AAPL: Earnings beat expectations",
+        eventExchange.getLastMarketEvent().get().title());
     assertEquals(1, eventExchange.getMarketEventHistory().size());
-    assertEquals("AAPL: Earnings beat expectations", eventExchange.getMarketEventHistory().getFirst().title());
+    assertEquals("AAPL: Earnings beat expectations",
+        eventExchange.getMarketEventHistory().getFirst().title());
     assertEquals(0,
         appleStock.getSalesPrice().compareTo(initialApplePrice
             .multiply(new BigDecimal("1.01"))

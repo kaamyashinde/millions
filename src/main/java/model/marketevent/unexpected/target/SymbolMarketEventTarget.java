@@ -1,7 +1,6 @@
-package model.marketevent;
+package model.marketevent.unexpected.target;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
 import model.Stock;
@@ -9,7 +8,7 @@ import model.Stock;
 /**
  * Targets one or more stock symbols directly.
  *
- * @author OpenAI
+ * @author kevindmazali
  * @version 1.0.0
  * @since 2026-04-04
  */

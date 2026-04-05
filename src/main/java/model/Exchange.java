@@ -1,7 +1,6 @@
 package model;
 
 import static model.utils.Validator.requirePositive;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,11 +13,11 @@ import java.util.stream.Collectors;
 import model.exception.InsufficientFundsException;
 import model.exception.InsufficientSharesException;
 import model.fund.Fund;
-import model.marketevent.DailyPriceMoveStrategy;
-import model.marketevent.MarketEvent;
-import model.marketevent.MarketEventStrategy;
-import model.marketevent.RandomMarketEventStrategy;
-import model.marketevent.UniformDailyPriceMoveStrategy;
+import model.marketevent.daily.DailyPriceMoveStrategy;
+import model.marketevent.daily.UniformDailyPriceMoveStrategy;
+import model.marketevent.unexpected.MarketEvent;
+import model.marketevent.unexpected.strategy.MarketEventStrategy;
+import model.marketevent.unexpected.strategy.RandomMarketEventStrategy;
 import model.transaction.Purchase;
 import model.transaction.Sale;
 import model.transaction.Transaction;
@@ -79,6 +78,7 @@ public class Exchange {
    * constructors (random source, price and event strategies, day 1, empty event history).
    */
   public static final class Builder {
+
     private final String name;
     private List<Stock> stocks = List.of();
     private List<Fund> funds = List.of();
@@ -96,49 +96,65 @@ public class Exchange {
       this.name = Objects.requireNonNull(name, "name");
     }
 
-    /** Listed stocks (default empty). */
+    /**
+     * Listed stocks (default empty).
+     */
     public Builder stocks(List<Stock> stocks) {
       this.stocks = stocks != null ? stocks : List.of();
       return this;
     }
 
-    /** Listed funds (default empty). */
+    /**
+     * Listed funds (default empty).
+     */
     public Builder funds(List<Fund> funds) {
       this.funds = funds != null ? funds : List.of();
       return this;
     }
 
-    /** Current trading day (default {@code 1}; must be at least 1). */
+    /**
+     * Current trading day (default {@code 1}; must be at least 1).
+     */
     public Builder day(int day) {
       this.day = day;
       return this;
     }
 
-    /** Random source for simulation (default new {@link Random}). */
+    /**
+     * Random source for simulation (default new {@link Random}).
+     */
     public Builder random(Random random) {
       this.random = random;
       return this;
     }
 
-    /** Baseline daily price move strategy (default {@link UniformDailyPriceMoveStrategy}). */
+    /**
+     * Baseline daily price move strategy (default {@link UniformDailyPriceMoveStrategy}).
+     */
     public Builder dailyPriceMoveStrategy(DailyPriceMoveStrategy strategy) {
       this.dailyPriceMoveStrategy = strategy;
       return this;
     }
 
-    /** Rare market event strategy (default {@link RandomMarketEventStrategy}). */
+    /**
+     * Rare market event strategy (default {@link RandomMarketEventStrategy}).
+     */
     public Builder marketEventStrategy(MarketEventStrategy strategy) {
       this.marketEventStrategy = strategy;
       return this;
     }
 
-    /** Prior market events, oldest first (default empty; copied into the exchange). */
+    /**
+     * Prior market events, oldest first (default empty; copied into the exchange).
+     */
     public Builder marketEventHistory(List<MarketEvent> history) {
       this.marketEventHistory = history != null ? history : List.of();
       return this;
     }
 
-    /** Latest event for the current day, if any (default none). */
+    /**
+     * Latest event for the current day, if any (default none).
+     */
     public Builder lastMarketEvent(MarketEvent event) {
       this.lastMarketEvent = event;
       return this;
@@ -271,10 +287,10 @@ public class Exchange {
    * @param maxSpend upper bound on total purchase cost (gross + commission)
    * @param player   the player making the purchase
    * @return the Purchase transaction
-   * @throws NullPointerException         if {@code maxSpend} is null
-   * @throws IllegalArgumentException     if the symbol is unknown or {@code maxSpend} is not
-   *                                      positive
-   * @throws InsufficientFundsException   if no positive quantity fits the budget and cash available
+   * @throws NullPointerException       if {@code maxSpend} is null
+   * @throws IllegalArgumentException   if the symbol is unknown or {@code maxSpend} is not
+   *                                    positive
+   * @throws InsufficientFundsException if no positive quantity fits the budget and cash available
    */
   public Transaction buyUpToBudget(String symbol, BigDecimal maxSpend, Player player) {
     return executeBuyUpToBudget(player, symbol, maxSpend).getFirst();
@@ -362,8 +378,8 @@ public class Exchange {
 
   /**
    * Sells a total quantity of the given symbol using FIFO lots (oldest holding first). May perform
-   * several {@link Sale} transactions if the quantity spans multiple lots. Partial lots are split so
-   * cost basis is preserved per lot.
+   * several {@link Sale} transactions if the quantity spans multiple lots. Partial lots are split
+   * so cost basis is preserved per lot.
    *
    * @param symbol   the stock symbol
    * @param quantity total shares to sell
@@ -378,8 +394,8 @@ public class Exchange {
 
   /**
    * Sells shares of the symbol in FIFO order, stopping when the cumulative net proceeds credited to
-   * the player (per {@link SaleCalculator#calculateTotal()}) would
-   * exceed {@code targetNet}, or when there are no more shares. May perform several sales.
+   * the player (per {@link SaleCalculator#calculateTotal()}) would exceed {@code targetNet}, or
+   * when there are no more shares. May perform several sales.
    *
    * @param symbol    the stock symbol
    * @param targetNet desired maximum total net cash to raise
@@ -492,7 +508,8 @@ public class Exchange {
   private void advanceOneDay() {
     this.day += 1;
     List<Stock> listedStocks = List.copyOf(this.stockMap.values());
-    this.lastMarketEvent = marketEventStrategy.maybeCreateEvent(listedStocks, this.day, this.random);
+    this.lastMarketEvent =
+        marketEventStrategy.maybeCreateEvent(listedStocks, this.day, this.random);
     this.lastMarketEvent.ifPresent(marketEventHistory::add);
     this.stockMap.values().forEach(stock -> {
       BigDecimal nextPrice = dailyPriceMoveStrategy.calculateNextPrice(stock, this.random);
@@ -580,7 +597,7 @@ public class Exchange {
    * Combines stock and fund listings into one symbol-keyed registry.
    *
    * @param stocks listed stocks
-   * @param funds listed funds
+   * @param funds  listed funds
    * @return combined symbol map
    */
   private static Map<String, InvestableAsset> buildAssetMap(List<Stock> stocks, List<Fund> funds) {

@@ -1,7 +1,6 @@
 package view;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -11,13 +10,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import model.Stock;
-import model.marketevent.MarketEvent;
+import model.marketevent.unexpected.MarketEvent;
+import model.marketevent.unexpected.target.SymbolMarketEventTarget;
+import model.recommendation.StockRecommendation;
 import model.stockinfo.StockFinancialInfo;
 import model.stockinfo.StockFinancialInfoProvider;
-import model.marketevent.SymbolMarketEventTarget;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import model.recommendation.StockRecommendation;
 
 /**
  * Tests refresh behavior of the stock detail view.
@@ -65,7 +64,8 @@ class StockDetailViewTest {
               return detailView;
             });
 
-    assertEquals("Revenue: " + provider.formatMoney(expected.revenue()), view.getRevenueLabelText());
+    assertEquals("Revenue: " + provider.formatMoney(expected.revenue()),
+        view.getRevenueLabelText());
     assertEquals("Profit: " + provider.formatMoney(expected.profit()), view.getProfitLabelText());
     assertEquals("Health: " + expected.health().displayLabel(), view.getHealthLabelText());
   }
@@ -227,6 +227,7 @@ class StockDetailViewTest {
 
   @FunctionalInterface
   private interface ViewSupplier {
+
     StockDetailView get() throws Exception;
   }
 }

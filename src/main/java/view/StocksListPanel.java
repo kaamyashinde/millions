@@ -22,14 +22,13 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.Exchange;
 import model.Stock;
+import model.marketevent.unexpected.MarketEvent;
 import model.stockinfo.StockFinancialInfoProvider;
-import model.marketevent.MarketEvent;
 
 /**
  * JavaFX panel listing all stocks on an {@link Exchange}: symbol, company, latest price, mock
- * revenue, and health indicator.
- * Prices reflect the same {@link Stock} instances as the rest of the demo; use {@link #refresh()}
- * after trading days advance so the table re-renders updated values.
+ * revenue, and health indicator. Prices reflect the same {@link Stock} instances as the rest of the
+ * demo; use {@link #refresh()} after trading days advance so the table re-renders updated values.
  *
  * @author kevindmazali
  * @version 1.0.0
@@ -47,7 +46,8 @@ public class StocksListPanel extends BorderPane {
   /**
    * Builds a read-only listing for the given exchange.
    *
-   * @param exchange exchange whose listed stocks are shown (via {@link Exchange#findStocks(String)})
+   * @param exchange exchange whose listed stocks are shown (via
+   *                 {@link Exchange#findStocks(String)})
    */
   public StocksListPanel(Exchange exchange) {
     this.exchange = exchange;
@@ -155,7 +155,7 @@ public class StocksListPanel extends BorderPane {
    * Restores the previous stock selection after the backing rows are rebuilt.
    *
    * @param previousSelection previously selected stock, possibly null
-   * @param sorted current sorted table rows
+   * @param sorted            current sorted table rows
    */
   private void restoreSelection(Stock previousSelection, List<Stock> sorted) {
     if (previousSelection == null) {

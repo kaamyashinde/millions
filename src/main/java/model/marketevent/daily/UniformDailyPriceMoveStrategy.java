@@ -1,7 +1,6 @@
-package model.marketevent;
+package model.marketevent.daily;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
 import java.util.Random;
 import model.Stock;
@@ -9,7 +8,7 @@ import model.Stock;
 /**
  * Applies the standard daily fluctuation band used by the exchange when no rare event is involved.
  *
- * @author OpenAI
+ * @author kevindmazali
  * @version 1.0.0
  * @since 2026-04-04
  */
@@ -29,7 +28,7 @@ public class UniformDailyPriceMoveStrategy implements DailyPriceMoveStrategy {
   /**
    * Calculates the next-day price using the stock's current price and a uniform daily move band.
    *
-   * @param stock stock whose current price is being advanced
+   * @param stock  stock whose current price is being advanced
    * @param random random source used to sample the daily move
    * @return baseline next-day price before any rare event shock
    */

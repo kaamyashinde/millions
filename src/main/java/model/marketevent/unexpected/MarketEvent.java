@@ -1,22 +1,22 @@
-package model.marketevent;
+package model.marketevent.unexpected;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
 import java.util.Set;
 import model.Stock;
+import model.marketevent.unexpected.target.MarketEventTarget;
 
 /**
  * Immutable description of a rare market event and the price shock it applies.
  *
+ * @param day         trading day on which the event occurred
+ * @param title       short user-facing title
+ * @param description user-facing description shown in the UI
+ * @param target      target describing which stocks are affected
+ * @param priceFactor multiplicative shock applied after the normal daily move
  * @author OpenAI
  * @version 1.0.0
  * @since 2026-04-04
- * @param day trading day on which the event occurred
- * @param title short user-facing title
- * @param description user-facing description shown in the UI
- * @param target target describing which stocks are affected
- * @param priceFactor multiplicative shock applied after the normal daily move
  */
 public record MarketEvent(
     int day,

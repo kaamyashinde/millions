@@ -1,4 +1,4 @@
-package model.marketevent;
+package model.marketevent.unexpected.target;
 
 import java.util.Set;
 import model.Stock;
@@ -6,7 +6,7 @@ import model.Stock;
 /**
  * Describes which stocks are affected by a market event.
  *
- * @author OpenAI
+ * @author kevindmzazali
  * @version 1.0.0
  * @since 2026-04-04
  */

@@ -15,11 +15,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.Stock;
-import model.marketevent.MarketEvent;
-import model.stockinfo.StockFinancialInfo;
-import model.stockinfo.StockFinancialInfoProvider;
+import model.marketevent.unexpected.MarketEvent;
 import model.recommendation.StockRecommendation;
 import model.recommendation.StockRecommendationService;
+import model.stockinfo.StockFinancialInfo;
+import model.stockinfo.StockFinancialInfoProvider;
 import view.components.chart.StockChart;
 import view.components.recommendation.StockRecommendationLabel;
 
@@ -123,7 +123,7 @@ public class StockDetailView extends BorderPane {
   /**
    * Displays details for the selected stock and refreshes the recommendation and chart.
    *
-   * @param stock selected stock, or {@code null} to show the empty state
+   * @param stock      selected stock, or {@code null} to show the empty state
    * @param tradingDay current exchange trading day
    */
   public void showStock(Stock stock, int tradingDay) {
@@ -131,10 +131,11 @@ public class StockDetailView extends BorderPane {
   }
 
   /**
-   * Displays details for the selected stock and the latest market event relevant to the current day.
+   * Displays details for the selected stock and the latest market event relevant to the current
+   * day.
    *
-   * @param stock selected stock, or {@code null} to show the empty state
-   * @param tradingDay current exchange trading day
+   * @param stock       selected stock, or {@code null} to show the empty state
+   * @param tradingDay  current exchange trading day
    * @param marketEvent latest market event, if one occurred on the current day
    */
   public void showStock(Stock stock, int tradingDay, Optional<MarketEvent> marketEvent) {
@@ -144,9 +145,9 @@ public class StockDetailView extends BorderPane {
   /**
    * Displays details for the selected stock together with the latest and past market events.
    *
-   * @param stock selected stock, or {@code null} to show the empty state
-   * @param tradingDay current exchange trading day
-   * @param marketEvent latest market event, if one occurred on the current day
+   * @param stock         selected stock, or {@code null} to show the empty state
+   * @param tradingDay    current exchange trading day
+   * @param marketEvent   latest market event, if one occurred on the current day
    * @param marketHistory past market events relevant to the selected stock
    */
   public void showStock(
@@ -167,7 +168,8 @@ public class StockDetailView extends BorderPane {
       clearFundamentalsLabels();
       marketHistoryList.setItems(FXCollections.observableArrayList());
       recommendationLabel.setRecommendation(StockRecommendation.HOLD);
-      placeholderLabel.setText("Choose a stock from the list to view chart and recommendation details.");
+      placeholderLabel.setText(
+          "Choose a stock from the list to view chart and recommendation details.");
       content.getChildren().setAll(recommendationBox, placeholderLabel);
       return;
     }
@@ -177,12 +179,14 @@ public class StockDetailView extends BorderPane {
     latestPriceLabel.setText("Latest price: " + formatLatestPrice(stock));
     marketEventLabel.setText(buildMarketEventText(stock, marketEvent));
     applyFundamentalsLabels(stock);
-    marketHistoryList.setItems(FXCollections.observableArrayList(buildMarketHistoryItems(marketHistory)));
+    marketHistoryList.setItems(
+        FXCollections.observableArrayList(buildMarketHistoryItems(marketHistory)));
     recommendationLabel.setRecommendation(recommendationService.recommend(stock));
 
     if (stock.getHistoricalPrices().isEmpty()) {
       placeholderLabel.setText("No price history is available for this stock yet.");
-      content.getChildren().setAll(recommendationBox, marketHistoryHeading, marketHistoryList, placeholderLabel);
+      content.getChildren()
+          .setAll(recommendationBox, marketHistoryHeading, marketHistoryList, placeholderLabel);
       return;
     }
 
@@ -204,7 +208,7 @@ public class StockDetailView extends BorderPane {
   /**
    * Refreshes the view while also updating the latest market event context.
    *
-   * @param tradingDay current exchange trading day
+   * @param tradingDay  current exchange trading day
    * @param marketEvent latest market event, if one occurred on the current day
    */
   public void refresh(int tradingDay, Optional<MarketEvent> marketEvent) {
@@ -214,11 +218,12 @@ public class StockDetailView extends BorderPane {
   /**
    * Refreshes the view while also updating the stored event history.
    *
-   * @param tradingDay current exchange trading day
-   * @param marketEvent latest market event, if one occurred on the current day
+   * @param tradingDay    current exchange trading day
+   * @param marketEvent   latest market event, if one occurred on the current day
    * @param marketHistory past market events relevant to the selected stock
    */
-  public void refresh(int tradingDay, Optional<MarketEvent> marketEvent, List<MarketEvent> marketHistory) {
+  public void refresh(int tradingDay, Optional<MarketEvent> marketEvent,
+      List<MarketEvent> marketHistory) {
     showStock(selectedStock, tradingDay, marketEvent, marketHistory);
   }
 
@@ -324,7 +329,7 @@ public class StockDetailView extends BorderPane {
   /**
    * Builds the text shown for the latest market event in the detail view.
    *
-   * @param stock currently selected stock
+   * @param stock       currently selected stock
    * @param marketEvent latest market event for the exchange
    * @return user-facing market-event text
    */
