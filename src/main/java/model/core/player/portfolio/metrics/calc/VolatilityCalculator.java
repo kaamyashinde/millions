@@ -1,7 +1,6 @@
 package model.core.player.portfolio.metrics.calc;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -31,8 +30,8 @@ public class VolatilityCalculator {
         .orElseThrow();
 
     double variance = dailyReturns.stream()
-        .mapToDouble(value -> {
-          double delta = value.doubleValue() - mean;
+        .mapToDouble(val -> {
+          double delta = val.doubleValue() - mean;
           return delta * delta;
         })
         .average()
