@@ -1,4 +1,4 @@
-package model.learninghub;
+package model.learninghub.learn;
 
 import model.utils.Validator;
 
@@ -11,7 +11,6 @@ import model.utils.Validator;
  * @param type        content format
  * @param url         fully-qualified URL to open in a browser or WebView
  * @param description one-sentence teaser shown on the resource card
- *
  * @author kaamyashinde
  * @version 1.0.0
  * @since 04-04-2026
@@ -24,7 +23,9 @@ public record LearningResource(
     String url,
     String description) {
 
-  /** Validates that all fields are non-null. */
+  /**
+   * Validates that all fields are non-null.
+   */
   public LearningResource {
     Validator.checkNotNull(id, "id");
     Validator.checkNotNull(title, "title");

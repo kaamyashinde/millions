@@ -1,10 +1,12 @@
 package model.learninghub;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.List;
-
+import model.learninghub.quiz.QuizAnswer;
+import model.learninghub.quiz.QuizQuestion;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class QuizQuestionTest {
 
@@ -68,6 +70,7 @@ class QuizQuestionTest {
   @Test
   void answersListIsImmutable() {
     QuizQuestion q = new QuizQuestion("q1", "What?", VALID_ANSWERS, "a", "Exp.", null);
-    assertThrows(UnsupportedOperationException.class, () -> q.answers().add(new QuizAnswer("e", "Extra")));
+    assertThrows(UnsupportedOperationException.class,
+        () -> q.answers().add(new QuizAnswer("e", "Extra")));
   }
 }

@@ -1,7 +1,6 @@
 package view;
 
 import java.util.List;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -12,16 +11,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-
-import model.learninghub.LearningContentStore;
-import model.learninghub.LearningResource;
-import model.learninghub.QuizAnswer;
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizQuestion;
+import model.learninghub.learn.LearningContentStore;
+import model.learninghub.learn.LearningResource;
+import model.learninghub.quiz.QuizAnswer;
+import model.learninghub.quiz.QuizAttempt;
+import model.learninghub.quiz.QuizQuestion;
 
 /**
- * Interactive quiz view. Presents one question at a time with four answer choices.
- * Gives immediate feedback after each answer and navigates to the result view when done.
+ * Interactive quiz view. Presents one question at a time with four answer choices. Gives immediate
+ * feedback after each answer and navigates to the result view when done.
  *
  * @author kaamyashinde
  * @version 1.0.0
@@ -41,8 +39,8 @@ public class QuizView extends BorderPane {
   private final QuizAttempt attempt;
   private final Runnable onFinish;
 
-  private Label progressLabel;
-  private VBox centerContent;
+  private final Label progressLabel;
+  private final VBox centerContent;
 
   /**
    * Builds the quiz view.
@@ -101,16 +99,16 @@ public class QuizView extends BorderPane {
     questionText.setWrapText(true);
     questionText.setStyle(
         "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-size: 15;"
-        + "-fx-font-weight: bold;");
+            + "-fx-font-size: 15;"
+            + "-fx-font-weight: bold;");
 
     VBox questionCard = new VBox(questionText);
     questionCard.setPadding(new Insets(16));
     questionCard.setStyle(
         "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_BORDER_DEFAULT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;");
+            + "-fx-border-color: " + COLOR_BORDER_DEFAULT + ";"
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;");
 
     // Answer buttons
     VBox answersBox = new VBox(8);
@@ -124,8 +122,8 @@ public class QuizView extends BorderPane {
     feedbackPane.setPadding(new Insets(12));
     feedbackPane.setStyle(
         "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;");
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;");
 
     // Next / finish button (hidden until answered)
     Button nextBtn = new Button(
@@ -134,12 +132,12 @@ public class QuizView extends BorderPane {
     nextBtn.setManaged(false);
     nextBtn.setStyle(
         "-fx-background-color: " + COLOR_ACCENT + ";"
-        + "-fx-text-fill: white;"
-        + "-fx-font-weight: bold;"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;"
-        + "-fx-padding: 10 20 10 20;");
+            + "-fx-text-fill: white;"
+            + "-fx-font-weight: bold;"
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;"
+            + "-fx-cursor: hand;"
+            + "-fx-padding: 10 20 10 20;");
     nextBtn.setOnAction(_ -> {
       String chosenId = (String) nextBtn.getUserData();
       attempt.submitAnswer(chosenId);
@@ -207,13 +205,13 @@ public class QuizView extends BorderPane {
     btn.setUserData(answer.id());
     btn.setStyle(
         "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-border-color: " + COLOR_ACCENT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;"
-        + "-fx-alignment: CENTER_LEFT;"
-        + "-fx-padding: 10 14 10 14;");
+            + "-fx-text-fill: " + COLOR_HEADING + ";"
+            + "-fx-border-color: " + COLOR_ACCENT + ";"
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;"
+            + "-fx-cursor: hand;"
+            + "-fx-alignment: CENTER_LEFT;"
+            + "-fx-padding: 10 14 10 14;");
     return btn;
   }
 
@@ -226,15 +224,15 @@ public class QuizView extends BorderPane {
 
     feedbackPane.setStyle(
         "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + resultColor + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;");
+            + "-fx-border-color: " + resultColor + ";"
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;");
 
     Label resultLabel = new Label(resultText);
     resultLabel.setStyle(
         "-fx-text-fill: " + resultColor + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 13;");
 
     Label explanation = new Label(q.explanationText());
     explanation.setWrapText(true);
@@ -259,16 +257,16 @@ public class QuizView extends BorderPane {
     Label sourceLabel = new Label(resource.sourceLabel());
     sourceLabel.setStyle(
         "-fx-background-color: #4CAF5022;"
-        + "-fx-text-fill: #4CAF50;"
-        + "-fx-background-radius: 4;"
-        + "-fx-padding: 2 6 2 6;"
-        + "-fx-font-size: 10;");
+            + "-fx-text-fill: #4CAF50;"
+            + "-fx-background-radius: 4;"
+            + "-fx-padding: 2 6 2 6;"
+            + "-fx-font-size: 10;");
 
     Label title = new Label(resource.title());
     title.setStyle(
         "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 12;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 12;");
     title.setWrapText(true);
 
     Label desc = new Label(resource.description());
@@ -279,9 +277,9 @@ public class QuizView extends BorderPane {
     card.setPadding(new Insets(10));
     card.setStyle(
         "-fx-background-color: #1a1a1a;"
-        + "-fx-border-color: #4CAF50;"
-        + "-fx-border-radius: 6;"
-        + "-fx-background-radius: 6;");
+            + "-fx-border-color: #4CAF50;"
+            + "-fx-border-radius: 6;"
+            + "-fx-background-radius: 6;");
     return card;
   }
 }

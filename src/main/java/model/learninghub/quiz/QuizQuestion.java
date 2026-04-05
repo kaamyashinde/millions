@@ -1,7 +1,7 @@
-package model.learninghub;
+package model.learninghub.quiz;
 
 import java.util.List;
-
+import model.learninghub.learn.LearningResource;
 import model.utils.Validator;
 
 /**
@@ -12,8 +12,8 @@ import model.utils.Validator;
  * @param answers          the list of answer options (minimum 2)
  * @param correctAnswerId  the {@link QuizAnswer#id()} of the correct answer; must exist in answers
  * @param explanationText  explanation shown after the player answers
- * @param linkedResourceId optional ID of a {@link model.learninghub.LearningResource} to surface
- *                         when the player answers incorrectly; may be {@code null}
+ * @param linkedResourceId optional ID of a {@link LearningResource} to surface when the player
+ *                         answers incorrectly; may be {@code null}
  * @author kaamyashinde
  * @version 1.0.0
  * @since 04-04-2026
@@ -38,7 +38,8 @@ public record QuizQuestion(
     }
     boolean valid = answers.stream().anyMatch(a -> a.id().equals(correctAnswerId));
     if (!valid) {
-      throw new IllegalArgumentException("correctAnswerId '" + correctAnswerId + "' not found in answers list");
+      throw new IllegalArgumentException(
+          "correctAnswerId '" + correctAnswerId + "' not found in answers list");
     }
     answers = List.copyOf(answers);
   }

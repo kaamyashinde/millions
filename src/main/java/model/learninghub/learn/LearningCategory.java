@@ -1,4 +1,4 @@
-package model.learninghub;
+package model.learninghub.learn;
 
 import model.utils.Validator;
 
@@ -9,14 +9,15 @@ import model.utils.Validator;
  * @param name        display name shown in the UI
  * @param description one-sentence summary shown on the category card
  * @param emoji       single emoji used as a visual icon
- *
  * @author kaamyashinde
  * @version 1.0.0
  * @since 04-04-2026
  */
 public record LearningCategory(String id, String name, String description, String emoji) {
 
-  /** Validates that no field is null. */
+  /**
+   * Validates that no field is null.
+   */
   public LearningCategory {
     Validator.checkNotNull(id, "id");
     Validator.checkNotNull(name, "name");

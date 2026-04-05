@@ -1,5 +1,7 @@
 package model.learninghub;
 
+import model.learninghub.learn.LearningItem;
+
 /**
  * Difficulty level of a {@link LearningItem}.
  *
@@ -9,12 +11,18 @@ package model.learninghub;
  */
 public enum Difficulty {
 
-  /** Suitable for users new to investing. */
+  /**
+   * Suitable for users new to investing.
+   */
   BEGINNER,
 
-  /** Assumes basic familiarity with markets. */
+  /**
+   * Assumes basic familiarity with markets.
+   */
   INTERMEDIATE,
 
-  /** In-depth material for experienced investors. */
+  /**
+   * In-depth material for experienced investors.
+   */
   ADVANCED
 }

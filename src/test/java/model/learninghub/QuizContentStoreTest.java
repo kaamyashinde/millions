@@ -1,11 +1,13 @@
 package model.learninghub;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.Optional;
-
+import model.learninghub.quiz.Quiz;
+import model.learninghub.quiz.QuizContentStore;
+import model.learninghub.quiz.QuizQuestion;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class QuizContentStoreTest {
 
@@ -46,7 +48,7 @@ class QuizContentStoreTest {
             .anyMatch(a -> a.id().equals(q.correctAnswerId()));
         assertTrue(found,
             "correctAnswerId '" + q.correctAnswerId()
-            + "' not found in answers for question " + q.id());
+                + "' not found in answers for question " + q.id());
       }
     }
   }

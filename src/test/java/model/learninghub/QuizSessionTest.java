@@ -1,11 +1,15 @@
 package model.learninghub;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.List;
-
+import model.learninghub.quiz.Quiz;
+import model.learninghub.quiz.QuizAnswer;
+import model.learninghub.quiz.QuizAttempt;
+import model.learninghub.quiz.QuizQuestion;
+import model.learninghub.quiz.QuizSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class QuizSessionTest {
 

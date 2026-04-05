@@ -1,12 +1,12 @@
-package model.learninghub;
+package model.learninghub.quiz;
 
 import java.util.List;
-
+import model.learninghub.learn.LearningItem;
 import model.utils.Validator;
 
 /**
- * A quiz linked to a single {@link LearningItem}, containing a fixed set of
- * multiple-choice {@link QuizQuestion questions}.
+ * A quiz linked to a single {@link LearningItem}, containing a fixed set of multiple-choice
+ * {@link QuizQuestion questions}.
  *
  * @param id           unique quiz identifier
  * @param linkedItemId the {@link LearningItem#id()} this quiz belongs to

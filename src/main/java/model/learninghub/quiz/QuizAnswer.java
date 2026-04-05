@@ -1,4 +1,4 @@
-package model.learninghub;
+package model.learninghub.quiz;
 
 import model.utils.Validator;
 

@@ -1,7 +1,8 @@
-package model.learninghub;
+package model.learninghub.learn;
 
 import java.util.Comparator;
 import java.util.List;
+import model.learninghub.Difficulty;
 
 /**
  * Central store (Facade) for all Learning Hub content. Acts as the single source of truth for
@@ -55,7 +56,8 @@ public final class LearningContentStore {
   private static final LearningItem ITEM_HOW_PRICES_MOVE =
       new LearningItem("how-stock-prices-move", "How Stock Prices Move", "how-stock-prices-move",
           "Discover the forces of supply and demand that drive price changes.",
-          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, true, "learninghub/how-stock-prices-move.md",
+          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, true,
+          "learninghub/how-stock-prices-move.md",
           List.of("reading-stock-charts", "what-is-investment-risk"),
           List.of("res-investopedia-stocks", "res-yt-investing-basics"));
 
@@ -201,8 +203,8 @@ public final class LearningContentStore {
   }
 
   /**
-   * Returns the items whose {@link LearningItem#id()} appears in {@code ids},
-   * preserving the order of {@code ids}. Items not found are silently skipped.
+   * Returns the items whose {@link LearningItem#id()} appears in {@code ids}, preserving the order
+   * of {@code ids}. Items not found are silently skipped.
    *
    * @param ids list of item IDs to look up
    * @return list of matching {@link LearningItem}s

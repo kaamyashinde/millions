@@ -1,7 +1,6 @@
 package view;
 
 import java.util.List;
-
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -10,15 +9,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-
-import model.learninghub.Quiz;
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizContentStore;
-import model.learninghub.QuizSession;
+import model.learninghub.quiz.Quiz;
+import model.learninghub.quiz.QuizAttempt;
+import model.learninghub.quiz.QuizContentStore;
+import model.learninghub.quiz.QuizSession;
 
 /**
- * Top-level panel for the Quiz tab. Shows a list of all available quizzes and
- * handles the full quiz-play flow (quiz → result → back to launcher).
+ * Top-level panel for the Quiz tab. Shows a list of all available quizzes and handles the full
+ * quiz-play flow (quiz → result → back to launcher).
  *
  * @author kaamyashinde
  * @version 1.0.0
@@ -31,9 +29,11 @@ public class QuizLauncherPanel extends BorderPane {
   private static final String COLOR_HEADING = "#e0e0e0";
   private static final String COLOR_SUBTITLE = "#9e9e9e";
 
-  private javafx.scene.Node launcherView;
+  private final javafx.scene.Node launcherView;
 
-  /** Builds the panel and shows the quiz list. */
+  /**
+   * Builds the panel and shows the quiz list.
+   */
   public QuizLauncherPanel() {
     setPadding(new Insets(16));
 
@@ -67,8 +67,8 @@ public class QuizLauncherPanel extends BorderPane {
     Label title = new Label(quiz.title());
     title.setStyle(
         "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 13;");
     title.setWrapText(true);
 
     Label meta = new Label(quiz.questions().size() + " questions");
@@ -77,18 +77,18 @@ public class QuizLauncherPanel extends BorderPane {
     Label cta = new Label("Start →");
     cta.setStyle(
         "-fx-text-fill: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-font-size: 11;"
-        + "-fx-font-weight: bold;");
+            + "-fx-font-size: 11;"
+            + "-fx-font-weight: bold;");
 
     VBox card = new VBox(4, title, meta, cta);
     card.setPadding(new Insets(14));
     card.setMaxWidth(Double.MAX_VALUE);
     card.setStyle(
         "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;");
+            + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;"
+            + "-fx-cursor: hand;");
 
     card.setOnMouseClicked(_ -> startQuiz(quiz));
     return card;

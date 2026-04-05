@@ -2,7 +2,6 @@ package view;
 
 import java.util.List;
 import java.util.function.Consumer;
-
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -14,11 +13,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
 import model.learninghub.Difficulty;
-import model.learninghub.LearningCategory;
-import model.learninghub.LearningContentStore;
-import model.learninghub.LearningItem;
+import model.learninghub.learn.LearningCategory;
+import model.learninghub.learn.LearningContentStore;
+import model.learninghub.learn.LearningItem;
 
 /**
  * Category view for the Learning Hub. Shows all {@link LearningItem}s in a single
@@ -39,8 +37,8 @@ public class LearningCategoryView extends BorderPane {
   private static final String COLOR_DIFFICULTY_ADVANCED = "#FF4444";
 
   private final VBox content = new VBox(12);
-  private List<LearningItem> items;
-  private Consumer<LearningItem> onItemClicked;
+  private final List<LearningItem> items;
+  private final Consumer<LearningItem> onItemClicked;
 
   /**
    * Builds the category view.
@@ -76,7 +74,8 @@ public class LearningCategoryView extends BorderPane {
     ToggleGroup filterGroup = new ToggleGroup();
     ToggleButton btnAll = makeFilterToggle("All", null, filterGroup);
     ToggleButton btnBeginner = makeFilterToggle("Beginner", Difficulty.BEGINNER, filterGroup);
-    ToggleButton btnIntermediate = makeFilterToggle("Intermediate", Difficulty.INTERMEDIATE, filterGroup);
+    ToggleButton btnIntermediate =
+        makeFilterToggle("Intermediate", Difficulty.INTERMEDIATE, filterGroup);
     ToggleButton btnAdvanced = makeFilterToggle("Advanced", Difficulty.ADVANCED, filterGroup);
     btnAll.setSelected(true);
 
@@ -103,9 +102,9 @@ public class LearningCategoryView extends BorderPane {
     btn.setToggleGroup(group);
     btn.setStyle(
         "-fx-background-radius: 4;"
-        + "-fx-border-radius: 4;"
-        + "-fx-cursor: hand;"
-        + "-fx-font-size: 11;");
+            + "-fx-border-radius: 4;"
+            + "-fx-cursor: hand;"
+            + "-fx-font-size: 11;");
     btn.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
       if (isNowSelected) {
         applyFilter(difficulty);
@@ -123,7 +122,8 @@ public class LearningCategoryView extends BorderPane {
         ? items
         : items.stream().filter(i -> i.difficulty() == difficulty).toList();
     if (filtered.isEmpty()) {
-      Label empty = new Label("No " + difficulty.name().toLowerCase() + " topics in this category.");
+      Label empty =
+          new Label("No " + difficulty.name().toLowerCase() + " topics in this category.");
       empty.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + ";");
       content.getChildren().add(empty);
     } else {
@@ -133,7 +133,8 @@ public class LearningCategoryView extends BorderPane {
     }
   }
 
-  private static javafx.scene.Node buildItemCard(LearningItem item, Consumer<LearningItem> onItemClicked) {
+  private static javafx.scene.Node buildItemCard(LearningItem item,
+      Consumer<LearningItem> onItemClicked) {
     String badgeColor = difficultyColor(item.difficulty());
 
     Label badge = new Label(item.difficulty().name());

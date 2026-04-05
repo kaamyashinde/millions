@@ -1,6 +1,7 @@
-package model.learninghub;
+package model.learninghub.learn;
 
 import java.util.List;
+import model.learninghub.Difficulty;
 import model.utils.Validator;
 
 /**
@@ -13,11 +14,10 @@ import model.utils.Validator;
  * @param category        the category this item belongs to
  * @param difficulty      difficulty level
  * @param featured        {@code true} if the item should appear in the "Featured Topics" row
- * @param contentFile     classpath resource path to the markdown content file
- *                        (e.g. {@code "learninghub/what-is-a-stock.md"})
+ * @param contentFile     classpath resource path to the markdown content file (e.g.
+ *                        {@code "learninghub/what-is-a-stock.md"})
  * @param relatedTopicIds IDs of related {@link LearningItem}s to suggest after reading
  * @param resourceIds     IDs of {@link LearningResource}s specifically relevant to this item
- *
  * @author kaamyashinde
  * @version 1.2.0
  * @since 04-04-2026
@@ -34,7 +34,9 @@ public record LearningItem(
     List<String> relatedTopicIds,
     List<String> resourceIds) {
 
-  /** Validates that all non-primitive fields are non-null. */
+  /**
+   * Validates that all non-primitive fields are non-null.
+   */
   public LearningItem {
     Validator.checkNotNull(id, "id");
     Validator.checkNotNull(title, "title");

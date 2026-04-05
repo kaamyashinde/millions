@@ -1,4 +1,4 @@
-package model.learninghub;
+package model.learninghub.quiz;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,9 +7,9 @@ import java.util.List;
  * Session-level store for completed {@link QuizAttempt quiz attempts}.
  *
  * <p>All state is held in-memory for the duration of the application session.
- * Call {@link #record(QuizAttempt)} exactly once per completed quiz (from the
- * navigation layer), then read aggregate stats from {@link #totalCorrectAcrossSession()}
- * and {@link #totalAnsweredAcrossSession()}.
+ * Call {@link #record(QuizAttempt)} exactly once per completed quiz (from the navigation layer),
+ * then read aggregate stats from {@link #totalCorrectAcrossSession()} and
+ * {@link #totalAnsweredAcrossSession()}.
  *
  * @author kaamyashinde
  * @version 1.0.0
@@ -39,17 +39,23 @@ public final class QuizSession {
     completedAttempts.add(attempt);
   }
 
-  /** Returns an immutable snapshot of all completed attempts this session. */
+  /**
+   * Returns an immutable snapshot of all completed attempts this session.
+   */
   public static List<QuizAttempt> getCompletedAttempts() {
     return List.copyOf(completedAttempts);
   }
 
-  /** Total correct answers across all completed quizzes this session. */
+  /**
+   * Total correct answers across all completed quizzes this session.
+   */
   public static int totalCorrectAcrossSession() {
     return completedAttempts.stream().mapToInt(QuizAttempt::correctCount).sum();
   }
 
-  /** Total questions answered across all completed quizzes this session. */
+  /**
+   * Total questions answered across all completed quizzes this session.
+   */
   public static int totalAnsweredAcrossSession() {
     return completedAttempts.stream().mapToInt(QuizAttempt::totalQuestions).sum();
   }

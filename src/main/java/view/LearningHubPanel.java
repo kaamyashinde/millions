@@ -3,9 +3,7 @@ package view;
 import java.awt.Desktop;
 import java.net.URI;
 import java.util.List;
-
 import javafx.geometry.Insets;
-
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
@@ -17,14 +15,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-
 import model.learninghub.Difficulty;
-import model.learninghub.LearningCategory;
-import model.learninghub.LearningContentStore;
-import model.learninghub.LearningItem;
-import model.learninghub.LearningResource;
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizSession;
+import model.learninghub.learn.LearningCategory;
+import model.learninghub.learn.LearningContentStore;
+import model.learninghub.learn.LearningItem;
+import model.learninghub.learn.LearningResource;
+import model.learninghub.quiz.QuizAttempt;
+import model.learninghub.quiz.QuizSession;
 
 /**
  * Learning Hub landing page. Displays a featured-topics row, a 6-category grid, and a highlighted
@@ -36,7 +33,7 @@ import model.learninghub.QuizSession;
  */
 public class LearningHubPanel extends BorderPane {
 
-  private javafx.scene.Node landingView;
+  private final javafx.scene.Node landingView;
 
   private static final String COLOR_BG_CARD = "#1e1e1e";
   private static final String COLOR_BORDER_DEFAULT = "#2a2a2a";
@@ -204,7 +201,8 @@ public class LearningHubPanel extends BorderPane {
             + "-fx-font-size: 10;");
 
     Label title = new Label(resource.title());
-    title.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-weight: bold; -fx-font-size: 14;");
+    title.setStyle(
+        "-fx-text-fill: " + COLOR_HEADING + "; -fx-font-weight: bold; -fx-font-size: 14;");
 
     Label desc = new Label(resource.description());
     desc.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + ";");

@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,17 +14,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-
+import model.learninghub.Difficulty;
+import model.learninghub.learn.LearningContentStore;
+import model.learninghub.learn.LearningItem;
+import model.learninghub.learn.LearningResource;
+import model.learninghub.quiz.Quiz;
+import model.learninghub.quiz.QuizAttempt;
+import model.learninghub.quiz.QuizContentStore;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-
-import model.learninghub.Difficulty;
-import model.learninghub.LearningContentStore;
-import model.learninghub.LearningItem;
-import model.learninghub.LearningResource;
-import model.learninghub.Quiz;
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizContentStore;
 import util.MarkdownLoader;
 
 /**
@@ -157,8 +154,8 @@ public class LearningItemDetailView extends BorderPane {
     Label heading = new Label("Further Reading");
     heading.setStyle(
         "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 13;");
     section.getChildren().add(heading);
 
     if (resources.isEmpty()) {
@@ -166,8 +163,8 @@ public class LearningItemDetailView extends BorderPane {
           "Open links in the Further Reading section above to explore more.");
       fallback.setStyle(
           "-fx-text-fill: " + COLOR_SUBTITLE + ";"
-          + "-fx-font-size: 11;"
-          + "-fx-font-style: italic;");
+              + "-fx-font-size: 11;"
+              + "-fx-font-style: italic;");
       fallback.setWrapText(true);
       section.getChildren().add(fallback);
     } else {
@@ -183,16 +180,16 @@ public class LearningItemDetailView extends BorderPane {
     Label sourceLabel = new Label(resource.sourceLabel());
     sourceLabel.setStyle(
         "-fx-background-color: " + COLOR_BORDER_RESOURCE + "22;"
-        + "-fx-text-fill: " + COLOR_BORDER_RESOURCE + ";"
-        + "-fx-background-radius: 4;"
-        + "-fx-padding: 2 6 2 6;"
-        + "-fx-font-size: 10;");
+            + "-fx-text-fill: " + COLOR_BORDER_RESOURCE + ";"
+            + "-fx-background-radius: 4;"
+            + "-fx-padding: 2 6 2 6;"
+            + "-fx-font-size: 10;");
 
     Label title = new Label(resource.title());
     title.setStyle(
         "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 13;");
 
     Label desc = new Label(resource.description());
     desc.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
@@ -206,10 +203,10 @@ public class LearningItemDetailView extends BorderPane {
     card.setMaxWidth(Double.MAX_VALUE);
     card.setStyle(
         "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_BORDER_RESOURCE + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;");
+            + "-fx-border-color: " + COLOR_BORDER_RESOURCE + ";"
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;"
+            + "-fx-cursor: hand;");
     card.setOnMouseClicked(_ -> openUrl(resource.url()));
     return card;
   }
@@ -227,8 +224,8 @@ public class LearningItemDetailView extends BorderPane {
     Label heading = new Label("Suggested Next Topics");
     heading.setStyle(
         "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 13;");
     section.getChildren().add(heading);
 
     for (LearningItem relatedItem : related) {
@@ -245,10 +242,10 @@ public class LearningItemDetailView extends BorderPane {
     Label badge = new Label(item.difficulty().name());
     badge.setStyle(
         "-fx-background-color: " + badgeColor + "22;"
-        + "-fx-text-fill: " + badgeColor + ";"
-        + "-fx-background-radius: 4;"
-        + "-fx-padding: 2 6 2 6;"
-        + "-fx-font-size: 10;");
+            + "-fx-text-fill: " + badgeColor + ";"
+            + "-fx-background-radius: 4;"
+            + "-fx-padding: 2 6 2 6;"
+            + "-fx-font-size: 10;");
 
     Label title = new Label(item.title());
     title.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-weight: bold;");
@@ -266,10 +263,10 @@ public class LearningItemDetailView extends BorderPane {
     card.setMaxWidth(Double.MAX_VALUE);
     card.setStyle(
         "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;");
+            + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;"
+            + "-fx-cursor: hand;");
     card.setOnMouseClicked(_ -> onItemClicked.accept(item));
     return card;
   }
@@ -284,22 +281,22 @@ public class LearningItemDetailView extends BorderPane {
     Label heading = new Label("Test Your Knowledge");
     heading.setStyle(
         "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 13;");
 
     Button quizBtn = new Button("Take Quiz: " + quiz.get().title() + "  →");
     quizBtn.setMaxWidth(Double.MAX_VALUE);
     quizBtn.setWrapText(true);
     quizBtn.setStyle(
         "-fx-background-color: #2196F322;"
-        + "-fx-text-fill: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;"
-        + "-fx-font-size: 13;"
-        + "-fx-font-weight: bold;"
-        + "-fx-padding: 12 16 12 16;");
+            + "-fx-text-fill: " + COLOR_BORDER_ACCENT + ";"
+            + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;"
+            + "-fx-cursor: hand;"
+            + "-fx-font-size: 13;"
+            + "-fx-font-weight: bold;"
+            + "-fx-padding: 12 16 12 16;");
     quizBtn.setOnAction(_ -> onTakeQuiz.accept(new QuizAttempt(quiz.get())));
 
     VBox section = new VBox(8, heading, quizBtn);

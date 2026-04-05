@@ -1,7 +1,8 @@
-package model.learninghub;
+package model.learninghub.quiz;
 
 import java.util.List;
 import java.util.Optional;
+import model.learninghub.learn.LearningItem;
 
 /**
  * Static facade providing all quiz content for the Learning Hub.
@@ -138,7 +139,8 @@ public final class QuizContentStore {
               List.of(
                   new QuizAnswer("a", "The total value of all stocks on an exchange"),
                   new QuizAnswer("b", "A government report on economic conditions"),
-                  new QuizAnswer("c", "The overall mood (optimism or pessimism) of investors collectively"),
+                  new QuizAnswer("c",
+                      "The overall mood (optimism or pessimism) of investors collectively"),
                   new QuizAnswer("d", "The average dividend yield of the market")),
               "c",
               "Market sentiment refers to the overall attitude of investors toward a market or asset. Positive sentiment (bulls) drives prices up; negative sentiment (bears) drives them down.",
@@ -178,7 +180,8 @@ public final class QuizContentStore {
               "What is 'liquidity risk'?",
               List.of(
                   new QuizAnswer("a", "The risk that a company runs out of cash"),
-                  new QuizAnswer("b", "The risk that you cannot sell an investment quickly at a fair price"),
+                  new QuizAnswer("b",
+                      "The risk that you cannot sell an investment quickly at a fair price"),
                   new QuizAnswer("c", "The risk that inflation erodes your returns"),
                   new QuizAnswer("d", "The risk of currency fluctuations")),
               "b",
@@ -190,7 +193,8 @@ public final class QuizContentStore {
               List.of(
                   new QuizAnswer("a", "Default risk — the bank might go bankrupt"),
                   new QuizAnswer("b", "Volatility risk — the balance fluctuates daily"),
-                  new QuizAnswer("c", "Inflation risk — rising costs erode the real value of savings"),
+                  new QuizAnswer("c",
+                      "Inflation risk — rising costs erode the real value of savings"),
                   new QuizAnswer("d", "Liquidity risk — you cannot withdraw your money")),
               "c",
               "Inflation risk means the purchasing power of your money decreases over time. If inflation is 3% and your savings account pays 1%, you are effectively losing 2% of real value per year.",
@@ -263,7 +267,8 @@ public final class QuizContentStore {
               "Why might an investor include both stocks and bonds in their portfolio?",
               List.of(
                   new QuizAnswer("a", "Bonds amplify stock returns"),
-                  new QuizAnswer("b", "Stocks and bonds often move in opposite directions, reducing overall risk"),
+                  new QuizAnswer("b",
+                      "Stocks and bonds often move in opposite directions, reducing overall risk"),
                   new QuizAnswer("c", "It is a legal requirement"),
                   new QuizAnswer("d", "To maximise tax liability")),
               "b",
@@ -282,7 +287,8 @@ public final class QuizContentStore {
               "What is 'compound interest'?",
               List.of(
                   new QuizAnswer("a", "Interest calculated only on the original principal"),
-                  new QuizAnswer("b", "Interest earned on both the principal and previously earned interest"),
+                  new QuizAnswer("b",
+                      "Interest earned on both the principal and previously earned interest"),
                   new QuizAnswer("c", "A fixed interest payment regardless of balance"),
                   new QuizAnswer("d", "Interest charged for withdrawing money early")),
               "b",
@@ -305,7 +311,8 @@ public final class QuizContentStore {
               List.of(
                   new QuizAnswer("a", "Early investors pay lower fees"),
                   new QuizAnswer("b", "Stock markets only grow when young investors participate"),
-                  new QuizAnswer("c", "More time allows compounding to multiply returns over a longer period"),
+                  new QuizAnswer("c",
+                      "More time allows compounding to multiply returns over a longer period"),
                   new QuizAnswer("d", "Early investors receive government subsidies")),
               "c",
               "Time is the most powerful ingredient in compounding. Each additional year multiplies your total return. Starting 10 years earlier can more than double your final portfolio value.",
@@ -315,7 +322,8 @@ public final class QuizContentStore {
               "What is the 'Rule of 72'?",
               List.of(
                   new QuizAnswer("a", "You must diversify into at least 72 stocks"),
-                  new QuizAnswer("b", "Divide 72 by the annual return to estimate how many years to double your money"),
+                  new QuizAnswer("b",
+                      "Divide 72 by the annual return to estimate how many years to double your money"),
                   new QuizAnswer("c", "You should invest 72% of your salary"),
                   new QuizAnswer("d", "A stock index rebalances every 72 days")),
               "b",
@@ -326,7 +334,8 @@ public final class QuizContentStore {
               "Which of the following benefits most from compound interest over a long period?",
               List.of(
                   new QuizAnswer("a", "A savings account with monthly withdrawals"),
-                  new QuizAnswer("b", "A stock portfolio where dividends are reinvested and left to grow"),
+                  new QuizAnswer("b",
+                      "A stock portfolio where dividends are reinvested and left to grow"),
                   new QuizAnswer("c", "A fixed-term deposit with annual withdrawals of interest"),
                   new QuizAnswer("d", "Cash kept under a mattress")),
               "b",
@@ -345,7 +354,8 @@ public final class QuizContentStore {
               "What is the primary purpose of diversification?",
               List.of(
                   new QuizAnswer("a", "To guarantee positive returns"),
-                  new QuizAnswer("b", "To reduce the impact of any single investment performing poorly"),
+                  new QuizAnswer("b",
+                      "To reduce the impact of any single investment performing poorly"),
                   new QuizAnswer("c", "To increase the overall risk of a portfolio"),
                   new QuizAnswer("d", "To concentrate on the best-performing sector")),
               "b",
@@ -378,7 +388,8 @@ public final class QuizContentStore {
               "A well-diversified portfolio might include which combination?",
               List.of(
                   new QuizAnswer("a", "Only technology stocks from one country"),
-                  new QuizAnswer("b", "Stocks, bonds, and assets from multiple sectors and regions"),
+                  new QuizAnswer("b",
+                      "Stocks, bonds, and assets from multiple sectors and regions"),
                   new QuizAnswer("c", "Only the ten largest companies in one index"),
                   new QuizAnswer("d", "Cash and gold only")),
               "b",
@@ -431,7 +442,8 @@ public final class QuizContentStore {
               List.of(
                   new QuizAnswer("a", "The price rise is likely to reverse soon"),
                   new QuizAnswer("b", "The move has weak conviction behind it"),
-                  new QuizAnswer("c", "Many investors support the move, giving it stronger conviction"),
+                  new QuizAnswer("c",
+                      "Many investors support the move, giving it stronger conviction"),
                   new QuizAnswer("d", "The stock is about to be delisted")),
               "c",
               "Volume confirms price moves. A price rise on high volume suggests broad market participation and conviction. A rise on low volume may be less reliable and more likely to reverse.",
@@ -441,7 +453,8 @@ public final class QuizContentStore {
               "What is a 'support level' on a price chart?",
               List.of(
                   new QuizAnswer("a", "The highest price a stock has ever reached"),
-                  new QuizAnswer("b", "A price level where the stock tends to find buying interest and stop falling"),
+                  new QuizAnswer("b",
+                      "A price level where the stock tends to find buying interest and stop falling"),
                   new QuizAnswer("c", "The average analyst price target"),
                   new QuizAnswer("d", "The price at which the company buys back its own shares")),
               "b",
@@ -482,7 +495,8 @@ public final class QuizContentStore {
               "Why are index funds generally cheaper than actively managed funds?",
               List.of(
                   new QuizAnswer("a", "They invest in fewer companies"),
-                  new QuizAnswer("b", "They require no fund manager to pick stocks, so costs are lower"),
+                  new QuizAnswer("b",
+                      "They require no fund manager to pick stocks, so costs are lower"),
                   new QuizAnswer("c", "They are only sold to professional investors"),
                   new QuizAnswer("d", "They are sponsored by governments")),
               "b",
@@ -515,7 +529,8 @@ public final class QuizContentStore {
               "What does it mean that an index fund provides 'instant diversification'?",
               List.of(
                   new QuizAnswer("a", "You receive your money back instantly"),
-                  new QuizAnswer("b", "The fund splits your investment across all companies in the index in one purchase"),
+                  new QuizAnswer("b",
+                      "The fund splits your investment across all companies in the index in one purchase"),
                   new QuizAnswer("c", "All your money is converted to foreign currency"),
                   new QuizAnswer("d", "You are protected from all losses")),
               "b",
@@ -534,9 +549,11 @@ public final class QuizContentStore {
               "What is dollar-cost averaging (DCA)?",
               List.of(
                   new QuizAnswer("a", "Investing a lump sum at the lowest price of the year"),
-                  new QuizAnswer("b", "Investing a fixed amount at regular intervals regardless of price"),
+                  new QuizAnswer("b",
+                      "Investing a fixed amount at regular intervals regardless of price"),
                   new QuizAnswer("c", "Converting all savings to US dollars"),
-                  new QuizAnswer("d", "Selling shares whenever the price averages out to your purchase price")),
+                  new QuizAnswer("d",
+                      "Selling shares whenever the price averages out to your purchase price")),
               "b",
               "DCA means investing a consistent amount (e.g., 500 NOK per month) on a regular schedule. This automatically buys more shares when prices are low and fewer when prices are high.",
               "res-nordnet-academy"),
@@ -556,7 +573,8 @@ public final class QuizContentStore {
               "Which psychological benefit does DCA offer?",
               List.of(
                   new QuizAnswer("a", "It guarantees you buy at the absolute lowest price"),
-                  new QuizAnswer("b", "It removes the need to time the market, reducing emotional decision-making"),
+                  new QuizAnswer("b",
+                      "It removes the need to time the market, reducing emotional decision-making"),
                   new QuizAnswer("c", "It eliminates all investment risk"),
                   new QuizAnswer("d", "It doubles your return compared to lump-sum investing")),
               "b",
@@ -578,7 +596,8 @@ public final class QuizContentStore {
               "In what scenario might a lump-sum investment outperform DCA?",
               List.of(
                   new QuizAnswer("a", "When markets are volatile"),
-                  new QuizAnswer("b", "When markets consistently rise throughout the investment period"),
+                  new QuizAnswer("b",
+                      "When markets consistently rise throughout the investment period"),
                   new QuizAnswer("c", "When interest rates are rising"),
                   new QuizAnswer("d", "When you are investing for less than one month")),
               "b",
@@ -597,7 +616,8 @@ public final class QuizContentStore {
               "What is paper trading?",
               List.of(
                   new QuizAnswer("a", "Trading shares printed on physical paper certificates"),
-                  new QuizAnswer("b", "Simulated investing with virtual money to practise without real risk"),
+                  new QuizAnswer("b",
+                      "Simulated investing with virtual money to practise without real risk"),
                   new QuizAnswer("c", "A government-regulated trading test for new investors"),
                   new QuizAnswer("d", "Trading only in paper and publishing companies")),
               "b",
@@ -608,7 +628,8 @@ public final class QuizContentStore {
               "What is a key limitation of paper trading compared to real investing?",
               List.of(
                   new QuizAnswer("a", "You cannot track your performance in paper trading"),
-                  new QuizAnswer("b", "Paper trading does not simulate the emotional pressure of real money on the line"),
+                  new QuizAnswer("b",
+                      "Paper trading does not simulate the emotional pressure of real money on the line"),
                   new QuizAnswer("c", "Paper trading always shows worse results than real trading"),
                   new QuizAnswer("d", "Paper trading uses outdated price data")),
               "b",
@@ -619,8 +640,10 @@ public final class QuizContentStore {
               "Which of the following is a good use of paper trading?",
               List.of(
                   new QuizAnswer("a", "Generating actual income from the stock market"),
-                  new QuizAnswer("b", "Testing a new investment strategy before committing real money"),
-                  new QuizAnswer("c", "Guaranteed practice that will make you profitable in real markets"),
+                  new QuizAnswer("b",
+                      "Testing a new investment strategy before committing real money"),
+                  new QuizAnswer("c",
+                      "Guaranteed practice that will make you profitable in real markets"),
                   new QuizAnswer("d", "Replacing real investing entirely for the long term")),
               "b",
               "Paper trading is excellent for testing strategies, understanding order types, and learning how markets work — all without financial risk. It is a stepping stone, not a substitute for real investing.",
@@ -630,7 +653,8 @@ public final class QuizContentStore {
               "If a paper trader consistently profits in simulation, what should they conclude?",
               List.of(
                   new QuizAnswer("a", "Their strategy will definitely work with real money"),
-                  new QuizAnswer("b", "Their strategy shows promise, but real trading will test it more rigorously"),
+                  new QuizAnswer("b",
+                      "Their strategy shows promise, but real trading will test it more rigorously"),
                   new QuizAnswer("c", "They should immediately invest all their savings"),
                   new QuizAnswer("d", "Paper profits equal real profits")),
               "b",
@@ -642,7 +666,8 @@ public final class QuizContentStore {
               List.of(
                   new QuizAnswer("a", "Filing tax returns on investment gains"),
                   new QuizAnswer("b", "Applying for a brokerage account"),
-                  new QuizAnswer("c", "Entering and exiting positions according to a plan, not impulse"),
+                  new QuizAnswer("c",
+                      "Entering and exiting positions according to a plan, not impulse"),
                   new QuizAnswer("d", "Receiving dividends from companies")),
               "c",
               "Discipline — sticking to your strategy and not reacting emotionally to short-term price moves — is one of the most important investing skills. Paper trading helps you build and test this discipline in a safe environment.",

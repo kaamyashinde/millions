@@ -1,4 +1,4 @@
-package model.learninghub;
+package model.learninghub.quiz;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,9 @@ public final class QuizAttempt {
     this.currentIndex = 0;
   }
 
-  /** Returns the current question, or throws if the quiz is already finished. */
+  /**
+   * Returns the current question, or throws if the quiz is already finished.
+   */
   public QuizQuestion currentQuestion() {
     if (isFinished()) {
       throw new IllegalStateException("Quiz is already finished");
@@ -42,17 +44,23 @@ public final class QuizAttempt {
     return quiz.questions().get(currentIndex);
   }
 
-  /** Zero-based index of the current question. */
+  /**
+   * Zero-based index of the current question.
+   */
   public int currentIndex() {
     return currentIndex;
   }
 
-  /** Total number of questions in the quiz. */
+  /**
+   * Total number of questions in the quiz.
+   */
   public int totalQuestions() {
     return quiz.questions().size();
   }
 
-  /** Returns {@code true} once all questions have been answered. */
+  /**
+   * Returns {@code true} once all questions have been answered.
+   */
   public boolean isFinished() {
     return currentIndex >= quiz.questions().size();
   }
@@ -80,7 +88,9 @@ public final class QuizAttempt {
     return quiz.questions().get(i).correctAnswerId().equals(givenAnswerIds.get(i));
   }
 
-  /** Returns the number of correctly answered questions so far. */
+  /**
+   * Returns the number of correctly answered questions so far.
+   */
   public int correctCount() {
     int count = 0;
     for (int i = 0; i < givenAnswerIds.size(); i++) {
@@ -91,12 +101,16 @@ public final class QuizAttempt {
     return count;
   }
 
-  /** Returns an immutable snapshot of the answer IDs given so far. */
+  /**
+   * Returns an immutable snapshot of the answer IDs given so far.
+   */
   public List<String> givenAnswerIds() {
     return List.copyOf(givenAnswerIds);
   }
 
-  /** Returns the quiz this attempt belongs to. */
+  /**
+   * Returns the quiz this attempt belongs to.
+   */
   public Quiz quiz() {
     return quiz;
   }
