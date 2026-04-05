@@ -13,6 +13,15 @@ import model.exception.ProfileInUseException;
 import model.persistence.GameStateSnapshot;
 import model.persistence.ProfileDirectories;
 import model.persistence.SavedRunRecord;
+import model.session.auth.AuthService;
+import model.session.leaderboard.LocalLeaderboardService;
+import model.session.leaderboard.PlayerLeaderboardEntry;
+import model.session.leaderboard.PlayerLeaderboardMetric;
+import model.session.leaderboard.PlayerLeaderboardRanking;
+import model.session.persistence.GamePersistenceService;
+import model.session.persistence.SavedRunService;
+import model.session.profile.ProfilePreferencesService;
+import model.session.profile.ProfileService;
 
 /**
  * Thin facade that coordinates sub-services and owns the active session lifecycle.

@@ -1,4 +1,4 @@
-package model.session;
+package model.session.persistence;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -10,6 +10,7 @@ import model.persistence.GameStateSnapshot;
 import model.persistence.MarketData;
 import model.persistence.ProfileImageService;
 import model.persistence.UserAccountRepository;
+import model.session.leaderboard.LocalLeaderboardService;
 
 /**
  * Persists and restores game-state snapshots for user profiles.

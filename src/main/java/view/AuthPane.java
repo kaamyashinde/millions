@@ -19,7 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.session.PlayerLeaderboardEntry;
+import model.session.leaderboard.PlayerLeaderboardEntry;
 
 /**
  * Collects login and registration input for the session-based GUI shell.
@@ -43,12 +43,12 @@ public class AuthPane extends BorderPane {
   /**
    * Builds the authentication view with login and registration forms.
    *
-   * @param users currently registered usernames
+   * @param users                currently registered usernames
    * @param allowReturnToSession whether the caller should show a return button
-   * @param loginAction callback invoked for login requests
-   * @param registerAction callback invoked for registration requests
-   * @param returnAction callback invoked when returning to the current session
-   * @param helpAction callback to open the welcome / help content
+   * @param loginAction          callback invoked for login requests
+   * @param registerAction       callback invoked for registration requests
+   * @param returnAction         callback invoked when returning to the current session
+   * @param helpAction           callback to open the welcome / help content
    */
   public AuthPane(
       List<String> users,
@@ -74,13 +74,15 @@ public class AuthPane extends BorderPane {
 
     registeredUsersView.getItems().setAll(users);
     registeredUsersView.setPlaceholder(new Label("No registered users yet."));
-    registeredUsersView.setStyle("-fx-background-color: #1e1e1e; -fx-control-inner-background: #1e1e1e;");
-    registeredUsersView.getSelectionModel().selectedItemProperty().addListener((obs, oldUser, newUser) -> {
-      if (newUser != null) {
-        loginUsernameField.setText(newUser);
-        registerUsernameField.setText(newUser);
-      }
-    });
+    registeredUsersView.setStyle(
+        "-fx-background-color: #1e1e1e; -fx-control-inner-background: #1e1e1e;");
+    registeredUsersView.getSelectionModel().selectedItemProperty()
+        .addListener((obs, oldUser, newUser) -> {
+          if (newUser != null) {
+            loginUsernameField.setText(newUser);
+            registerUsernameField.setText(newUser);
+          }
+        });
 
     VBox usersBox = new VBox(8, labelMuted("Registered users"), registeredUsersView);
     usersBox.setPrefWidth(200);
@@ -239,7 +241,7 @@ public class AuthPane extends BorderPane {
    * Fills the login form for tests or higher-level helpers.
    *
    * @param username username to show
-   * @param pin PIN to show
+   * @param pin      PIN to show
    */
   public void setLoginValues(String username, String pin) {
     loginUsernameField.setText(username);
@@ -249,8 +251,8 @@ public class AuthPane extends BorderPane {
   /**
    * Fills the registration form for tests or higher-level helpers.
    *
-   * @param username username to show
-   * @param pin PIN to show
+   * @param username      username to show
+   * @param pin           PIN to show
    * @param startingMoney starting money text to show
    */
   public void setRegistrationValues(String username, String pin, String startingMoney) {
@@ -287,6 +289,7 @@ public class AuthPane extends BorderPane {
    */
   @FunctionalInterface
   public interface LoginAction {
+
     void run(String username, String pin);
   }
 
@@ -295,6 +298,7 @@ public class AuthPane extends BorderPane {
    */
   @FunctionalInterface
   public interface RegisterAction {
+
     void run(String username, String pin, String startingMoney);
   }
 }

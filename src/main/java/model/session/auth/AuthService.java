@@ -1,4 +1,4 @@
-package model.session;
+package model.session.auth;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -12,6 +12,8 @@ import model.persistence.PinHashingService;
 import model.persistence.ProfileDirectories;
 import model.persistence.UserAccountRecord;
 import model.persistence.UserAccountRepository;
+import model.session.ActiveSession;
+import model.session.persistence.GamePersistenceService;
 import model.utils.PinValidator;
 import model.utils.RegistrationValidator;
 import model.utils.StartingMoneyValidator;

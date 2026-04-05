@@ -1,4 +1,4 @@
-package model.session;
+package model.session.profile;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +13,8 @@ import model.persistence.PinHashingService;
 import model.persistence.ProfileImageService;
 import model.persistence.UserAccountRecord;
 import model.persistence.UserAccountRepository;
+import model.session.ActiveSession;
+import model.session.auth.AuthService;
 import model.utils.PinValidator;
 import model.utils.ValidationResult;
 

@@ -18,9 +18,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.session.PlayerLeaderboardEntry;
-import model.session.PlayerLeaderboardMetric;
-import model.session.PlayerLeaderboardRanking;
+import model.session.leaderboard.PlayerLeaderboardEntry;
+import model.session.leaderboard.PlayerLeaderboardMetric;
+import model.session.leaderboard.PlayerLeaderboardRanking;
 import view.components.table.AppTableView;
 
 /**
@@ -214,7 +214,8 @@ public class PlayerLeaderboardPanel extends BorderPane {
     activeMetric = primaryColumn == returnColumn
         ? PlayerLeaderboardMetric.TOTAL_RETURN_PERCENT
         : PlayerLeaderboardMetric.NET_WORTH;
-    SortType sortType = primaryColumn.getSortType() == null ? SortType.DESCENDING : primaryColumn.getSortType();
+    SortType sortType =
+        primaryColumn.getSortType() == null ? SortType.DESCENDING : primaryColumn.getSortType();
     ascending = sortType == SortType.ASCENDING;
   }
 

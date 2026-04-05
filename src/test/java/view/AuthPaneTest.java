@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import model.session.PlayerLeaderboardEntry;
+import model.session.leaderboard.PlayerLeaderboardEntry;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,8 @@ class AuthPaneTest {
     AuthPane pane = runOnFxThread(() -> new AuthPane(
         List.of("Alice", "Bob"),
         List.of(
-            new PlayerLeaderboardEntry("Bob", new BigDecimal("1400.00"), new BigDecimal("0.40000000")),
+            new PlayerLeaderboardEntry("Bob", new BigDecimal("1400.00"),
+                new BigDecimal("0.40000000")),
             new PlayerLeaderboardEntry("Alice", new BigDecimal("1000.00"), BigDecimal.ZERO)),
         true,
         (username, pin) -> {
@@ -81,6 +82,7 @@ class AuthPaneTest {
 
   @FunctionalInterface
   private interface PaneSupplier {
+
     AuthPane get() throws Exception;
   }
 }

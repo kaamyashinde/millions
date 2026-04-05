@@ -1,4 +1,4 @@
-package model.session;
+package model.session.leaderboard;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -17,7 +17,8 @@ public final class PlayerLeaderboardRanking {
    * @param metric active ranking metric
    * @return comparator ordering strongest players first
    */
-  public static Comparator<PlayerLeaderboardEntry> bestFirstComparator(PlayerLeaderboardMetric metric) {
+  public static Comparator<PlayerLeaderboardEntry> bestFirstComparator(
+      PlayerLeaderboardMetric metric) {
     return Comparator
         .comparing(
             (PlayerLeaderboardEntry entry) -> metricValue(entry, metric),
@@ -32,7 +33,7 @@ public final class PlayerLeaderboardRanking {
   /**
    * Comparator used for display ordering.
    *
-   * @param metric active display metric
+   * @param metric    active display metric
    * @param ascending whether the primary metric should be shown low-to-high
    * @return comparator matching the requested display order
    */
@@ -43,7 +44,8 @@ public final class PlayerLeaderboardRanking {
       return bestFirstComparator(metric);
     }
     return Comparator
-        .comparing((PlayerLeaderboardEntry entry) -> metricValue(entry, metric), BigDecimal::compareTo)
+        .comparing((PlayerLeaderboardEntry entry) -> metricValue(entry, metric),
+            BigDecimal::compareTo)
         .thenComparing(
             entry -> metricValue(entry, secondaryMetric(metric)),
             Comparator.reverseOrder())
@@ -54,11 +56,12 @@ public final class PlayerLeaderboardRanking {
   /**
    * Returns the numeric metric value used for sorting.
    *
-   * @param entry leaderboard entry
+   * @param entry  leaderboard entry
    * @param metric chosen metric
    * @return numeric value for that metric
    */
-  public static BigDecimal metricValue(PlayerLeaderboardEntry entry, PlayerLeaderboardMetric metric) {
+  public static BigDecimal metricValue(PlayerLeaderboardEntry entry,
+      PlayerLeaderboardMetric metric) {
     return switch (metric) {
       case NET_WORTH -> entry.netWorth();
       case TOTAL_RETURN_PERCENT -> entry.totalReturnPercent();

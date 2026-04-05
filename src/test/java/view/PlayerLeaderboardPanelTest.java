@@ -8,7 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import model.session.PlayerLeaderboardEntry;
+import model.session.leaderboard.PlayerLeaderboardEntry;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -74,7 +74,8 @@ class PlayerLeaderboardPanelTest {
     assertEquals(List.of("Alice", "Cara", "Bob"), panel.getDisplayedUsernames());
   }
 
-  private static PlayerLeaderboardEntry entry(String username, String netWorth, String returnPercent) {
+  private static PlayerLeaderboardEntry entry(String username, String netWorth,
+      String returnPercent) {
     return new PlayerLeaderboardEntry(
         username,
         new BigDecimal(netWorth),
@@ -103,6 +104,7 @@ class PlayerLeaderboardPanelTest {
 
   @FunctionalInterface
   private interface PanelSupplier {
+
     PlayerLeaderboardPanel get() throws Exception;
   }
 }

@@ -11,6 +11,11 @@ import model.persistence.ProfilePreferencesRepository;
 import model.persistence.SavedRunMapper;
 import model.persistence.SavedRunRepository;
 import model.persistence.UserAccountRepository;
+import model.session.auth.AuthService;
+import model.session.persistence.GamePersistenceService;
+import model.session.persistence.SavedRunService;
+import model.session.profile.ProfilePreferencesService;
+import model.session.profile.ProfileService;
 
 /**
  * Creates fully wired local-profile session services for application entry points.

@@ -1,4 +1,4 @@
-package model.session;
+package model.session.leaderboard;
 
 import java.math.BigDecimal;
 import java.nio.file.Files;

@@ -9,6 +9,7 @@ import model.exception.DuplicateUsernameException;
 import model.exception.RegistrationValidationException;
 import model.session.ActiveSession;
 import model.session.SessionService;
+import model.session.leaderboard.PlayerLeaderboardEntry;
 
 /**
  * Top-level JavaFX shell that swaps between authentication and logged-in workspace views.
@@ -231,7 +232,7 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
     return sessionService.listRegisteredUsers();
   }
 
-  private List<model.session.PlayerLeaderboardEntry> listLeaderboardEntries() {
+  private List<PlayerLeaderboardEntry> listLeaderboardEntries() {
     return sessionService.listLeaderboardEntries();
   }
 

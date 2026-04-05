@@ -1,4 +1,4 @@
-package model.session;
+package model.session.profile;
 
 import model.persistence.ProfilePreferences;
 import model.persistence.ProfilePreferencesRepository;

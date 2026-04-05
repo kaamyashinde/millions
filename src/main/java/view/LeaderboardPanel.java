@@ -18,7 +18,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.session.LocalLeaderboardService.LeaderboardRow;
+import model.session.leaderboard.LocalLeaderboardService.LeaderboardRow;
 import model.session.SessionService;
 import view.components.image.DiskImageLoader;
 import view.components.image.ImageLoader;
