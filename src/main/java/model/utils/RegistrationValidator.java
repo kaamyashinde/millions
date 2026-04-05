@@ -1,4 +1,4 @@
-package model.session.validation;
+package model.utils;
 
 import java.math.BigDecimal;
 

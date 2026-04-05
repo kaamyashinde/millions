@@ -29,7 +29,7 @@ import model.persistence.SavedRunRecord;
 import model.persistence.SavedRunRepository;
 import model.persistence.UserAccountRecord;
 import model.persistence.UserAccountRepository;
-import model.session.validation.ValidationError;
+import model.utils.ValidationError;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

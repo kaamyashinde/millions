@@ -12,11 +12,11 @@ import model.persistence.PinHashingService;
 import model.persistence.ProfileDirectories;
 import model.persistence.UserAccountRecord;
 import model.persistence.UserAccountRepository;
-import model.session.validation.PinValidator;
-import model.session.validation.RegistrationValidator;
-import model.session.validation.StartingMoneyValidator;
-import model.session.validation.UsernameValidator;
-import model.session.validation.ValidationResult;
+import model.utils.PinValidator;
+import model.utils.RegistrationValidator;
+import model.utils.StartingMoneyValidator;
+import model.utils.UsernameValidator;
+import model.utils.ValidationResult;
 
 /**
  * Handles user registration, authentication, and credential validation.

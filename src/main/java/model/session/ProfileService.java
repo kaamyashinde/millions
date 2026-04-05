@@ -13,8 +13,8 @@ import model.persistence.PinHashingService;
 import model.persistence.ProfileImageService;
 import model.persistence.UserAccountRecord;
 import model.persistence.UserAccountRepository;
-import model.session.validation.PinValidator;
-import model.session.validation.ValidationResult;
+import model.utils.PinValidator;
+import model.utils.ValidationResult;
 
 /**
  * Manages profile metadata: display names, avatars, and profile deletion.

@@ -1,4 +1,4 @@
-package model.session.validation;
+package model.utils;
 
 /**
  * Typed registration validation failures shared by the model and view layers.

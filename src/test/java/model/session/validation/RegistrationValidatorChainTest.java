@@ -2,8 +2,13 @@ package model.session.validation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-
 import java.math.BigDecimal;
+import model.utils.PinValidator;
+import model.utils.RegistrationValidator;
+import model.utils.StartingMoneyValidator;
+import model.utils.UsernameValidator;
+import model.utils.ValidationError;
+import model.utils.ValidationResult;
 import org.junit.jupiter.api.Test;
 
 class RegistrationValidatorChainTest {

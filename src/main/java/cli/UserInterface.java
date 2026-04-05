@@ -44,7 +44,7 @@ import model.session.ProfilePreferencesService;
 import model.session.ProfileService;
 import model.session.SavedRunService;
 import model.session.SessionService;
-import model.session.validation.ValidationError;
+import model.utils.ValidationError;
 import util.I18n;
 
 /**

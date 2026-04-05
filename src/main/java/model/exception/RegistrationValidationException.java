@@ -1,6 +1,6 @@
 package model.exception;
 
-import model.session.validation.ValidationError;
+import model.utils.ValidationError;
 
 /**
  * Thrown when registration input fails model validation.
