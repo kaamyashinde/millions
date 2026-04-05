@@ -1,10 +1,10 @@
-package model.analysis.stockinfo;
+package model.core.market.stock.info;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 import java.util.Random;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
 
 /**
  * Supplies deterministic mock fundamentals per stock symbol so UI can show simplified financials

@@ -1,4 +1,4 @@
-package model.analysis.recommendation;
+package model.core.market.stock.recommendation;
 
 /**
  * Recommendation levels shown to the player for a stock.

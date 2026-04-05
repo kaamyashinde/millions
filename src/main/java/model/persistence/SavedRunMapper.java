@@ -6,14 +6,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import model.analysis.MetricValue;
-import model.analysis.PerformanceComparison;
-import model.analysis.PerformanceMetrics;
-import model.analysis.PortfolioPerformanceService;
 import model.core.market.Exchange;
-import model.core.market.Share;
 import model.core.player.Player;
+import model.core.player.Share;
 import model.core.player.levels.PlayerLevel;
+import model.core.player.portfolio.PerformanceComparison;
+import model.core.player.portfolio.PortfolioPerformanceService;
+import model.core.player.portfolio.metrics.MetricValue;
+import model.core.player.portfolio.metrics.PerformanceMetrics;
 import model.core.trading.transactioncalculator.SaleCalculator;
 
 /**

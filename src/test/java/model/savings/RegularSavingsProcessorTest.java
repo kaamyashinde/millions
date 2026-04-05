@@ -5,10 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
 import model.core.market.Exchange;
-import model.core.market.Stock;
 import model.core.market.fund.Fund;
 import model.core.market.fund.FundComponent;
+import model.core.market.stock.Stock;
 import model.core.player.Player;
+import model.core.player.savings.RegularSavingsPlan;
+import model.core.player.savings.RegularSavingsProcessor;
+import model.core.player.savings.SavingsInstallmentMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

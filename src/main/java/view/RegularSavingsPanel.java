@@ -28,9 +28,9 @@ import javafx.util.StringConverter;
 import model.core.market.Exchange;
 import model.core.market.InvestableAsset;
 import model.core.player.Player;
-import model.savings.RegularSavingsPlan;
-import model.savings.RegularSavingsProcessor;
-import model.savings.SavingsInstallmentMode;
+import model.core.player.savings.RegularSavingsPlan;
+import model.core.player.savings.RegularSavingsProcessor;
+import model.core.player.savings.SavingsInstallmentMode;
 import view.components.notification.NotificationService;
 import view.components.toast.ToastMode;
 

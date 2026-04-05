@@ -4,9 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
 import java.util.List;
 import model.core.market.Exchange;
+import model.core.market.HistoricalAssetPriceService;
 import model.core.market.InvestableAsset;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
 import model.core.player.Player;
+import model.core.player.portfolio.MarketBenchmarkService;
+import model.core.player.portfolio.PerformanceComparison;
+import model.core.player.portfolio.PortfolioPerformanceService;
+import model.core.player.portfolio.metrics.MetricStatus;
+import model.core.player.portfolio.metrics.calc.PerformanceMetricsCalculator;
+import model.core.player.portfolio.metrics.calc.ReturnSeriesCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

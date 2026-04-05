@@ -1,4 +1,4 @@
-package model.savings;
+package model.core.player.savings;
 
 import model.core.market.Exchange;
 

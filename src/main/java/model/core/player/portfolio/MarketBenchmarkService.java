@@ -1,11 +1,16 @@
-package model.analysis;
+package model.core.player.portfolio;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import model.core.market.Exchange;
-import model.core.market.Stock;
+import model.core.market.HistoricalAssetPriceService;
+import model.core.market.stock.Stock;
+import model.core.player.portfolio.metrics.MetricStatus;
+import model.core.player.portfolio.metrics.PerformanceMetrics;
+import model.core.player.portfolio.metrics.calc.PerformanceMetricsCalculator;
+import model.core.player.portfolio.metrics.calc.ReturnSeriesCalculator;
 
 /**
  * Builds market benchmark metrics from the listed stocks on an exchange.

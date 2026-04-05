@@ -1,7 +1,7 @@
 package model.core.market.marketevent.unexpected.target;
 
 import java.util.Set;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
 
 /**
  * Describes which stocks are affected by a market event.

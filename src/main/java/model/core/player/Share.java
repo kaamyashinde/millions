@@ -1,7 +1,8 @@
-package model.core.market;
+package model.core.player;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
+import model.core.market.InvestableAsset;
 
 /**
  * Represents a share in the stock market. A purchase results in acquiring certain amount of

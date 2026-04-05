@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import model.analysis.stockinfo.CompanyHealth;
-import model.analysis.stockinfo.StockFinancialInfo;
-import model.analysis.stockinfo.StockFinancialInfoProvider;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
+import model.core.market.stock.info.CompanyHealth;
+import model.core.market.stock.info.StockFinancialInfo;
+import model.core.market.stock.info.StockFinancialInfoProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

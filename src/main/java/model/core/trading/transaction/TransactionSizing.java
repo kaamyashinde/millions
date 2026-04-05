@@ -5,7 +5,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.function.Function;
 import model.core.market.InvestableAsset;
-import model.core.market.Share;
+import model.core.player.Share;
 import model.core.trading.transactioncalculator.PurchaseCalculator;
 import model.core.trading.transactioncalculator.SaleCalculator;
 import model.utils.Validator;

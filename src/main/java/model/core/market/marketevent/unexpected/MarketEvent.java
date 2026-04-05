@@ -3,8 +3,8 @@ package model.core.market.marketevent.unexpected;
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.Set;
-import model.core.market.Stock;
 import model.core.market.marketevent.unexpected.target.MarketEventTarget;
+import model.core.market.stock.Stock;
 
 /**
  * Immutable description of a rare market event and the price shock it applies.

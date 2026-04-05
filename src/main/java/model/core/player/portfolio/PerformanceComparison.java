@@ -1,6 +1,7 @@
-package model.analysis;
+package model.core.player.portfolio;
 
 import static model.utils.Validator.checkNotNull;
+import model.core.player.portfolio.metrics.PerformanceMetrics;
 
 /**
  * Holds side-by-side performance metrics for the player portfolio and market benchmark.

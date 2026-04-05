@@ -1,4 +1,4 @@
-package model.analysis;
+package model.core.player.portfolio.metrics.calc;
 
 import static model.utils.Validator.checkNotNull;
 
@@ -17,7 +17,7 @@ public class SharpeRatioCalculator {
    * Computes the Sharpe ratio from daily returns and a precomputed volatility.
    *
    * @param dailyReturns ordered daily return ratios
-   * @param volatility standard deviation of the same return series
+   * @param volatility   standard deviation of the same return series
    * @return average daily return divided by volatility
    */
   public BigDecimal calculate(List<BigDecimal> dailyReturns, BigDecimal volatility) {

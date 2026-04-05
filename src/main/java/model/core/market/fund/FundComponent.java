@@ -1,7 +1,7 @@
 package model.core.market.fund;
 
 import java.math.BigDecimal;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
 import model.utils.Validator;
 
 /**

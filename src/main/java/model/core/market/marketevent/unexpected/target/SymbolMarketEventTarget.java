@@ -3,7 +3,7 @@ package model.core.market.marketevent.unexpected.target;
 import static model.utils.Validator.checkNotNull;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
 
 /**
  * Targets one or more stock symbols directly.

@@ -1,4 +1,4 @@
-package model.savings;
+package model.core.player.savings;
 
 import java.util.ArrayList;
 import java.util.List;

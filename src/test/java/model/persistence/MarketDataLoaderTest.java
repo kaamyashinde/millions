@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.List;
 import model.core.market.Exchange;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
 import org.junit.jupiter.api.Test;
 
 class MarketDataLoaderTest {

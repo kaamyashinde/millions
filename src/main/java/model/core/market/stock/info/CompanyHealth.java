@@ -1,4 +1,4 @@
-package model.analysis.stockinfo;
+package model.core.market.stock.info;
 
 /**
  * Qualitative label for mock company financial health shown in stock views.

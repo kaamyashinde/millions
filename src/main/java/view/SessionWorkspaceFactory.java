@@ -3,7 +3,7 @@ package view;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
 import model.session.ActiveSession;
 import model.session.SessionService;
 import view.components.notification.LevelUpNotificationObserver;

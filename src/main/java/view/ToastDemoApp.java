@@ -23,7 +23,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.core.market.Exchange;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
 import model.core.player.Player;
 import model.persistence.MarketData;
 import model.persistence.MarketDataLoader;

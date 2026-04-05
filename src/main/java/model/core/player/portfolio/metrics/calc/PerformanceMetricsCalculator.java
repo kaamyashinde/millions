@@ -1,9 +1,12 @@
-package model.analysis;
+package model.core.player.portfolio.metrics.calc;
 
 import static model.utils.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import model.core.player.portfolio.metrics.MetricStatus;
+import model.core.player.portfolio.metrics.MetricValue;
+import model.core.player.portfolio.metrics.PerformanceMetrics;
 
 /**
  * Orchestrates return, volatility, and Sharpe calculations from a daily value series.
@@ -25,8 +28,8 @@ public class PerformanceMetricsCalculator {
    * Creates a calculator with injected helpers.
    *
    * @param returnSeriesCalculator helper used to derive returns
-   * @param volatilityCalculator helper used to derive volatility
-   * @param sharpeRatioCalculator helper used to derive the Sharpe ratio
+   * @param volatilityCalculator   helper used to derive volatility
+   * @param sharpeRatioCalculator  helper used to derive the Sharpe ratio
    */
   public PerformanceMetricsCalculator(
       ReturnSeriesCalculator returnSeriesCalculator,

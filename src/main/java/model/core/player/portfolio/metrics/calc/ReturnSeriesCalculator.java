@@ -1,4 +1,4 @@
-package model.analysis;
+package model.core.player.portfolio.metrics.calc;
 
 import static model.utils.Validator.checkNotNull;
 
@@ -50,7 +50,7 @@ public class ReturnSeriesCalculator {
    * Computes one decimal return from a start value to an end value.
    *
    * @param startValue starting value
-   * @param endValue ending value
+   * @param endValue   ending value
    * @return decimal return ratio such as {@code 0.05} for 5%
    */
   public BigDecimal calculateReturn(BigDecimal startValue, BigDecimal endValue) {

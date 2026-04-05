@@ -1,4 +1,4 @@
-package model.savings;
+package model.core.player.savings;
 
 import java.math.BigDecimal;
 import model.utils.Validator;
@@ -8,7 +8,8 @@ import model.utils.Validator;
  * days, next due day, and active flag. The {@link #symbol} is fixed for the lifetime of the
  * instance; to invest in a different stock, remove this plan and add a new one. Other fields may be
  * updated via setters; changing {@code mode}, {@code amount}, or {@code intervalDays} does
- * <strong>not</strong> automatically change {@link #nextDueDay} — use {@link #setNextDueDay(int)} if
+ * <strong>not</strong> automatically change {@link #nextDueDay} — use {@link #setNextDueDay(int)}
+ * if
  * the schedule should be adjusted. {@link RegularSavingsProcessor} reads current values on each run
  * and updates {@link #nextDueDay} after each installment attempt.
  *
@@ -18,30 +19,42 @@ import model.utils.Validator;
  */
 public class RegularSavingsPlan {
 
-  /** Uppercase stock symbol; immutable after construction. */
+  /**
+   * Uppercase stock symbol; immutable after construction.
+   */
   private final String symbol;
 
-  /** Fixed share count vs. budget cap per installment; may be updated. */
+  /**
+   * Fixed share count vs. budget cap per installment; may be updated.
+   */
   private SavingsInstallmentMode mode;
 
-  /** Share quantity (fixed mode) or max spend (budget mode); may be updated. */
+  /**
+   * Share quantity (fixed mode) or max spend (budget mode); may be updated.
+   */
   private BigDecimal amount;
 
-  /** Trading days between installments; may be updated. */
+  /**
+   * Trading days between installments; may be updated.
+   */
   private int intervalDays;
 
-  /** Next trading day on which an installment is due. */
+  /**
+   * Next trading day on which an installment is due.
+   */
   private int nextDueDay;
 
-  /** When false, {@link RegularSavingsProcessor} skips the plan. */
+  /**
+   * When false, {@link RegularSavingsProcessor} skips the plan.
+   */
   private boolean active;
 
   /**
-   * @param symbol        stock symbol
-   * @param mode          fixed shares or budget
-   * @param amount        share quantity or max spend per period
-   * @param intervalDays  positive trading days between installments
-   * @param currentDay    exchange day when the plan is created
+   * @param symbol       stock symbol
+   * @param mode         fixed shares or budget
+   * @param amount       share quantity or max spend per period
+   * @param intervalDays positive trading days between installments
+   * @param currentDay   exchange day when the plan is created
    */
   public RegularSavingsPlan(String symbol, SavingsInstallmentMode mode, BigDecimal amount,
       int intervalDays, int currentDay) {

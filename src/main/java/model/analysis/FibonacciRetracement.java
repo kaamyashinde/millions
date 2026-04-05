@@ -1,4 +1,4 @@
-package model.analysis.technical.chartanalysis;
+package model.analysis;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

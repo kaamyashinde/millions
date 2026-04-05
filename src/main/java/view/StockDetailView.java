@@ -14,12 +14,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.analysis.recommendation.StockRecommendation;
-import model.analysis.recommendation.StockRecommendationService;
-import model.analysis.stockinfo.StockFinancialInfo;
-import model.analysis.stockinfo.StockFinancialInfoProvider;
-import model.core.market.Stock;
 import model.core.market.marketevent.unexpected.MarketEvent;
+import model.core.market.stock.Stock;
+import model.core.market.stock.info.StockFinancialInfo;
+import model.core.market.stock.info.StockFinancialInfoProvider;
+import model.core.market.stock.recommendation.StockRecommendation;
+import model.core.market.stock.recommendation.StockRecommendationService;
 import view.components.chart.StockChart;
 import view.components.recommendation.StockRecommendationLabel;
 

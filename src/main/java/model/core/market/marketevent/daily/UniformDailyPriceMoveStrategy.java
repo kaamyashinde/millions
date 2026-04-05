@@ -3,7 +3,7 @@ package model.core.market.marketevent.daily;
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.Random;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
 
 /**
  * Applies the standard daily fluctuation band used by the exchange when no rare event is involved.

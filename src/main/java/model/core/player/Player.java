@@ -5,12 +5,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import model.core.market.Share;
 import model.core.player.levels.PlayerLevel;
 import model.core.player.levels.PlayerLevels;
+import model.core.player.portfolio.Portfolio;
+import model.core.player.savings.RegularSavingsPlan;
 import model.core.trading.transaction.Transaction;
 import model.core.trading.transaction.TransactionArchive;
-import model.savings.RegularSavingsPlan;
 
 /**
  * A class representing a Player in the system.

@@ -1,10 +1,11 @@
-package model.core.player;
+package model.core.player.portfolio;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
-import model.core.market.Share;
+import model.core.player.Player;
+import model.core.player.Share;
 import model.core.trading.transaction.Sale;
 import model.core.trading.transaction.TransactionSizing;
 import model.core.trading.transactioncalculator.SaleCalculator;

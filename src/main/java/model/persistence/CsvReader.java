@@ -13,9 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import model.core.market.Stock;
 import model.core.market.fund.Fund;
 import model.core.market.fund.FundComponent;
+import model.core.market.stock.Stock;
 
 /**
  * Reads mixed market data from CSV where each row is either a stock or a fund definition.

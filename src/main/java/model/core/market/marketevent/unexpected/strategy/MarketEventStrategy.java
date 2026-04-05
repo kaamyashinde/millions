@@ -3,8 +3,8 @@ package model.core.market.marketevent.unexpected.strategy;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import model.core.market.Stock;
 import model.core.market.marketevent.unexpected.MarketEvent;
+import model.core.market.stock.Stock;
 
 /**
  * Decides whether a rare market event should occur on a given trading day.

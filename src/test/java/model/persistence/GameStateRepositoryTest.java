@@ -6,12 +6,12 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
 import model.core.market.Exchange;
-import model.core.market.Stock;
 import model.core.market.fund.Fund;
 import model.core.market.fund.FundComponent;
+import model.core.market.stock.Stock;
 import model.core.player.Player;
-import model.savings.RegularSavingsPlan;
-import model.savings.SavingsInstallmentMode;
+import model.core.player.savings.RegularSavingsPlan;
+import model.core.player.savings.SavingsInstallmentMode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

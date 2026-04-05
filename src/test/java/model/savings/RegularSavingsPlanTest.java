@@ -3,6 +3,8 @@ package model.savings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
+import model.core.player.savings.RegularSavingsPlan;
+import model.core.player.savings.SavingsInstallmentMode;
 import org.junit.jupiter.api.Test;
 
 /**

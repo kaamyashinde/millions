@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.List;
+import model.core.player.portfolio.metrics.MetricStatus;
+import model.core.player.portfolio.metrics.PerformanceMetrics;
+import model.core.player.portfolio.metrics.calc.PerformanceMetricsCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

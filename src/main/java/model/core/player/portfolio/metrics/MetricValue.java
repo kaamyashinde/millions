@@ -1,4 +1,4 @@
-package model.analysis;
+package model.core.player.portfolio.metrics;
 
 import static model.utils.Validator.checkNotNull;
 
@@ -12,7 +12,7 @@ public record MetricValue(BigDecimal value, MetricStatus status) {
   /**
    * Creates one metric value.
    *
-   * @param value numeric value when available, otherwise {@code null}
+   * @param value  numeric value when available, otherwise {@code null}
    * @param status availability state for the metric
    */
   public MetricValue {

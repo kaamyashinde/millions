@@ -1,4 +1,4 @@
-package model.analysis;
+package model.core.player.portfolio.metrics;
 
 import static model.utils.Validator.checkNotNull;
 
@@ -14,8 +14,8 @@ public record PerformanceMetrics(
    * Creates one metrics bundle.
    *
    * @param returnPercent total return metric
-   * @param volatility simplified volatility metric
-   * @param sharpeRatio Sharpe ratio metric
+   * @param volatility    simplified volatility metric
+   * @param sharpeRatio   Sharpe ratio metric
    */
   public PerformanceMetrics {
     checkNotNull(returnPercent, "Return percent");

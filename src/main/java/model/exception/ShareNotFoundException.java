@@ -1,6 +1,6 @@
 package model.exception;
 
-import model.core.market.Share;
+import model.core.player.Share;
 import model.core.player.Player;
 
 /**

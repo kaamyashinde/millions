@@ -1,14 +1,17 @@
-package model.analysis;
+package model.core.player.portfolio;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import model.core.market.Exchange;
+import model.core.market.HistoricalAssetPriceService;
 import model.core.market.InvestableAsset;
-import model.core.market.Share;
 import model.core.player.Player;
-import model.core.player.Portfolio;
+import model.core.player.Share;
+import model.core.player.portfolio.metrics.MetricStatus;
+import model.core.player.portfolio.metrics.PerformanceMetrics;
+import model.core.player.portfolio.metrics.calc.PerformanceMetricsCalculator;
 import model.core.trading.transaction.Purchase;
 import model.core.trading.transaction.Sale;
 import model.core.trading.transaction.Transaction;

@@ -1,9 +1,10 @@
-package model.core.market;
+package model.core.market.stock;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import model.core.market.InvestableAsset;
 
 /**
  * Represents a stock in a company. This has a unique stock symbol, f.e.g., "AAPL" for Apple Inc.

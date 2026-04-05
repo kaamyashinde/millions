@@ -1,4 +1,4 @@
-package model.analysis.stockinfo;
+package model.core.market.stock.info;
 
 import java.math.BigDecimal;
 

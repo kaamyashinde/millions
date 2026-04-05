@@ -7,9 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
-import model.core.market.Stock;
 import model.core.market.fund.Fund;
 import model.core.market.fund.FundComponent;
+import model.core.market.stock.Stock;
 
 /**
  * Writes mixed market-data CSV files containing both stocks and funds.

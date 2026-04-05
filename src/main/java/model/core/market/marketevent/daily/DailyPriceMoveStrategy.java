@@ -2,7 +2,7 @@ package model.core.market.marketevent.daily;
 
 import java.math.BigDecimal;
 import java.util.Random;
-import model.core.market.Stock;
+import model.core.market.stock.Stock;
 
 /**
  * Calculates the baseline next-day price for a stock before any rare market event is applied.

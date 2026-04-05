@@ -1,4 +1,4 @@
-package model.analysis.technical.chartanalysis;
+package model.analysis;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

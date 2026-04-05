@@ -1,4 +1,4 @@
-package model.analysis;
+package model.core.player.portfolio.metrics;
 
 /**
  * Availability state for one displayed performance metric.
