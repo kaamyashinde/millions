@@ -1,4 +1,4 @@
-package model.session;
+package model.exception;
 
 /**
  * Signals that a new profile username is already taken.

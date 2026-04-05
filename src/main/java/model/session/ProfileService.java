@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
+import model.exception.AuthenticationException;
+import model.exception.RegistrationValidationException;
 import model.persistence.PersistenceException;
 import model.persistence.PinHashingService;
 import model.persistence.ProfileImageService;

@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import model.core.market.Exchange;
 import model.core.player.Player;
+import model.exception.ProfileInUseException;
 import model.persistence.GameStateSnapshot;
 import model.persistence.ProfileDirectories;
 import model.persistence.SavedRunRecord;

@@ -1,4 +1,4 @@
-package model.session;
+package model.exception;
 
 import model.session.validation.ValidationError;
 

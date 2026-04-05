@@ -1,7 +1,7 @@
 package model.session;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import model.exception.RegistrationValidationException;
 import model.session.validation.ValidationError;
 import org.junit.jupiter.api.Test;
 

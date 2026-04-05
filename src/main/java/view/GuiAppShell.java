@@ -4,10 +4,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.stage.Window;
+import model.exception.AuthenticationException;
+import model.exception.DuplicateUsernameException;
+import model.exception.RegistrationValidationException;
 import model.session.ActiveSession;
-import model.session.AuthenticationException;
-import model.session.DuplicateUsernameException;
-import model.session.RegistrationValidationException;
 import model.session.SessionService;
 
 /**
@@ -34,7 +34,7 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
   /**
    * Builds a GUI shell with injectable collaborators for tests.
    *
-   * @param sessionService session service used for profile lifecycle operations
+   * @param sessionService   session service used for profile lifecycle operations
    * @param workspaceFactory factory that creates one fresh workspace per active session
    */
   public GuiAppShell(SessionService sessionService, SessionWorkspaceFactory workspaceFactory) {
@@ -42,10 +42,11 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
   }
 
   /**
-   * Builds a GUI shell with control over the first-login welcome dialog (disabled in headless tests).
+   * Builds a GUI shell with control over the first-login welcome dialog (disabled in headless
+   * tests).
    *
-   * @param sessionService session service used for profile lifecycle operations
-   * @param workspaceFactory factory that creates one fresh workspace per active session
+   * @param sessionService            session service used for profile lifecycle operations
+   * @param workspaceFactory          factory that creates one fresh workspace per active session
    * @param showWelcomeOnFirstSession when {@code true}, shows welcome once per profile after login
    */
   public GuiAppShell(
@@ -89,8 +90,8 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
   /**
    * Submits a registration request using the same flow as the visible auth form.
    *
-   * @param username requested username
-   * @param pin PIN text
+   * @param username      requested username
+   * @param pin           PIN text
    * @param startingMoney starting money text
    */
   public void submitRegistration(String username, String pin, String startingMoney) {
@@ -101,7 +102,7 @@ public class GuiAppShell extends javafx.scene.layout.BorderPane {
    * Submits a login request using the same flow as the visible auth form.
    *
    * @param username username to log in
-   * @param pin PIN text
+   * @param pin      PIN text
    */
   public void submitLogin(String username, String pin) {
     handleLogin(username, pin);

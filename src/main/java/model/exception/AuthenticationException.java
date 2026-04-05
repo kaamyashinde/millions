@@ -1,4 +1,4 @@
-package model.session;
+package model.exception;
 
 /**
  * Signals invalid login credentials for a local user profile.

@@ -16,8 +16,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import model.exception.AuthenticationException;
 import model.session.ActiveSession;
-import model.session.AuthenticationException;
 import model.session.SessionService;
 import view.components.image.DiskImageLoader;
 import view.components.image.ImageLoader;
@@ -33,9 +33,9 @@ public final class ProfileEditorDialog {
   /**
    * Shows the profile editor for the active session.
    *
-   * @param owner parent window
-   * @param sessionService session service
-   * @param onSaved invoked after a successful save (e.g. refresh UI)
+   * @param owner            parent window
+   * @param sessionService   session service
+   * @param onSaved          invoked after a successful save (e.g. refresh UI)
    * @param onAccountDeleted invoked after the current profile was deleted
    */
   public static void show(
@@ -122,7 +122,8 @@ public final class ProfileEditorDialog {
       } catch (IllegalArgumentException exception) {
         status.setText(exception.getMessage());
       } catch (RuntimeException exception) {
-        status.setText(exception.getMessage() != null ? exception.getMessage() : "Could not save profile.");
+        status.setText(
+            exception.getMessage() != null ? exception.getMessage() : "Could not save profile.");
       }
     });
 

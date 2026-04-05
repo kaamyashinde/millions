@@ -1,4 +1,4 @@
-package model.session;
+package model.exception;
 
 /**
  * Thrown when a profile cannot be deleted because it is the active session.
