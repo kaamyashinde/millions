@@ -1,4 +1,4 @@
-package model;
+package model.market;
 
 import static model.utils.Validator.requirePositive;
 import java.math.BigDecimal;
@@ -10,14 +10,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+import model.Player;
 import model.exception.InsufficientFundsException;
 import model.exception.InsufficientSharesException;
-import model.fund.Fund;
-import model.marketevent.daily.DailyPriceMoveStrategy;
-import model.marketevent.daily.UniformDailyPriceMoveStrategy;
-import model.marketevent.unexpected.MarketEvent;
-import model.marketevent.unexpected.strategy.MarketEventStrategy;
-import model.marketevent.unexpected.strategy.RandomMarketEventStrategy;
+import model.market.fund.Fund;
+import model.market.marketevent.daily.DailyPriceMoveStrategy;
+import model.market.marketevent.daily.UniformDailyPriceMoveStrategy;
+import model.market.marketevent.unexpected.MarketEvent;
+import model.market.marketevent.unexpected.strategy.MarketEventStrategy;
+import model.market.marketevent.unexpected.strategy.RandomMarketEventStrategy;
 import model.transaction.Purchase;
 import model.transaction.Sale;
 import model.transaction.Transaction;

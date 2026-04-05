@@ -1,10 +1,10 @@
-package model.marketevent.unexpected.strategy;
+package model.market.marketevent.unexpected.strategy;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import model.Stock;
-import model.marketevent.unexpected.MarketEvent;
+import model.market.Stock;
+import model.market.marketevent.unexpected.MarketEvent;
 
 /**
  * Decides whether a rare market event should occur on a given trading day.

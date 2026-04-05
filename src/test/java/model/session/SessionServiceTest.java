@@ -2,31 +2,29 @@ package model.session;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 import model.persistence.GameStateMapper;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketData;
 import model.persistence.PinHashingService;
+import model.persistence.ProfileDirectories;
 import model.persistence.ProfileImageService;
 import model.persistence.ProfilePreferencesRepository;
 import model.persistence.SavedRunMapper;
 import model.persistence.SavedRunRecord;
 import model.persistence.SavedRunRepository;
-import model.persistence.ProfileDirectories;
-import model.persistence.UserAccountRepository;
 import model.persistence.UserAccountRecord;
+import model.persistence.UserAccountRepository;
 import model.session.validation.ValidationError;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -73,12 +71,14 @@ class SessionServiceTest {
   void switchingUsers_restoresCorrectSavedStateWithoutLeakage() {
     SessionService sessionService = createSessionService();
 
-    ActiveSession alice = sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    ActiveSession alice =
+        sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
     alice.exchange().buy("AAPL", new BigDecimal("1.0"), alice.player());
     alice.exchange().advance();
     sessionService.saveActiveSession();
 
-    ActiveSession bob = sessionService.register("Bob", "5678".toCharArray(), new BigDecimal("2000.00"));
+    ActiveSession bob =
+        sessionService.register("Bob", "5678".toCharArray(), new BigDecimal("2000.00"));
     bob.player().addMoney(new BigDecimal("25.00"));
     bob.exchange().advance(2);
     sessionService.saveActiveSession();
@@ -87,12 +87,14 @@ class SessionServiceTest {
     assertEquals("Alice", reloadedAlice.username());
     assertEquals(2, reloadedAlice.exchange().getDay());
     assertEquals(1, reloadedAlice.player().getPortfolio().getShares().size());
-    assertEquals("AAPL", reloadedAlice.player().getPortfolio().getShares().getFirst().getAsset().getSymbol());
+    assertEquals("AAPL",
+        reloadedAlice.player().getPortfolio().getShares().getFirst().getAsset().getSymbol());
 
     ActiveSession reloadedBob = sessionService.login("Bob", "5678".toCharArray());
     assertEquals("Bob", reloadedBob.username());
     assertEquals(3, reloadedBob.exchange().getDay());
-    assertTrue(reloadedBob.player().getPortfolio().getShares().isEmpty(), "Bob should not see Alice's holdings");
+    assertTrue(reloadedBob.player().getPortfolio().getShares().isEmpty(),
+        "Bob should not see Alice's holdings");
     assertEquals(new BigDecimal("2025.00"), reloadedBob.player().getMoney());
   }
 
@@ -100,7 +102,8 @@ class SessionServiceTest {
   void listLeaderboardEntries_usesLiveActiveSessionState() {
     SessionService sessionService = createSessionService();
 
-    ActiveSession alice = sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    ActiveSession alice =
+        sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
     sessionService.saveActiveSession();
     alice.player().addMoney(new BigDecimal("50.00"));
 
@@ -123,11 +126,13 @@ class SessionServiceTest {
     sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("100.00"));
     sessionService.saveActiveSession();
 
-    ActiveSession charlie = sessionService.register("Charlie", "2345".toCharArray(), new BigDecimal("50.00"));
+    ActiveSession charlie =
+        sessionService.register("Charlie", "2345".toCharArray(), new BigDecimal("50.00"));
     charlie.player().addMoney(new BigDecimal("50.00"));
     sessionService.saveActiveSession();
 
-    ActiveSession bob = sessionService.register("Bob", "3456".toCharArray(), new BigDecimal("50.00"));
+    ActiveSession bob =
+        sessionService.register("Bob", "3456".toCharArray(), new BigDecimal("50.00"));
     bob.player().addMoney(new BigDecimal("50.00"));
     sessionService.saveActiveSession();
 
@@ -181,7 +186,8 @@ class SessionServiceTest {
 
     ActiveSession back = sessionService.login("Alice", "1234".toCharArray());
     assertEquals("Allie", back.player().getName());
-    UserAccountRecord account = new UserAccountRepository(tempDir).findByUsername("Alice").orElseThrow();
+    UserAccountRecord account =
+        new UserAccountRepository(tempDir).findByUsername("Alice").orElseThrow();
     assertEquals("Allie", account.displayName());
   }
 

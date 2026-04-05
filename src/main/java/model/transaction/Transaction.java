@@ -1,8 +1,8 @@
 package model.transaction;
 
 import model.Player;
-import model.Share;
 import model.exception.AlreadyCommittedException;
+import model.market.Share;
 import model.transactioncalculator.TransactionCalculator;
 
 /**
@@ -72,9 +72,9 @@ public abstract class Transaction {
   }
 
   /**
-   * Commits the transaction to a player. This template method enforces the
-   * commit lifecycle: guard against double-commit, validate preconditions,
-   * execute the domain action, archive the transaction, and mark it committed.
+   * Commits the transaction to a player. This template method enforces the commit lifecycle: guard
+   * against double-commit, validate preconditions, execute the domain action, archive the
+   * transaction, and mark it committed.
    *
    * @param player the player to commit the transaction against
    * @throws AlreadyCommittedException if the transaction was already committed
@@ -90,16 +90,16 @@ public abstract class Transaction {
   }
 
   /**
-   * Validates that the player meets all requirements for this transaction.
-   * Throws a domain-specific exception if any precondition is violated.
+   * Validates that the player meets all requirements for this transaction. Throws a domain-specific
+   * exception if any precondition is violated.
    *
    * @param player the player to validate against
    */
   protected abstract void validatePreconditions(Player player);
 
   /**
-   * Performs the core domain action of the transaction (e.g. transfer money
-   * and shares). Called only after preconditions have passed.
+   * Performs the core domain action of the transaction (e.g. transfer money and shares). Called
+   * only after preconditions have passed.
    *
    * @param player the player to execute the transaction against
    */

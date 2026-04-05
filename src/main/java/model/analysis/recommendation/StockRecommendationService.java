@@ -4,7 +4,7 @@ import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import model.Stock;
+import model.market.Stock;
 
 /**
  * Computes a trend-based recommendation from recent stock price data.

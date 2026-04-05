@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
 import java.util.List;
-import model.Stock;
 import model.analysis.recommendation.StockRecommendation;
 import model.analysis.recommendation.StockRecommendationService;
+import model.market.Stock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

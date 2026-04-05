@@ -1,15 +1,14 @@
 package model.analysis;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import model.Exchange;
-import model.InvestableAsset;
 import model.Player;
 import model.Portfolio;
-import model.Share;
+import model.market.Exchange;
+import model.market.InvestableAsset;
+import model.market.Share;
 import model.transaction.Purchase;
 import model.transaction.Sale;
 import model.transaction.Transaction;
@@ -37,9 +36,9 @@ public class PortfolioPerformanceService {
   /**
    * Creates a service with injected collaborators.
    *
-   * @param historicalAssetPriceService helper used to resolve historical asset prices
+   * @param historicalAssetPriceService  helper used to resolve historical asset prices
    * @param performanceMetricsCalculator helper used to derive metrics from value series
-   * @param marketBenchmarkService helper used to derive benchmark metrics
+   * @param marketBenchmarkService       helper used to derive benchmark metrics
    */
   public PortfolioPerformanceService(
       HistoricalAssetPriceService historicalAssetPriceService,
@@ -56,7 +55,7 @@ public class PortfolioPerformanceService {
   /**
    * Calculates the player's portfolio metrics and market benchmark metrics side by side.
    *
-   * @param player player whose strategy should be evaluated
+   * @param player   player whose strategy should be evaluated
    * @param exchange exchange supplying day count and benchmark listings
    * @return side-by-side performance comparison
    */
@@ -71,7 +70,7 @@ public class PortfolioPerformanceService {
   /**
    * Calculates the player's portfolio metrics from reconstructed daily net worth.
    *
-   * @param player player whose strategy should be evaluated
+   * @param player   player whose strategy should be evaluated
    * @param exchange exchange supplying the number of trading days in scope
    * @return player metrics, or unavailable metrics when no trades exist
    */
@@ -88,7 +87,7 @@ public class PortfolioPerformanceService {
   /**
    * Replays the player's transactions day by day and records end-of-day net worth.
    *
-   * @param player player whose trades should be replayed
+   * @param player   player whose trades should be replayed
    * @param exchange exchange supplying the day range
    * @return ordered end-of-day net worth series
    */
@@ -96,14 +95,16 @@ public class PortfolioPerformanceService {
     checkNotNull(player, "Player");
     checkNotNull(exchange, "Exchange");
 
-    List<Transaction> transactions = player.getTransactionArchive().getTransactions(exchange.getDay());
+    List<Transaction> transactions =
+        player.getTransactionArchive().getTransactions(exchange.getDay());
     Portfolio replayPortfolio = new Portfolio();
     BigDecimal cash = player.getStartingMoney();
     int transactionIndex = 0;
     List<BigDecimal> dailyValues = new ArrayList<>();
 
     for (int day = 1; day <= exchange.getDay(); day++) {
-      while (transactionIndex < transactions.size() && transactions.get(transactionIndex).getDay() == day) {
+      while (transactionIndex < transactions.size()
+          && transactions.get(transactionIndex).getDay() == day) {
         cash = applyTransaction(transactions.get(transactionIndex), replayPortfolio, cash);
         transactionIndex++;
       }
@@ -114,7 +115,8 @@ public class PortfolioPerformanceService {
     return dailyValues;
   }
 
-  private BigDecimal applyTransaction(Transaction transaction, Portfolio replayPortfolio, BigDecimal cash) {
+  private BigDecimal applyTransaction(Transaction transaction, Portfolio replayPortfolio,
+      BigDecimal cash) {
     if (transaction instanceof Purchase purchase) {
       replayPortfolio.addShare(purchase.getShare());
       return cash.subtract(purchase.getCalculator().calculateTotal());

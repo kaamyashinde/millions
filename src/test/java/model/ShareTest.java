@@ -1,9 +1,12 @@
 package model;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.math.BigDecimal;
+import model.market.Share;
+import model.market.Stock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.math.BigDecimal;
 
 class ShareTest {
 
@@ -42,9 +45,9 @@ class ShareTest {
     Stock newStock = new Stock("GOOGL", "Alphabet Inc.");
     BigDecimal quantity = new BigDecimal("5");
     BigDecimal price = new BigDecimal("2800.00");
-    
+
     Share share = new Share(newStock, quantity, price);
-    
+
     assertNotNull(share);
     assertEquals(newStock, share.getAsset());
     assertEquals(quantity, share.getQuantity());
@@ -61,10 +64,10 @@ class ShareTest {
   void shareWithDifferentPrices() {
     BigDecimal lowPrice = new BigDecimal("10.00");
     BigDecimal highPrice = new BigDecimal("9999.99");
-    
+
     Share lowPriceShare = new Share(testStock, testQuantity, lowPrice);
     Share highPriceShare = new Share(testStock, testQuantity, highPrice);
-    
+
     assertEquals(lowPrice, lowPriceShare.getPurchasePrice());
     assertEquals(highPrice, highPriceShare.getPurchasePrice());
   }

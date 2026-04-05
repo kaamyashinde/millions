@@ -2,7 +2,6 @@ package view;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
@@ -10,9 +9,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import model.Exchange;
 import model.Player;
-import model.Stock;
+import model.market.Exchange;
+import model.market.Stock;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -72,9 +71,9 @@ class PlayerPortfolioPanelTest {
   /**
    * Creates a stock with ordered price history.
    *
-   * @param symbol stock symbol
+   * @param symbol  stock symbol
    * @param company company name
-   * @param prices ordered prices, oldest to newest
+   * @param prices  ordered prices, oldest to newest
    * @return stock populated with those prices
    */
   private static Stock stockWithPrices(String symbol, String company, String... prices) {
@@ -115,6 +114,7 @@ class PlayerPortfolioPanelTest {
 
   @FunctionalInterface
   private interface PanelSupplier {
+
     PlayerPortfolioPanel get() throws Exception;
   }
 }

@@ -3,8 +3,8 @@ package model.persistence;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.List;
-import model.Exchange;
-import model.Stock;
+import model.market.Exchange;
+import model.market.Stock;
 import org.junit.jupiter.api.Test;
 
 class MarketDataLoaderTest {
@@ -13,7 +13,8 @@ class MarketDataLoaderTest {
 
   @Test
   void loadFromResource_readsBundledDemoMarketData() {
-    MarketData marketData = MarketDataLoader.loadFromResource(MarketDataLoaderTest.class, DEMO_RESOURCE);
+    MarketData marketData =
+        MarketDataLoader.loadFromResource(MarketDataLoaderTest.class, DEMO_RESOURCE);
 
     assertEquals(4, marketData.stocks().size());
     assertEquals(2, marketData.funds().size());
@@ -23,7 +24,8 @@ class MarketDataLoaderTest {
 
   @Test
   void loadFromResource_canBootstrapExchangeWithFunds() {
-    MarketData marketData = MarketDataLoader.loadFromResource(MarketDataLoaderTest.class, DEMO_RESOURCE);
+    MarketData marketData =
+        MarketDataLoader.loadFromResource(MarketDataLoaderTest.class, DEMO_RESOURCE);
     Exchange exchange = new Exchange.Builder("NYSE")
         .stocks(marketData.stocks())
         .funds(marketData.funds())

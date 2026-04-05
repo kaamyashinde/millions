@@ -1,7 +1,7 @@
-package model.fund;
+package model.market.fund;
 
 import java.math.BigDecimal;
-import model.Stock;
+import model.market.Stock;
 import model.utils.Validator;
 
 /**
@@ -12,7 +12,7 @@ public record FundComponent(Stock stock, BigDecimal weight) {
   /**
    * Creates one weighted stock component for a fund definition.
    *
-   * @param stock underlying stock included in the fund
+   * @param stock  underlying stock included in the fund
    * @param weight positive portfolio weight for this stock
    */
   public FundComponent {

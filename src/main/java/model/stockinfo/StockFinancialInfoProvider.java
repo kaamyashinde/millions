@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 import java.util.Random;
-import model.Stock;
+import model.market.Stock;
 
 /**
  * Supplies deterministic mock fundamentals per stock symbol so UI can show simplified financials
@@ -15,7 +15,9 @@ public class StockFinancialInfoProvider {
   private static final BigDecimal MILLION = BigDecimal.valueOf(1_000_000L);
   private static final BigDecimal MIN_REVENUE_M = BigDecimal.valueOf(10);
   private static final BigDecimal REVENUE_SPAN_M = BigDecimal.valueOf(90);
-  /** Minimum positive profit-to-revenue ratio to classify as {@link CompanyHealth#STRONG}. */
+  /**
+   * Minimum positive profit-to-revenue ratio to classify as {@link CompanyHealth#STRONG}.
+   */
   private static final BigDecimal STRONG_MARGIN = new BigDecimal("0.10");
 
   /**

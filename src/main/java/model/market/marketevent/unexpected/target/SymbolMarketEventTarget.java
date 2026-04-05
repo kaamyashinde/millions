@@ -1,9 +1,9 @@
-package model.marketevent.unexpected.target;
+package model.market.marketevent.unexpected.target;
 
 import static model.utils.Validator.checkNotNull;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import model.Stock;
+import model.market.Stock;
 
 /**
  * Targets one or more stock symbols directly.

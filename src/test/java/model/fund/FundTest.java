@@ -3,7 +3,9 @@ package model.fund;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
 import java.util.List;
-import model.Stock;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 import org.junit.jupiter.api.Test;
 
 class FundTest {

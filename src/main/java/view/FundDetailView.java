@@ -9,8 +9,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 
 /**
  * Dedicated fund detail view showing the latest derived price and composite holdings.

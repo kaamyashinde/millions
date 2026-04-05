@@ -1,5 +1,6 @@
 package view;
 
+import controller.RegularSavingsPanelController;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -24,11 +25,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
-
-import controller.RegularSavingsPanelController;
-import model.Exchange;
-import model.InvestableAsset;
 import model.Player;
+import model.market.Exchange;
+import model.market.InvestableAsset;
 import model.savings.RegularSavingsPlan;
 import model.savings.RegularSavingsProcessor;
 import model.savings.SavingsInstallmentMode;
@@ -38,10 +37,9 @@ import view.components.toast.ToastMode;
 /**
  * JavaFX panel for demoing {@link RegularSavingsPlan} against an {@link Exchange} and
  * {@link Player}: list plans, add (asset chosen from {@link RegularSavingsPanelController}
- * listing), edit in
- * place (symbol stays fixed; use remove + add to change ticker), remove, and advance the exchange one
- * day while running {@link RegularSavingsProcessor}. Skipped installments surface as warning
- * toasts.
+ * listing), edit in place (symbol stays fixed; use remove + add to change ticker), remove, and
+ * advance the exchange one day while running {@link RegularSavingsProcessor}. Skipped installments
+ * surface as warning toasts.
  *
  * @author kevindmazali
  * @version 1.0.0
@@ -94,9 +92,10 @@ public class RegularSavingsPanel extends BorderPane {
    * Builds a panel wired to the given exchange and player and invokes a callback after each
    * successful model mutation.
    *
-   * @param exchange exchange whose day advances and whose listed assets validate new symbols
-   * @param player player whose plans are listed and edited
-   * @param notifications service used for insufficient-fund skips after advancing a day
+   * @param exchange         exchange whose day advances and whose listed assets validate new
+   *                         symbols
+   * @param player           player whose plans are listed and edited
+   * @param notifications    service used for insufficient-fund skips after advancing a day
    * @param afterModelChange callback invoked after a successful add, edit, remove, or day advance
    */
   public RegularSavingsPanel(

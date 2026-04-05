@@ -3,7 +3,6 @@ package view;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
@@ -11,9 +10,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 import model.persistence.GameStateMapper;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketData;
@@ -57,7 +56,8 @@ class GuiAppShellTest {
   @Test
   void registerThenLogoutSwapsBetweenAuthAndWorkspace() throws Exception {
     SessionService sessionService = createSessionService();
-    GuiAppShell shell = runOnFxThread(() -> new GuiAppShell(sessionService, new SessionWorkspaceFactory(), false));
+    GuiAppShell shell =
+        runOnFxThread(() -> new GuiAppShell(sessionService, new SessionWorkspaceFactory(), false));
 
     assertTrue(shell.isShowingAuthView());
 
@@ -81,7 +81,8 @@ class GuiAppShellTest {
   @Test
   void switchingUsersRebuildsWorkspaceAndAvoidsCrossUserLeakage() throws Exception {
     SessionService sessionService = createSessionService();
-    GuiAppShell shell = runOnFxThread(() -> new GuiAppShell(sessionService, new SessionWorkspaceFactory(), false));
+    GuiAppShell shell =
+        runOnFxThread(() -> new GuiAppShell(sessionService, new SessionWorkspaceFactory(), false));
 
     runOnFxThread(() -> {
       shell.submitRegistration("Alice", "1234", "1000.00");
@@ -232,6 +233,7 @@ class GuiAppShellTest {
 
   @FunctionalInterface
   private interface ShellSupplier {
+
     GuiAppShell get() throws Exception;
   }
 }

@@ -1,7 +1,6 @@
 package view;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
@@ -24,12 +23,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.Exchange;
 import model.Player;
-import model.Share;
 import model.analysis.MetricValue;
 import model.analysis.PerformanceComparison;
 import model.analysis.PortfolioPerformanceService;
+import model.market.Exchange;
+import model.market.Share;
 import view.components.image.DiskImageLoader;
 import view.components.image.ImageLoader;
 
@@ -70,8 +69,8 @@ public class PlayerPortfolioPanel extends BorderPane {
   /**
    * Builds a player summary panel backed by the given exchange and player.
    *
-   * @param exchange exchange supplying market and trading-day state
-   * @param player player whose summary and holdings should be shown
+   * @param exchange   exchange supplying market and trading-day state
+   * @param player     player whose summary and holdings should be shown
    * @param avatarPath path to profile avatar image (may not exist yet)
    */
   public PlayerPortfolioPanel(Exchange exchange, Player player, Path avatarPath) {
@@ -102,8 +101,10 @@ public class PlayerPortfolioPanel extends BorderPane {
     GridPane summaryGrid = new GridPane();
     summaryGrid.setHgap(18);
     summaryGrid.setVgap(8);
-    summaryGrid.addRow(0, new Label("Player"), playerLabel, new Label("Trading day"), tradingDayLabel);
-    summaryGrid.addRow(1, new Label("Balance"), balanceLabel, new Label("Net worth"), netWorthLabel);
+    summaryGrid.addRow(0, new Label("Player"), playerLabel, new Label("Trading day"),
+        tradingDayLabel);
+    summaryGrid.addRow(1, new Label("Balance"), balanceLabel, new Label("Net worth"),
+        netWorthLabel);
 
     VBox top = new VBox(12, topRow, summaryGrid);
     setTop(top);
@@ -123,13 +124,16 @@ public class PlayerPortfolioPanel extends BorderPane {
 
   private void buildHoldingsTable() {
     TableColumn<Share, String> symbolColumn = new TableColumn<>("Symbol");
-    symbolColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAsset().getSymbol()));
+    symbolColumn.setCellValueFactory(
+        c -> new SimpleStringProperty(c.getValue().getAsset().getSymbol()));
 
     TableColumn<Share, String> nameColumn = new TableColumn<>("Name");
-    nameColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAsset().getDisplayName()));
+    nameColumn.setCellValueFactory(
+        c -> new SimpleStringProperty(c.getValue().getAsset().getDisplayName()));
 
     TableColumn<Share, String> typeColumn = new TableColumn<>("Type");
-    typeColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAsset().getAssetType()));
+    typeColumn.setCellValueFactory(
+        c -> new SimpleStringProperty(c.getValue().getAsset().getAssetType()));
 
     TableColumn<Share, String> quantityColumn = new TableColumn<>("Quantity");
     quantityColumn.setCellValueFactory(
@@ -161,14 +165,17 @@ public class PlayerPortfolioPanel extends BorderPane {
     metricsGrid.setHgap(18);
     metricsGrid.setVgap(8);
 
-    metricsGrid.addRow(0, new Label("Metric"), new Label("Your portfolio"), new Label("Market benchmark"));
-    metricsGrid.addRow(1, new Label("Return %"), portfolioReturnValueLabel, benchmarkReturnValueLabel);
+    metricsGrid.addRow(0, new Label("Metric"), new Label("Your portfolio"),
+        new Label("Market benchmark"));
+    metricsGrid.addRow(1, new Label("Return %"), portfolioReturnValueLabel,
+        benchmarkReturnValueLabel);
     metricsGrid.addRow(
         2,
         new Label("Volatility"),
         portfolioVolatilityValueLabel,
         benchmarkVolatilityValueLabel);
-    metricsGrid.addRow(3, new Label("Sharpe ratio"), portfolioSharpeValueLabel, benchmarkSharpeValueLabel);
+    metricsGrid.addRow(3, new Label("Sharpe ratio"), portfolioSharpeValueLabel,
+        benchmarkSharpeValueLabel);
 
     VBox metricsBox = new VBox(10, heading, metricsGrid);
     metricsBox.setPadding(new Insets(14, 0, 0, 0));
@@ -189,12 +196,18 @@ public class PlayerPortfolioPanel extends BorderPane {
     holdings.setAll(player.getPortfolio().getShares());
 
     PerformanceComparison comparison = performanceService.compareAgainstMarket(player, exchange);
-    portfolioReturnValueLabel.setText(formatMetricValue(comparison.portfolio().returnPercent(), true));
-    portfolioVolatilityValueLabel.setText(formatMetricValue(comparison.portfolio().volatility(), true));
-    portfolioSharpeValueLabel.setText(formatMetricValue(comparison.portfolio().sharpeRatio(), false));
-    benchmarkReturnValueLabel.setText(formatMetricValue(comparison.benchmark().returnPercent(), true));
-    benchmarkVolatilityValueLabel.setText(formatMetricValue(comparison.benchmark().volatility(), true));
-    benchmarkSharpeValueLabel.setText(formatMetricValue(comparison.benchmark().sharpeRatio(), false));
+    portfolioReturnValueLabel.setText(
+        formatMetricValue(comparison.portfolio().returnPercent(), true));
+    portfolioVolatilityValueLabel.setText(
+        formatMetricValue(comparison.portfolio().volatility(), true));
+    portfolioSharpeValueLabel.setText(
+        formatMetricValue(comparison.portfolio().sharpeRatio(), false));
+    benchmarkReturnValueLabel.setText(
+        formatMetricValue(comparison.benchmark().returnPercent(), true));
+    benchmarkVolatilityValueLabel.setText(
+        formatMetricValue(comparison.benchmark().volatility(), true));
+    benchmarkSharpeValueLabel.setText(
+        formatMetricValue(comparison.benchmark().sharpeRatio(), false));
     holdingsTable.refresh();
   }
 
@@ -253,7 +266,8 @@ public class PlayerPortfolioPanel extends BorderPane {
         case NO_TRADES -> "N/A (no trades yet)";
         case INSUFFICIENT_HISTORY -> "N/A (need more history)";
         case ZERO_VOLATILITY -> "N/A (zero volatility)";
-        case AVAILABLE -> throw new IllegalArgumentException("Available metrics do not need fallback text.");
+        case AVAILABLE ->
+            throw new IllegalArgumentException("Available metrics do not need fallback text.");
       };
     }
 

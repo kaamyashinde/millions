@@ -1,8 +1,8 @@
-package model.fund;
+package model.market.fund;
 
 import java.math.BigDecimal;
 import java.util.List;
-import model.InvestableAsset;
+import model.market.InvestableAsset;
 import model.utils.Validator;
 
 /**
@@ -17,8 +17,8 @@ public class Fund implements InvestableAsset {
   /**
    * Creates a new fund with weighted stock components.
    *
-   * @param symbol unique trading symbol for the fund
-   * @param name display name shown to users
+   * @param symbol     unique trading symbol for the fund
+   * @param name       display name shown to users
    * @param components weighted stock allocations that define the fund
    */
   public Fund(String symbol, String name, List<FundComponent> components) {

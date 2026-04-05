@@ -22,9 +22,9 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import model.Exchange;
 import model.Player;
-import model.Stock;
+import model.market.Exchange;
+import model.market.Stock;
 import model.persistence.MarketData;
 import model.persistence.MarketDataLoader;
 import view.components.notification.NotificationService;
@@ -36,8 +36,8 @@ import view.components.toast.ToastMode;
  * <strong>Player</strong> tab hosts {@link PlayerPortfolioPanel}; <strong>Stocks</strong> tab
  * hosts {@link StocksListPanel}; <strong>Funds</strong> tab hosts {@link FundsListPanel};
  * <strong>Savings</strong> tab hosts {@link RegularSavingsPanel} with an {@link Exchange} loaded
- * from bundled CSV and demo funds, and {@link Player} "k" with starting balance 5000. A heading
- * and four toast-trigger buttons sit above the tabs; toasts float over the top-right corner of the
+ * from bundled CSV and demo funds, and {@link Player} "k" with starting balance 5000. A heading and
+ * four toast-trigger buttons sit above the tabs; toasts float over the top-right corner of the
  * scene.
  *
  * @author kaamyashinde
@@ -50,7 +50,9 @@ public class ToastDemoApp extends Application {
   private static final String DEMO_CSV_RESOURCE = "/data/demo-stocks.csv";
   private static final int TICKER_PREVIEW_MAX = 8;
 
-  /** Long auto-dismiss for seeded rows so the stacked tray stays visible for layout checks. */
+  /**
+   * Long auto-dismiss for seeded rows so the stacked tray stays visible for layout checks.
+   */
   private static final Duration SEED_DISPLAY_DURATION = Duration.minutes(10);
 
   private final NotificationService notifications = new NotificationService();
@@ -58,7 +60,8 @@ public class ToastDemoApp extends Application {
 
   @Override
   public void start(Stage stage) {
-    MarketData marketData = MarketDataLoader.loadFromResource(ToastDemoApp.class, DEMO_CSV_RESOURCE);
+    MarketData marketData =
+        MarketDataLoader.loadFromResource(ToastDemoApp.class, DEMO_CSV_RESOURCE);
     List<Stock> stocks = marketData.stocks();
     NotificationsPanel notificationsPanel = new NotificationsPanel(notifications);
 
@@ -79,7 +82,8 @@ public class ToastDemoApp extends Application {
       Label stocksError =
           new Label("Could not load demo-stocks.csv. No listings to show.");
       stocksError.setWrapText(true);
-      playerTab = new Tab("Player", new Label("Could not load demo-stocks.csv. Player view unavailable."));
+      playerTab =
+          new Tab("Player", new Label("Could not load demo-stocks.csv. Player view unavailable."));
       stocksTab = new Tab("Stocks", stocksError);
       fundsTab = new Tab("Funds", new Label("Could not build funds without demo stocks."));
       savingsTab = new Tab("Savings", error);
@@ -92,7 +96,8 @@ public class ToastDemoApp extends Application {
       showLoadedNotifications(notifications, demoExchange, stocks, demoPlayer);
 
       PlayerPortfolioPanel playerPanel =
-          new PlayerPortfolioPanel(demoExchange, demoPlayer, Path.of("/nonexistent/millions-demo-avatar.png"));
+          new PlayerPortfolioPanel(demoExchange, demoPlayer,
+              Path.of("/nonexistent/millions-demo-avatar.png"));
       StocksListPanel stocksPanel = new StocksListPanel(demoExchange);
       FundsListPanel fundsPanel = new FundsListPanel(demoExchange);
       playerTab = new Tab("Player", playerPanel);
@@ -139,7 +144,9 @@ public class ToastDemoApp extends Application {
     Tab quizTab = new Tab("Quiz", new QuizLauncherPanel());
     quizTab.setClosable(false);
 
-    TabPane tabs = new TabPane(notificationsTab, playerTab, stocksTab, fundsTab, savingsTab, learningHubTab, quizTab);
+    TabPane tabs =
+        new TabPane(notificationsTab, playerTab, stocksTab, fundsTab, savingsTab, learningHubTab,
+            quizTab);
 
     Text heading = new Text("Toast Demo");
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
@@ -209,8 +216,8 @@ public class ToastDemoApp extends Application {
   }
 
   /**
-   * Enqueues one notification of each {@link ToastMode} (ERROR, WARNING, INFO, SUCCESS) with a
-   * long display duration so the stacked tray remains visible for layout preview.
+   * Enqueues one notification of each {@link ToastMode} (ERROR, WARNING, INFO, SUCCESS) with a long
+   * display duration so the stacked tray remains visible for layout preview.
    */
   private void seedDemoNotifications() {
     discard(notifications.show(ToastMode.ERROR, "Something went wrong!",
@@ -230,7 +237,8 @@ public class ToastDemoApp extends Application {
    * @param id the notification identifier to discard
    */
   @SuppressWarnings("unused")
-  private static void discard(UUID id) {}
+  private static void discard(UUID id) {
+  }
 
   private static void showLoadedNotifications(
       NotificationService notifications,

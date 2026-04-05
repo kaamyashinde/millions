@@ -2,15 +2,14 @@ package model.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
-import model.Exchange;
 import model.Player;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.Exchange;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 import model.savings.RegularSavingsPlan;
 import model.savings.SavingsInstallmentMode;
 import org.junit.jupiter.api.Test;
@@ -46,7 +45,8 @@ class GameStateRepositoryTest {
     assertEquals(exchange.getDay(), restoredExchange.getDay());
     assertEquals(player.getMoney(), restoredPlayer.getMoney());
     assertEquals(1, restoredPlayer.getPortfolio().getShares().size());
-    assertEquals("AAPL", restoredPlayer.getPortfolio().getShares().getFirst().getAsset().getSymbol());
+    assertEquals("AAPL",
+        restoredPlayer.getPortfolio().getShares().getFirst().getAsset().getSymbol());
     assertEquals(1, restoredPlayer.getTransactionArchive().getAllTransactions().size());
     assertEquals(1, restoredPlayer.getRegularSavingsPlans().size());
     assertEquals(

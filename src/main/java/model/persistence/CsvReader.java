@@ -13,9 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 
 /**
  * Reads mixed market data from CSV where each row is either a stock or a fund definition.
@@ -25,7 +25,7 @@ import model.fund.FundComponent;
  *   <li>{@code STOCK,symbol,company,price}</li>
  *   <li>{@code FUND,symbol,name,STOCK_A:0.40,STOCK_B:0.60}</li>
  * </ul>
- *
+ * <p>
  * Empty lines and comment lines beginning with {@code #} are ignored.
  */
 public final class CsvReader {
@@ -40,7 +40,7 @@ public final class CsvReader {
    * Reads mixed market data from a CSV file on disk.
    *
    * @param directory directory containing the CSV file
-   * @param fileName file name without the {@code .csv} extension
+   * @param fileName  file name without the {@code .csv} extension
    * @return parsed stocks and funds
    */
   public static MarketData readMarketData(Path directory, String fileName) {
@@ -59,7 +59,8 @@ public final class CsvReader {
    * @return parsed stocks and funds
    */
   public static MarketData readMarketData(InputStream input) {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+    BufferedReader reader =
+        new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
     try (Stream<String> lines = reader.lines()) {
       return marketDataFromLineStream(lines);
     }
@@ -69,7 +70,7 @@ public final class CsvReader {
    * Reads only stocks from a mixed market-data CSV.
    *
    * @param directory directory containing the CSV file
-   * @param fileName file name without the {@code .csv} extension
+   * @param fileName  file name without the {@code .csv} extension
    * @return loaded stocks
    */
   public static List<Stock> readCsv(Path directory, String fileName) {
@@ -114,7 +115,8 @@ public final class CsvReader {
     return stocksBySymbol;
   }
 
-  private static List<Fund> parseFunds(List<String> cleanedLines, Map<String, Stock> stocksBySymbol) {
+  private static List<Fund> parseFunds(List<String> cleanedLines,
+      Map<String, Stock> stocksBySymbol) {
     return cleanedLines.stream()
         .map(CsvReader::splitLine)
         .filter(tokens -> FUND_RECORD.equals(tokens[0]))

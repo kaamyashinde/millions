@@ -3,15 +3,14 @@ package model.persistence;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -48,7 +47,8 @@ class CsvWriterTest {
 
   @Test
   void writeMarketDataToFile_writesStocksAndFundsInMixedFormat() throws IOException {
-    MarketData marketData = new MarketData(List.of(testStock1, testStock2, testStock3), List.of(blendFund));
+    MarketData marketData =
+        new MarketData(List.of(testStock1, testStock2, testStock3), List.of(blendFund));
 
     CsvWriter.writeMarketDataToFile(tempDir, "test_multiple", marketData);
 
@@ -98,12 +98,14 @@ class CsvWriterTest {
 
     Path csvFile = tempDir.resolve("test_extension.csv");
     assertTrue(Files.exists(csvFile), "File should have .csv extension");
-    assertFalse(Files.exists(tempDir.resolve("test_extension")), "File without extension should not exist");
+    assertFalse(Files.exists(tempDir.resolve("test_extension")),
+        "File without extension should not exist");
   }
 
   @Test
   void writeAndRead_roundTrip_preservesStocksAndFunds() throws IOException {
-    MarketData original = new MarketData(List.of(testStock1, testStock2, testStock3), List.of(blendFund));
+    MarketData original =
+        new MarketData(List.of(testStock1, testStock2, testStock3), List.of(blendFund));
 
     CsvWriter.writeMarketDataToFile(tempDir, "roundtrip", original);
 
@@ -115,6 +117,7 @@ class CsvWriterTest {
     assertEquals("Apple Inc.", loaded.stocks().get(0).getCompany());
     assertEquals(new BigDecimal("150.25"), loaded.stocks().get(0).getSalesPrice());
     assertEquals("BLEND", loaded.funds().getFirst().getSymbol());
-    assertEquals(new BigDecimal("0.50"), loaded.funds().getFirst().getComponents().getFirst().weight());
+    assertEquals(new BigDecimal("0.50"),
+        loaded.funds().getFirst().getComponents().getFirst().weight());
   }
 }

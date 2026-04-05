@@ -7,9 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 
 /**
  * Writes mixed market-data CSV files containing both stocks and funds.
@@ -25,8 +25,8 @@ public final class CsvWriter {
   /**
    * Writes mixed market data to a CSV file.
    *
-   * @param directory directory where the CSV file will be saved
-   * @param fileName name of the CSV file to write to without the {@code .csv} extension
+   * @param directory  directory where the CSV file will be saved
+   * @param fileName   name of the CSV file to write to without the {@code .csv} extension
    * @param marketData stocks and funds to serialize
    */
   public static void writeMarketDataToFile(Path directory, String fileName, MarketData marketData) {
@@ -48,8 +48,8 @@ public final class CsvWriter {
   /**
    * Writes a stock-only market-data file in the mixed-format schema.
    *
-   * @param directory directory where the CSV file will be saved
-   * @param fileName file name without the {@code .csv} extension
+   * @param directory    directory where the CSV file will be saved
+   * @param fileName     file name without the {@code .csv} extension
    * @param stocksToSave stocks to serialize
    */
   public static void writeCsvToFile(Path directory, String fileName, List<Stock> stocksToSave) {

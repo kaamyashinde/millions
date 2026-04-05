@@ -1,11 +1,11 @@
 package model;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import model.market.Share;
 import model.savings.RegularSavingsPlan;
 import model.transaction.Transaction;
 import model.transaction.TransactionArchive;
@@ -25,7 +25,9 @@ public class Player {
   private PlayerLevel playerLevel;
   private final List<PlayerObserver> observers;
 
-  /** Recurring purchase plans; list is modified only via add/remove helpers. */
+  /**
+   * Recurring purchase plans; list is modified only via add/remove helpers.
+   */
   private final List<RegularSavingsPlan> regularSavingsPlans;
   private BigDecimal money;
 
@@ -49,12 +51,12 @@ public class Player {
   /**
    * Rebuilds a player from previously persisted state.
    *
-   * @param name player name to restore
+   * @param name          player name to restore
    * @param startingMoney initial balance recorded when the profile was created
-   * @param currentMoney current liquid balance
-   * @param shares portfolio lots to restore
-   * @param transactions transaction history to restore
-   * @param savingsPlans recurring savings plans to restore
+   * @param currentMoney  current liquid balance
+   * @param shares        portfolio lots to restore
+   * @param transactions  transaction history to restore
+   * @param savingsPlans  recurring savings plans to restore
    * @return restored player instance containing the supplied state
    */
   public static Player restore(

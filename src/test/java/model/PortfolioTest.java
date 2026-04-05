@@ -1,10 +1,15 @@
 package model;
 
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
+import model.market.Share;
+import model.market.Stock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class PortfolioTest {
 
@@ -64,10 +69,10 @@ class PortfolioTest {
   @Test
   void getShares() {
     assertTrue(portfolio.getShares().isEmpty());
-    
+
     portfolio.addShare(appleShare);
     portfolio.addShare(googleShare);
-    
+
     List<Share> shares = portfolio.getShares();
     assertEquals(2, shares.size());
     assertTrue(shares.contains(appleShare));
@@ -77,16 +82,16 @@ class PortfolioTest {
   @Test
   void getSharesBasedOnSymbol() {
     Share anotherAppleShare = new Share(appleStock, new BigDecimal("20"), new BigDecimal("155.00"));
-    
+
     portfolio.addShare(appleShare);
     portfolio.addShare(googleShare);
     portfolio.addShare(anotherAppleShare);
-    
+
     List<Share> appleShares = portfolio.getSharesBasedOnSymbol("AAPL");
     assertEquals(2, appleShares.size());
     assertTrue(appleShares.contains(appleShare));
     assertTrue(appleShares.contains(anotherAppleShare));
-    
+
     List<Share> googleShares = portfolio.getSharesBasedOnSymbol("GOOGL");
     assertEquals(1, googleShares.size());
     assertTrue(googleShares.contains(googleShare));
@@ -107,7 +112,7 @@ class PortfolioTest {
   @Test
   void containsShare() {
     assertFalse(portfolio.containsShare(appleShare));
-    
+
     portfolio.addShare(appleShare);
     assertTrue(portfolio.containsShare(appleShare));
     assertFalse(portfolio.containsShare(googleShare));

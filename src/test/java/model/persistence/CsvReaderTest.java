@@ -2,7 +2,6 @@ package model.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -10,8 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import model.Stock;
-import model.fund.Fund;
+import model.market.Stock;
+import model.market.fund.Fund;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -52,7 +51,7 @@ class CsvReaderTest {
     String csvContent = """
         # Comment
         STOCK,NVDA,Nvidia,191.27
-
+        
         # Another comment
         STOCK,AAPL,Apple Inc,152.54
         FUND,PAIR,Pair Fund,NVDA:0.40,AAPL:0.60
@@ -75,7 +74,8 @@ class CsvReaderTest {
     Path csvFile = tempDir.resolve("with_unknown_component.csv");
     Files.writeString(csvFile, csvContent);
 
-    assertThrows(IllegalArgumentException.class, () -> CsvReader.readMarketData(tempDir, "with_unknown_component"));
+    assertThrows(IllegalArgumentException.class,
+        () -> CsvReader.readMarketData(tempDir, "with_unknown_component"));
   }
 
   @Test
@@ -87,7 +87,8 @@ class CsvReaderTest {
     Path csvFile = tempDir.resolve("with_invalid_type.csv");
     Files.writeString(csvFile, csvContent);
 
-    assertThrows(IllegalArgumentException.class, () -> CsvReader.readMarketData(tempDir, "with_invalid_type"));
+    assertThrows(IllegalArgumentException.class,
+        () -> CsvReader.readMarketData(tempDir, "with_invalid_type"));
   }
 
   @Test

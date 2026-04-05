@@ -1,8 +1,8 @@
 package model.persistence;
 
 import java.util.List;
-import model.Stock;
-import model.fund.Fund;
+import model.market.Stock;
+import model.market.fund.Fund;
 
 /**
  * Immutable persisted market payload containing all loaded stocks and funds.
@@ -13,7 +13,7 @@ public record MarketData(List<Stock> stocks, List<Fund> funds) {
    * Creates a normalized market-data bundle with immutable list copies.
    *
    * @param stocks loaded stock definitions
-   * @param funds loaded fund definitions
+   * @param funds  loaded fund definitions
    */
   public MarketData {
     stocks = List.copyOf(stocks);

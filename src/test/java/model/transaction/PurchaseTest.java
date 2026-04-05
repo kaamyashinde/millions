@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import model.Player;
-import model.Share;
-import model.Stock;
 import model.exception.AlreadyCommittedException;
 import model.exception.InsufficientFundsException;
+import model.market.Share;
+import model.market.Stock;
 import model.transactioncalculator.PurchaseCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,7 +74,8 @@ class PurchaseTest {
   @Test
   void commitThrowsAlreadyCommittedWhenCommitCalledTwice() {
     Purchase purchase = new Purchase(share, 1);
-    BigDecimal afterFirstCommit = player.getMoney().subtract(purchase.getCalculator().calculateTotal());
+    BigDecimal afterFirstCommit =
+        player.getMoney().subtract(purchase.getCalculator().calculateTotal());
 
     purchase.commit(player);
 

@@ -2,7 +2,7 @@ package model.transactioncalculator;
 
 
 import java.math.BigDecimal;
-import model.Share;
+import model.market.Share;
 import model.utils.Validator;
 
 /**

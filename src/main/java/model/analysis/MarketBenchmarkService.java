@@ -1,12 +1,11 @@
 package model.analysis;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import model.Exchange;
-import model.Stock;
+import model.market.Exchange;
+import model.market.Stock;
 
 /**
  * Builds market benchmark metrics from the listed stocks on an exchange.
@@ -30,9 +29,9 @@ public class MarketBenchmarkService {
   /**
    * Creates a benchmark service with injected collaborators.
    *
-   * @param historicalAssetPriceService helper used to resolve historical prices
+   * @param historicalAssetPriceService  helper used to resolve historical prices
    * @param performanceMetricsCalculator helper used to derive performance metrics
-   * @param returnSeriesCalculator helper used to derive daily returns
+   * @param returnSeriesCalculator       helper used to derive daily returns
    */
   public MarketBenchmarkService(
       HistoricalAssetPriceService historicalAssetPriceService,
@@ -66,7 +65,7 @@ public class MarketBenchmarkService {
    * Builds an index-like daily value series that starts at 1.0 and compounds equal-weight daily
    * stock returns.
    *
-   * @param stocks listed stocks included in the benchmark
+   * @param stocks      listed stocks included in the benchmark
    * @param tradingDays number of trading days to include
    * @return benchmark daily values, oldest to newest
    */

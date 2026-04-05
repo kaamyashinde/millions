@@ -1,4 +1,4 @@
-package model.marketevent.unexpected.strategy;
+package model.market.marketevent.unexpected.strategy;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import model.Stock;
-import model.marketevent.unexpected.MarketEvent;
-import model.marketevent.unexpected.target.SymbolMarketEventTarget;
+import model.market.Stock;
+import model.market.marketevent.unexpected.MarketEvent;
+import model.market.marketevent.unexpected.target.SymbolMarketEventTarget;
 
 /**
  * Creates occasional stock-specific market events with a larger shock than the normal daily band.

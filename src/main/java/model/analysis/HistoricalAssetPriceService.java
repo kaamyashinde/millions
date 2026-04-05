@@ -1,13 +1,12 @@
 package model.analysis;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
 import java.util.List;
-import model.InvestableAsset;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.InvestableAsset;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 
 /**
  * Resolves historical prices for stocks and derived fund prices on a trading day.
@@ -18,7 +17,7 @@ public class HistoricalAssetPriceService {
    * Returns the asset price for the requested trading day.
    *
    * @param asset stock or fund whose price should be resolved
-   * @param day trading day number (1-based)
+   * @param day   trading day number (1-based)
    * @return price on that trading day
    */
   public BigDecimal getPriceOnDay(InvestableAsset asset, int day) {
@@ -30,14 +29,15 @@ public class HistoricalAssetPriceService {
     if (asset instanceof Fund fund) {
       return getFundPriceOnDay(fund, day);
     }
-    throw new IllegalArgumentException("Unsupported asset type: " + asset.getClass().getSimpleName());
+    throw new IllegalArgumentException(
+        "Unsupported asset type: " + asset.getClass().getSimpleName());
   }
 
   /**
    * Returns a stock price from its historical price list.
    *
    * @param stock stock to inspect
-   * @param day trading day number (1-based)
+   * @param day   trading day number (1-based)
    * @return stock price on that day
    */
   public BigDecimal getStockPriceOnDay(Stock stock, int day) {
@@ -55,7 +55,7 @@ public class HistoricalAssetPriceService {
    * components.
    *
    * @param fund fund to inspect
-   * @param day trading day number (1-based)
+   * @param day  trading day number (1-based)
    * @return derived fund price on that day
    */
   public BigDecimal getFundPriceOnDay(Fund fund, int day) {
@@ -70,7 +70,7 @@ public class HistoricalAssetPriceService {
    * Returns one weighted historical contribution inside a fund.
    *
    * @param component weighted fund component
-   * @param day trading day number (1-based)
+   * @param day       trading day number (1-based)
    * @return weighted price contribution on that day
    */
   public BigDecimal getComponentContribution(FundComponent component, int day) {

@@ -2,13 +2,11 @@ package cli;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Path;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-import model.Exchange;
 import model.Player;
-import model.Stock;
-import model.Share;
 import model.analysis.MetricStatus;
 import model.analysis.MetricValue;
 import model.analysis.PerformanceComparison;
@@ -16,8 +14,11 @@ import model.analysis.PortfolioPerformanceService;
 import model.exception.InsufficientFundsException;
 import model.exception.InsufficientSharesException;
 import model.exception.ShareNotFoundException;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.Exchange;
+import model.market.Share;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 import model.persistence.GameStateMapper;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketData;
@@ -45,13 +46,12 @@ import model.session.validation.ValidationError;
 import model.transaction.Purchase;
 import model.transaction.Transaction;
 import util.I18n;
-import java.nio.file.Path;
 
 /**
- * The UserInterface class is responsible for handling the user input and output
- * for the Millions stock trading application.
- * The class provides a menu for the user to set up a player, view portfolio and balance,
- * list and search stocks, buy and sell shares, advance the trading day, and view transaction history.
+ * The UserInterface class is responsible for handling the user input and output for the Millions
+ * stock trading application. The class provides a menu for the user to set up a player, view
+ * portfolio and balance, list and search stocks, buy and sell shares, advance the trading day, and
+ * view transaction history.
  */
 public class UserInterface {
 
@@ -145,8 +145,8 @@ public class UserInterface {
   }
 
   /**
-   * Starts the UserInterface. Prints a welcome message and runs the menu loop
-   * until the user chooses to quit.
+   * Starts the UserInterface. Prints a welcome message and runs the menu loop until the user
+   * chooses to quit.
    */
   private static void start() {
     System.out.println(I18n.get("app.welcome.banner"));
@@ -521,7 +521,8 @@ public class UserInterface {
   }
 
   /**
-   * Sells a share from the portfolio. Lists holdings with numbers and prompts for the index to sell.
+   * Sells a share from the portfolio. Lists holdings with numbers and prompts for the index to
+   * sell.
    */
   private static void sellShares() {
     if (isPlayerMissing()) {
@@ -665,7 +666,8 @@ public class UserInterface {
    * Prints the player's portfolio metrics beside the market benchmark metrics.
    */
   private static void printPerformanceComparison() {
-    PerformanceComparison comparison = portfolioPerformanceService.compareAgainstMarket(player, exchange);
+    PerformanceComparison comparison =
+        portfolioPerformanceService.compareAgainstMarket(player, exchange);
     String rowFormat = "   %-18s %-26s %-26s%n";
     System.out.println(I18n.get("performance.header"));
     System.out.printf(
@@ -696,11 +698,11 @@ public class UserInterface {
   /**
    * Prints one side-by-side metric row.
    *
-   * @param rowFormat printf row format
-   * @param label metric label
+   * @param rowFormat       printf row format
+   * @param label           metric label
    * @param portfolioMetric player metric
    * @param benchmarkMetric market metric
-   * @param percentDisplay whether the metric should be formatted as a percent
+   * @param percentDisplay  whether the metric should be formatted as a percent
    */
   private static void printMetricRow(
       String rowFormat,
@@ -718,7 +720,7 @@ public class UserInterface {
   /**
    * Formats one metric value for CLI display.
    *
-   * @param metric metric to format
+   * @param metric         metric to format
    * @param percentDisplay whether the metric should be formatted as a percent
    * @return user-facing metric text
    */
@@ -743,7 +745,8 @@ public class UserInterface {
    */
   private static String metricStatusKey(MetricStatus status) {
     return switch (status) {
-      case AVAILABLE -> throw new IllegalArgumentException("Available metrics do not need a status key.");
+      case AVAILABLE ->
+          throw new IllegalArgumentException("Available metrics do not need a status key.");
       case NO_TRADES -> "performance.unavailable.noTrades";
       case INSUFFICIENT_HISTORY -> "performance.unavailable.history";
       case ZERO_VOLATILITY -> "performance.unavailable.zeroVolatility";
@@ -996,7 +999,8 @@ public class UserInterface {
   }
 
   /**
-   * Lists plans then prompts for a 1-based index to remove via {@link Player#removeRegularSavingsPlanAt(int)}.
+   * Lists plans then prompts for a 1-based index to remove via
+   * {@link Player#removeRegularSavingsPlanAt(int)}.
    */
   private static void removeSavingsPlan() {
     if (isPlayerMissing()) {
@@ -1063,7 +1067,8 @@ public class UserInterface {
   }
 
   /**
-   * Copies the in-memory state from the active session into the CLI fields used by existing actions.
+   * Copies the in-memory state from the active session into the CLI fields used by existing
+   * actions.
    *
    * @param session logged-in session
    */
@@ -1135,7 +1140,8 @@ public class UserInterface {
       System.out.println(I18n.get("profile.avatar.saved"));
     } catch (RuntimeException exception) {
       System.out.println(
-          exception.getMessage() != null ? exception.getMessage() : I18n.get("profile.avatar.failed"));
+          exception.getMessage() != null ? exception.getMessage()
+              : I18n.get("profile.avatar.failed"));
     }
   }
 
@@ -1156,7 +1162,8 @@ public class UserInterface {
       System.out.println(I18n.get("auth.invalidCredentials"));
     } catch (RuntimeException exception) {
       System.out.println(
-          exception.getMessage() != null ? exception.getMessage() : I18n.get("profile.delete.failed"));
+          exception.getMessage() != null ? exception.getMessage()
+              : I18n.get("profile.delete.failed"));
     } finally {
       java.util.Arrays.fill(pin, '0');
     }

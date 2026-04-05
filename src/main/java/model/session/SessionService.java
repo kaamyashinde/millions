@@ -2,13 +2,13 @@ package model.session;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import model.Exchange;
 import model.Player;
+import model.market.Exchange;
 import model.persistence.GameStateSnapshot;
 import model.persistence.ProfileDirectories;
 import model.persistence.SavedRunRecord;
@@ -245,7 +245,9 @@ public final class SessionService {
     profileService.saveAvatarFromFile(sourceImage, requireActiveSession().normalizedUsername());
   }
 
-  /** Removes the avatar image for the active profile. */
+  /**
+   * Removes the avatar image for the active profile.
+   */
   public void clearAvatar() {
     profileService.clearAvatar(requireActiveSession().normalizedUsername());
   }

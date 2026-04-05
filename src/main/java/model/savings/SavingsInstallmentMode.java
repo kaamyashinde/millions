@@ -1,5 +1,7 @@
 package model.savings;
 
+import model.market.Exchange;
+
 /**
  * How a regular savings plan sizes each installment.
  *
@@ -9,9 +11,13 @@ package model.savings;
  */
 public enum SavingsInstallmentMode {
 
-  /** Buy a fixed number of shares each time. */
+  /**
+   * Buy a fixed number of shares each time.
+   */
   FIXED_SHARES,
 
-  /** Spend up to a fixed cash amount (see {@link model.Exchange#buyUpToBudget}). */
+  /**
+   * Spend up to a fixed cash amount (see {@link Exchange#buyUpToBudget}).
+   */
   BUDGET
 }

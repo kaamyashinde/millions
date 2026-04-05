@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
-import model.Exchange;
 import model.Player;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.Exchange;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

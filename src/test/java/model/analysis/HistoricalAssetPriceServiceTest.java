@@ -1,12 +1,11 @@
 package model.analysis;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.math.BigDecimal;
 import java.util.List;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.market.Stock;
+import model.market.fund.Fund;
+import model.market.fund.FundComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,9 +37,9 @@ class HistoricalAssetPriceServiceTest {
   /**
    * Creates a stock with ordered historical prices.
    *
-   * @param symbol stock symbol
+   * @param symbol  stock symbol
    * @param company display name
-   * @param prices ordered prices, oldest to newest
+   * @param prices  ordered prices, oldest to newest
    * @return stock populated with the supplied prices
    */
   private static Stock stockWithPrices(String symbol, String company, String... prices) {

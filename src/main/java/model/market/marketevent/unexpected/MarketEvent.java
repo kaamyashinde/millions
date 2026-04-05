@@ -1,10 +1,10 @@
-package model.marketevent.unexpected;
+package model.market.marketevent.unexpected;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.Set;
-import model.Stock;
-import model.marketevent.unexpected.target.MarketEventTarget;
+import model.market.Stock;
+import model.market.marketevent.unexpected.target.MarketEventTarget;
 
 /**
  * Immutable description of a rare market event and the price shock it applies.

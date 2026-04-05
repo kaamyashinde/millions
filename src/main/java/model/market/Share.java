@@ -1,4 +1,4 @@
-package model;
+package model.market;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;

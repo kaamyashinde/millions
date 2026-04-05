@@ -2,9 +2,9 @@ package model.savings;
 
 import java.util.ArrayList;
 import java.util.List;
-import model.Exchange;
 import model.Player;
 import model.exception.InsufficientFundsException;
+import model.market.Exchange;
 
 /**
  * Applies regular savings plans on trading-day advances: executes due installments via
@@ -19,7 +19,9 @@ import model.exception.InsufficientFundsException;
  */
 public final class RegularSavingsProcessor {
 
-  /** Prevents instantiation. */
+  /**
+   * Prevents instantiation.
+   */
   private RegularSavingsProcessor() {
   }
 
@@ -28,12 +30,13 @@ public final class RegularSavingsProcessor {
    * next due day falls on or before that day. On {@link InsufficientFundsException}, skips the
    * installment but still advances that plan's next due day by one interval.
    *
-   * @param exchange          exchange used for buys (current day must match {@code toDayInclusive}
-   *                            after callers advance it)
-   * @param player            player whose plans are run; if null, returns an empty list
-   * @param fromDayExclusive  day before the first simulated day (typically previous
-   *                            {@link Exchange#getDay()} before {@link Exchange#advance(int)})
-   * @param toDayInclusive    last calendar day to process (typically current {@link Exchange#getDay()})
+   * @param exchange         exchange used for buys (current day must match {@code toDayInclusive}
+   *                         after callers advance it)
+   * @param player           player whose plans are run; if null, returns an empty list
+   * @param fromDayExclusive day before the first simulated day (typically previous
+   *                         {@link Exchange#getDay()} before {@link Exchange#advance(int)})
+   * @param toDayInclusive   last calendar day to process (typically current
+   *                         {@link Exchange#getDay()})
    * @return symbols for which a scheduled installment was skipped due to insufficient funds
    */
   public static List<String> run(Exchange exchange, Player player, int fromDayExclusive,

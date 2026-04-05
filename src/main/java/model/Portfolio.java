@@ -4,8 +4,9 @@ import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
-import model.transactioncalculator.SaleCalculator;
+import model.market.Share;
 import model.transaction.TransactionSizing;
+import model.transactioncalculator.SaleCalculator;
 
 /**
  * Represents a portfolio of stocks and shares.This would belong to a user.

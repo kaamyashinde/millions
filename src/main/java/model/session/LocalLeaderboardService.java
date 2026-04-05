@@ -7,8 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import model.Exchange;
 import model.Player;
+import model.market.Exchange;
 import model.persistence.GameStateMapper;
 import model.persistence.GameStateRepository;
 import model.persistence.GameStateSnapshot;
@@ -26,9 +26,9 @@ public final class LocalLeaderboardService {
    * One row in the local leaderboard.
    *
    * @param normalizedUsername profile directory key
-   * @param displayName name shown in UI
-   * @param netWorth total net worth from saved state
-   * @param hasAvatar whether an avatar image file exists
+   * @param displayName        name shown in UI
+   * @param netWorth           total net worth from saved state
+   * @param hasAvatar          whether an avatar image file exists
    */
   public record LeaderboardRow(
       String normalizedUsername,
@@ -36,6 +36,7 @@ public final class LocalLeaderboardService {
       BigDecimal netWorth,
       boolean hasAvatar
   ) {
+
   }
 
   private final UserAccountRepository userAccountRepository;
@@ -77,7 +78,8 @@ public final class LocalLeaderboardService {
       String label = account.displayName() != null && !account.displayName().isBlank()
           ? account.displayName().trim()
           : account.username();
-      boolean hasAvatar = Files.isRegularFile(profileImageService.avatarPath(account.normalizedUsername()));
+      boolean hasAvatar =
+          Files.isRegularFile(profileImageService.avatarPath(account.normalizedUsername()));
       rows.add(new LeaderboardRow(account.normalizedUsername(), label, netWorth, hasAvatar));
     }
     rows.sort(Comparator.comparing(LeaderboardRow::netWorth).reversed());

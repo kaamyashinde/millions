@@ -2,8 +2,8 @@ package model.session;
 
 import java.math.BigDecimal;
 import java.util.List;
-import model.Exchange;
 import model.Player;
+import model.market.Exchange;
 import model.persistence.GameStateSnapshot;
 import model.persistence.PinHashingService;
 import model.persistence.ProfileDirectories;
@@ -53,7 +53,7 @@ public final class AuthService {
    * @param pin           numeric PIN
    * @param startingMoney initial cash balance
    * @return new active session for the registered profile
-   * @throws DuplicateUsernameException if the username is already taken
+   * @throws DuplicateUsernameException      if the username is already taken
    * @throws RegistrationValidationException if username, PIN, or starting money is invalid
    */
   public ActiveSession register(String username, char[] pin, BigDecimal startingMoney) {

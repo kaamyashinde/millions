@@ -2,8 +2,8 @@ package model.transaction;
 
 
 import model.Player;
-import model.Share;
 import model.exception.ShareNotFoundException;
+import model.market.Share;
 import model.transactioncalculator.SaleCalculator;
 
 /**
@@ -21,7 +21,7 @@ public class Sale extends Transaction {
    * Constructor for Sale.
    *
    * @param share the share
-   * @param day  the trading day
+   * @param day   the trading day
    */
   public Sale(Share share, int day) {
     super(share, day, new SaleCalculator(share));
@@ -29,8 +29,8 @@ public class Sale extends Transaction {
   }
 
   /**
-   * No separate precondition check needed; the share removal in
-   * {@link #execute(Player)} is atomic (validates and removes in one step).
+   * No separate precondition check needed; the share removal in {@link #execute(Player)} is atomic
+   * (validates and removes in one step).
    *
    * @param player the player making the sale
    */

@@ -1,8 +1,8 @@
 package model.transaction;
 
 import model.Player;
-import model.Share;
 import model.exception.InsufficientFundsException;
+import model.market.Share;
 import model.transactioncalculator.PurchaseCalculator;
 
 /**
@@ -20,7 +20,7 @@ public class Purchase extends Transaction {
    * Constructor for Purchase.
    *
    * @param share the share
-   * @param day  the trading day
+   * @param day   the trading day
    */
   public Purchase(Share share, int day) {
     super(share, day, new PurchaseCalculator(share));

@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import model.Stock;
-import model.marketevent.unexpected.MarketEvent;
-import model.marketevent.unexpected.strategy.RandomMarketEventStrategy;
-import model.marketevent.unexpected.target.SymbolMarketEventTarget;
+import model.market.Stock;
+import model.market.marketevent.unexpected.MarketEvent;
+import model.market.marketevent.unexpected.strategy.RandomMarketEventStrategy;
+import model.market.marketevent.unexpected.target.SymbolMarketEventTarget;
 import org.junit.jupiter.api.Test;
 
 class RandomMarketEventStrategyTest {

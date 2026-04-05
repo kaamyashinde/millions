@@ -1,20 +1,19 @@
 package model.persistence;
 
 import static model.utils.Validator.checkNotNull;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import model.Exchange;
 import model.Player;
 import model.PlayerLevel;
-import model.Share;
 import model.analysis.MetricValue;
 import model.analysis.PerformanceComparison;
 import model.analysis.PerformanceMetrics;
 import model.analysis.PortfolioPerformanceService;
+import model.market.Exchange;
+import model.market.Share;
 import model.transactioncalculator.SaleCalculator;
 
 /**

@@ -1,7 +1,6 @@
 package view.components.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,16 +8,16 @@ import model.Player;
 import model.PlayerLevel;
 import model.PlayerLevels;
 import model.PlayerObserver;
-import model.Share;
-import model.Stock;
+import model.market.Share;
+import model.market.Stock;
 import model.transaction.Purchase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests the level-transition tracking logic of {@link LevelUpNotificationObserver}
- * without requiring a JavaFX runtime. Uses a recording spy in place of
- * {@link NotificationService} to capture when the observer would fire.
+ * Tests the level-transition tracking logic of {@link LevelUpNotificationObserver} without
+ * requiring a JavaFX runtime. Uses a recording spy in place of {@link NotificationService} to
+ * capture when the observer would fire.
  */
 class LevelUpNotificationObserverTest {
 
@@ -77,8 +76,8 @@ class LevelUpNotificationObserverTest {
   }
 
   /**
-   * Mirrors the tracking logic of {@link LevelUpNotificationObserver} without
-   * requiring a real {@link NotificationService} (which needs JavaFX).
+   * Mirrors the tracking logic of {@link LevelUpNotificationObserver} without requiring a real
+   * {@link NotificationService} (which needs JavaFX).
    */
   private PlayerObserver buildLevelTransitionSpy(PlayerLevel initialLevel) {
     final PlayerLevel[] previous = {initialLevel};

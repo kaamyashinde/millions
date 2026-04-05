@@ -3,9 +3,10 @@ package model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import model.market.Share;
+import model.market.Stock;
 import model.transaction.Purchase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,8 +94,8 @@ class PlayerLevelTest {
   }
 
   /**
-   * Adds one purchase transaction per day for the given range (inclusive)
-   * to build up distinct trading days in the player's archive.
+   * Adds one purchase transaction per day for the given range (inclusive) to build up distinct
+   * trading days in the player's archive.
    */
   private void addDistinctTradingDays(int fromDay, int toDay) {
     for (int day = fromDay; day <= toDay; day++) {
