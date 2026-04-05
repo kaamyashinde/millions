@@ -4,13 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import model.player.Player;
-import model.player.PlayerObserver;
-import model.player.levels.PlayerLevels;
+import model.core.player.Player;
+import model.core.player.PlayerObserver;
+import model.core.player.levels.PlayerLevels;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

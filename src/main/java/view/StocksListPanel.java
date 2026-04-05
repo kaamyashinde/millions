@@ -20,10 +20,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.market.Exchange;
-import model.market.Stock;
-import model.market.marketevent.unexpected.MarketEvent;
-import model.stockinfo.StockFinancialInfoProvider;
+import model.analysis.stockinfo.StockFinancialInfoProvider;
+import model.core.market.Exchange;
+import model.core.market.Stock;
+import model.core.market.marketevent.unexpected.MarketEvent;
 
 /**
  * JavaFX panel listing all stocks on an {@link Exchange}: symbol, company, latest price, mock

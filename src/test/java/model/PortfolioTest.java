@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
-import model.market.Share;
-import model.market.Stock;
-import model.player.Portfolio;
+import model.core.market.Share;
+import model.core.market.Stock;
+import model.core.player.Portfolio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

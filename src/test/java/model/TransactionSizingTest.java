@@ -3,11 +3,11 @@ package model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
-import model.market.Share;
-import model.market.Stock;
-import model.trading.transaction.TransactionSizing;
-import model.trading.transactioncalculator.PurchaseCalculator;
-import model.trading.transactioncalculator.SaleCalculator;
+import model.core.market.Share;
+import model.core.market.Stock;
+import model.core.trading.transaction.TransactionSizing;
+import model.core.trading.transactioncalculator.PurchaseCalculator;
+import model.core.trading.transactioncalculator.SaleCalculator;
 import org.junit.jupiter.api.Test;
 
 class TransactionSizingTest {

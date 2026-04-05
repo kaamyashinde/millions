@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import model.analysis.recommendation.StockRecommendation;
 import model.analysis.recommendation.StockRecommendationService;
-import model.market.Stock;
+import model.core.market.Stock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

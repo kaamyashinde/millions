@@ -7,13 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
-import model.player.Player;
+import model.core.market.Share;
+import model.core.market.Stock;
+import model.core.player.Player;
+import model.core.trading.transaction.Sale;
+import model.core.trading.transactioncalculator.SaleCalculator;
 import model.exception.AlreadyCommittedException;
 import model.exception.ShareNotFoundException;
-import model.market.Share;
-import model.market.Stock;
-import model.trading.transaction.Sale;
-import model.trading.transactioncalculator.SaleCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

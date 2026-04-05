@@ -4,15 +4,15 @@ import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import model.player.Player;
-import model.player.Portfolio;
-import model.market.Exchange;
-import model.market.InvestableAsset;
-import model.market.Share;
-import model.trading.transaction.Purchase;
-import model.trading.transaction.Sale;
-import model.trading.transaction.Transaction;
-import model.trading.transactioncalculator.SaleCalculator;
+import model.core.market.Exchange;
+import model.core.market.InvestableAsset;
+import model.core.market.Share;
+import model.core.player.Player;
+import model.core.player.Portfolio;
+import model.core.trading.transaction.Purchase;
+import model.core.trading.transaction.Sale;
+import model.core.trading.transaction.Transaction;
+import model.core.trading.transactioncalculator.SaleCalculator;
 
 /**
  * Reconstructs the player's daily net worth and compares it with the market benchmark.

@@ -6,15 +6,15 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import model.player.Player;
-import model.player.levels.PlayerLevel;
 import model.analysis.MetricValue;
 import model.analysis.PerformanceComparison;
 import model.analysis.PerformanceMetrics;
 import model.analysis.PortfolioPerformanceService;
-import model.market.Exchange;
-import model.market.Share;
-import model.trading.transactioncalculator.SaleCalculator;
+import model.core.market.Exchange;
+import model.core.market.Share;
+import model.core.player.Player;
+import model.core.player.levels.PlayerLevel;
+import model.core.trading.transactioncalculator.SaleCalculator;
 
 /**
  * Builds {@link SavedRunRecord} snapshots from live {@link Player} and {@link Exchange} state.

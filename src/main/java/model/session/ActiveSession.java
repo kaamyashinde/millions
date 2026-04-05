@@ -1,7 +1,7 @@
 package model.session;
 
-import model.player.Player;
-import model.market.Exchange;
+import model.core.market.Exchange;
+import model.core.player.Player;
 
 /**
  * In-memory representation of the currently logged-in user and their game state.

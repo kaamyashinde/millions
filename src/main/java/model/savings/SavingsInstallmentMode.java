@@ -1,6 +1,6 @@
 package model.savings;
 
-import model.market.Exchange;
+import model.core.market.Exchange;
 
 /**
  * How a regular savings plan sizes each installment.

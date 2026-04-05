@@ -10,11 +10,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import model.analysis.recommendation.StockRecommendation;
-import model.market.Stock;
-import model.market.marketevent.unexpected.MarketEvent;
-import model.market.marketevent.unexpected.target.SymbolMarketEventTarget;
-import model.stockinfo.StockFinancialInfo;
-import model.stockinfo.StockFinancialInfoProvider;
+import model.analysis.stockinfo.StockFinancialInfo;
+import model.analysis.stockinfo.StockFinancialInfoProvider;
+import model.core.market.Stock;
+import model.core.market.marketevent.unexpected.MarketEvent;
+import model.core.market.marketevent.unexpected.target.SymbolMarketEventTarget;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

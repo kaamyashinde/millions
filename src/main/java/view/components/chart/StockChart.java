@@ -7,7 +7,7 @@ import java.util.List;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import model.market.Stock;
+import model.core.market.Stock;
 import view.components.chart.tool.ChartTool;
 
 /**

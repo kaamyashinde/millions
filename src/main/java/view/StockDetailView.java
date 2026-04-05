@@ -16,10 +16,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.analysis.recommendation.StockRecommendation;
 import model.analysis.recommendation.StockRecommendationService;
-import model.market.Stock;
-import model.market.marketevent.unexpected.MarketEvent;
-import model.stockinfo.StockFinancialInfo;
-import model.stockinfo.StockFinancialInfoProvider;
+import model.analysis.stockinfo.StockFinancialInfo;
+import model.analysis.stockinfo.StockFinancialInfoProvider;
+import model.core.market.Stock;
+import model.core.market.marketevent.unexpected.MarketEvent;
 import view.components.chart.StockChart;
 import view.components.recommendation.StockRecommendationLabel;
 

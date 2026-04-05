@@ -2,8 +2,8 @@ package model.session;
 
 import java.math.BigDecimal;
 import java.util.List;
-import model.player.Player;
-import model.market.Exchange;
+import model.core.market.Exchange;
+import model.core.player.Player;
 import model.persistence.GameStateSnapshot;
 import model.persistence.PinHashingService;
 import model.persistence.ProfileDirectories;

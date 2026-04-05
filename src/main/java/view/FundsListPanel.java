@@ -20,8 +20,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.market.Exchange;
-import model.market.fund.Fund;
+import model.core.market.Exchange;
+import model.core.market.fund.Fund;
 
 /**
  * JavaFX panel listing all funds on an exchange together with a composition detail view.

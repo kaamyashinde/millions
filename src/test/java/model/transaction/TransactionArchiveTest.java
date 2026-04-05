@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
-import model.market.Share;
-import model.market.Stock;
-import model.trading.transaction.Purchase;
-import model.trading.transaction.Sale;
-import model.trading.transaction.Transaction;
-import model.trading.transaction.TransactionArchive;
+import model.core.market.Share;
+import model.core.market.Stock;
+import model.core.trading.transaction.Purchase;
+import model.core.trading.transaction.Sale;
+import model.core.trading.transaction.Transaction;
+import model.core.trading.transaction.TransactionArchive;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

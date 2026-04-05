@@ -5,19 +5,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import model.player.Player;
-import model.market.Exchange;
-import model.market.InvestableAsset;
-import model.market.Share;
-import model.market.Stock;
-import model.market.fund.Fund;
-import model.market.fund.FundComponent;
-import model.market.marketevent.unexpected.MarketEvent;
-import model.market.marketevent.unexpected.target.SymbolMarketEventTarget;
+import model.core.market.Exchange;
+import model.core.market.InvestableAsset;
+import model.core.market.Share;
+import model.core.market.Stock;
+import model.core.market.fund.Fund;
+import model.core.market.fund.FundComponent;
+import model.core.market.marketevent.unexpected.MarketEvent;
+import model.core.market.marketevent.unexpected.target.SymbolMarketEventTarget;
+import model.core.player.Player;
+import model.core.trading.transaction.Purchase;
+import model.core.trading.transaction.Sale;
+import model.core.trading.transaction.Transaction;
 import model.savings.RegularSavingsPlan;
-import model.trading.transaction.Purchase;
-import model.trading.transaction.Sale;
-import model.trading.transaction.Transaction;
 
 /**
  * Converts between mutable domain objects and immutable persisted snapshots.

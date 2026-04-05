@@ -2,8 +2,8 @@ package model.session;
 
 import java.util.List;
 import java.util.UUID;
-import model.player.Player;
-import model.market.Exchange;
+import model.core.market.Exchange;
+import model.core.player.Player;
 import model.persistence.SavedRunMapper;
 import model.persistence.SavedRunRecord;
 import model.persistence.SavedRunRepository;

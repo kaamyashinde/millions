@@ -1,7 +1,7 @@
 package model.exception;
 
-import model.player.Player;
-import model.market.Share;
+import model.core.market.Share;
+import model.core.player.Player;
 
 /**
  * An exception thrown when a player attempts to sell a share that is not present in their

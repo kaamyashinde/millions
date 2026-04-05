@@ -9,8 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import model.market.Stock;
-import model.market.fund.Fund;
+import model.core.market.Stock;
+import model.core.market.fund.Fund;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

@@ -9,9 +9,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import model.player.Player;
-import model.market.Exchange;
-import model.market.Stock;
+import model.core.market.Exchange;
+import model.core.market.Stock;
+import model.core.player.Player;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

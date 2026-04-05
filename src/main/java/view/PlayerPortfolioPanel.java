@@ -23,12 +23,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.player.Player;
 import model.analysis.MetricValue;
 import model.analysis.PerformanceComparison;
 import model.analysis.PortfolioPerformanceService;
-import model.market.Exchange;
-import model.market.Share;
+import model.core.market.Exchange;
+import model.core.market.Share;
+import model.core.player.Player;
 import view.components.image.DiskImageLoader;
 import view.components.image.ImageLoader;
 

@@ -2,9 +2,9 @@ package model.transactioncalculator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
-import model.market.Share;
-import model.market.Stock;
-import model.trading.transactioncalculator.PurchaseCalculator;
+import model.core.market.Share;
+import model.core.market.Stock;
+import model.core.trading.transactioncalculator.PurchaseCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

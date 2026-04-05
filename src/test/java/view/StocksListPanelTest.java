@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
-import model.market.Exchange;
-import model.market.Stock;
+import model.core.market.Exchange;
+import model.core.market.Stock;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

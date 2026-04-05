@@ -5,8 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.market.Exchange;
-import model.market.InvestableAsset;
+import model.core.market.Exchange;
+import model.core.market.InvestableAsset;
 
 /**
  * Supplies UI-ready data for {@link view.RegularSavingsPanel}: investable assets listed on an

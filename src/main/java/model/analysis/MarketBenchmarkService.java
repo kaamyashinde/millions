@@ -4,8 +4,8 @@ import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import model.market.Exchange;
-import model.market.Stock;
+import model.core.market.Exchange;
+import model.core.market.Stock;
 
 /**
  * Builds market benchmark metrics from the listed stocks on an exchange.

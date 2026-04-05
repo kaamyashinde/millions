@@ -2,9 +2,9 @@ package model.savings;
 
 import java.util.ArrayList;
 import java.util.List;
-import model.player.Player;
+import model.core.market.Exchange;
+import model.core.player.Player;
 import model.exception.InsufficientFundsException;
-import model.market.Exchange;
 
 /**
  * Applies regular savings plans on trading-day advances: executes due installments via

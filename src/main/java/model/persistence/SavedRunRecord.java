@@ -3,7 +3,7 @@ package model.persistence;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 import java.util.List;
-import model.player.levels.PlayerLevel;
+import model.core.player.levels.PlayerLevel;
 
 /**
  * JSON-serialized snapshot of one saved playthrough for comparison and optional leaderboard

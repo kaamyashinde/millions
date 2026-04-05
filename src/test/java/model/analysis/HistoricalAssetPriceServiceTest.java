@@ -3,9 +3,9 @@ package model.analysis;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
 import java.util.List;
-import model.market.Stock;
-import model.market.fund.Fund;
-import model.market.fund.FundComponent;
+import model.core.market.Stock;
+import model.core.market.fund.Fund;
+import model.core.market.fund.FundComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
