@@ -3,7 +3,6 @@ package model.analysis;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
 import java.util.List;
-import model.core.market.HistoricalAssetPriceService;
 import model.core.market.fund.Fund;
 import model.core.market.fund.FundComponent;
 import model.core.market.stock.Stock;
