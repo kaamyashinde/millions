@@ -65,7 +65,7 @@ public class Stock implements InvestableAsset {
    */
   @Override
   public String getDisplayName() {
-    return company;
+    return getCompany();
   }
 
   /**
