@@ -1,9 +1,14 @@
 package model.core.market;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
- * Common contract for anything that can be bought, held, and sold through the exchange.
+ * Common contract for anything that can be bought, held, and sold through the exchange. This
+ * includes stocks, funds, and potentially other asset types in the future.
+ *
+ * @author kevindmazali
+ * @version 1.0.1
  */
 public interface InvestableAsset {
 
@@ -34,4 +39,9 @@ public interface InvestableAsset {
    * @return human-readable asset type
    */
   String getAssetType();
+
+  /**
+   * Returns the historical prices for this asset, ordered from oldest to newest.
+   */
+  List<BigDecimal> getHistoricalPrices();
 }
