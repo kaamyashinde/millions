@@ -13,6 +13,8 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
 import model.Exchange;
 import model.Stock;
+import old_view.StocksListPanel;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

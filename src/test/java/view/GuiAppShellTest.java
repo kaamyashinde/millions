@@ -22,10 +22,13 @@ import model.persistence.SavedRunRepository;
 import model.persistence.UserAccountRepository;
 import model.session.ActiveSession;
 import model.session.SessionService;
+import old_view.GuiAppShell;
+import old_view.SessionWorkspaceFactory;
+import old_view.components.toast.ToastMode;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import view.components.toast.ToastMode;
 
 /**
  * Tests the session-aware JavaFX shell for register, logout, and switch-user behavior.

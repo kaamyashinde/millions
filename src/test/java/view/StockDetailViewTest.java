@@ -14,6 +14,7 @@ import model.Stock;
 import model.marketevent.MarketEvent;
 import model.stockinfo.StockFinancialInfo;
 import model.stockinfo.StockFinancialInfoProvider;
+import old_view.StockDetailView;
 import model.marketevent.SymbolMarketEventTarget;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

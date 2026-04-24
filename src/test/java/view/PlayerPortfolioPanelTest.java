@@ -13,6 +13,8 @@ import javafx.application.Platform;
 import model.Exchange;
 import model.Player;
 import model.Stock;
+import old_view.PlayerPortfolioPanel;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
