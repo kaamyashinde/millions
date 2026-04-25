@@ -12,10 +12,10 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
-import old_view.components.notification.NotificationItem;
-import old_view.components.notification.ToastTray;
-import old_view.components.toast.Toast;
-import old_view.components.toast.ToastMode;
+import view.components.notification.NotificationItem;
+import view.components.notification.ToastTray;
+import view.components.toast.Toast;
+import view.components.toast.ToastMode;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
