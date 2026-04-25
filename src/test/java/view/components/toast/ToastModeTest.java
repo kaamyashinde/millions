@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-import old_view.components.toast.ToastMode;
+import view.components.toast.ToastMode;
 
 /**
  * Tests for ToastMode enum. No JavaFX toolkit initialization required as these tests only cover
