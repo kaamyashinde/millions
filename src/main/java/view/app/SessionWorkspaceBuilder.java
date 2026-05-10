@@ -1,0 +1,159 @@
+package view.app;
+
+import controller.WorkspaceController;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import model.session.ActiveSession;
+import model.session.SessionService;
+import view.dialogs.ProfileEditorDialog;
+import view.layout.WorkspaceLayout;
+import view.pages.funds.FundsPage;
+import view.pages.leaderboard.LeaderboardPage;
+import view.pages.learning.LearningHubPage;
+import view.pages.notifications.NotificationsPage;
+import view.pages.portfolio.PlayerPortfolioPage;
+import view.pages.quiz.QuizLauncherPage;
+import view.pages.saved.SavedRunsPage;
+import view.pages.savings.SavingsPage;
+import view.pages.stocks.StocksPage;
+
+/**
+ * Builds a {@link WorkspaceLayout} with all session tabs wired to a {@link WorkspaceController}.
+ */
+public final class SessionWorkspaceBuilder {
+
+  private SessionWorkspaceBuilder() {}
+
+  /**
+   * Creates the logged-in workspace for one session.
+   *
+   * @param session active session
+   * @param sessionService session service
+   * @param helpAction opens help / welcome
+   * @param logoutAction logs out
+   * @param switchUserAction begins switch-user flow
+   * @param persistAction persists session after mutations
+   * @param onProfileDeleted invoked when profile is deleted from editor
+   * @return workspace layout ready to set as scene root
+   */
+  public static WorkspaceLayout build(
+      ActiveSession session,
+      SessionService sessionService,
+      Runnable helpAction,
+      Runnable logoutAction,
+      Runnable switchUserAction,
+      Runnable persistAction,
+      Runnable onProfileDeleted) {
+    WorkspaceController workspaceController = new WorkspaceController(session, sessionService);
+
+    Runnable refreshAndPersist = () -> {
+      workspaceController.refreshAll();
+      persistAction.run();
+    };
+
+    NotificationsPage notificationsPage =
+        new NotificationsPage(workspaceController.getNotificationsTab());
+    PlayerPortfolioPage portfolioPage =
+        new PlayerPortfolioPage(
+            session.exchange(),
+            session.player(),
+            sessionService.avatarPath(session.normalizedUsername()));
+    StocksPage stocksPage = new StocksPage(session.exchange());
+    FundsPage fundsPage = new FundsPage(session.exchange());
+    SavingsPage savingsPage =
+        new SavingsPage(workspaceController.getSavings(), refreshAndPersist);
+    SavedRunsPage savedRunsPage = new SavedRunsPage(sessionService, persistAction);
+    LeaderboardPage leaderboardPage = new LeaderboardPage(sessionService);
+    LearningHubPage learningHubPage = new LearningHubPage();
+    QuizLauncherPage quizLauncherPage = new QuizLauncherPage();
+
+    Tab notificationsTab = new Tab("Notifications", notificationsPage);
+    Tab playerTab = new Tab("Player", portfolioPage);
+    Tab stocksTab = new Tab("Stocks", stocksPage);
+    Tab fundsTab = new Tab("Funds", fundsPage);
+    Tab savingsTab = new Tab("Savings", savingsPage);
+    Tab savedRunsTab = new Tab("Saved runs", savedRunsPage);
+    Tab leaderboardTab = new Tab("Leaderboard", leaderboardPage);
+    Tab learningTab = new Tab("Learning", learningHubPage);
+    Tab quizTab = new Tab("Quizzes", quizLauncherPage);
+
+    for (Tab tab :
+        new Tab[] {
+          notificationsTab,
+          playerTab,
+          stocksTab,
+          fundsTab,
+          savingsTab,
+          savedRunsTab,
+          leaderboardTab,
+          learningTab,
+          quizTab
+        }) {
+      tab.setClosable(false);
+    }
+
+    playerTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        portfolioPage.refresh();
+      }
+    });
+    stocksTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        stocksPage.refresh();
+      }
+    });
+    fundsTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        fundsPage.refresh();
+      }
+    });
+    savedRunsTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        savedRunsPage.refresh();
+        persistAction.run();
+      }
+    });
+    leaderboardTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        leaderboardPage.refresh();
+      }
+    });
+
+    TabPane tabPane =
+        new TabPane(
+            notificationsTab,
+            playerTab,
+            stocksTab,
+            fundsTab,
+            savingsTab,
+            savedRunsTab,
+            leaderboardTab,
+            learningTab,
+            quizTab);
+
+    final WorkspaceLayout[] layoutHolder = new WorkspaceLayout[1];
+    layoutHolder[0] =
+        new WorkspaceLayout(
+            workspaceController.getNotifications(),
+            tabPane,
+            () -> {
+              var window =
+                  layoutHolder[0].getScene() != null
+                      ? layoutHolder[0].getScene().getWindow()
+                      : null;
+              ProfileEditorDialog.show(
+                  window,
+                  workspaceController.createProfileEditorController(),
+                  refreshAndPersist,
+                  onProfileDeleted);
+            },
+            refreshAndPersist,
+            helpAction,
+            switchUserAction,
+            logoutAction);
+
+    layoutHolder[0].setSessionSummary(workspaceController.getSessionSummary());
+    layoutHolder[0].loadHeaderAvatar(workspaceController.getAvatarPath());
+    return layoutHolder[0];
+  }
+}
