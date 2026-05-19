@@ -13,7 +13,7 @@ import javafx.application.Platform;
 import model.Exchange;
 import model.Player;
 import model.Stock;
-import old_view.PlayerPortfolioPanel;
+import view.pages.portfolio.PlayerPortfolioPage;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests the player metrics panel state and refresh behavior.
  */
-class PlayerPortfolioPanelTest {
+class PlayerPortfolioPageTest {
 
   @BeforeAll
   static void initJavaFx() throws InterruptedException {
@@ -40,8 +40,8 @@ class PlayerPortfolioPanelTest {
     Exchange exchange = new Exchange("NYSE", List.of(apple));
     Player player = new Player("k", new BigDecimal("5000.00"));
 
-    PlayerPortfolioPanel panel =
-        runOnFxThread(() -> new PlayerPortfolioPanel(exchange, player, Path.of("/no/avatar.png")));
+    PlayerPortfolioPage panel =
+        runOnFxThread(() -> new PlayerPortfolioPage(exchange, player, Path.of("/no/avatar.png")));
 
     assertEquals("k", panel.getDisplayedPlayerName());
     assertEquals("5000.00", panel.getDisplayedBalance());
@@ -55,8 +55,8 @@ class PlayerPortfolioPanelTest {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
     Exchange exchange = new Exchange("NYSE", List.of(apple));
     Player player = new Player("k", new BigDecimal("5000.00"));
-    PlayerPortfolioPanel panel =
-        runOnFxThread(() -> new PlayerPortfolioPanel(exchange, player, Path.of("/no/avatar.png")));
+    PlayerPortfolioPage panel =
+        runOnFxThread(() -> new PlayerPortfolioPage(exchange, player, Path.of("/no/avatar.png")));
 
     exchange.buy("AAPL", BigDecimal.ONE, player);
     exchange.advance();
@@ -94,9 +94,9 @@ class PlayerPortfolioPanelTest {
    * @return supplier result
    * @throws Exception any exception thrown by the supplier
    */
-  private static PlayerPortfolioPanel runOnFxThread(PanelSupplier supplier) throws Exception {
+  private static PlayerPortfolioPage runOnFxThread(PanelSupplier supplier) throws Exception {
     CountDownLatch latch = new CountDownLatch(1);
-    AtomicReference<PlayerPortfolioPanel> ref = new AtomicReference<>();
+    AtomicReference<PlayerPortfolioPage> ref = new AtomicReference<>();
     AtomicReference<Exception> err = new AtomicReference<>();
     Platform.runLater(
         () -> {
@@ -117,6 +117,6 @@ class PlayerPortfolioPanelTest {
 
   @FunctionalInterface
   private interface PanelSupplier {
-    PlayerPortfolioPanel get() throws Exception;
+    PlayerPortfolioPage get() throws Exception;
   }
 }
