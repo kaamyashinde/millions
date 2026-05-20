@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import model.session.PlayerLeaderboardEntry;
-import old_view.PlayerLeaderboardPanel;
+import view.pages.auth.AuthPlayerLeaderboardPanel;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests leaderboard sorting, ranks, and highlight behavior.
  */
-class PlayerLeaderboardPanelTest {
+class AuthPlayerLeaderboardPanelTest {
 
   @BeforeAll
   static void initJavaFx() throws InterruptedException {
@@ -32,7 +32,7 @@ class PlayerLeaderboardPanelTest {
 
   @Test
   void defaultSortIsNetWorthDescending() throws Exception {
-    PlayerLeaderboardPanel panel = runOnFxThread(() -> new PlayerLeaderboardPanel(List.of(
+    AuthPlayerLeaderboardPanel panel = runOnFxThread(() -> new AuthPlayerLeaderboardPanel(List.of(
         entry("Alice", "1000.00", "0.00"),
         entry("Cara", "1300.00", "0.30"),
         entry("Bob", "1400.00", "0.40"))));
@@ -43,7 +43,7 @@ class PlayerLeaderboardPanelTest {
 
   @Test
   void returnAscendingKeepsBestRanksAndHighlightsTopThree() throws Exception {
-    PlayerLeaderboardPanel panel = runOnFxThread(() -> new PlayerLeaderboardPanel(List.of(
+    AuthPlayerLeaderboardPanel panel = runOnFxThread(() -> new AuthPlayerLeaderboardPanel(List.of(
         entry("Alice", "900.00", "-0.10"),
         entry("Bob", "1400.00", "0.40"),
         entry("Cara", "1300.00", "0.30"),
@@ -62,7 +62,7 @@ class PlayerLeaderboardPanelTest {
 
   @Test
   void netWorthAscendingSortsLowestFirst() throws Exception {
-    PlayerLeaderboardPanel panel = runOnFxThread(() -> new PlayerLeaderboardPanel(List.of(
+    AuthPlayerLeaderboardPanel panel = runOnFxThread(() -> new AuthPlayerLeaderboardPanel(List.of(
         entry("Bob", "1400.00", "0.40"),
         entry("Alice", "1000.00", "0.00"),
         entry("Cara", "1300.00", "0.30"))));
@@ -83,9 +83,9 @@ class PlayerLeaderboardPanelTest {
         new BigDecimal(returnPercent));
   }
 
-  private static PlayerLeaderboardPanel runOnFxThread(PanelSupplier supplier) throws Exception {
+  private static AuthPlayerLeaderboardPanel runOnFxThread(PanelSupplier supplier) throws Exception {
     CountDownLatch latch = new CountDownLatch(1);
-    AtomicReference<PlayerLeaderboardPanel> ref = new AtomicReference<>();
+    AtomicReference<AuthPlayerLeaderboardPanel> ref = new AtomicReference<>();
     AtomicReference<Exception> err = new AtomicReference<>();
     Platform.runLater(() -> {
       try {
@@ -105,6 +105,6 @@ class PlayerLeaderboardPanelTest {
 
   @FunctionalInterface
   private interface PanelSupplier {
-    PlayerLeaderboardPanel get() throws Exception;
+    AuthPlayerLeaderboardPanel get() throws Exception;
   }
 }
