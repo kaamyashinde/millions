@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import view.theme.ThemeStyles;
 
 /**
  * A reusable JavaFX toast notification component. Supports four severity levels (ERROR, WARNING,
@@ -75,6 +76,7 @@ public class Toast extends HBox {
     setPrefWidth(TOAST_WIDTH);
     setMaxWidth(TOAST_WIDTH);
     setMinHeight(MIN_TOAST_HEIGHT);
+    ThemeStyles.addStyleClasses(this, "toast");
 
     StackPane iconPane = buildIconPane(mode);
     VBox textBox = new VBox(4);

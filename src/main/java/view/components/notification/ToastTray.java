@@ -77,30 +77,22 @@ public class ToastTray extends VBox {
   private void insertToastAt(NotificationItem item, int index) {
     Toast toast =
         new Toast(item.mode(), item.title(), item.description(), item.actionLabel(), item.onAction());
-    toast.setStyle(ToastNotificationStyles.toastBorderStyle());
     idToNode.put(item.id(), toast);
     getChildren().add(index, toast);
   }
 
   /**
-   * Shared toast border geometry (radii, border width).
-   *
-   * @author kaamyashinde
-   * @version 1.0.0
-   * @since 2026-03-29
+   * Legacy toast style helper retained for tests and older callers during the CSS migration.
    */
   public static final class ToastNotificationStyles {
 
-    /**
-     * Prevents instantiation of this utility class.
-     */
     private ToastNotificationStyles() {
     }
 
     /**
-     * Builds the shared border style for a toast container (radii and border width only).
+     * Builds the former shared border style for a toast container.
      *
-     * @return the inline JavaFX style string for the toast container
+     * @return inline JavaFX style string matching the CSS toast geometry
      */
     public static String toastBorderStyle() {
       return "-fx-background-radius: 8;"
