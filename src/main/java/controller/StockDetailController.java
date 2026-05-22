@@ -9,8 +9,8 @@ import model.Stock;
 import model.marketevent.MarketEvent;
 import model.stockinfo.StockFinancialInfo;
 import model.stockinfo.StockFinancialInfoProvider;
-import recommendation.StockRecommendation;
-import recommendation.StockRecommendationService;
+import model.recommendation.StockRecommendation;
+import model.recommendation.StockRecommendationService;
 
 /**
  * Supplies stock detail data: fundamentals, recommendation, and market events.

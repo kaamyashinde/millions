@@ -15,15 +15,19 @@ import java.util.UUID;
 import model.Stock;
 import model.fund.Fund;
 import model.fund.FundComponent;
+import model.persistence.GameStateMapper;
 import model.persistence.GameStateRepository;
 import model.persistence.MarketData;
 import model.persistence.PinHashingService;
+import model.persistence.ProfileImageService;
 import model.persistence.ProfilePreferencesRepository;
+import model.persistence.SavedRunMapper;
 import model.persistence.SavedRunRecord;
 import model.persistence.SavedRunRepository;
 import model.persistence.ProfileDirectories;
 import model.persistence.UserAccountRepository;
 import model.persistence.UserAccountRecord;
+import model.session.validation.ValidationError;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -41,6 +45,17 @@ class SessionServiceTest {
     assertThrows(
         DuplicateUsernameException.class,
         () -> sessionService.register("alice", "5678".toCharArray(), new BigDecimal("500.00")));
+  }
+
+  @Test
+  void register_rejectsInvalidUsernameWithTypedValidationError() {
+    SessionService sessionService = createSessionService();
+
+    RegistrationValidationException thrown = assertThrows(
+        RegistrationValidationException.class,
+        () -> sessionService.register("ab", "1234".toCharArray(), new BigDecimal("100.00")));
+
+    assertEquals(ValidationError.INVALID_USERNAME, thrown.error());
   }
 
   @Test
@@ -190,15 +205,35 @@ class SessionServiceTest {
   }
 
   private SessionService createSessionService() {
-    return new SessionService(
-        new UserAccountRepository(tempDir),
+    UserAccountRepository userAccountRepository = new UserAccountRepository(tempDir);
+    PinHashingService pinHashingService = new PinHashingService();
+
+    GamePersistenceService gamePersistenceService = new GamePersistenceService(
         new GameStateRepository(tempDir),
-        new SavedRunRepository(tempDir),
-        new ProfilePreferencesRepository(tempDir),
-        new PinHashingService(),
-        SessionServiceTest::sampleMarketData,
-        "NYSE",
+        new GameStateMapper("NYSE"),
+        SessionServiceTest::sampleMarketData);
+
+    AuthService authService = new AuthService(
+        userAccountRepository, pinHashingService, gamePersistenceService);
+
+    ProfileService profileService = new ProfileService(
+        userAccountRepository,
+        new ProfileImageService(tempDir),
+        pinHashingService,
         tempDir);
+
+    SavedRunService savedRunService = new SavedRunService(
+        new SavedRunRepository(tempDir), new SavedRunMapper());
+
+    ProfilePreferencesService profilePreferencesService = new ProfilePreferencesService(
+        new ProfilePreferencesRepository(tempDir));
+
+    return new SessionService(
+        authService,
+        profileService,
+        gamePersistenceService,
+        savedRunService,
+        profilePreferencesService);
   }
 
   private static MarketData sampleMarketData() {

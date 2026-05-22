@@ -26,7 +26,10 @@ class RegularSavingsProcessorTest {
         "TECHX",
         "Tech Titans Blend Fund",
         List.of(new FundComponent(apple, BigDecimal.ONE)));
-    exchange = new Exchange("NYSE", List.of(apple), List.of(techFund));
+    exchange = new Exchange.Builder("NYSE")
+        .stocks(List.of(apple))
+        .funds(List.of(techFund))
+        .build();
     player = new Player("T", new BigDecimal("50000"));
   }
 

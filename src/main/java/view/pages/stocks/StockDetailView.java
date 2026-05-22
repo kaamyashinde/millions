@@ -16,12 +16,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.Stock;
 import model.marketevent.MarketEvent;
+import model.recommendation.StockRecommendation;
+import model.recommendation.StockRecommendationService;
 import model.stockinfo.StockFinancialInfo;
 import model.stockinfo.StockFinancialInfoProvider;
 import view.components.chart.StockChart;
 import view.components.recommendation.StockRecommendationLabel;
-import recommendation.StockRecommendation;
-import recommendation.StockRecommendationService;
 
 /**
  * Dedicated stock detail view showing summary data, mock company fundamentals, trend-based

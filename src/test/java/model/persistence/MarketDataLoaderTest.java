@@ -24,7 +24,10 @@ class MarketDataLoaderTest {
   @Test
   void loadFromResource_canBootstrapExchangeWithFunds() {
     MarketData marketData = MarketDataLoader.loadFromResource(MarketDataLoaderTest.class, DEMO_RESOURCE);
-    Exchange exchange = new Exchange("NYSE", marketData.stocks(), marketData.funds());
+    Exchange exchange = new Exchange.Builder("NYSE")
+        .stocks(marketData.stocks())
+        .funds(marketData.funds())
+        .build();
 
     assertFalse(exchange.getFunds().isEmpty());
     assertEquals(6, exchange.getAssets().size());

@@ -2,6 +2,7 @@ package model;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import model.transactioncalculator.SaleCalculator;
 import model.transaction.TransactionSizing;
@@ -62,10 +63,10 @@ public class Portfolio {
   /**
    * Gets the list of shares in the portfolio.
    *
-   * @return The list of shares in the portfolio.
+   * @return An unmodifiable live view of the shares in the portfolio.
    */
   public List<Share> getShares() {
-    return this.shares;
+    return Collections.unmodifiableList(this.shares);
   }
 
   /**

@@ -53,7 +53,10 @@ class ExchangeTest {
             new FundComponent(microsoftStock, new BigDecimal("0.25"))));
 
     List<Stock> stocks = List.of(appleStock, googleStock, microsoftStock);
-    exchange = new Exchange("NYSE", stocks, List.of(techFund));
+    exchange = new Exchange.Builder("NYSE")
+        .stocks(stocks)
+        .funds(List.of(techFund))
+        .build();
 
     player = new Player("TestPlayer", new BigDecimal("100000.00"));
   }
@@ -235,12 +238,12 @@ class ExchangeTest {
   @Test
   void advance_updateStockPrices() {
     Exchange rangeCheckedExchange =
-        new Exchange(
-            "NYSE",
-            List.of(appleStock, googleStock, microsoftStock),
-            new Random(7),
-            new UniformDailyPriceMoveStrategy(0.05 / Math.sqrt(7)),
-            (stocks, tradingDay, random) -> Optional.empty());
+        new Exchange.Builder("NYSE")
+            .stocks(List.of(appleStock, googleStock, microsoftStock))
+            .random(new Random(7))
+            .dailyPriceMoveStrategy(new UniformDailyPriceMoveStrategy(0.05 / Math.sqrt(7)))
+            .marketEventStrategy((stocks, tradingDay, random) -> Optional.empty())
+            .build();
     BigDecimal initialApplePrice = appleStock.getSalesPrice();
     BigDecimal initialGooglePrice = googleStock.getSalesPrice();
 
@@ -395,18 +398,20 @@ class ExchangeTest {
   @Test
   void advance_appliesLargeShockToAffectedStockAndStoresEvent() {
     Exchange eventExchange =
-        new Exchange(
-            "NYSE",
-            List.of(appleStock, googleStock, microsoftStock),
-            new Random(3),
-            (stock, random) -> stock.getSalesPrice().multiply(new BigDecimal("1.01")),
-            (stocks, tradingDay, random) -> Optional.of(
-                new MarketEvent(
-                    tradingDay,
-                    "AAPL: Earnings beat expectations",
-                    "Apple Inc. reported stronger earnings than expected.",
-                    new SymbolMarketEventTarget(Set.of("AAPL")),
-                    new BigDecimal("1.20"))));
+        new Exchange.Builder("NYSE")
+            .stocks(List.of(appleStock, googleStock, microsoftStock))
+            .random(new Random(3))
+            .dailyPriceMoveStrategy(
+                (stock, random) -> stock.getSalesPrice().multiply(new BigDecimal("1.01")))
+            .marketEventStrategy(
+                (stocks, tradingDay, random) -> Optional.of(
+                    new MarketEvent(
+                        tradingDay,
+                        "AAPL: Earnings beat expectations",
+                        "Apple Inc. reported stronger earnings than expected.",
+                        new SymbolMarketEventTarget(Set.of("AAPL")),
+                        new BigDecimal("1.20"))))
+            .build();
 
     BigDecimal initialApplePrice = appleStock.getSalesPrice();
     BigDecimal initialGooglePrice = googleStock.getSalesPrice();
@@ -446,12 +451,12 @@ class ExchangeTest {
           return Optional.empty();
         };
     Exchange eventExchange =
-        new Exchange(
-            "NYSE",
-            List.of(appleStock, googleStock, microsoftStock),
-            new Random(11),
-            (stock, random) -> stock.getSalesPrice(),
-            singleEventStrategy);
+        new Exchange.Builder("NYSE")
+            .stocks(List.of(appleStock, googleStock, microsoftStock))
+            .random(new Random(11))
+            .dailyPriceMoveStrategy((stock, random) -> stock.getSalesPrice())
+            .marketEventStrategy(singleEventStrategy)
+            .build();
 
     eventExchange.advance();
     assertTrue(eventExchange.getLastMarketEvent().isPresent());
@@ -466,35 +471,36 @@ class ExchangeTest {
   void getMarketEventsForStock_returnsOnlyMatchingEventsInChronologicalOrder() {
     AtomicInteger calls = new AtomicInteger();
     Exchange eventExchange =
-        new Exchange(
-            "NYSE",
-            List.of(appleStock, googleStock, microsoftStock),
-            new Random(15),
-            (stock, random) -> stock.getSalesPrice(),
-            (stocks, tradingDay, random) -> switch (calls.getAndIncrement()) {
-              case 0 -> Optional.of(
-                  new MarketEvent(
-                      tradingDay,
-                      "AAPL: Earnings beat expectations",
-                      "Apple Inc. reported stronger earnings than expected.",
-                      new SymbolMarketEventTarget(Set.of("AAPL")),
-                      new BigDecimal("1.10")));
-              case 1 -> Optional.of(
-                  new MarketEvent(
-                      tradingDay,
-                      "MSFT: Regulatory setback",
-                      "Microsoft faces a regulatory setback.",
-                      new SymbolMarketEventTarget(Set.of("MSFT")),
-                      new BigDecimal("0.88")));
-              case 2 -> Optional.of(
-                  new MarketEvent(
-                      tradingDay,
-                      "AAPL: Product launch gains traction",
-                      "Apple Inc. announced strong demand for a new release.",
-                      new SymbolMarketEventTarget(Set.of("AAPL")),
-                      new BigDecimal("1.09")));
-              default -> Optional.empty();
-            });
+        new Exchange.Builder("NYSE")
+            .stocks(List.of(appleStock, googleStock, microsoftStock))
+            .random(new Random(15))
+            .dailyPriceMoveStrategy((stock, random) -> stock.getSalesPrice())
+            .marketEventStrategy(
+                (stocks, tradingDay, random) -> switch (calls.getAndIncrement()) {
+                  case 0 -> Optional.of(
+                      new MarketEvent(
+                          tradingDay,
+                          "AAPL: Earnings beat expectations",
+                          "Apple Inc. reported stronger earnings than expected.",
+                          new SymbolMarketEventTarget(Set.of("AAPL")),
+                          new BigDecimal("1.10")));
+                  case 1 -> Optional.of(
+                      new MarketEvent(
+                          tradingDay,
+                          "MSFT: Regulatory setback",
+                          "Microsoft faces a regulatory setback.",
+                          new SymbolMarketEventTarget(Set.of("MSFT")),
+                          new BigDecimal("0.88")));
+                  case 2 -> Optional.of(
+                      new MarketEvent(
+                          tradingDay,
+                          "AAPL: Product launch gains traction",
+                          "Apple Inc. announced strong demand for a new release.",
+                          new SymbolMarketEventTarget(Set.of("AAPL")),
+                          new BigDecimal("1.09")));
+                  default -> Optional.empty();
+                })
+            .build();
 
     eventExchange.advance(4);
 

@@ -38,7 +38,8 @@ class StocksPageTest {
   void selectingARowUpdatesTheEmbeddedDetailView() throws Exception {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00", "102.00");
     Stock microsoft = stockWithPrices("MSFT", "Microsoft", "200.00", "194.00");
-    Exchange exchange = new Exchange("NYSE", List.of(microsoft, apple));
+    Exchange exchange =
+        new Exchange.Builder("NYSE").stocks(List.of(microsoft, apple)).build();
 
     StocksPage panel = runOnFxThread(() -> new StocksPage(exchange));
     SplitPane splitPane = (SplitPane) panel.getCenter();

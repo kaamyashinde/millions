@@ -37,7 +37,7 @@ class PlayerPortfolioPageTest {
   @Test
   void emptyPlayerShowsNoTradesAndNoHoldings() throws Exception {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
-    Exchange exchange = new Exchange("NYSE", List.of(apple));
+    Exchange exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
     Player player = new Player("k", new BigDecimal("5000.00"));
 
     PlayerPortfolioPage panel =
@@ -53,7 +53,7 @@ class PlayerPortfolioPageTest {
   @Test
   void refreshAfterTradeAndAdvanceUpdatesHoldingsAndMetrics() throws Exception {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
-    Exchange exchange = new Exchange("NYSE", List.of(apple));
+    Exchange exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
     Player player = new Player("k", new BigDecimal("5000.00"));
     PlayerPortfolioPage panel =
         runOnFxThread(() -> new PlayerPortfolioPage(exchange, player, Path.of("/no/avatar.png")));

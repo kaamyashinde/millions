@@ -2,6 +2,7 @@ package model;
 
 import static model.utils.Validator.checkNotNull;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -80,10 +81,10 @@ public class Stock implements InvestableAsset {
   /**
    * Returns the historical prices of the stock.
    *
-   * @return A list of historical prices of the stock.
+   * @return An unmodifiable live view of the historical prices.
    */
   public List<BigDecimal> getHistoricalPrices() {
-    return this.price;
+    return Collections.unmodifiableList(this.price);
   }
 
   /**

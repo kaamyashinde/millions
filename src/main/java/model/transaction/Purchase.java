@@ -2,7 +2,6 @@ package model.transaction;
 
 import model.Player;
 import model.Share;
-import model.exception.AlreadyCommittedException;
 import model.exception.InsufficientFundsException;
 import model.transactioncalculator.PurchaseCalculator;
 
@@ -29,33 +28,26 @@ public class Purchase extends Transaction {
   }
 
   /**
-   * Commits the purchase transaction.
+   * Checks that the player has enough money to cover the purchase total.
    *
    * @param player the player making the purchase
-   * @throws InsufficientFundsException if the player does not have enough money to complete the
-   *                                    purchase.
-   * @throws IllegalStateException      if the transaction was not added to the archive after
-   *                                    committing.
-   * @throws AlreadyCommittedException  if the transaction has already been committed.
+   * @throws InsufficientFundsException if the player's balance is less than the purchase cost
    */
-  public void commit(Player player) {
-
-    if (this.isCommited()) {
-      throw new AlreadyCommittedException();
-    }
-
+  @Override
+  protected void validatePreconditions(Player player) {
     if (player.getMoney().compareTo(purchaseCalc.calculateTotal()) < 0) {
       throw new InsufficientFundsException();
-    } else {
-      player.withdrawMoney(this.purchaseCalc.calculateTotal());
-      player.getPortfolio().addShare(this.getShare());
-      player.getTransactionArchive().addTransaction(this);
     }
+  }
 
-    if (player.getTransactionArchive().getTransactions(getDay()).contains(this)) {
-      this.commited = true;
-    } else {
-      throw new IllegalStateException("Transaction was not added to the archive.");
-    }
+  /**
+   * Withdraws the purchase cost from the player and adds the share to their portfolio.
+   *
+   * @param player the player making the purchase
+   */
+  @Override
+  protected void execute(Player player) {
+    player.withdrawMoney(purchaseCalc.calculateTotal());
+    player.getPortfolio().addShare(this.getShare());
   }
 }

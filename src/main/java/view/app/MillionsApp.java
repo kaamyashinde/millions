@@ -10,6 +10,7 @@ import model.persistence.MarketDataLoader;
 import model.session.ActiveSession;
 import model.session.AuthenticationException;
 import model.session.DuplicateUsernameException;
+import model.session.RegistrationValidationException;
 import model.session.SessionService;
 import model.session.SessionServiceFactory;
 import view.dialogs.WelcomeDialog;
@@ -93,8 +94,6 @@ public class MillionsApp extends Application {
       onSessionStarted(session);
     } catch (AuthenticationException e) {
       loginPage.setStatus("Invalid username or PIN.");
-    } catch (IllegalArgumentException e) {
-      loginPage.setStatus(mapValidationMessage(e.getMessage()));
     }
   }
 
@@ -110,8 +109,8 @@ public class MillionsApp extends Application {
       registerPage.setStatus("Starting money must be a valid number.");
     } catch (DuplicateUsernameException e) {
       registerPage.setStatus("That username is already taken.");
-    } catch (IllegalArgumentException e) {
-      registerPage.setStatus(mapValidationMessage(e.getMessage()));
+    } catch (RegistrationValidationException e) {
+      registerPage.setStatus(e.getMessage());
     }
   }
 
@@ -197,16 +196,4 @@ public class MillionsApp extends Application {
     return data;
   }
 
-  private static String mapValidationMessage(String message) {
-    if (message == null) {
-      return "Invalid input.";
-    }
-    return switch (message) {
-      case "Username must be 3-32 characters using letters, numbers, underscores, or hyphens." ->
-          "Username must be 3-32 characters (letters, numbers, _ or -).";
-      case "PIN must be 4 to 8 digits." -> "PIN must be 4 to 8 digits.";
-      case "Starting money must be non-negative." -> "Starting money must be non-negative.";
-      default -> "Invalid input.";
-    };
-  }
 }

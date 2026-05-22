@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import model.Stock;
 import model.session.ActiveSession;
 import model.session.SessionService;
+import view.components.notification.LevelUpNotificationObserver;
 import view.components.notification.NotificationService;
 import view.components.toast.ToastMode;
 
@@ -59,6 +60,8 @@ public class WorkspaceController {
     this.learningHub = new LearningHubController();
     this.quiz = new QuizController();
     showLoadedNotifications();
+    session.player().addObserver(
+        new LevelUpNotificationObserver(notifications, session.player().getPlayerLevel()));
   }
 
   public ActiveSession getSession() {

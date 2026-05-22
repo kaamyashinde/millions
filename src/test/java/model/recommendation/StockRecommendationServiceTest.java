@@ -1,4 +1,4 @@
-package recommendation;
+package model.recommendation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,9 +48,38 @@ class StockRecommendationServiceTest {
 
   @Test
   void recommend_listOverloadRejectsNull() {
-    NullPointerException error = assertThrows(NullPointerException.class, () -> service.recommend((List<BigDecimal>) null));
+    NullPointerException error =
+        assertThrows(NullPointerException.class, () -> service.recommend((List<BigDecimal>) null));
 
     assertEquals("Historical prices cannot be null", error.getMessage());
+  }
+
+  @Test
+  void constructor_rejectsNullStrategy() {
+    NullPointerException error =
+        assertThrows(NullPointerException.class, () -> new StockRecommendationService(null));
+
+    assertEquals("Recommendation strategy cannot be null", error.getMessage());
+  }
+
+  @Test
+  void recommend_delegatesToInjectedStrategy() {
+    RecommendationStrategy alwaysSell =
+        prices -> prices.size() >= 2 ? StockRecommendation.SELL : StockRecommendation.HOLD;
+    StockRecommendationService custom = new StockRecommendationService(alwaysSell);
+    Stock stock = stockWithPrices("100.00", "101.00");
+
+    assertEquals(StockRecommendation.SELL, custom.recommend(stock));
+  }
+
+  @Test
+  void recommend_listDelegatesToInjectedStrategy() {
+    RecommendationStrategy alwaysBuy = prices -> StockRecommendation.BUY;
+    StockRecommendationService custom = new StockRecommendationService(alwaysBuy);
+
+    assertEquals(
+        StockRecommendation.BUY,
+        custom.recommend(List.of(new BigDecimal("1"), new BigDecimal("2"))));
   }
 
   /**

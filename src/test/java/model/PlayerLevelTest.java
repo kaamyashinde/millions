@@ -23,58 +23,61 @@ class PlayerLevelTest {
 
   @Test
   void qualifies() {
-    // NOVICE always qualifies
-    assertTrue(PlayerLevel.NOVICE.qualifies(player));
+    assertTrue(PlayerLevels.NOVICE.qualifies(player));
+    assertFalse(PlayerLevels.INVESTOR.qualifies(player));
+    assertFalse(PlayerLevels.SPECULATOR.qualifies(player));
 
-    // INVESTOR requires >= 70 distinct trading days AND net worth >= 1.2x starting money
-    assertFalse(PlayerLevel.INVESTOR.qualifies(player));
+    addDistinctTradingDays(1, 70);
 
-    // SPECULATOR requires >= 140 distinct trading days AND net worth >= 2x starting money
-    assertFalse(PlayerLevel.SPECULATOR.qualifies(player));
+    assertFalse(PlayerLevels.INVESTOR.qualifies(player));
 
-    // Add 70 distinct trading days of transactions (~10 former "weeks")
-    for (int day = 1; day <= 70; day++) {
-      Share share = new Share(stock, new BigDecimal("1"), new BigDecimal("10.00"));
-      Purchase purchase = new Purchase(share, day);
-      player.getTransactionArchive().addTransaction(purchase);
-    }
-
-    // Net worth is still 1000 (starting money), need >= 1200 for INVESTOR
-    assertFalse(PlayerLevel.INVESTOR.qualifies(player));
-
-    // Add money to meet 1.2x threshold (need net worth >= 1200)
     player.addMoney(new BigDecimal("200.00"));
-    assertTrue(PlayerLevel.INVESTOR.qualifies(player));
-    assertFalse(PlayerLevel.SPECULATOR.qualifies(player));
+    assertTrue(PlayerLevels.INVESTOR.qualifies(player));
+    assertFalse(PlayerLevels.SPECULATOR.qualifies(player));
 
-    // Add 70 more distinct trading days (total 140 ~20 former "weeks")
-    for (int day = 71; day <= 140; day++) {
+    addDistinctTradingDays(71, 140);
+
+    assertFalse(PlayerLevels.SPECULATOR.qualifies(player));
+
+    player.addMoney(new BigDecimal("800.00"));
+    assertTrue(PlayerLevels.SPECULATOR.qualifies(player));
+  }
+
+  @Test
+  void levelAutoUpdates_toInvestor_whenThresholdMet() {
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
+
+    addDistinctTradingDays(1, 70);
+    player.addMoney(new BigDecimal("200.00"));
+
+    assertEquals(PlayerLevels.INVESTOR, player.getPlayerLevel());
+  }
+
+  @Test
+  void levelAutoUpdates_toSpeculator_whenThresholdMet() {
+    addDistinctTradingDays(1, 140);
+    player.addMoney(new BigDecimal("1000.00"));
+
+    assertEquals(PlayerLevels.SPECULATOR, player.getPlayerLevel());
+  }
+
+  @Test
+  void levelRemainsNovice_whenOnlyDaysMetButNotNetWorth() {
+    addDistinctTradingDays(1, 70);
+    player.recalculateLevel();
+
+    assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
+  }
+
+  /**
+   * Adds one purchase transaction per day for the given range (inclusive)
+   * to build up distinct trading days in the player's archive.
+   */
+  private void addDistinctTradingDays(int fromDay, int toDay) {
+    for (int day = fromDay; day <= toDay; day++) {
       Share share = new Share(stock, new BigDecimal("1"), new BigDecimal("10.00"));
       Purchase purchase = new Purchase(share, day);
       player.getTransactionArchive().addTransaction(purchase);
     }
-
-    // Still not speculator - need net worth >= 2000
-    assertFalse(PlayerLevel.SPECULATOR.qualifies(player));
-
-    // Add money to meet 2x threshold
-    player.addMoney(new BigDecimal("800.00"));
-    assertTrue(PlayerLevel.SPECULATOR.qualifies(player));
-  }
-
-  @Test
-  void values() {
-    PlayerLevel[] levels = PlayerLevel.values();
-    assertEquals(3, levels.length);
-    assertEquals(PlayerLevel.SPECULATOR, levels[0]);
-    assertEquals(PlayerLevel.INVESTOR, levels[1]);
-    assertEquals(PlayerLevel.NOVICE, levels[2]);
-  }
-
-  @Test
-  void valueOf() {
-    assertEquals(PlayerLevel.SPECULATOR, PlayerLevel.valueOf("SPECULATOR"));
-    assertEquals(PlayerLevel.INVESTOR, PlayerLevel.valueOf("INVESTOR"));
-    assertEquals(PlayerLevel.NOVICE, PlayerLevel.valueOf("NOVICE"));
   }
 }

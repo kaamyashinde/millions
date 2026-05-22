@@ -1,8 +1,5 @@
 package view.layout;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,7 +7,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -20,6 +16,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import view.components.image.FileImageLoader;
+import view.components.image.ImageLoader;
+import view.components.image.ValidatingImageLoader;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
 import view.theme.ThemePalette;
@@ -32,6 +31,7 @@ public class WorkspaceLayout extends StackPane {
 
   private final Label sessionSummaryLabel = new Label();
   private final ImageView headerAvatar = new ImageView();
+  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
   private final NotificationService notifications;
 
   /**
@@ -122,15 +122,7 @@ public class WorkspaceLayout extends StackPane {
    * @param avatarPath path to the profile avatar image
    */
   public void loadHeaderAvatar(Path avatarPath) {
-    headerAvatar.setImage(null);
-    if (!Files.isRegularFile(avatarPath)) {
-      return;
-    }
-    try (InputStream in = Files.newInputStream(avatarPath)) {
-      headerAvatar.setImage(new Image(in, 40, 40, true, true));
-    } catch (IOException exception) {
-      headerAvatar.setImage(null);
-    }
+    headerAvatar.setImage(avatarLoader.load(avatarPath, 40));
   }
 
   /**
