@@ -33,7 +33,7 @@ public class FibonacciTool extends AbstractChartTool {
    * Seven hex colour strings mapped to Fibonacci retracement levels in order (0 % through 100 %).
    */
   private static final String[] COLORS = {
-    "#ffffff", "#ffd700", "#ff6b6b", "#ff8c00", "#00bfff", "#98fb98", "#dddddd"
+    "#F8FAFC", "#F59E0B", "#EF4444", "#14B8A6", "#0EA5A4", "#22C55E", "#94A3B8"
   };
 
   /** Current interaction state of the two-click workflow. */

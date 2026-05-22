@@ -36,9 +36,9 @@ public class AnalysisToolbar extends HBox {
     for (ChartTool tool : tools) {
       ToggleButton btn = new ToggleButton(tool.getName());
       btn.setStyle(
-          "-fx-background-color: #2a2a2a;"
-              + "-fx-text-fill: #cccccc;"
-              + "-fx-border-color: #555555;"
+          "-fx-background-color: #111827;"
+              + "-fx-text-fill: #CBD5E1;"
+              + "-fx-border-color: #334155;"
               + "-fx-border-radius: 4;"
               + "-fx-background-radius: 4;"
               + "-fx-cursor: hand;");
@@ -64,7 +64,7 @@ public class AnalysisToolbar extends HBox {
         tools.stream().map(t -> (Observable) t.statusProperty()).toArray(Observable[]::new);
 
     Label statusLabel = new Label();
-    statusLabel.setStyle("-fx-text-fill: #888888; -fx-font-style: italic;");
+    statusLabel.setStyle("-fx-text-fill: #94A3B8; -fx-font-style: italic;");
     statusLabel
         .textProperty()
         .bind(
