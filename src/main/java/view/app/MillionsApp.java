@@ -26,6 +26,7 @@ import view.pages.quiz.QuizLauncherPage;
 import view.pages.saved.SavedRunsPage;
 import view.pages.savings.SavingsPage;
 import view.pages.stocks.StocksPage;
+import view.theme.ThemeStyles;
 
 /**
  * JavaFX entry point for the Millions application.
@@ -53,6 +54,7 @@ public class MillionsApp extends Application {
 
     LoginPage loginPage = buildLoginPage();
     scene = new Scene(loginPage, WINDOW_WIDTH, WINDOW_HEIGHT);
+    ThemeStyles.install(scene);
 
     stage.setScene(scene);
     stage.setTitle("Millions");
