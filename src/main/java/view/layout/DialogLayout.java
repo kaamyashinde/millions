@@ -7,7 +7,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -23,7 +22,7 @@ public class DialogLayout extends BorderPane {
    * @param onClose invoked when the close button is pressed
    */
   public DialogLayout(Node content, String closeLabel, Runnable onClose) {
-    setStyle("-fx-background-color: " + ThemePalette.BACKGROUND + ";");
+    ThemeStyles.addStyleClasses(this, "dialog-root");
     setPadding(new Insets(16));
     setCenter(content);
 
