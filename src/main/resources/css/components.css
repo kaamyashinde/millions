@@ -1,0 +1,130 @@
+/* Reusable components shared by layouts and pages. */
+
+.card,
+.metric-card,
+.leaderboard-panel {
+    -fx-background-color: -millions-surface;
+    -fx-border-color: -millions-border;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 14;
+}
+
+.metric-card {
+    -fx-spacing: 10;
+}
+
+.field {
+    -fx-background-color: -millions-input-bg;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: -millions-input-border;
+    -fx-border-width: 1;
+    -fx-padding: 8 12;
+    -fx-font-size: 14px;
+    -fx-text-fill: -millions-text-primary;
+}
+
+.field:focused {
+    -fx-border-color: -millions-accent;
+}
+
+.btn {
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-cursor: hand;
+    -fx-padding: 8 16;
+}
+
+.btn-secondary,
+.btn-default {
+    -fx-background-color: -millions-bg;
+    -fx-text-fill: -millions-text-primary;
+    -fx-border-color: -millions-border;
+    -fx-border-width: 1;
+}
+
+.btn-primary,
+.btn-accent {
+    -fx-background-color: -millions-accent;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 16;
+}
+
+.btn-danger {
+    -fx-background-color: #fdeaea;
+    -fx-text-fill: #9d2020;
+    -fx-border-color: #cc3d3d;
+    -fx-border-width: 1;
+}
+
+.pill,
+.badge {
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-padding: 4 10;
+    -fx-font-weight: bold;
+}
+
+.status-success {
+    -fx-text-fill: -millions-success;
+}
+
+.status-warning {
+    -fx-text-fill: -millions-warning;
+}
+
+.status-danger {
+    -fx-text-fill: -millions-error;
+}
+
+.recommendation-badge {
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-padding: 6 12;
+    -fx-font-weight: bold;
+}
+
+.recommendation-buy {
+    -fx-background-color: #e8f7ee;
+    -fx-border-color: #1f9d55;
+    -fx-text-fill: #176f3d;
+}
+
+.recommendation-hold {
+    -fx-background-color: #fff6d9;
+    -fx-border-color: #c58b00;
+    -fx-text-fill: #8a5a00;
+}
+
+.recommendation-sell {
+    -fx-background-color: #fdeaea;
+    -fx-border-color: #cc3d3d;
+    -fx-text-fill: #9d2020;
+}
+
+.toast {
+    -fx-background-color: -millions-bg;
+    -fx-background-radius: 8;
+    -fx-border-color: -millions-border;
+    -fx-border-radius: 8;
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(17, 24, 39, 0.12), 12, 0.18, 0, 4);
+}
+
+.leaderboard-top-one {
+    -fx-background-color: -millions-top-one;
+    -fx-font-weight: bold;
+}
+
+.leaderboard-top-two {
+    -fx-background-color: -millions-top-two;
+    -fx-font-weight: bold;
+}
+
+.leaderboard-top-three {
+    -fx-background-color: -millions-top-three;
+    -fx-font-weight: bold;
+}
