@@ -1,24 +1,28 @@
 /* Millions theme tokens and global JavaFX defaults. */
 
 .root {
-    -millions-accent: #6d28d9;
-    -millions-accent-light: #f0eeff;
-    -millions-bg: #ffffff;
-    -millions-surface: #f6f7fb;
-    -millions-surface-strong: #eef1f7;
-    -millions-border: #d7dce5;
-    -millions-text-primary: #111827;
-    -millions-text-secondary: #6b7280;
-    -millions-text-muted: #9ca3af;
-    -millions-error: #c62828;
-    -millions-success: #1f9d55;
-    -millions-warning: #c58b00;
-    -millions-info: #2563eb;
-    -millions-input-bg: #f5f5f5;
-    -millions-input-border: #d1d5db;
-    -millions-top-one: #fff4cc;
-    -millions-top-two: #eef3f8;
-    -millions-top-three: #fbe9dd;
+    -millions-accent: #0EA5A4;
+    -millions-accent-light: #0EA5A420;
+    -millions-primary-hover: #14B8A6;
+    -millions-bg: #0B1220;
+    -millions-surface: #111827;
+    -millions-surface-light: #1E293B;
+    -millions-surface-strong: #1E293B;
+    -millions-border: #334155;
+    -millions-text-primary: #F8FAFC;
+    -millions-text-secondary: #CBD5E1;
+    -millions-text-muted: #94A3B8;
+    -millions-error: #EF4444;
+    -millions-success: #22C55E;
+    -millions-positive: #22C55E;
+    -millions-negative: #EF4444;
+    -millions-warning: #F59E0B;
+    -millions-info: #0EA5A4;
+    -millions-input-bg: #1E293B;
+    -millions-input-border: #334155;
+    -millions-top-one: #F59E0B33;
+    -millions-top-two: #0EA5A422;
+    -millions-top-three: #CBD5E133;
     -fx-background-color: -millions-bg;
     -fx-font-family: "System";
     -fx-text-fill: -millions-text-primary;
@@ -115,4 +119,21 @@
 .table-row-cell:selected {
     -fx-background-color: -millions-accent-light;
     -fx-text-background-color: -millions-text-primary;
+}
+
+.table-row-cell {
+    -fx-background-color: -millions-bg;
+    -fx-text-background-color: -millions-text-primary;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: -millions-surface;
+}
+
+.table-row-cell:empty {
+    -fx-background-color: -millions-bg;
+}
+
+.table-cell {
+    -fx-text-fill: -millions-text-primary;
 }
