@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+
+import view.components.notification.NotificationItem;
 import view.components.toast.ToastMode;
 
 class NotificationItemTest {

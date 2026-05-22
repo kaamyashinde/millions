@@ -12,10 +12,13 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import view.components.notification.NotificationItem;
+import view.components.notification.ToastTray;
 import view.components.toast.Toast;
 import view.components.toast.ToastMode;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  * ToastTray mirrors list order top-to-bottom: index 0 is the top child. New items appended with

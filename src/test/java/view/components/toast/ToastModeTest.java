@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
+import view.components.toast.ToastMode;
+
 /**
  * Tests for ToastMode enum. No JavaFX toolkit initialization required as these tests only cover
  * getColorHex() and getSymbol().

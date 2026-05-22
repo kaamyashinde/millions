@@ -9,7 +9,7 @@ import model.Exchange;
 import model.InvestableAsset;
 
 /**
- * Supplies UI-ready data for {@link view.RegularSavingsPanel}: investable assets listed on an
+ * Supplies UI-ready data for the savings page: investable assets listed on an
  * {@link Exchange}, sorted by symbol, for combo-box selection when creating a plan.
  *
  * @author kevindmazali

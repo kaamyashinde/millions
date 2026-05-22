@@ -13,13 +13,15 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
 import model.Exchange;
 import model.Stock;
+import view.pages.stocks.StocksPage;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
  * Tests the stock list to detail-view wiring.
  */
-class StocksListPanelTest {
+class StocksPageTest {
 
   @BeforeAll
   static void initJavaFx() throws InterruptedException {
@@ -39,7 +41,7 @@ class StocksListPanelTest {
     Exchange exchange =
         new Exchange.Builder("NYSE").stocks(List.of(microsoft, apple)).build();
 
-    StocksListPanel panel = runOnFxThread(() -> new StocksListPanel(exchange));
+    StocksPage panel = runOnFxThread(() -> new StocksPage(exchange));
     SplitPane splitPane = (SplitPane) panel.getCenter();
     @SuppressWarnings("unchecked")
     TableView<Stock> table = (TableView<Stock>) splitPane.getItems().getFirst();
@@ -80,9 +82,9 @@ class StocksListPanelTest {
    * @return supplier result
    * @throws Exception any exception thrown by the supplier
    */
-  private static StocksListPanel runOnFxThread(PanelSupplier supplier) throws Exception {
+  private static StocksPage runOnFxThread(PanelSupplier supplier) throws Exception {
     CountDownLatch latch = new CountDownLatch(1);
-    AtomicReference<StocksListPanel> ref = new AtomicReference<>();
+    AtomicReference<StocksPage> ref = new AtomicReference<>();
     AtomicReference<Exception> err = new AtomicReference<>();
     Platform.runLater(
         () -> {
@@ -103,6 +105,6 @@ class StocksListPanelTest {
 
   @FunctionalInterface
   private interface PanelSupplier {
-    StocksListPanel get() throws Exception;
+    StocksPage get() throws Exception;
   }
 }

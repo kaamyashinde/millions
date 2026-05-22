@@ -9,9 +9,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.util.Duration;
+import view.components.notification.NotificationService;
+import view.components.notification.ToastTray;
+import view.components.toast.ToastMode;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import view.components.toast.ToastMode;
 
 class NotificationServiceTest {
 
