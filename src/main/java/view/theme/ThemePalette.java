@@ -27,6 +27,9 @@ public final class ThemePalette {
   public static final String TOP_ONE = "#F59E0B33";
   public static final String TOP_TWO = "#0EA5A422";
   public static final String TOP_THREE = "#CBD5E133";
+  public static final String DIFFICULTY_BEGINNER = "#22C55E";
+  public static final String DIFFICULTY_INTERMEDIATE = "#F59E0B";
+  public static final String DIFFICULTY_ADVANCED = "#EF4444";
 
   private ThemePalette() {}
 }
