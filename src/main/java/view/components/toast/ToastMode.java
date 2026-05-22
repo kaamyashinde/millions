@@ -15,7 +15,7 @@ import javafx.scene.shape.Shape;
  * @since 2026-03-29
  */
 public enum ToastMode {
-  ERROR("#FF4444", "i") {
+  ERROR("#EF4444", "i") {
     @Override
     public Shape createShape() {
       double r = ICON_SIZE / 2.0;
@@ -31,7 +31,7 @@ public enum ToastMode {
     }
   },
 
-  WARNING("#FFA500", "i") {
+  WARNING("#F59E0B", "i") {
     @Override
     public Shape createShape() {
       double h = ICON_SIZE / 2.0;
@@ -47,7 +47,7 @@ public enum ToastMode {
     }
   },
 
-  INFO("#2196F3", "i") {
+  INFO("#0EA5A4", "i") {
     @Override
     public Shape createShape() {
       Rectangle rect = new Rectangle(ICON_SIZE, ICON_SIZE);
@@ -60,7 +60,7 @@ public enum ToastMode {
     }
   },
 
-  SUCCESS("#4CAF50", "✓") {
+  SUCCESS("#22C55E", "✓") {
     @Override
     public Shape createShape() {
       Circle circle = new Circle(ICON_SIZE / 2.0);
@@ -73,7 +73,7 @@ public enum ToastMode {
 
   static final double ICON_SIZE = 40;
   static final double STROKE = 2;
-  private static final Color DEFAULT_STROKE = Color.BLACK;
+  private static final Color DEFAULT_STROKE = Color.web("#F8FAFC");
 
   private final String colorHex;
   private final String symbol;
