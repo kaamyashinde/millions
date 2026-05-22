@@ -38,12 +38,12 @@ class TransactionTest {
   }
 
   @Test
-  void getWeekReturnsWeekFromTransaction() {
+  void getDayReturnsDayFromTransaction() {
     Sale sale = new Sale(share, 5);
-    assertEquals(5, sale.getWeek());
+    assertEquals(5, sale.getDay());
 
     Purchase purchase = new Purchase(share, 7);
-    assertEquals(7, purchase.getWeek());
+    assertEquals(7, purchase.getDay());
   }
 
   @Test

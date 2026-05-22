@@ -1,0 +1,77 @@
+/* Quiz launcher, quiz play, and quiz results. */
+
+.quiz-root {
+    -millions-bg: #121212;
+    -millions-surface: #1e1e1e;
+    -millions-border: #2a2a2a;
+    -millions-text-primary: #e0e0e0;
+    -millions-text-secondary: #9e9e9e;
+    -millions-accent: #2196F3;
+    -millions-success: #4CAF50;
+    -millions-error: #FF4444;
+    -fx-background-color: -millions-bg;
+}
+
+.quiz-heading {
+    -fx-fill: -millions-text-primary;
+}
+
+.quiz-subtitle,
+.quiz-meta {
+    -fx-text-fill: -millions-text-secondary;
+}
+
+.quiz-card,
+.quiz-question-card,
+.quiz-feedback {
+    -fx-background-color: -millions-surface;
+    -fx-border-color: -millions-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.quiz-card {
+    -fx-border-color: -millions-accent;
+    -fx-cursor: hand;
+}
+
+.quiz-card-title,
+.quiz-question-text {
+    -fx-text-fill: -millions-text-primary;
+    -fx-font-weight: bold;
+}
+
+.quiz-cta {
+    -fx-text-fill: -millions-accent;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.quiz-answer-button {
+    -fx-background-color: -millions-surface;
+    -fx-text-fill: -millions-text-primary;
+    -fx-border-color: -millions-accent;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+    -fx-padding: 10 14;
+}
+
+.quiz-answer-correct {
+    -fx-border-color: -millions-success;
+    -fx-background-color: #4CAF5022;
+}
+
+.quiz-answer-wrong {
+    -fx-border-color: -millions-error;
+    -fx-background-color: #FF444422;
+}
+
+.quiz-feedback-correct {
+    -fx-border-color: -millions-success;
+}
+
+.quiz-feedback-wrong {
+    -fx-border-color: -millions-error;
+}

@@ -32,7 +32,7 @@ class PurchaseTest {
   void constructorSetsCalculatorAndShare() {
     Purchase purchase = new Purchase(share, 1);
     assertEquals(share, purchase.getShare());
-    assertEquals(1, purchase.getWeek());
+    assertEquals(1, purchase.getDay());
     assertNotNull(purchase.getCalculator());
     assertInstanceOf(PurchaseCalculator.class, purchase.getCalculator());
   }
@@ -68,22 +68,6 @@ class PurchaseTest {
     assertEquals(new BigDecimal("1.00"), poorPlayer.getMoney());
     assertFalse(poorPlayer.getPortfolio().getShares().contains(share));
     assertTrue(poorPlayer.getTransactionArchive().isEmpty());
-    assertFalse(purchase.isCommited());
-  }
-
-  @Test
-  void commitThrowsIllegalStateWhenTransactionNotInArchive() {
-    Purchase purchase = new Purchase(share, 1);
-    // Player whose getTransactionArchive() returns a fresh empty archive each call,
-    // so addTransaction writes to one instance while the contains-check reads another.
-    Player playerWithFreshArchive = new Player("Charlie", new BigDecimal("50000.00")) {
-      @Override
-      public TransactionArchive getTransactionArchive() {
-        return new TransactionArchive();
-      }
-    };
-
-    assertThrows(IllegalStateException.class, () -> purchase.commit(playerWithFreshArchive));
     assertFalse(purchase.isCommited());
   }
 

@@ -43,54 +43,63 @@ public class TransactionArchive {
   }
 
   /**
-   * Gets the list of transactions up to a specified week.
+   * Gets the list of transactions up to a specified trading day.
    *
-   * @param week the week up to which transactions are retrieved
-   * @return the list of transactions up to the specified week
+   * @param day the day up to which transactions are retrieved
+   * @return the list of transactions up to the specified day
    */
-  public List<Transaction> getTransactions(int week) {
+  public List<Transaction> getTransactions(int day) {
     return this.transactions.stream()
-        .filter(t -> t.getWeek() <= week)
+        .filter(t -> t.getDay() <= day)
         .toList();
   }
 
   /**
-   * Gets the list of purchases up to a specified week.
+   * Gets the full transaction history in insertion order.
    *
-   * @param week the week up to which purchases are retrieved
-   * @return the list of purchases up to the specified week
+   * @return immutable snapshot of all transactions
    */
-  public List<Purchase> getPurchases(int week) {
+  public List<Transaction> getAllTransactions() {
+    return List.copyOf(transactions);
+  }
+
+  /**
+   * Gets the list of purchases up to a specified trading day.
+   *
+   * @param day the day up to which purchases are retrieved
+   * @return the list of purchases up to the specified day
+   */
+  public List<Purchase> getPurchases(int day) {
     return this.transactions.stream()
         .filter(Purchase.class::isInstance)
         .map(t -> (Purchase) t)
-        .filter(p -> p.getWeek() <= week)
+        .filter(p -> p.getDay() <= day)
         .toList();   // or .collect(Collectors.toList()) on Java < 16
   }
 
   /**
-   * Gets the list of sales up to a specified week.
+   * Gets the list of sales up to a specified trading day.
    *
-   * @param week the week up to which sales are retrieved
-   * @return the list of sales up to the specified week
+   * @param day the day up to which sales are retrieved
+   * @return the list of sales up to the specified day
    */
-  public List<Sale> getSales(int week) {
+  public List<Sale> getSales(int day) {
     return this.transactions.stream()
         .filter(Sale.class::isInstance)
         .map(t -> (Sale) t)
-        .filter(s -> s.getWeek() <= week)
+        .filter(s -> s.getDay() <= day)
         .toList();   // or .collect(Collectors.toList()) on Java < 16
   }
 
   /**
-   * Counts the number of distinct weeks in the transaction archive.
+   * Counts the number of distinct trading days in the transaction archive.
    *
-   * @return the number of distinct weeks
+   * @return the number of distinct days
    */
 
-  public int countDistinctWeek() {
+  public int countDistinctDay() {
     return (int) this.transactions.stream()
-        .map(Transaction::getWeek)
+        .map(Transaction::getDay)
         .distinct()
         .count();
   }

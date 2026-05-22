@@ -29,7 +29,7 @@ public class SaleCalculator implements TransactionCalculator {
    */
   public SaleCalculator(Share share) {
     Validator.checkNotNull(share, "Share");
-    this.salePrice = share.getStock().getSalesPrice();
+    this.salePrice = share.getAsset().getSalesPrice();
     this.purchasePrice = share.getPurchasePrice();
     this.quantity = share.getQuantity();
   }

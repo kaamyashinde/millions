@@ -14,35 +14,35 @@ import java.math.BigDecimal;
 
 public class Share {
 
-  private final Stock stock;
+  private final InvestableAsset asset;
   private final BigDecimal quantity;
   private final BigDecimal purchasePrice;
 
   /**
    * This is the constructor for the Share class.
    *
-   * @param stock         The stock associated with the share.
+   * @param asset         The asset associated with the share.
    * @param quantity      The quantity of shares purchased.
    * @param purchasePrice The price at which the shares were purchased.
-   * @throws NullPointerException if {@code stock}, {@code quantity} or {@code purchasePrice} is
+   * @throws NullPointerException if {@code asset}, {@code quantity} or {@code purchasePrice} is
    *                              null.
    */
-  public Share(Stock stock, BigDecimal quantity, BigDecimal purchasePrice) {
-    checkNotNull(stock, "Stock");
+  public Share(InvestableAsset asset, BigDecimal quantity, BigDecimal purchasePrice) {
+    checkNotNull(asset, "Asset");
     checkNotNull(quantity, "Quantity");
     checkNotNull(purchasePrice, "Purchase Price");
-    this.stock = stock;
+    this.asset = asset;
     this.quantity = quantity;
     this.purchasePrice = purchasePrice;
   }
 
   /**
-   * Gets the stock associated with the share.
+   * Gets the asset associated with the share.
    *
-   * @return The stock associated with the share.
+   * @return The asset associated with the share.
    */
-  public Stock getStock() {
-    return stock;
+  public InvestableAsset getAsset() {
+    return asset;
   }
 
   /**

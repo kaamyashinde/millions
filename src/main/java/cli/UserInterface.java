@@ -1,6 +1,7 @@
 package cli;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -8,34 +9,87 @@ import model.Exchange;
 import model.Player;
 import model.Stock;
 import model.Share;
+import model.analysis.MetricStatus;
+import model.analysis.MetricValue;
+import model.analysis.PerformanceComparison;
+import model.analysis.PortfolioPerformanceService;
 import model.exception.InsufficientFundsException;
+import model.exception.InsufficientSharesException;
 import model.exception.ShareNotFoundException;
+import model.fund.Fund;
+import model.fund.FundComponent;
+import model.persistence.GameStateMapper;
+import model.persistence.GameStateRepository;
+import model.persistence.MarketData;
+import model.persistence.MarketDataLoader;
+import model.persistence.PinHashingService;
+import model.persistence.ProfileImageService;
+import model.persistence.ProfilePreferencesRepository;
+import model.persistence.SavedRunMapper;
+import model.persistence.SavedRunRepository;
+import model.persistence.UserAccountRepository;
+import model.savings.RegularSavingsPlan;
+import model.savings.RegularSavingsProcessor;
+import model.savings.SavingsInstallmentMode;
+import model.session.ActiveSession;
+import model.session.AuthService;
+import model.session.AuthenticationException;
+import model.session.DuplicateUsernameException;
+import model.session.GamePersistenceService;
+import model.session.ProfilePreferencesService;
+import model.session.ProfileService;
+import model.session.RegistrationValidationException;
+import model.session.SavedRunService;
+import model.session.SessionService;
+import model.session.validation.ValidationError;
 import model.transaction.Purchase;
 import model.transaction.Transaction;
+import util.I18n;
+import java.nio.file.Path;
 
 /**
  * The UserInterface class is responsible for handling the user input and output
  * for the Millions stock trading application.
  * The class provides a menu for the user to set up a player, view portfolio and balance,
- * list and search stocks, buy and sell shares, advance the week, and view transaction history.
+ * list and search stocks, buy and sell shares, advance the trading day, and view transaction history.
  */
 public class UserInterface {
 
+  private static final String DEMO_MARKET_DATA_RESOURCE = "/data/demo-stocks.csv";
+  private static final String EXCHANGE_NAME = "NYSE";
+  private static final Path PROFILES_ROOT =
+      Path.of(System.getProperty("user.home"), ".millions", "profiles");
+
   private static final int QUIT = 0;
-  private static final int SET_UP_PLAYER = 1;
-  private static final int VIEW_BALANCE = 2;
-  private static final int VIEW_PORTFOLIO = 3;
-  private static final int LIST_STOCKS = 4;
-  private static final int SEARCH_STOCKS = 5;
-  private static final int BUY_SHARES = 6;
-  private static final int SELL_SHARES = 7;
-  private static final int ADVANCE_WEEK = 8;
-  private static final int VIEW_TRANSACTIONS = 9;
+  private static final int REGISTER_USER = 1;
+  private static final int LOGIN_USER = 2;
+  private static final int LOGOUT_USER = 3;
+  private static final int VIEW_BALANCE = 4;
+  private static final int VIEW_PORTFOLIO = 5;
+  private static final int LIST_STOCKS = 6;
+  private static final int SEARCH_STOCKS = 7;
+  private static final int BUY_SHARES = 8;
+  private static final int SELL_SHARES = 9;
+  private static final int ADVANCE_DAY = 10;
+  private static final int VIEW_TRANSACTIONS = 11;
+  private static final int ADD_SAVINGS = 12;
+  private static final int LIST_SAVINGS = 13;
+  private static final int REMOVE_SAVINGS = 14;
+  private static final int EDIT_SAVINGS = 15;
+  private static final int LIST_FUNDS = 16;
+  private static final int SEARCH_FUNDS = 17;
+  private static final int VIEW_FUND_DETAILS = 18;
+  private static final int PROFILE_DISPLAY_NAME = 19;
+  private static final int PROFILE_AVATAR_PATH = 20;
+  private static final int PROFILE_DELETE = 21;
+  private static final int INVALID_MENU_CHOICE = -1;
 
   private static final Scanner input = new Scanner(System.in);
-  private static final String INVALID_INPUT = "-> Invalid input, please try again.";
+  private static final PortfolioPerformanceService portfolioPerformanceService =
+      new PortfolioPerformanceService();
 
   private static boolean running = true;
+  private static SessionService sessionService;
   private static Exchange exchange;
   private static Player player;
 
@@ -54,18 +108,40 @@ public class UserInterface {
   }
 
   /**
-   * Initialises the UserInterface. Creates a default exchange with a set of stocks
-   * so that the user can list, search, buy and sell without loading from file.
+   * Initialises the session layer and starts with no active user.
    */
   private static void init() {
-    Stock apple = new Stock("AAPL", "Apple Inc.");
-    apple.addNewSalesPrice(new BigDecimal("150.00"));
-    Stock google = new Stock("GOOGL", "Alphabet Inc.");
-    google.addNewSalesPrice(new BigDecimal("2800.00"));
-    Stock microsoft = new Stock("MSFT", "Microsoft Corporation");
-    microsoft.addNewSalesPrice(new BigDecimal("300.00"));
-    exchange = new Exchange("NYSE", List.of(apple, google, microsoft));
+    UserAccountRepository userAccountRepository = new UserAccountRepository(PROFILES_ROOT);
+    PinHashingService pinHashingService = new PinHashingService();
+
+    GamePersistenceService gamePersistenceService = new GamePersistenceService(
+        new GameStateRepository(PROFILES_ROOT),
+        new GameStateMapper(EXCHANGE_NAME),
+        UserInterface::loadMarketData);
+
+    AuthService authService = new AuthService(
+        userAccountRepository, pinHashingService, gamePersistenceService);
+
+    ProfileService profileService = new ProfileService(
+        userAccountRepository,
+        new ProfileImageService(PROFILES_ROOT),
+        pinHashingService,
+        PROFILES_ROOT);
+
+    SavedRunService savedRunService = new SavedRunService(
+        new SavedRunRepository(PROFILES_ROOT), new SavedRunMapper());
+
+    ProfilePreferencesService profilePreferencesService = new ProfilePreferencesService(
+        new ProfilePreferencesRepository(PROFILES_ROOT));
+
+    sessionService = new SessionService(
+        authService,
+        profileService,
+        gamePersistenceService,
+        savedRunService,
+        profilePreferencesService);
     player = null;
+    exchange = null;
   }
 
   /**
@@ -73,11 +149,9 @@ public class UserInterface {
    * until the user chooses to quit.
    */
   private static void start() {
-    System.out.println("""
-        =================== MILLIONS - Stock Trading ===================
-
-        Hello and welcome to Millions. Manage your portfolio and trade stocks.
-        """);
+    System.out.println(I18n.get("app.welcome.banner"));
+    System.out.println();
+    System.out.println(I18n.get("app.welcome.body"));
     while (running) {
       triggerChoice();
     }
@@ -89,22 +163,38 @@ public class UserInterface {
    * @return the integer corresponding to the action the user wants to perform
    */
   private static int showMenu() {
-    System.out.println("""
-        ------------ MENU -----------
-        0. Exit the application
-        1. Set up player (name, starting money)
-        2. View balance
-        3. View portfolio
-        4. List all stocks
-        5. Search stocks
-        6. Buy shares
-        7. Sell shares
-        8. Advance week
-        9. View transaction history
-        -----------------------------
-        What would you like to do? (Enter a number between 0 and 9).
-        """);
-    return input.nextInt();
+    System.out.println(I18n.get("menu.header"));
+    System.out.println(activeUserSummary());
+    System.out.println(I18n.get("menu.option.exit"));
+    System.out.println(I18n.get("menu.option.register"));
+    System.out.println(I18n.get("menu.option.login"));
+    System.out.println(I18n.get("menu.option.logout"));
+    System.out.println(I18n.get("menu.option.balance"));
+    System.out.println(I18n.get("menu.option.portfolio"));
+    System.out.println(I18n.get("menu.option.list"));
+    System.out.println(I18n.get("menu.option.search"));
+    System.out.println(I18n.get("menu.option.buy"));
+    System.out.println(I18n.get("menu.option.sell"));
+    System.out.println(I18n.get("menu.option.day"));
+    System.out.println(I18n.get("menu.option.transactions"));
+    System.out.println(I18n.get("menu.option.savings.add"));
+    System.out.println(I18n.get("menu.option.savings.list"));
+    System.out.println(I18n.get("menu.option.savings.remove"));
+    System.out.println(I18n.get("menu.option.savings.edit"));
+    System.out.println(I18n.get("menu.option.funds.list"));
+    System.out.println(I18n.get("menu.option.funds.search"));
+    System.out.println(I18n.get("menu.option.funds.view"));
+    System.out.println(I18n.get("menu.option.profile.name"));
+    System.out.println(I18n.get("menu.option.profile.avatar"));
+    System.out.println(I18n.get("menu.option.profile.delete"));
+    System.out.println(I18n.get("menu.footer"));
+    System.out.println(I18n.get("menu.prompt"));
+    try {
+      return input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      return INVALID_MENU_CHOICE;
+    }
   }
 
   /**
@@ -114,16 +204,28 @@ public class UserInterface {
     int choice = showMenu();
     switch (choice) {
       case QUIT -> quit();
-      case SET_UP_PLAYER -> setUpPlayer();
+      case REGISTER_USER -> registerUser();
+      case LOGIN_USER -> loginUser();
+      case LOGOUT_USER -> logoutUser();
       case VIEW_BALANCE -> viewBalance();
       case VIEW_PORTFOLIO -> viewPortfolio();
       case LIST_STOCKS -> listStocks();
       case SEARCH_STOCKS -> searchStocks();
       case BUY_SHARES -> buyShares();
       case SELL_SHARES -> sellShares();
-      case ADVANCE_WEEK -> advanceWeek();
+      case ADVANCE_DAY -> advanceDay();
       case VIEW_TRANSACTIONS -> viewTransactions();
-      default -> System.out.println(INVALID_INPUT);
+      case ADD_SAVINGS -> addSavingsPlan();
+      case LIST_SAVINGS -> listSavingsPlans();
+      case REMOVE_SAVINGS -> removeSavingsPlan();
+      case EDIT_SAVINGS -> editSavingsPlan();
+      case LIST_FUNDS -> listFunds();
+      case SEARCH_FUNDS -> searchFunds();
+      case VIEW_FUND_DETAILS -> viewFundDetails();
+      case PROFILE_DISPLAY_NAME -> editProfileDisplayName();
+      case PROFILE_AVATAR_PATH -> setProfileAvatarFromPath();
+      case PROFILE_DELETE -> deleteMyProfile();
+      default -> System.out.println(I18n.get("invalid.input"));
     }
   }
 
@@ -132,139 +234,289 @@ public class UserInterface {
    */
   private static void quit() {
     running = false;
-    System.out.println("Thank you for using Millions!");
-    System.out.println("Successfully exited the application.");
+    sessionService.saveActiveSession();
+    System.out.println(I18n.get("quit.thanks"));
+    System.out.println(I18n.get("quit.success"));
     System.exit(0);
   }
 
   /**
-   * Ensures a player has been set up. Prints a message if not.
+   * Checks whether a player has been set up. Prints a message if not.
    *
-   * @return true if player is not null, false otherwise
+   * @return true if player is null, false otherwise
    */
-  private static boolean requirePlayer() {
-    if (player == null) {
-      System.out.println("-> You need to set up a player first (option 1).");
-      return false;
+  private static boolean isPlayerMissing() {
+    if (player == null || exchange == null) {
+      System.out.println(I18n.get("require.player"));
+      return true;
     }
-    return true;
+    return false;
   }
 
   /**
-   * Sets up the player. Prompts for name and starting money and creates a new Player.
+   * Registers a new local profile and makes it the active session.
    */
-  private static void setUpPlayer() {
+  private static void registerUser() {
     input.nextLine();
-    System.out.println("Enter your name: ");
-    String name = input.nextLine().trim();
-    if (name.isEmpty()) {
-      System.out.println(INVALID_INPUT);
-      return;
-    }
-    System.out.println("Enter your starting money (e.g. 10000.00): ");
+    System.out.println(I18n.get("prompt.username"));
+    String username = input.nextLine().trim();
+    System.out.println(I18n.get("prompt.pin"));
+    char[] pin = input.nextLine().trim().toCharArray();
+    System.out.println(I18n.get("prompt.startingMoney"));
     try {
       BigDecimal startingMoney = new BigDecimal(input.nextLine().trim());
-      if (startingMoney.compareTo(BigDecimal.ZERO) < 0) {
-        System.out.println(INVALID_INPUT + " Starting money must be non-negative.");
-        return;
-      }
-      player = new Player(name, startingMoney);
-      System.out.println("-> Player '" + name + "' created with " + startingMoney + " in balance.");
+      ActiveSession session = sessionService.register(username, pin, startingMoney);
+      applyActiveSession(session);
+      System.out.println(I18n.format("auth.registered", session.username(), startingMoney));
     } catch (NumberFormatException e) {
-      System.out.println(INVALID_INPUT);
+      System.out.println(I18n.get("invalid.input"));
+    } catch (DuplicateUsernameException e) {
+      System.out.println(I18n.get("auth.duplicateUsername"));
+    } catch (RegistrationValidationException e) {
+      System.out.println(registrationValidationMessage(e.error()));
     }
+  }
+
+  /**
+   * Logs into an existing local profile and loads its saved game state.
+   */
+  private static void loginUser() {
+    input.nextLine();
+    List<String> usernames = sessionService.listRegisteredUsers();
+    if (usernames.isEmpty()) {
+      System.out.println(I18n.get("auth.users.none"));
+      return;
+    }
+    System.out.println(I18n.get("auth.users.header"));
+    usernames.forEach(username -> System.out.println("   - " + username));
+    System.out.println(I18n.get("prompt.username"));
+    String username = input.nextLine().trim();
+    System.out.println(I18n.get("prompt.pin"));
+    char[] pin = input.nextLine().trim().toCharArray();
+    try {
+      ActiveSession session = sessionService.login(username, pin);
+      applyActiveSession(session);
+      System.out.println(I18n.format("auth.loggedIn", session.username()));
+    } catch (AuthenticationException e) {
+      System.out.println(I18n.get("auth.invalidCredentials"));
+    }
+  }
+
+  /**
+   * Logs out the current profile after saving its game state.
+   */
+  private static void logoutUser() {
+    if (!sessionService.logout()) {
+      System.out.println(I18n.get("auth.noActiveUser"));
+      return;
+    }
+    clearActiveSession();
+    System.out.println(I18n.get("auth.loggedOut"));
   }
 
   /**
    * Prints the current balance of the player.
    */
   private static void viewBalance() {
-    if (!requirePlayer()) {
+    if (isPlayerMissing()) {
       return;
     }
-    System.out.println("-> Your current balance: " + player.getMoney());
+    System.out.println(I18n.format("balance.current", player.getMoney()));
   }
 
   /**
    * Prints the player's portfolio (all shares held).
    */
   private static void viewPortfolio() {
-    if (!requirePlayer()) {
+    if (isPlayerMissing()) {
       return;
     }
     if (player.getPortfolio().getShares().isEmpty()) {
-      System.out.println("-> Your portfolio is empty.");
+      System.out.println(I18n.get("portfolio.empty"));
+      printPerformanceComparison();
       return;
     }
-    System.out.println("-> Your portfolio:");
+    System.out.println(I18n.get("portfolio.header"));
     player.getPortfolio().getShares().forEach(share -> System.out.println(
-        "   " + share.getStock().getSymbol() + " (" + share.getStock().getCompany() + "): "
-            + share.getQuantity() + " shares @ " + share.getPurchasePrice() + " (current: "
-            + share.getStock().getSalesPrice() + ")"));
+        I18n.format(
+            "portfolio.line",
+            share.getAsset().getSymbol(),
+            share.getAsset().getDisplayName(),
+            share.getQuantity(),
+            share.getPurchasePrice(),
+            share.getAsset().getSalesPrice(),
+            share.getAsset().getAssetType())));
+    printPerformanceComparison();
   }
 
   /**
    * Lists all stocks available on the exchange with symbol, company and current price.
    */
   private static void listStocks() {
-    List<Stock> stocks = exchange.findStocks("");
-    if (stocks.isEmpty()) {
-      System.out.println("-> No stocks available.");
+    if (isPlayerMissing()) {
       return;
     }
-    System.out.println("-> Stocks on " + exchange.getName() + ":");
+    List<Stock> stocks = exchange.findStocks("");
+    if (stocks.isEmpty()) {
+      System.out.println(I18n.get("stocks.none"));
+      return;
+    }
+    System.out.println(I18n.format("stocks.onExchange", exchange.getName()));
     stocks.forEach(stock -> System.out.println(
-        "   " + stock.getSymbol() + " - " + stock.getCompany() + " | Price: " + stock.getSalesPrice()));
+        I18n.format("stock.line", stock.getSymbol(), stock.getCompany(), stock.getSalesPrice())));
   }
 
   /**
    * Searches stocks by symbol or company name and prints matching results.
    */
   private static void searchStocks() {
+    if (isPlayerMissing()) {
+      return;
+    }
     input.nextLine();
-    System.out.println("Enter search term (symbol or company name): ");
+    System.out.println(I18n.get("prompt.search"));
     String term = input.nextLine().trim();
     List<Stock> results = exchange.findStocks(term);
     if (results.isEmpty()) {
-      System.out.println("-> No stocks found matching '" + term + "'.");
+      System.out.println(I18n.format("search.none", term));
       return;
     }
-    System.out.println("-> Found " + results.size() + " stock(s):");
+    System.out.println(I18n.format("search.found", results.size()));
     results.forEach(stock -> System.out.println(
-        "   " + stock.getSymbol() + " - " + stock.getCompany() + " | Price: " + stock.getSalesPrice()));
+        I18n.format("stock.line", stock.getSymbol(), stock.getCompany(), stock.getSalesPrice())));
+  }
+
+  /**
+   * Lists all funds available on the exchange with symbol, name, and derived current price.
+   */
+  private static void listFunds() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    List<Fund> funds = exchange.findFunds("");
+    if (funds.isEmpty()) {
+      System.out.println(I18n.get("funds.none"));
+      return;
+    }
+    System.out.println(I18n.format("funds.onExchange", exchange.getName()));
+    funds.forEach(fund -> System.out.println(
+        I18n.format("fund.line", fund.getSymbol(), fund.getDisplayName(), fund.getSalesPrice())));
+  }
+
+  /**
+   * Searches listed funds by symbol or fund name.
+   */
+  private static void searchFunds() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println(I18n.get("prompt.search.funds"));
+    String term = input.nextLine().trim();
+    List<Fund> results = exchange.findFunds(term);
+    if (results.isEmpty()) {
+      System.out.println(I18n.format("fund.search.none", term));
+      return;
+    }
+    System.out.println(I18n.format("fund.search.found", results.size()));
+    results.forEach(fund -> System.out.println(
+        I18n.format("fund.line", fund.getSymbol(), fund.getDisplayName(), fund.getSalesPrice())));
+  }
+
+  /**
+   * Shows one fund and its underlying stock weights.
+   */
+  private static void viewFundDetails() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println(I18n.get("prompt.fund.symbol"));
+    String symbol = input.nextLine().trim().toUpperCase();
+    if (symbol.isEmpty()) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    Fund fund = exchange.getFund(symbol);
+    if (fund == null) {
+      System.out.println(I18n.format("error.fundNotOnExchange", symbol));
+      return;
+    }
+    System.out.println(I18n.format(
+        "fund.details.header",
+        fund.getSymbol(),
+        fund.getDisplayName(),
+        fund.getSalesPrice()));
+    for (FundComponent component : fund.getComponents()) {
+      System.out.println(I18n.format(
+          "fund.details.line",
+          component.stock().getSymbol(),
+          component.stock().getCompany(),
+          component.weight()));
+    }
   }
 
   /**
    * Buys shares of a stock. Prompts for stock symbol and quantity, then commits the purchase.
    */
   private static void buyShares() {
-    if (!requirePlayer()) {
+    if (isPlayerMissing()) {
       return;
     }
     input.nextLine();
-    System.out.println("Enter the stock symbol (e.g. AAPL): ");
+    System.out.println(I18n.get("prompt.symbol"));
     String symbol = input.nextLine().trim().toUpperCase();
     if (symbol.isEmpty()) {
-      System.out.println(INVALID_INPUT);
+      System.out.println(I18n.get("invalid.input"));
       return;
     }
-    if (!exchange.hasStock(symbol)) {
-      System.out.println("-> Stock '" + symbol + "' not found on the exchange.");
+    if (!exchange.hasAsset(symbol)) {
+      System.out.println(I18n.format("error.assetNotOnExchange", symbol));
       return;
     }
-    System.out.println("Enter the quantity to buy: ");
+    System.out.println(I18n.get("prompt.buy.mode"));
+    int buyMode;
     try {
-      BigDecimal quantity = new BigDecimal(input.nextLine().trim());
-      if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
-        System.out.println(INVALID_INPUT + " Quantity must be positive.");
-        return;
+      buyMode = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    try {
+      if (buyMode == 1) {
+        System.out.println(I18n.get("prompt.quantity.buy"));
+        BigDecimal quantity = new BigDecimal(input.nextLine().trim());
+        if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
+          System.out.println(
+              I18n.get("invalid.input") + " " + I18n.get("validation.quantity.positive"));
+          return;
+        }
+        exchange.buy(symbol, quantity, player);
+        persistActiveSession();
+        System.out.println(I18n.format("buy.success", quantity, symbol));
+        printPerformanceComparison();
+      } else if (buyMode == 2) {
+        System.out.println(I18n.get("prompt.maxSpend.buy"));
+        BigDecimal maxSpend = new BigDecimal(input.nextLine().trim());
+        if (maxSpend.compareTo(BigDecimal.ZERO) <= 0) {
+          System.out.println(I18n.get("invalid.input"));
+          return;
+        }
+        exchange.buyUpToBudget(symbol, maxSpend, player);
+        persistActiveSession();
+        System.out.println(I18n.format("buy.success.budget", symbol, maxSpend));
+        printPerformanceComparison();
+      } else {
+        System.out.println(I18n.get("invalid.input"));
       }
-      exchange.buy(symbol, quantity, player);
-      System.out.println("-> Successfully bought " + quantity + " share(s) of " + symbol + ".");
     } catch (NumberFormatException e) {
-      System.out.println(INVALID_INPUT);
-    } catch (InsufficientFundsException e) {
-      System.out.println("-> " + e.getMessage());
+      System.out.println(I18n.get("invalid.input"));
+    } catch (InsufficientFundsException ignored) {
+      System.out.println(I18n.get("error.insufficientFunds"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(I18n.get("error.invalidArgument"));
     }
   }
 
@@ -272,66 +524,656 @@ public class UserInterface {
    * Sells a share from the portfolio. Lists holdings with numbers and prompts for the index to sell.
    */
   private static void sellShares() {
-    if (!requirePlayer()) {
+    if (isPlayerMissing()) {
       return;
     }
     List<Share> shares = player.getPortfolio().getShares();
     if (shares.isEmpty()) {
-      System.out.println("-> Your portfolio is empty. Nothing to sell.");
+      System.out.println(I18n.get("portfolio.empty.sell"));
       return;
     }
-    System.out.println("-> Your holdings (enter the number to sell that lot):");
+    input.nextLine();
+    System.out.println(I18n.get("prompt.sell.mode"));
+    int sellMode;
+    try {
+      sellMode = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    try {
+      switch (sellMode) {
+        case 1 -> sellWholeHolding(shares);
+        case 2 -> sellByQuantityCli();
+        case 3 -> sellByTargetNetCli();
+        default -> System.out.println(I18n.get("invalid.input"));
+      }
+    } catch (ShareNotFoundException e) {
+      System.out.println(I18n.format("error.shareNotFound", e.getStockSymbol(), e.getPlayerName()));
+    } catch (InsufficientSharesException e) {
+      System.out.println(I18n.format("error.insufficientShares", e.getSymbol()));
+    } catch (NumberFormatException e) {
+      System.out.println(I18n.get("invalid.input"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(I18n.get("error.invalidArgument"));
+    }
+  }
+
+  private static void sellWholeHolding(List<Share> shares) {
+    System.out.println(I18n.get("holdings.header"));
     for (int i = 0; i < shares.size(); i++) {
       Share s = shares.get(i);
-      System.out.println("   " + (i + 1) + ". " + s.getStock().getSymbol() + " - " + s.getQuantity()
-          + " shares @ " + s.getPurchasePrice() + " (current: " + s.getStock().getSalesPrice() + ")");
+      System.out.println(I18n.format(
+          "holding.line",
+          i + 1,
+          s.getAsset().getSymbol(),
+          s.getQuantity(),
+          s.getPurchasePrice(),
+          s.getAsset().getSalesPrice(),
+          s.getAsset().getAssetType()));
     }
-    System.out.println("Enter the number of the holding to sell (1 to " + shares.size() + "): ");
+    System.out.println(I18n.format("prompt.holdingIndex", shares.size()));
     try {
       int index = input.nextInt();
       if (index < 1 || index > shares.size()) {
-        System.out.println(INVALID_INPUT);
+        System.out.println(I18n.get("invalid.input"));
         return;
       }
       Share toSell = shares.get(index - 1);
       exchange.sell(toSell, player);
-      System.out.println("-> Successfully sold " + toSell.getQuantity() + " share(s) of "
-          + toSell.getStock().getSymbol() + ".");
+      persistActiveSession();
+      System.out.println(I18n.format("sell.success", toSell.getQuantity(),
+          toSell.getAsset().getSymbol()));
+      printPerformanceComparison();
     } catch (InputMismatchException e) {
-      System.out.println(INVALID_INPUT);
+      System.out.println(I18n.get("invalid.input"));
       input.nextLine();
-    } catch (ShareNotFoundException e) {
-      System.out.println("-> " + e.getMessage());
     }
   }
 
   /**
-   * Advances the exchange to the next week and updates stock prices.
+   * Prompts for symbol and quantity and sells that many shares in FIFO order via
+   * {@link Exchange#sellByQuantity}.
    */
-  private static void advanceWeek() {
-    exchange.advance();
-    System.out.println("-> Week advanced to " + exchange.getWeek() + ". Stock prices have been updated.");
+  private static void sellByQuantityCli() {
+    System.out.println(I18n.get("prompt.symbol"));
+    String symbol = input.nextLine().trim().toUpperCase();
+    if (symbol.isEmpty() || !exchange.hasAsset(symbol)) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("prompt.sell.quantity"));
+    BigDecimal qty = new BigDecimal(input.nextLine().trim());
+    if (qty.signum() <= 0) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    List<Transaction> txs = exchange.sellByQuantity(symbol, qty, player);
+    persistActiveSession();
+    System.out.println(I18n.format("sell.success.multi", txs.size(), symbol));
+    printPerformanceComparison();
   }
 
   /**
-   * Prints the player's transaction history up to the current week.
+   * Prompts for symbol and target net proceeds and sells FIFO slices via
+   * {@link Exchange#sellUpToTargetNet}.
+   */
+  private static void sellByTargetNetCli() {
+    System.out.println(I18n.get("prompt.symbol"));
+    String symbol = input.nextLine().trim().toUpperCase();
+    if (symbol.isEmpty() || !exchange.hasAsset(symbol)) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("prompt.sell.targetNet"));
+    BigDecimal target = new BigDecimal(input.nextLine().trim());
+    if (target.signum() <= 0) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    List<Transaction> txs = exchange.sellUpToTargetNet(symbol, target, player);
+    persistActiveSession();
+    System.out.println(I18n.format("sell.success.multi", txs.size(), symbol));
+    printPerformanceComparison();
+  }
+
+  /**
+   * Advances the exchange one trading day, then runs {@link RegularSavingsProcessor} for the
+   * skipped interval and prints any symbols whose installments were skipped for lack of funds.
+   */
+  private static void advanceDay() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    int before = exchange.getDay();
+    exchange.advance();
+    System.out.println(I18n.format("day.advanced", exchange.getDay()));
+    if (player != null) {
+      List<String> skipped =
+          RegularSavingsProcessor.run(exchange, player, before, exchange.getDay());
+      for (String sym : skipped) {
+        System.out.println(I18n.format("savings.warning.skip", sym));
+      }
+      persistActiveSession();
+      printPerformanceComparison();
+    }
+  }
+
+  /**
+   * Prints the player's portfolio metrics beside the market benchmark metrics.
+   */
+  private static void printPerformanceComparison() {
+    PerformanceComparison comparison = portfolioPerformanceService.compareAgainstMarket(player, exchange);
+    String rowFormat = "   %-18s %-26s %-26s%n";
+    System.out.println(I18n.get("performance.header"));
+    System.out.printf(
+        rowFormat,
+        I18n.get("performance.column.metric"),
+        I18n.get("performance.column.portfolio"),
+        I18n.get("performance.column.market"));
+    printMetricRow(
+        rowFormat,
+        I18n.get("performance.metric.return"),
+        comparison.portfolio().returnPercent(),
+        comparison.benchmark().returnPercent(),
+        true);
+    printMetricRow(
+        rowFormat,
+        I18n.get("performance.metric.volatility"),
+        comparison.portfolio().volatility(),
+        comparison.benchmark().volatility(),
+        true);
+    printMetricRow(
+        rowFormat,
+        I18n.get("performance.metric.sharpe"),
+        comparison.portfolio().sharpeRatio(),
+        comparison.benchmark().sharpeRatio(),
+        false);
+  }
+
+  /**
+   * Prints one side-by-side metric row.
+   *
+   * @param rowFormat printf row format
+   * @param label metric label
+   * @param portfolioMetric player metric
+   * @param benchmarkMetric market metric
+   * @param percentDisplay whether the metric should be formatted as a percent
+   */
+  private static void printMetricRow(
+      String rowFormat,
+      String label,
+      MetricValue portfolioMetric,
+      MetricValue benchmarkMetric,
+      boolean percentDisplay) {
+    System.out.printf(
+        rowFormat,
+        label,
+        formatMetricValue(portfolioMetric, percentDisplay),
+        formatMetricValue(benchmarkMetric, percentDisplay));
+  }
+
+  /**
+   * Formats one metric value for CLI display.
+   *
+   * @param metric metric to format
+   * @param percentDisplay whether the metric should be formatted as a percent
+   * @return user-facing metric text
+   */
+  private static String formatMetricValue(MetricValue metric, boolean percentDisplay) {
+    if (!metric.isAvailable()) {
+      return I18n.get(metricStatusKey(metric.status()));
+    }
+    BigDecimal value = metric.value();
+    if (percentDisplay) {
+      return value.multiply(BigDecimal.valueOf(100))
+          .setScale(2, RoundingMode.HALF_UP)
+          .toPlainString() + "%";
+    }
+    return value.setScale(3, RoundingMode.HALF_UP).toPlainString();
+  }
+
+  /**
+   * Maps analysis-layer metric statuses to CLI translation keys.
+   *
+   * @param status unavailable metric status
+   * @return translation key for that status
+   */
+  private static String metricStatusKey(MetricStatus status) {
+    return switch (status) {
+      case AVAILABLE -> throw new IllegalArgumentException("Available metrics do not need a status key.");
+      case NO_TRADES -> "performance.unavailable.noTrades";
+      case INSUFFICIENT_HISTORY -> "performance.unavailable.history";
+      case ZERO_VOLATILITY -> "performance.unavailable.zeroVolatility";
+    };
+  }
+
+  /**
+   * Interactive flow to create a {@link RegularSavingsPlan} and attach it to the player.
+   */
+  private static void addSavingsPlan() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println(I18n.get("savings.prompt.symbol"));
+    String symbol = input.nextLine().trim().toUpperCase();
+    if (symbol.isEmpty() || !exchange.hasAsset(symbol)) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("savings.prompt.mode"));
+    int modeChoice;
+    try {
+      modeChoice = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    SavingsInstallmentMode mode =
+        modeChoice == 1 ? SavingsInstallmentMode.FIXED_SHARES : SavingsInstallmentMode.BUDGET;
+    if (modeChoice != 1 && modeChoice != 2) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    BigDecimal amount;
+    try {
+      if (mode == SavingsInstallmentMode.FIXED_SHARES) {
+        System.out.println(I18n.get("savings.prompt.amountShares"));
+        amount = new BigDecimal(input.nextLine().trim());
+      } else {
+        System.out.println(I18n.get("savings.prompt.amountBudget"));
+        amount = new BigDecimal(input.nextLine().trim());
+      }
+      if (amount.signum() <= 0) {
+        System.out.println(I18n.get("invalid.input"));
+        return;
+      }
+    } catch (NumberFormatException e) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("savings.prompt.frequency"));
+    int freq;
+    try {
+      freq = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    int interval = readIntervalForFrequencyChoice(freq);
+    if (interval < 0) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    RegularSavingsPlan plan =
+        new RegularSavingsPlan(symbol, mode, amount, interval, exchange.getDay());
+    player.addRegularSavingsPlan(plan);
+    persistActiveSession();
+    System.out.println(I18n.format("savings.added", symbol, plan.getNextDueDay()));
+  }
+
+  /**
+   * Prints all regular savings plans (1-based index, mode, amounts, next due day).
+   */
+  private static void listSavingsPlans() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    List<RegularSavingsPlan> plans = player.getRegularSavingsPlans();
+    if (plans.isEmpty()) {
+      System.out.println(I18n.get("savings.list.empty"));
+      return;
+    }
+    for (int i = 0; i < plans.size(); i++) {
+      RegularSavingsPlan p = plans.get(i);
+      System.out.println(I18n.format(
+          "savings.list.line",
+          i + 1,
+          p.getSymbol(),
+          p.getMode(),
+          p.getAmount(),
+          p.getIntervalDays(),
+          p.getNextDueDay(),
+          p.isActive()));
+    }
+  }
+
+  /**
+   * Resolves trading days between installments from a frequency menu choice, after the frequency
+   * line has been read with {@code nextInt} and consumed with {@code nextLine}.
+   *
+   * @param freq 1 = weekly, 2 = biweekly, 3 = monthly, 4 = custom (reads another line)
+   * @return positive interval, or -1 if invalid
+   */
+  private static int readIntervalForFrequencyChoice(int freq) {
+    if (freq == 1) {
+      return 5;
+    }
+    if (freq == 2) {
+      return 10;
+    }
+    if (freq == 3) {
+      return 22;
+    }
+    if (freq == 4) {
+      System.out.println(I18n.get("savings.prompt.customDays"));
+      try {
+        int custom = Integer.parseInt(input.nextLine().trim());
+        if (custom <= 0) {
+          return -1;
+        }
+        return custom;
+      } catch (NumberFormatException e) {
+        return -1;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Prompts for a plan index and updates mode, amount, interval, and active; symbol is unchanged.
+   */
+  private static void editSavingsPlan() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    List<RegularSavingsPlan> plans = player.getRegularSavingsPlans();
+    if (plans.isEmpty()) {
+      System.out.println(I18n.get("savings.list.empty"));
+      return;
+    }
+    for (int i = 0; i < plans.size(); i++) {
+      RegularSavingsPlan p = plans.get(i);
+      System.out.println(I18n.format(
+          "savings.list.line",
+          i + 1,
+          p.getSymbol(),
+          p.getMode(),
+          p.getAmount(),
+          p.getIntervalDays(),
+          p.getNextDueDay(),
+          p.isActive()));
+    }
+    System.out.println(I18n.format("savings.prompt.editIndex", plans.size()));
+    int idx;
+    try {
+      idx = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    if (idx < 1 || idx > plans.size()) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    RegularSavingsPlan plan = plans.get(idx - 1);
+    System.out.println(I18n.format("savings.prompt.symbolLocked", plan.getSymbol()));
+    System.out.println(I18n.get("savings.prompt.mode"));
+    int modeChoice;
+    try {
+      modeChoice = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    if (modeChoice != 1 && modeChoice != 2) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    SavingsInstallmentMode mode =
+        modeChoice == 1 ? SavingsInstallmentMode.FIXED_SHARES : SavingsInstallmentMode.BUDGET;
+    BigDecimal amount;
+    try {
+      if (mode == SavingsInstallmentMode.FIXED_SHARES) {
+        System.out.println(I18n.get("savings.prompt.amountShares"));
+        amount = new BigDecimal(input.nextLine().trim());
+      } else {
+        System.out.println(I18n.get("savings.prompt.amountBudget"));
+        amount = new BigDecimal(input.nextLine().trim());
+      }
+      if (amount.signum() <= 0) {
+        System.out.println(I18n.get("invalid.input"));
+        return;
+      }
+    } catch (NumberFormatException e) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("savings.prompt.frequency"));
+    int freq;
+    try {
+      freq = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    int interval = readIntervalForFrequencyChoice(freq);
+    if (interval < 0) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    System.out.println(I18n.get("savings.prompt.active"));
+    int activeChoice;
+    try {
+      activeChoice = input.nextInt();
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    if (activeChoice != 0 && activeChoice != 1) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    input.nextLine();
+    plan.setMode(mode);
+    try {
+      plan.setAmount(amount);
+      plan.setIntervalDays(interval);
+    } catch (IllegalArgumentException | NullPointerException ex) {
+      System.out.println(I18n.get("invalid.input"));
+      return;
+    }
+    plan.setActive(activeChoice == 1);
+    persistActiveSession();
+    System.out.println(I18n.get("savings.updated"));
+  }
+
+  /**
+   * Lists plans then prompts for a 1-based index to remove via {@link Player#removeRegularSavingsPlanAt(int)}.
+   */
+  private static void removeSavingsPlan() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    List<RegularSavingsPlan> plans = player.getRegularSavingsPlans();
+    if (plans.isEmpty()) {
+      System.out.println(I18n.get("savings.list.empty"));
+      return;
+    }
+    listSavingsPlans();
+    System.out.println(I18n.format("savings.prompt.removeIndex", plans.size()));
+    try {
+      int idx = input.nextInt();
+      if (player.removeRegularSavingsPlanAt(idx)) {
+        persistActiveSession();
+        System.out.println(I18n.get("savings.removed"));
+      } else {
+        System.out.println(I18n.get("invalid.input"));
+      }
+    } catch (InputMismatchException e) {
+      input.nextLine();
+      System.out.println(I18n.get("invalid.input"));
+    }
+  }
+
+  /**
+   * Prints the player's transaction history up to the current trading day.
    */
   private static void viewTransactions() {
-    if (!requirePlayer()) {
+    if (isPlayerMissing()) {
       return;
     }
-    int week = exchange.getWeek();
-    List<Transaction> transactions = player.getTransactionArchive().getTransactions(week);
+    int day = exchange.getDay();
+    List<Transaction> transactions = player.getTransactionArchive().getTransactions(day);
     if (transactions.isEmpty()) {
-      System.out.println("-> No transactions yet.");
+      System.out.println(I18n.get("transactions.none"));
       return;
     }
-    System.out.println("-> Transaction history (up to week " + week + "):");
+    System.out.println(I18n.format("transactions.header", day));
     transactions.forEach(t -> {
-      String type = t instanceof Purchase ? "PURCHASE" : "SALE";
-      String sym = t.getShare().getStock().getSymbol();
+      String type = t instanceof Purchase ? I18n.get("tx.type.purchase") : I18n.get("tx.type.sale");
+      String sym = t.getShare().getAsset().getSymbol();
       String qty = t.getShare().getQuantity().toString();
-      System.out.println("   Week " + t.getWeek() + " | " + type + " | " + sym + " | " + qty + " share(s)");
+      System.out.println(I18n.format("transaction.line", t.getDay(), type, sym, qty));
     });
+  }
+
+  /**
+   * Loads the bundled market data used to create fresh per-user exchanges.
+   *
+   * @return bundled market-data payload
+   */
+  private static MarketData loadMarketData() {
+    MarketData marketData = MarketDataLoader.loadFromResource(
+        UserInterface.class,
+        DEMO_MARKET_DATA_RESOURCE);
+    if (marketData.stocks().isEmpty()) {
+      throw new IllegalStateException("Could not load demo market data from "
+          + DEMO_MARKET_DATA_RESOURCE);
+    }
+    return marketData;
+  }
+
+  /**
+   * Copies the in-memory state from the active session into the CLI fields used by existing actions.
+   *
+   * @param session logged-in session
+   */
+  private static void applyActiveSession(ActiveSession session) {
+    player = session.player();
+    exchange = session.exchange();
+  }
+
+  /**
+   * Clears the CLI's active player and exchange references after logout.
+   */
+  private static void clearActiveSession() {
+    player = null;
+    exchange = null;
+  }
+
+  /**
+   * Saves the current session after a mutating user action.
+   */
+  private static void persistActiveSession() {
+    sessionService.saveActiveSession();
+  }
+
+  /**
+   * Builds the short active-user line shown above the menu.
+   *
+   * @return user-facing session summary
+   */
+  private static String activeUserSummary() {
+    return sessionService.getActiveSession()
+        .map(session -> I18n.format(
+            "session.active.current",
+            session.player().getName(),
+            session.username(),
+            session.exchange().getDay()))
+        .orElseGet(() -> I18n.get("session.active.none"));
+  }
+
+  private static void editProfileDisplayName() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println(I18n.get("prompt.profile.displayName"));
+    String line = input.nextLine();
+    try {
+      sessionService.updateDisplayName(line);
+      System.out.println(I18n.get("profile.name.saved"));
+    } catch (IllegalArgumentException exception) {
+      System.out.println(exception.getMessage());
+    } catch (IllegalStateException exception) {
+      System.out.println(I18n.get("require.player"));
+    }
+  }
+
+  private static void setProfileAvatarFromPath() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println(I18n.get("prompt.profile.avatarPath"));
+    String line = input.nextLine().trim();
+    if (line.isEmpty()) {
+      System.out.println(I18n.get("profile.avatar.emptyPath"));
+      return;
+    }
+    try {
+      sessionService.saveAvatarFromFile(Path.of(line));
+      System.out.println(I18n.get("profile.avatar.saved"));
+    } catch (RuntimeException exception) {
+      System.out.println(
+          exception.getMessage() != null ? exception.getMessage() : I18n.get("profile.avatar.failed"));
+    }
+  }
+
+  private static void deleteMyProfile() {
+    if (isPlayerMissing()) {
+      return;
+    }
+    input.nextLine();
+    System.out.println(I18n.get("prompt.profile.deleteConfirm"));
+    System.out.println(I18n.get("prompt.pin"));
+    String pinLine = input.nextLine();
+    char[] pin = pinLine.toCharArray();
+    try {
+      sessionService.deleteActiveProfile(pin);
+      clearActiveSession();
+      System.out.println(I18n.get("profile.deleted"));
+    } catch (AuthenticationException exception) {
+      System.out.println(I18n.get("auth.invalidCredentials"));
+    } catch (RuntimeException exception) {
+      System.out.println(
+          exception.getMessage() != null ? exception.getMessage() : I18n.get("profile.delete.failed"));
+    } finally {
+      java.util.Arrays.fill(pin, '0');
+    }
+  }
+
+  /**
+   * Maps typed registration validation failures to translated CLI messages.
+   *
+   * @param error validation failure from the session layer
+   * @return translated user-facing message
+   */
+  private static String registrationValidationMessage(ValidationError error) {
+    return switch (error) {
+      case INVALID_USERNAME -> I18n.get("auth.invalidUsername");
+      case INVALID_PIN -> I18n.get("auth.invalidPin");
+      case NEGATIVE_STARTING_MONEY ->
+          I18n.get("invalid.input") + " " + I18n.get("validation.startingMoney.nonNegative");
+    };
   }
 }

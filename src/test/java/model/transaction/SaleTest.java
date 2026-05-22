@@ -34,7 +34,7 @@ class SaleTest {
   void constructorSetsCalculatorAndShare() {
     Sale sale = new Sale(share, 1);
     assertEquals(share, sale.getShare());
-    assertEquals(1, sale.getWeek());
+    assertEquals(1, sale.getDay());
     assertNotNull(sale.getCalculator());
     assertInstanceOf(SaleCalculator.class, sale.getCalculator());
   }

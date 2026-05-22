@@ -3,7 +3,6 @@ package model.transaction;
 
 import model.Player;
 import model.Share;
-import model.exception.AlreadyCommittedException;
 import model.exception.ShareNotFoundException;
 import model.transactioncalculator.SaleCalculator;
 
@@ -22,34 +21,34 @@ public class Sale extends Transaction {
    * Constructor for Sale.
    *
    * @param share the share
-   * @param week  the week
+   * @param day  the trading day
    */
-  public Sale(Share share, int week) {
-    super(share, week, new SaleCalculator(share));
+  public Sale(Share share, int day) {
+    super(share, day, new SaleCalculator(share));
     this.saleCalc = (SaleCalculator) this.getCalculator();
   }
 
   /**
-   * Commits the sale transaction.
+   * No separate precondition check needed; the share removal in
+   * {@link #execute(Player)} is atomic (validates and removes in one step).
    *
    * @param player the player making the sale
-   * @throws ShareNotFoundException    if the player does not have the share being sold in their
-   *                                   portfolio.
-   * @throws AlreadyCommittedException if the transaction has already been committed.
    */
-  public void commit(Player player) {
-    if (this.isCommited()) {
-      throw new AlreadyCommittedException();
-    }
-    if (!player.getPortfolio().containsShare(this.getShare())) {
+  @Override
+  protected void validatePreconditions(Player player) {
+  }
+
+  /**
+   * Removes the share from the player's portfolio and credits the sale proceeds.
+   *
+   * @param player the player making the sale
+   * @throws ShareNotFoundException if the portfolio does not hold a matching FIFO lot
+   */
+  @Override
+  protected void execute(Player player) {
+    if (!player.getPortfolio().removeFifoSliceForSale(this.getShare())) {
       throw new ShareNotFoundException(this.getShare(), player);
-    } else {
-      player.getPortfolio().removeShare(this.getShare());
-      player.addMoney(saleCalc.calculateTotal());
-      player.getTransactionArchive().addTransaction(this);
-      this.commited = true;
     }
-
-
+    player.addMoney(saleCalc.calculateTotal());
   }
 }

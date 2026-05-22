@@ -87,4 +87,38 @@ class StockTest {
             () -> stock.addNewSalesPrice(null));
     assertEquals("Price cannot be null", thrown.getMessage());
   }
+
+  @Test
+  void getHistoricalPricesReturnsAllPrices() {
+    assertEquals(pricesAdded, stock.getHistoricalPrices());
+  }
+
+  @Test
+  void getHighestPriceReturnsMaximumPrice() {
+    assertEquals(BigDecimal.valueOf(152.25), stock.getHighestPrice());
+  }
+
+  @Test
+  void getLowestPriceReturnsMinimumPrice() {
+    assertEquals(BigDecimal.valueOf(148.00), stock.getLowestPrice());
+  }
+
+  @Test
+  void getLatestPriceChangeReturnsDifferenceBetweenLastTwoPrices() {
+    assertEquals(BigDecimal.valueOf(-4.25), stock.getLatestPriceChange());
+  }
+
+  @Test
+  void getLatestPriceChangeReturnsZeroWhenOnlyOnePriceExists() {
+    Stock singlePriceStock = new Stock("AAPL", "Apple Inc.");
+    singlePriceStock.addNewSalesPrice(BigDecimal.valueOf(150.00));
+    assertEquals(BigDecimal.ZERO, singlePriceStock.getLatestPriceChange());
+  }
+
+  @Test
+  void getHistoricalPricesIsUnmodifiable() {
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> stock.getHistoricalPrices().add(BigDecimal.ONE));
+  }
 }
