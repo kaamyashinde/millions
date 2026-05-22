@@ -22,6 +22,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.Exchange;
 import model.fund.Fund;
+import view.theme.ThemeStyles;
 
 /**
  * JavaFX panel listing all funds on an exchange together with a composition detail view.
@@ -43,9 +44,12 @@ public class FundsPage extends BorderPane {
     this.exchange = exchange;
 
     setPadding(new Insets(16));
+    ThemeStyles.addStyleClasses(this, "finance-page");
 
     Text heading = new Text("Available funds");
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
+    ThemeStyles.addStyleClasses(heading, "finance-page-title");
+    ThemeStyles.addStyleClasses(metaLabel, "finance-meta");
 
     Button refreshBtn = new Button("Refresh");
     styleButton(refreshBtn);
@@ -122,9 +126,6 @@ public class FundsPage extends BorderPane {
   }
 
   private static void styleButton(Button button) {
-    button.setStyle(
-        "-fx-border-radius: 6;"
-            + "-fx-background-radius: 6;"
-            + "-fx-cursor: hand;");
+    ThemeStyles.styleButton(button);
   }
 }

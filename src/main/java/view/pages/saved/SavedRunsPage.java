@@ -27,18 +27,12 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.persistence.SavedRunRecord;
 import model.session.SessionService;
+import view.theme.ThemeStyles;
 
 /**
  * Lists saved playthrough snapshots and allows saving, leaderboard selection, and deletion.
  */
 public class SavedRunsPage extends BorderPane {
-
-  private static final String CARD_STYLE =
-      "-fx-background-color: #f6f7fb;"
-          + "-fx-border-color: #d7dce5;"
-          + "-fx-background-radius: 12;"
-          + "-fx-border-radius: 12;"
-          + "-fx-padding: 14;";
 
   private final SessionService sessionService;
   private final Runnable afterMutation;
@@ -53,15 +47,16 @@ public class SavedRunsPage extends BorderPane {
     this.afterMutation = afterMutation;
 
     setPadding(new Insets(16));
-    setStyle(CARD_STYLE);
+    ThemeStyles.addStyleClasses(this, "finance-page", "finance-panel");
 
     Text heading = new Text("Saved playthroughs");
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
+    ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
     Label hint = new Label(
         "Save snapshots to compare strategies. Trading day count is the in-game duration.");
     hint.setWrapText(true);
-    hint.setStyle("-fx-text-fill: #444;");
+    ThemeStyles.addStyleClasses(hint, "finance-meta");
 
     Button saveButton = new Button("Save current run");
     styleButton(saveButton);
@@ -177,10 +172,7 @@ public class SavedRunsPage extends BorderPane {
   }
 
   private static void styleButton(Button button) {
-    button.setStyle(
-        "-fx-border-radius: 6;"
-            + "-fx-background-radius: 6;"
-            + "-fx-cursor: hand;");
+    ThemeStyles.styleButton(button);
   }
 
   /**
