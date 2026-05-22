@@ -1,27 +1,32 @@
 package view.theme;
 
 /**
- * Central color constants for the light/lavender Millions UI theme.
+ * Central color constants for the dark navy + teal/green Millions UI theme.
  */
 public final class ThemePalette {
 
-  public static final String ACCENT = "#6d28d9";
-  public static final String ACCENT_LIGHT = "#f0eeff";
-  public static final String BACKGROUND = "#ffffff";
-  public static final String SURFACE = "#f6f7fb";
-  public static final String BORDER = "#d7dce5";
-  public static final String TEXT_PRIMARY = "#111827";
-  public static final String TEXT_SECONDARY = "#6b7280";
-  public static final String TEXT_MUTED = "#9ca3af";
-  public static final String ERROR = "#c62828";
-  public static final String SUCCESS = "#1f9d55";
-  public static final String WARNING = "#c58b00";
-  public static final String INFO = "#2563eb";
-  public static final String INPUT_BG = "#f5f5f5";
-  public static final String INPUT_BORDER = "#d1d5db";
-  public static final String TOP_ONE = "#fff4cc";
-  public static final String TOP_TWO = "#eef3f8";
-  public static final String TOP_THREE = "#fbe9dd";
+  public static final String ACCENT = "#0EA5A4";
+  public static final String ACCENT_LIGHT = "#0EA5A420";
+  public static final String PRIMARY_HOVER = "#14B8A6";
+  public static final String BACKGROUND = "#0B1220";
+  public static final String SURFACE = "#111827";
+  public static final String SURFACE_LIGHT = "#1E293B";
+  public static final String SURFACE_STRONG = "#1E293B";
+  public static final String BORDER = "#334155";
+  public static final String TEXT_PRIMARY = "#F8FAFC";
+  public static final String TEXT_SECONDARY = "#CBD5E1";
+  public static final String TEXT_MUTED = "#94A3B8";
+  public static final String ERROR = "#EF4444";
+  public static final String SUCCESS = "#22C55E";
+  public static final String POSITIVE = "#22C55E";
+  public static final String NEGATIVE = "#EF4444";
+  public static final String WARNING = "#F59E0B";
+  public static final String INFO = "#0EA5A4";
+  public static final String INPUT_BG = "#1E293B";
+  public static final String INPUT_BORDER = "#334155";
+  public static final String TOP_ONE = "#F59E0B33";
+  public static final String TOP_TWO = "#0EA5A422";
+  public static final String TOP_THREE = "#CBD5E133";
 
   private ThemePalette() {}
 }
