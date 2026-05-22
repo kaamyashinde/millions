@@ -30,14 +30,11 @@ import view.theme.ThemeStyles;
  */
 public class QuizView extends BorderPane {
 
-  private static final String COLOR_BG = "#121212";
-  private static final String COLOR_BG_CARD = "#1e1e1e";
-  private static final String COLOR_HEADING = "#e0e0e0";
-  private static final String COLOR_SUBTITLE = "#9e9e9e";
-  private static final String COLOR_ACCENT = "#2196F3";
-  private static final String COLOR_CORRECT = "#4CAF50";
-  private static final String COLOR_WRONG = "#FF4444";
-  private static final String COLOR_BORDER_DEFAULT = "#2a2a2a";
+  private static final String COLOR_BG_CARD = "#111827";
+  private static final String COLOR_HEADING = "#F8FAFC";
+  private static final String COLOR_SUBTITLE = "#CBD5E1";
+  private static final String COLOR_CORRECT = "#22C55E";
+  private static final String COLOR_WRONG = "#EF4444";
 
   private final QuizAttempt attempt;
   private final Runnable onFinish;
@@ -227,8 +224,8 @@ public class QuizView extends BorderPane {
   private static VBox buildResourceCard(LearningResource resource) {
     Label sourceLabel = new Label(resource.sourceLabel());
     sourceLabel.setStyle(
-        "-fx-background-color: #4CAF5022;"
-        + "-fx-text-fill: #4CAF50;"
+        "-fx-background-color: " + COLOR_CORRECT + "22;"
+        + "-fx-text-fill: " + COLOR_CORRECT + ";"
         + "-fx-background-radius: 4;"
         + "-fx-padding: 2 6 2 6;"
         + "-fx-font-size: 10;");
@@ -247,8 +244,8 @@ public class QuizView extends BorderPane {
     VBox card = new VBox(4, sourceLabel, title, desc);
     card.setPadding(new Insets(10));
     card.setStyle(
-        "-fx-background-color: #1a1a1a;"
-        + "-fx-border-color: #4CAF50;"
+        "-fx-background-color: " + COLOR_BG_CARD + ";"
+        + "-fx-border-color: " + COLOR_CORRECT + ";"
         + "-fx-border-radius: 6;"
         + "-fx-background-radius: 6;");
     return card;

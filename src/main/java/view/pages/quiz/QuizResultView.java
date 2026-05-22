@@ -29,14 +29,14 @@ import model.learninghub.QuizSession;
  */
 public class QuizResultView extends BorderPane {
 
-  private static final String COLOR_BG = "#121212";
-  private static final String COLOR_BG_CARD = "#1e1e1e";
-  private static final String COLOR_HEADING = "#e0e0e0";
-  private static final String COLOR_SUBTITLE = "#9e9e9e";
-  private static final String COLOR_CORRECT = "#4CAF50";
-  private static final String COLOR_WRONG = "#FF4444";
-  private static final String COLOR_ORANGE = "#FFA500";
-  private static final String COLOR_BORDER_DEFAULT = "#2a2a2a";
+  private static final String COLOR_BG = "#0B1220";
+  private static final String COLOR_BG_CARD = "#111827";
+  private static final String COLOR_HEADING = "#F8FAFC";
+  private static final String COLOR_SUBTITLE = "#CBD5E1";
+  private static final String COLOR_CORRECT = "#22C55E";
+  private static final String COLOR_WRONG = "#EF4444";
+  private static final String COLOR_ORANGE = "#F59E0B";
+  private static final String COLOR_BORDER_DEFAULT = "#334155";
 
   /**
    * Builds the result view.
@@ -106,7 +106,7 @@ public class QuizResultView extends BorderPane {
     }
 
     Label quizTitle = new Label(attempt.quiz().title());
-    quizTitle.setStyle("-fx-text-fill: " + "#9e9e9e" + "; -fx-font-size: 12;");
+    quizTitle.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 12;");
 
     Label scoreLabel = new Label(correct + " / " + total + " Correct");
     scoreLabel.setFont(Font.font("System", FontWeight.BOLD, 32));
@@ -160,7 +160,7 @@ public class QuizResultView extends BorderPane {
         : q.questionText();
 
     Label numLabel = new Label("#" + number);
-    numLabel.setStyle("-fx-text-fill: " + "#9e9e9e" + "; -fx-font-size: 11;");
+    numLabel.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
 
     Label qText = new Label(questionPreview);
     qText.setWrapText(true);
@@ -180,7 +180,7 @@ public class QuizResultView extends BorderPane {
     if (!correct) {
       Label explanation = new Label(q.explanationText());
       explanation.setWrapText(true);
-      explanation.setStyle("-fx-text-fill: " + "#9e9e9e" + "; -fx-font-size: 11; -fx-font-style: italic;");
+      explanation.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11; -fx-font-style: italic;");
       row.getChildren().add(explanation);
     }
 

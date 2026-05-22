@@ -27,11 +27,6 @@ import view.theme.ThemeStyles;
  */
 public class QuizLauncherPage extends BorderPane {
 
-  private static final String COLOR_BG_CARD = "#1e1e1e";
-  private static final String COLOR_BORDER_ACCENT = "#2196F3";
-  private static final String COLOR_HEADING = "#e0e0e0";
-  private static final String COLOR_SUBTITLE = "#9e9e9e";
-
   private javafx.scene.Node launcherView;
 
   /** Builds the panel and shows the quiz list. */
