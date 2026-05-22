@@ -38,7 +38,7 @@
 
 .btn-secondary,
 .btn-default {
-    -fx-background-color: -millions-bg;
+    -fx-background-color: -millions-surface;
     -fx-text-fill: -millions-text-primary;
     -fx-border-color: -millions-border;
     -fx-border-width: 1;
@@ -54,9 +54,9 @@
 }
 
 .btn-danger {
-    -fx-background-color: #fdeaea;
-    -fx-text-fill: #9d2020;
-    -fx-border-color: #cc3d3d;
+    -fx-background-color: #EF444422;
+    -fx-text-fill: #EF4444;
+    -fx-border-color: #EF4444;
     -fx-border-width: 1;
 }
 
@@ -88,30 +88,30 @@
 }
 
 .recommendation-buy {
-    -fx-background-color: #e8f7ee;
-    -fx-border-color: #1f9d55;
-    -fx-text-fill: #176f3d;
+    -fx-background-color: #22C55E22;
+    -fx-border-color: #22C55E;
+    -fx-text-fill: #22C55E;
 }
 
 .recommendation-hold {
-    -fx-background-color: #fff6d9;
-    -fx-border-color: #c58b00;
-    -fx-text-fill: #8a5a00;
+    -fx-background-color: #F59E0B22;
+    -fx-border-color: #F59E0B;
+    -fx-text-fill: #F59E0B;
 }
 
 .recommendation-sell {
-    -fx-background-color: #fdeaea;
-    -fx-border-color: #cc3d3d;
-    -fx-text-fill: #9d2020;
+    -fx-background-color: #EF444422;
+    -fx-border-color: #EF4444;
+    -fx-text-fill: #EF4444;
 }
 
 .toast {
-    -fx-background-color: -millions-bg;
+    -fx-background-color: -millions-surface;
     -fx-background-radius: 8;
     -fx-border-color: -millions-border;
     -fx-border-radius: 8;
     -fx-border-width: 1.5;
-    -fx-effect: dropshadow(gaussian, rgba(17, 24, 39, 0.12), 12, 0.18, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 12, 0.18, 0, 4);
 }
 
 .leaderboard-top-one {
