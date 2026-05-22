@@ -15,6 +15,7 @@ import model.learninghub.Quiz;
 import model.learninghub.QuizAttempt;
 import model.learninghub.QuizContentStore;
 import model.learninghub.QuizSession;
+import view.theme.ThemeStyles;
 
 /**
  * Top-level panel for the Quiz tab. Shows a list of all available quizzes and
@@ -36,13 +37,14 @@ public class QuizLauncherPage extends BorderPane {
   /** Builds the panel and shows the quiz list. */
   public QuizLauncherPage() {
     setPadding(new Insets(16));
+    ThemeStyles.addStyleClasses(this, "quiz-root");
 
     Text heading = new Text("Quizzes");
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
-    heading.setStyle("-fx-fill: " + COLOR_HEADING + ";");
+    ThemeStyles.addStyleClasses(heading, "quiz-heading");
 
     Label subtitle = new Label("Test your investing knowledge across all topics.");
-    subtitle.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + ";");
+    ThemeStyles.addStyleClasses(subtitle, "quiz-subtitle");
 
     VBox top = new VBox(4, heading, subtitle);
     top.setPadding(new Insets(0, 0, 12, 0));
@@ -56,7 +58,6 @@ public class QuizLauncherPage extends BorderPane {
 
     ScrollPane scroll = new ScrollPane(list);
     scroll.setFitToWidth(true);
-    scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
     scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
     this.launcherView = scroll;
@@ -65,30 +66,19 @@ public class QuizLauncherPage extends BorderPane {
 
   private javafx.scene.Node buildQuizCard(Quiz quiz) {
     Label title = new Label(quiz.title());
-    title.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+    ThemeStyles.addStyleClasses(title, "quiz-card-title");
     title.setWrapText(true);
 
     Label meta = new Label(quiz.questions().size() + " questions");
-    meta.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    ThemeStyles.addStyleClasses(meta, "quiz-meta");
 
     Label cta = new Label("Start →");
-    cta.setStyle(
-        "-fx-text-fill: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-font-size: 11;"
-        + "-fx-font-weight: bold;");
+    ThemeStyles.addStyleClasses(cta, "quiz-cta");
 
     VBox card = new VBox(4, title, meta, cta);
     card.setPadding(new Insets(14));
     card.setMaxWidth(Double.MAX_VALUE);
-    card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;");
+    ThemeStyles.addStyleClasses(card, "quiz-card");
 
     card.setOnMouseClicked(_ -> startQuiz(quiz));
     return card;
