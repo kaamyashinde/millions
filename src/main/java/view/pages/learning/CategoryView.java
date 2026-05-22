@@ -31,13 +31,9 @@ import view.theme.ThemeStyles;
  */
 public class CategoryView extends BorderPane {
 
-  private static final String COLOR_BG_CARD = "#1e1e1e";
-  private static final String COLOR_BORDER_ACCENT = "#2196F3";
-  private static final String COLOR_HEADING = "#e0e0e0";
-  private static final String COLOR_SUBTITLE = "#9e9e9e";
-  private static final String COLOR_DIFFICULTY_BEGINNER = "#4CAF50";
-  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#FFA500";
-  private static final String COLOR_DIFFICULTY_ADVANCED = "#FF4444";
+  private static final String COLOR_DIFFICULTY_BEGINNER = "#22C55E";
+  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#F59E0B";
+  private static final String COLOR_DIFFICULTY_ADVANCED = "#EF4444";
 
   private final VBox content = new VBox(12);
   private List<LearningItem> items;

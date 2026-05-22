@@ -39,14 +39,14 @@ import util.MarkdownLoader;
  */
 public class ItemDetailView extends BorderPane {
 
-  private static final String COLOR_BG_CARD = "#1e1e1e";
-  private static final String COLOR_BORDER_ACCENT = "#2196F3";
-  private static final String COLOR_BORDER_RESOURCE = "#4CAF50";
-  private static final String COLOR_HEADING = "#e0e0e0";
-  private static final String COLOR_SUBTITLE = "#9e9e9e";
-  private static final String COLOR_DIFFICULTY_BEGINNER = "#4CAF50";
-  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#FFA500";
-  private static final String COLOR_DIFFICULTY_ADVANCED = "#FF4444";
+  private static final String COLOR_BG_CARD = "#111827";
+  private static final String COLOR_BORDER_ACCENT = "#0EA5A4";
+  private static final String COLOR_BORDER_RESOURCE = "#22C55E";
+  private static final String COLOR_HEADING = "#F8FAFC";
+  private static final String COLOR_SUBTITLE = "#CBD5E1";
+  private static final String COLOR_DIFFICULTY_BEGINNER = "#22C55E";
+  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#F59E0B";
+  private static final String COLOR_DIFFICULTY_ADVANCED = "#EF4444";
 
   private static final Parser MD_PARSER = Parser.builder().build();
   private static final HtmlRenderer HTML_RENDERER = HtmlRenderer.builder().build();
@@ -94,7 +94,7 @@ public class ItemDetailView extends BorderPane {
   private static javafx.scene.Node buildMarkdownView(LearningItem item) {
     String markdown = MarkdownLoader.load(item.contentFile());
     String bodyHtml = markdown.isEmpty()
-        ? "<p style='color:#9e9e9e'>Content not available.</p>"
+        ? "<p style='color:#CBD5E1'>Content not available.</p>"
         : HTML_RENDERER.render(MD_PARSER.parse(markdown));
 
     String html = """
@@ -104,25 +104,25 @@ public class ItemDetailView extends BorderPane {
         <meta charset="UTF-8">
         <style>
           body {
-            background: #121212;
-            color: #e0e0e0;
+            background: #0B1220;
+            color: #F8FAFC;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-size: 14px;
             line-height: 1.7;
             margin: 0;
             padding: 8px 4px;
           }
-          h1, h2, h3 { color: #ffffff; margin-top: 1.2em; margin-bottom: 0.4em; }
-          h2 { font-size: 1.15em; border-bottom: 1px solid #2a2a2a; padding-bottom: 4px; }
+          h1, h2, h3 { color: #F8FAFC; margin-top: 1.2em; margin-bottom: 0.4em; }
+          h2 { font-size: 1.15em; border-bottom: 1px solid #334155; padding-bottom: 4px; }
           p { margin: 0.6em 0; }
           ul, ol { padding-left: 1.4em; margin: 0.6em 0; }
           li { margin-bottom: 4px; }
-          a { color: #64b5f6; text-decoration: none; }
+          a { color: #0EA5A4; text-decoration: none; }
           a:hover { text-decoration: underline; }
-          code { background: #1e1e1e; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
-          pre { background: #1e1e1e; padding: 10px; border-radius: 6px; overflow-x: auto; }
-          hr { border: none; border-top: 1px solid #2a2a2a; margin: 1em 0; }
-          strong { color: #ffffff; }
+          code { background: #111827; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+          pre { background: #111827; padding: 10px; border-radius: 6px; overflow-x: auto; }
+          hr { border: none; border-top: 1px solid #334155; margin: 1em 0; }
+          strong { color: #F8FAFC; }
         </style>
         </head>
         <body>
@@ -291,7 +291,7 @@ public class ItemDetailView extends BorderPane {
     quizBtn.setMaxWidth(Double.MAX_VALUE);
     quizBtn.setWrapText(true);
     quizBtn.setStyle(
-        "-fx-background-color: #2196F322;"
+        "-fx-background-color: #0EA5A422;"
         + "-fx-text-fill: " + COLOR_BORDER_ACCENT + ";"
         + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
         + "-fx-border-radius: 8;"
