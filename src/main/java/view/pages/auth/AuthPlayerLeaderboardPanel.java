@@ -22,27 +22,12 @@ import model.session.PlayerLeaderboardEntry;
 import model.session.PlayerLeaderboardMetric;
 import model.session.PlayerLeaderboardRanking;
 import view.components.table.AppTableView;
+import view.theme.ThemeStyles;
 
 /**
  * Dedicated auth-screen leaderboard for comparing saved players.
  */
 public class AuthPlayerLeaderboardPanel extends BorderPane {
-
-  private static final String PANEL_STYLE =
-      "-fx-background-color: #f6f7fb;"
-          + "-fx-border-color: #d7dce5;"
-          + "-fx-background-radius: 12;"
-          + "-fx-border-radius: 12;"
-          + "-fx-padding: 14;";
-  private static final String TOP_ONE_STYLE =
-      "-fx-background-color: #fff4cc;"
-          + "-fx-font-weight: bold;";
-  private static final String TOP_TWO_STYLE =
-      "-fx-background-color: #eef3f8;"
-          + "-fx-font-weight: bold;";
-  private static final String TOP_THREE_STYLE =
-      "-fx-background-color: #fbe9dd;"
-          + "-fx-font-weight: bold;";
 
   private final AppTableView<PlayerLeaderboardEntry> table =
       new AppTableView<>("No saved players to compare yet.");
@@ -73,13 +58,15 @@ public class AuthPlayerLeaderboardPanel extends BorderPane {
    * @param entries saved-player leaderboard entries
    */
   public AuthPlayerLeaderboardPanel(List<PlayerLeaderboardEntry> entries) {
-    setStyle(PANEL_STYLE);
+    ThemeStyles.addStyleClasses(this, "auth-leaderboard-panel");
     setPadding(new Insets(0));
     Label heading = new Label("Player leaderboard");
     heading.setFont(Font.font("System", FontWeight.BOLD, 18));
+    ThemeStyles.addStyleClasses(heading, "auth-leaderboard-heading");
 
     Label subheading = new Label("Compare saved profiles by net worth or total return.");
     subheading.setWrapText(true);
+    ThemeStyles.addStyleClasses(subheading, "auth-leaderboard-subheading");
 
     VBox top = new VBox(6, heading, subheading);
     setTop(top);
@@ -234,12 +221,7 @@ public class AuthPlayerLeaderboardPanel extends BorderPane {
 
   private String rowStyleFor(PlayerLeaderboardEntry entry) {
     int rank = rankByUsername.getOrDefault(entry.username(), Integer.MAX_VALUE);
-    return switch (rank) {
-      case 1 -> TOP_ONE_STYLE;
-      case 2 -> TOP_TWO_STYLE;
-      case 3 -> TOP_THREE_STYLE;
-      default -> "";
-    };
+    return ThemeStyles.leaderboardRowStyle(rank);
   }
 
   private static String formatCurrency(PlayerLeaderboardEntry entry) {

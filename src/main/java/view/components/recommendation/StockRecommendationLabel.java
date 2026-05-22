@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.recommendation.StockRecommendation;
+import view.theme.ThemeStyles;
 
 /**
  * Reusable JavaFX label that renders a stock recommendation as a styled badge.
@@ -18,12 +19,6 @@ import model.recommendation.StockRecommendation;
  * @since 2026-04-04
  */
 public class StockRecommendationLabel extends Label {
-
-  private static final String BASE_STYLE =
-      "-fx-background-radius: 999;"
-          + "-fx-border-radius: 999;"
-          + "-fx-padding: 6 12 6 12;"
-          + "-fx-font-weight: bold;";
 
   private StockRecommendation recommendation;
 
@@ -47,7 +42,8 @@ public class StockRecommendationLabel extends Label {
     checkNotNull(recommendation, "Recommendation");
     this.recommendation = recommendation;
     setText(recommendation.getDisplayText());
-    setStyle(BASE_STYLE + styleFor(recommendation));
+    getStyleClass().removeAll("recommendation-buy", "recommendation-hold", "recommendation-sell");
+    ThemeStyles.addStyleClasses(this, "recommendation-badge", styleClassFor(recommendation));
   }
 
   /**
@@ -60,18 +56,16 @@ public class StockRecommendationLabel extends Label {
   }
 
   /**
-   * Maps a recommendation to its badge colours.
+   * Maps a recommendation to its badge style class.
    *
    * @param recommendation recommendation to style
-   * @return JavaFX inline style fragment
+   * @return style class name
    */
-  private static String styleFor(StockRecommendation recommendation) {
+  private static String styleClassFor(StockRecommendation recommendation) {
     return switch (recommendation) {
-      case BUY -> "-fx-background-color: #e8f7ee;-fx-border-color: #1f9d55;-fx-text-fill: #176f3d;";
-      case HOLD ->
-          "-fx-background-color: #fff6d9;-fx-border-color: #c58b00;-fx-text-fill: #8a5a00;";
-      case SELL ->
-          "-fx-background-color: #fdeaea;-fx-border-color: #cc3d3d;-fx-text-fill: #9d2020;";
+      case BUY -> "recommendation-buy";
+      case HOLD -> "recommendation-hold";
+      case SELL -> "recommendation-sell";
     };
   }
 }

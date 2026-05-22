@@ -9,7 +9,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import view.layout.AuthLayout;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -19,6 +18,14 @@ public class LoginPage extends AuthLayout {
 
   private final TextField usernameField = new TextField();
   private final PasswordField pinField = new PasswordField();
+
+  /**
+   * @param loginAction login submit handler
+   * @param toRegister navigate to register
+   */
+  public LoginPage(LoginAction loginAction, Runnable toRegister) {
+    this(loginAction, toRegister, null, null, false, null);
+  }
 
   /**
    * @param loginAction login submit handler
@@ -35,21 +42,30 @@ public class LoginPage extends AuthLayout {
       Runnable helpAction,
       boolean showReturnToSession,
       Runnable returnAction) {
-    super(buildFormShell(), "Register", toRegister, sidePanel, helpAction, showReturnToSession, returnAction);
+    super(
+        buildFormShell(),
+        "Register",
+        toRegister,
+        sidePanel,
+        helpAction,
+        showReturnToSession,
+        returnAction);
     VBox form = (VBox) getContentSlot().getChildren().get(0);
     wireForm(form, loginAction);
   }
 
   private static VBox buildFormShell() {
-    return new VBox(16);
+    VBox form = new VBox(16);
+    ThemeStyles.addStyleClasses(form, "auth-form");
+    return form;
   }
 
   private void wireForm(VBox form, LoginAction loginAction) {
     Label heading = new Label("Welcome back");
-    heading.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";");
+    ThemeStyles.addStyleClasses(heading, "heading-lg");
 
     Label subheading = new Label("Enter your username and PIN to log in.");
-    subheading.setStyle("-fx-font-size: 13px; -fx-text-fill: " + ThemePalette.TEXT_SECONDARY + ";");
+    ThemeStyles.addStyleClasses(subheading, "text-subheading");
 
     usernameField.setPromptText("Username");
     ThemeStyles.styleField(usernameField);
@@ -66,8 +82,10 @@ public class LoginPage extends AuthLayout {
 
     VBox fields = new VBox(10, usernameField, pinField);
     fields.setMaxWidth(360);
+    ThemeStyles.addStyleClasses(fields, "auth-form-fields");
 
     VBox content = new VBox(8, heading, subheading, new VBox(12, fields, loginButton));
+    ThemeStyles.addStyleClasses(content, "auth-form-content");
     form.setAlignment(Pos.CENTER);
     form.setMaxWidth(360);
     form.setPadding(new Insets(0, 32, 0, 32));

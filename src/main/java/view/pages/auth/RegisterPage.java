@@ -9,7 +9,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import view.layout.AuthLayout;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -20,6 +19,14 @@ public class RegisterPage extends AuthLayout {
   private final TextField usernameField = new TextField();
   private final PasswordField pinField = new PasswordField();
   private final TextField startingMoneyField = new TextField();
+
+  /**
+   * @param registerAction registration submit handler
+   * @param toLogin navigate to login
+   */
+  public RegisterPage(RegisterAction registerAction, Runnable toLogin) {
+    this(registerAction, toLogin, null, null, false, null);
+  }
 
   /**
    * @param registerAction registration submit handler
@@ -42,15 +49,17 @@ public class RegisterPage extends AuthLayout {
   }
 
   private static VBox buildFormShell() {
-    return new VBox(16);
+    VBox form = new VBox(16);
+    ThemeStyles.addStyleClasses(form, "auth-form");
+    return form;
   }
 
   private void wireForm(VBox form, RegisterAction registerAction) {
     Label heading = new Label("Create your profile");
-    heading.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";");
+    ThemeStyles.addStyleClasses(heading, "heading-lg");
 
     Label subheading = new Label("Choose a username, PIN, and starting balance.");
-    subheading.setStyle("-fx-font-size: 13px; -fx-text-fill: " + ThemePalette.TEXT_SECONDARY + ";");
+    ThemeStyles.addStyleClasses(subheading, "text-subheading");
 
     usernameField.setPromptText("Username");
     pinField.setPromptText("PIN (4–8 digits)");
@@ -72,8 +81,10 @@ public class RegisterPage extends AuthLayout {
 
     VBox fields = new VBox(10, usernameField, pinField, startingMoneyField);
     fields.setMaxWidth(360);
+    ThemeStyles.addStyleClasses(fields, "auth-form-fields");
 
     VBox content = new VBox(8, heading, subheading, new VBox(12, fields, registerButton));
+    ThemeStyles.addStyleClasses(content, "auth-form-content");
     form.setAlignment(Pos.CENTER);
     form.setMaxWidth(360);
     form.setPadding(new Insets(0, 32, 0, 32));

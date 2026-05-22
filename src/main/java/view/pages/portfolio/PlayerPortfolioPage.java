@@ -33,18 +33,12 @@ import model.analysis.PortfolioPerformanceService;
 import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
 import view.components.image.ValidatingImageLoader;
+import view.theme.ThemeStyles;
 
 /**
  * JavaFX panel showing player summary data, current holdings, and portfolio-vs-market metrics.
  */
 public class PlayerPortfolioPage extends BorderPane {
-
-  private static final String CARD_STYLE =
-      "-fx-background-color: #f6f7fb;"
-          + "-fx-border-color: #d7dce5;"
-          + "-fx-background-radius: 12;"
-          + "-fx-border-radius: 12;"
-          + "-fx-padding: 14;";
 
   private final Exchange exchange;
   private final Player player;
@@ -84,9 +78,11 @@ public class PlayerPortfolioPage extends BorderPane {
     this.avatarPath = avatarPath;
 
     setPadding(new Insets(16));
+    ThemeStyles.addStyleClasses(this, "finance-page");
 
     Text heading = new Text("Player overview");
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
+    ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
     Button refreshButton = new Button("Refresh");
     refreshButton.setOnAction(_ -> refresh());
@@ -173,7 +169,7 @@ public class PlayerPortfolioPage extends BorderPane {
 
     VBox metricsBox = new VBox(10, heading, metricsGrid);
     metricsBox.setPadding(new Insets(14, 0, 0, 0));
-    metricsBox.setStyle(CARD_STYLE);
+    ThemeStyles.addStyleClasses(metricsBox, "finance-summary-card");
     BorderPane.setMargin(metricsBox, new Insets(16, 0, 0, 0));
     return metricsBox;
   }
@@ -268,9 +264,6 @@ public class PlayerPortfolioPage extends BorderPane {
   }
 
   private static void styleButton(Button button) {
-    button.setStyle(
-        "-fx-border-radius: 6;"
-            + "-fx-background-radius: 6;"
-            + "-fx-cursor: hand;");
+    ThemeStyles.styleButton(button);
   }
 }

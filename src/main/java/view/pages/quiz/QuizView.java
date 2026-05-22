@@ -18,6 +18,7 @@ import model.learninghub.LearningResource;
 import model.learninghub.QuizAnswer;
 import model.learninghub.QuizAttempt;
 import model.learninghub.QuizQuestion;
+import view.theme.ThemeStyles;
 
 /**
  * Interactive quiz view. Presents one question at a time with four answer choices.
@@ -55,16 +56,16 @@ public class QuizView extends BorderPane {
     this.attempt = attempt;
     this.onFinish = onFinish;
 
-    setStyle("-fx-background-color: " + COLOR_BG + ";");
+    ThemeStyles.addStyleClasses(this, "quiz-root");
     setPadding(new Insets(16));
 
     // ── TOP bar ──────────────────────────────────────────────────────────────
     Button backBtn = new Button("← Back");
-    backBtn.setStyle("-fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;");
+    ThemeStyles.styleButton(backBtn);
     backBtn.setOnAction(_ -> onBack.run());
 
     progressLabel = new Label();
-    progressLabel.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 12;");
+    ThemeStyles.addStyleClasses(progressLabel, "quiz-meta");
 
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -78,7 +79,6 @@ public class QuizView extends BorderPane {
     centerContent = new VBox(16);
     ScrollPane scroll = new ScrollPane(centerContent);
     scroll.setFitToWidth(true);
-    scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
     scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
     setCenter(scroll);
 
@@ -99,18 +99,11 @@ public class QuizView extends BorderPane {
     // Question card
     Label questionText = new Label(q.questionText());
     questionText.setWrapText(true);
-    questionText.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-size: 15;"
-        + "-fx-font-weight: bold;");
+    ThemeStyles.addStyleClasses(questionText, "quiz-question-text");
 
     VBox questionCard = new VBox(questionText);
     questionCard.setPadding(new Insets(16));
-    questionCard.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_BORDER_DEFAULT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;");
+    ThemeStyles.addStyleClasses(questionCard, "quiz-question-card");
 
     // Answer buttons
     VBox answersBox = new VBox(8);
@@ -122,24 +115,14 @@ public class QuizView extends BorderPane {
     feedbackPane.setVisible(false);
     feedbackPane.setManaged(false);
     feedbackPane.setPadding(new Insets(12));
-    feedbackPane.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;");
+    ThemeStyles.addStyleClasses(feedbackPane, "quiz-feedback");
 
     // Next / finish button (hidden until answered)
     Button nextBtn = new Button(
         (attempt.currentIndex() + 1 >= attempt.totalQuestions()) ? "See Results →" : "Next →");
     nextBtn.setVisible(false);
     nextBtn.setManaged(false);
-    nextBtn.setStyle(
-        "-fx-background-color: " + COLOR_ACCENT + ";"
-        + "-fx-text-fill: white;"
-        + "-fx-font-weight: bold;"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;"
-        + "-fx-padding: 10 20 10 20;");
+    ThemeStyles.styleAccentButton(nextBtn);
     nextBtn.setOnAction(_ -> {
       String chosenId = (String) nextBtn.getUserData();
       attempt.submitAnswer(chosenId);
@@ -167,17 +150,13 @@ public class QuizView extends BorderPane {
         // Highlight correct answer green
         for (Button b : answerButtons) {
           if (b.getUserData().equals(correctId)) {
-            b.setStyle(b.getStyle()
-                + "-fx-border-color: " + COLOR_CORRECT + ";"
-                + "-fx-background-color: " + COLOR_CORRECT + "22;");
+            ThemeStyles.addStyleClasses(b, "quiz-answer-correct");
           }
         }
 
         // Highlight wrong choice red
         if (!correct) {
-          btn.setStyle(btn.getStyle()
-              + "-fx-border-color: " + COLOR_WRONG + ";"
-              + "-fx-background-color: " + COLOR_WRONG + "22;");
+          ThemeStyles.addStyleClasses(btn, "quiz-answer-wrong");
         }
 
         // Build and show feedback
@@ -205,15 +184,7 @@ public class QuizView extends BorderPane {
     btn.setMaxWidth(Double.MAX_VALUE);
     btn.setWrapText(true);
     btn.setUserData(answer.id());
-    btn.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-border-color: " + COLOR_ACCENT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;"
-        + "-fx-alignment: CENTER_LEFT;"
-        + "-fx-padding: 10 14 10 14;");
+    ThemeStyles.addStyleClasses(btn, "quiz-answer-button");
     return btn;
   }
 
@@ -224,11 +195,9 @@ public class QuizView extends BorderPane {
     String resultColor = correct ? COLOR_CORRECT : COLOR_WRONG;
     String resultText = correct ? "✓  Correct!" : "✗  Not quite.";
 
-    feedbackPane.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + resultColor + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;");
+    feedbackPane.getStyleClass().removeAll("quiz-feedback-correct", "quiz-feedback-wrong");
+    ThemeStyles.addStyleClasses(
+        feedbackPane, correct ? "quiz-feedback-correct" : "quiz-feedback-wrong");
 
     Label resultLabel = new Label(resultText);
     resultLabel.setStyle(

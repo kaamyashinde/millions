@@ -24,6 +24,7 @@ import model.Exchange;
 import model.Stock;
 import model.stockinfo.StockFinancialInfoProvider;
 import model.marketevent.MarketEvent;
+import view.theme.ThemeStyles;
 
 /**
  * JavaFX panel listing all stocks on an {@link Exchange}: symbol, company, latest price, mock
@@ -53,11 +54,14 @@ public class StocksPage extends BorderPane {
     this.exchange = exchange;
 
     setPadding(new Insets(16));
+    ThemeStyles.addStyleClasses(this, "finance-page");
 
     Text heading = new Text("Available stocks");
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
+    ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
     metaLabel.setWrapText(true);
+    ThemeStyles.addStyleClasses(metaLabel, "finance-meta");
 
     Button refreshBtn = new Button("Refresh");
     styleButton(refreshBtn);
@@ -185,9 +189,6 @@ public class StocksPage extends BorderPane {
   }
 
   private static void styleButton(Button b) {
-    b.setStyle(
-        "-fx-border-radius: 6;"
-            + "-fx-background-radius: 6;"
-            + "-fx-cursor: hand;");
+    ThemeStyles.styleButton(b);
   }
 }

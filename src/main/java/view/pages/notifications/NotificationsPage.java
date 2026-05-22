@@ -17,7 +17,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import view.components.notification.ToastTray;
 import view.components.toast.ToastMode;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -31,14 +30,14 @@ public class NotificationsPage extends BorderPane {
   public NotificationsPage(NotificationsController controller) {
     var notifications = controller.getNotificationService();
     setPadding(new Insets(16));
-    setStyle(ThemeStyles.workspaceBackground());
+    ThemeStyles.addStyleClasses(this, "finance-page");
 
     Text heading = new Text("Notifications");
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
-    heading.setStyle("-fx-fill: " + ThemePalette.TEXT_PRIMARY + ";");
+    ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
     Label daysLabel = new Label("Days:");
-    daysLabel.setStyle(ThemeStyles.mutedText());
+    ThemeStyles.addStyleClasses(daysLabel, "muted-text");
     TextField daysField = new TextField();
     daysField.setPromptText("e.g. 14");
     daysField.setPrefWidth(100);
@@ -65,6 +64,7 @@ public class NotificationsPage extends BorderPane {
 
     HBox buttons = new HBox(14, errBtn, warnBtn, infoBtn, successBtn, clearBtn);
     buttons.setAlignment(Pos.CENTER);
+    ThemeStyles.addStyleClasses(buttons, "finance-notification-actions");
 
     VBox top = new VBox(28, heading, advanceRow, buttons);
     top.setAlignment(Pos.CENTER);
@@ -78,7 +78,6 @@ public class NotificationsPage extends BorderPane {
 
     ScrollPane scroll = new ScrollPane(trayRow);
     scroll.setFitToWidth(true);
-    scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
     BorderPane.setMargin(scroll, new Insets(24, 0, 0, 0));
     setCenter(scroll);
   }

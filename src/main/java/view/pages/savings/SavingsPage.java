@@ -57,7 +57,7 @@ public class SavingsPage extends BorderPane {
     this.controller = controller;
     this.afterModelChange = afterModelChange;
     setPadding(new Insets(16));
-    setStyle(ThemeStyles.workspaceBackground());
+    ThemeStyles.addStyleClasses(this, "finance-page");
     updateDayLabel();
 
     Button advanceBtn = new Button("Advance 1 trading day");
@@ -128,6 +128,7 @@ public class SavingsPage extends BorderPane {
 
     VBox bottom = new VBox(12, new Separator(), addGrid, editGrid, status);
     bottom.setPadding(new Insets(12, 0, 0, 0));
+    ThemeStyles.addStyleClasses(status, "finance-status");
     setBottom(bottom);
   }
 

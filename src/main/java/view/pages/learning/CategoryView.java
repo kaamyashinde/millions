@@ -19,6 +19,7 @@ import model.learninghub.Difficulty;
 import model.learninghub.LearningCategory;
 import model.learninghub.LearningContentStore;
 import model.learninghub.LearningItem;
+import view.theme.ThemeStyles;
 
 /**
  * Category view for the Learning Hub. Shows all {@link LearningItem}s in a single
@@ -52,24 +53,25 @@ public class CategoryView extends BorderPane {
   public CategoryView(
       LearningCategory category, Runnable onBack, Consumer<LearningItem> onItemClicked) {
     setPadding(new Insets(16));
+    ThemeStyles.addStyleClasses(this, "learning-root");
 
     this.items = LearningContentStore.getItemsByCategory(category);
     this.onItemClicked = onItemClicked;
 
     // ── TOP: back button + category header ───────────────────────────────────
     Button backBtn = new Button("← Back");
-    backBtn.setStyle("-fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;");
+    ThemeStyles.styleButton(backBtn);
     backBtn.setOnAction(_ -> onBack.run());
 
     Label emoji = new Label(category.emoji());
-    emoji.setStyle("-fx-font-size: 22;");
+    ThemeStyles.addStyleClasses(emoji, "learning-card-emoji");
 
     Label name = new Label(category.name());
     name.setFont(Font.font("System", FontWeight.BOLD, 20));
-    name.setStyle("-fx-text-fill: " + COLOR_HEADING + ";");
+    ThemeStyles.addStyleClasses(name, "learning-card-title");
 
     Label desc = new Label(category.description());
-    desc.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 12;");
+    ThemeStyles.addStyleClasses(desc, "learning-card-summary");
     desc.setWrapText(true);
 
     // ── Filter bar ───────────────────────────────────────────────────────────
@@ -93,7 +95,6 @@ public class CategoryView extends BorderPane {
 
     ScrollPane scroll = new ScrollPane(content);
     scroll.setFitToWidth(true);
-    scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
     scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
     setCenter(scroll);
   }
@@ -101,11 +102,7 @@ public class CategoryView extends BorderPane {
   private ToggleButton makeFilterToggle(String label, Difficulty difficulty, ToggleGroup group) {
     ToggleButton btn = new ToggleButton(label);
     btn.setToggleGroup(group);
-    btn.setStyle(
-        "-fx-background-radius: 4;"
-        + "-fx-border-radius: 4;"
-        + "-fx-cursor: hand;"
-        + "-fx-font-size: 11;");
+    ThemeStyles.addStyleClasses(btn, "btn", "btn-secondary");
     btn.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
       if (isNowSelected) {
         applyFilter(difficulty);
@@ -124,7 +121,7 @@ public class CategoryView extends BorderPane {
         : items.stream().filter(i -> i.difficulty() == difficulty).toList();
     if (filtered.isEmpty()) {
       Label empty = new Label("No " + difficulty.name().toLowerCase() + " topics in this category.");
-      empty.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + ";");
+      ThemeStyles.addStyleClasses(empty, "empty-state");
       content.getChildren().add(empty);
     } else {
       for (LearningItem item : filtered) {
@@ -145,22 +142,17 @@ public class CategoryView extends BorderPane {
             + "-fx-font-size: 10;");
 
     Label title = new Label(item.title());
-    title.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-weight: bold;");
+    ThemeStyles.addStyleClasses(title, "learning-card-title");
     title.setWrapText(true);
 
     Label summary = new Label(item.summary());
-    summary.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    ThemeStyles.addStyleClasses(summary, "learning-card-summary");
     summary.setWrapText(true);
 
     VBox card = new VBox(6, badge, title, summary);
     card.setPadding(new Insets(12));
     card.setMaxWidth(Double.MAX_VALUE);
-    card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-            + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
-            + "-fx-border-radius: 8;"
-            + "-fx-background-radius: 8;"
-            + "-fx-cursor: hand;");
+    ThemeStyles.addStyleClasses(card, "learning-card-accent");
 
     card.setOnMouseClicked(_ -> onItemClicked.accept(item));
     return card;
