@@ -11,11 +11,17 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
- * Split-screen layout shell for authentication pages with optional side panel and footer actions.
+ * Split-screen layout shell for authentication pages.
+ *
+ * <p>Divides the screen 50/50 horizontally: a decorative lavender left panel with the
+ * application brand, and a white right panel containing an injected form node centered
+ * vertically with a navigation link in the top-right corner.
+ *
+ * <p>This class holds no authentication logic. Login and Register pages each construct
+ * their own {@code AuthLayout}, supplying their form content and a nav-link callback.
  */
 public class AuthLayout extends HBox {
 
@@ -26,24 +32,24 @@ public class AuthLayout extends HBox {
   /**
    * Builds the split-screen authentication layout shell.
    *
-   * @param formContent form node centered in the right panel
-   * @param navLinkText navigation link label in the top-right corner
-   * @param navLinkAction invoked when the navigation link is clicked
+   * @param formContent   the form node to display centered in the right panel
+   * @param navLinkText   label text for the navigation link in the top-right corner
+   * @param navLinkAction callback invoked when the navigation link is clicked
    */
   public AuthLayout(Node formContent, String navLinkText, Runnable navLinkAction) {
     this(formContent, navLinkText, navLinkAction, null, null, false, null);
   }
 
   /**
-   * Builds auth layout with optional leaderboard side panel and footer actions.
+   * Builds auth layout with optional side content and footer actions.
    *
-   * @param formContent form node
-   * @param navLinkText top-right nav link text
-   * @param navLinkAction nav link handler
-   * @param sidePanel optional panel east of the form (e.g. player leaderboard)
-   * @param helpAction optional help handler; {@code null} hides Help
-   * @param showReturnToSession whether to show return-to-session button
-   * @param returnAction invoked when return is clicked
+   * @param formContent form node centered in the right panel
+   * @param navLinkText navigation link label in the top-right corner
+   * @param navLinkAction invoked when the navigation link is clicked
+   * @param sidePanel optional panel displayed beside the form
+   * @param helpAction optional help handler; {@code null} hides the help action
+   * @param showReturnToSession whether to show the return-to-session button
+   * @param returnAction invoked when return-to-session is clicked
    */
   public AuthLayout(
       Node formContent,
@@ -53,11 +59,12 @@ public class AuthLayout extends HBox {
       Runnable helpAction,
       boolean showReturnToSession,
       Runnable returnAction) {
+    ThemeStyles.addStyleClasses(this, "auth-root");
     contentSlot = new StackPane(formContent);
     contentSlot.setAlignment(Pos.CENTER);
 
     VBox left = buildLeftPanel();
-    BorderPane right = buildRightPanel(navLinkText, navLinkAction, sidePanel, helpAction);
+    BorderPane right = buildRightPanel(navLinkText, navLinkAction, sidePanel);
 
     returnButton.setVisible(showReturnToSession);
     returnButton.setManaged(showReturnToSession);
@@ -67,8 +74,8 @@ public class AuthLayout extends HBox {
     }
 
     statusLabel.setWrapText(true);
-    statusLabel.setStyle("-fx-text-fill: " + ThemePalette.ERROR + "; -fx-font-size: 13px;");
     statusLabel.setMaxWidth(400);
+    ThemeStyles.addStyleClasses(statusLabel, "auth-status-error");
 
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -90,7 +97,9 @@ public class AuthLayout extends HBox {
   }
 
   /**
-   * @return content slot holding the form
+   * Returns the content slot that holds the injected form node.
+   *
+   * @return the central content StackPane in the right panel
    */
   public StackPane getContentSlot() {
     return contentSlot;
@@ -106,14 +115,16 @@ public class AuthLayout extends HBox {
   }
 
   /**
-   * @return footer status text
+   * Returns the footer status message.
+   *
+   * @return current status text
    */
   public String getStatus() {
     return statusLabel.getText();
   }
 
   /**
-   * Simulates pressing the return button when it is visible (for tests).
+   * Fires the return-to-session action when that button is visible.
    */
   public void triggerReturnToSession() {
     if (returnButton.isManaged()) {
@@ -123,7 +134,7 @@ public class AuthLayout extends HBox {
 
   private VBox buildLeftPanel() {
     VBox panel = new VBox();
-    panel.setStyle("-fx-background-color: " + ThemePalette.ACCENT_LIGHT + ";");
+    ThemeStyles.addStyleClasses(panel, "auth-side-panel");
     panel.setMaxWidth(Double.MAX_VALUE);
     panel.setMinWidth(300);
     HBox.setHgrow(panel, Priority.ALWAYS);
@@ -131,6 +142,7 @@ public class AuthLayout extends HBox {
     HBox brand = buildBrandBox();
     VBox.setMargin(brand, new Insets(32, 0, 0, 32));
     panel.getChildren().add(brand);
+
     return panel;
   }
 
@@ -139,35 +151,29 @@ public class AuthLayout extends HBox {
     icon.setPrefSize(32, 32);
     icon.setMinSize(32, 32);
     icon.setMaxSize(32, 32);
-    icon.setStyle("-fx-background-color: " + ThemePalette.ACCENT + "; -fx-background-radius: 8;");
+    ThemeStyles.addStyleClasses(icon, "auth-brand-icon");
 
     Label iconLetter = new Label("M");
-    iconLetter.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-font-size: 16px;");
+    ThemeStyles.addStyleClasses(iconLetter, "auth-brand-letter");
     icon.getChildren().add(iconLetter);
 
     Label brandLabel = new Label("Millions");
-    brandLabel.setStyle(
-        "-fx-text-fill: " + ThemePalette.ACCENT + "; -fx-font-size: 20px; -fx-font-weight: bold;");
+    ThemeStyles.addStyleClasses(brandLabel, "auth-brand-label");
 
     HBox brand = new HBox(10, icon, brandLabel);
     brand.setAlignment(Pos.CENTER_LEFT);
     return brand;
   }
 
-  private BorderPane buildRightPanel(
-      String navLinkText, Runnable navLinkAction, Node sidePanel, Runnable helpAction) {
+  private BorderPane buildRightPanel(String navLinkText, Runnable navLinkAction, Node sidePanel) {
     BorderPane panel = new BorderPane();
-    panel.setStyle("-fx-background-color: " + ThemePalette.BACKGROUND + ";");
+    ThemeStyles.addStyleClasses(panel, "auth-main-panel");
     panel.setMaxWidth(Double.MAX_VALUE);
     panel.setMinWidth(300);
     HBox.setHgrow(panel, Priority.ALWAYS);
 
     Label navLinkLabel = new Label(navLinkText);
-    navLinkLabel.setStyle(
-        "-fx-text-fill: " + ThemePalette.ACCENT + ";"
-            + "-fx-underline: true;"
-            + "-fx-cursor: hand;"
-            + "-fx-font-size: 13px;");
+    ThemeStyles.addStyleClasses(navLinkLabel, "auth-nav-link");
     navLinkLabel.setOnMouseClicked(_ -> navLinkAction.run());
 
     HBox navRow = new HBox(navLinkLabel);
@@ -186,6 +192,7 @@ public class AuthLayout extends HBox {
     } else {
       panel.setCenter(contentSlot);
     }
+
     return panel;
   }
 }
