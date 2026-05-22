@@ -27,6 +27,7 @@ import model.learninghub.QuizAttempt;
 import model.learninghub.QuizSession;
 import view.pages.quiz.QuizResultView;
 import view.pages.quiz.QuizView;
+import view.theme.ThemeStyles;
 
 /**
  * Learning Hub landing page. Displays a featured-topics row, a 6-category grid, and a highlighted
@@ -57,14 +58,15 @@ public class LearningHubPage extends BorderPane {
    */
   public LearningHubPage() {
     setPadding(new Insets(16));
+    ThemeStyles.addStyleClasses(this, "learning-root", "learning-hub-root");
 
     // ── TOP: heading + subtitle ──────────────────────────────────────────────
     Text heading = new Text("Learning Hub");
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
-    heading.setStyle("-fx-fill: " + COLOR_HEADING + ";");
+    ThemeStyles.addStyleClasses(heading, "learning-heading");
 
     Label subtitle = new Label("Build your investing knowledge, one topic at a time.");
-    subtitle.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + ";");
+    ThemeStyles.addStyleClasses(subtitle, "learning-subtitle");
 
     VBox top = new VBox(4, heading, subtitle);
     top.setPadding(new Insets(0, 0, 12, 0));
@@ -82,7 +84,6 @@ public class LearningHubPage extends BorderPane {
 
     ScrollPane scroll = new ScrollPane(content);
     scroll.setFitToWidth(true);
-    scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
     scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
     this.landingView = scroll;
@@ -147,24 +148,19 @@ public class LearningHubPage extends BorderPane {
             + "-fx-font-size: 10;");
 
     Label title = new Label(item.title());
-    title.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-weight: bold;");
+    ThemeStyles.addStyleClasses(title, "learning-card-title");
     title.setWrapText(true);
 
     Label summary = new Label(item.summary());
-    summary.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    ThemeStyles.addStyleClasses(summary, "learning-card-summary");
     summary.setWrapText(true);
 
     Label category = new Label(item.category().emoji() + "  " + item.category().name());
-    category.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 10;");
+    ThemeStyles.addStyleClasses(category, "learning-card-meta");
 
     VBox card = new VBox(6, badge, title, summary, category);
     card.setPadding(new Insets(12));
-    card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-            + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
-            + "-fx-border-radius: 8;"
-            + "-fx-background-radius: 8;"
-            + "-fx-cursor: hand;");
+    ThemeStyles.addStyleClasses(card, "learning-card-accent");
     HBox.setHgrow(card, Priority.ALWAYS);
 
     card.setOnMouseClicked(_ -> onFeaturedCardClicked(item));
@@ -173,24 +169,19 @@ public class LearningHubPage extends BorderPane {
 
   private javafx.scene.Node buildCategoryCard(LearningCategory category) {
     Label emoji = new Label(category.emoji());
-    emoji.setStyle("-fx-font-size: 22;");
+    ThemeStyles.addStyleClasses(emoji, "learning-card-emoji");
 
     Label name = new Label(category.name());
-    name.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-weight: bold;");
+    ThemeStyles.addStyleClasses(name, "learning-card-title");
     name.setWrapText(true);
 
     Label desc = new Label(category.description());
-    desc.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    ThemeStyles.addStyleClasses(desc, "learning-card-summary");
     desc.setWrapText(true);
 
     VBox card = new VBox(6, emoji, name, desc);
     card.setPadding(new Insets(12));
-    card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-            + "-fx-border-color: " + COLOR_BORDER_DEFAULT + ";"
-            + "-fx-border-radius: 8;"
-            + "-fx-background-radius: 8;"
-            + "-fx-cursor: hand;");
+    ThemeStyles.addStyleClasses(card, "learning-card");
 
     card.setOnMouseClicked(_ -> onCategoryCardClicked(category));
     return card;
@@ -206,24 +197,19 @@ public class LearningHubPage extends BorderPane {
             + "-fx-font-size: 10;");
 
     Label title = new Label(resource.title());
-    title.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-weight: bold; -fx-font-size: 14;");
+    ThemeStyles.addStyleClasses(title, "learning-resource-title");
 
     Label desc = new Label(resource.description());
-    desc.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + ";");
+    ThemeStyles.addStyleClasses(desc, "learning-card-summary");
     desc.setWrapText(true);
 
     Label cta = new Label("Open article →");
-    cta.setStyle("-fx-text-fill: " + COLOR_BORDER_RESOURCE + "; -fx-font-size: 11;");
+    ThemeStyles.addStyleClasses(cta, "learning-resource-cta");
 
     VBox card = new VBox(6, sourceLabel, title, desc, cta);
     card.setPadding(new Insets(14));
     card.setMaxWidth(Double.MAX_VALUE);
-    card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-            + "-fx-border-color: " + COLOR_BORDER_RESOURCE + ";"
-            + "-fx-border-radius: 8;"
-            + "-fx-background-radius: 8;"
-            + "-fx-cursor: hand;");
+    ThemeStyles.addStyleClasses(card, "learning-card-resource");
 
     card.setOnMouseClicked(_ -> openUrl(resource.url()));
     return card;
@@ -233,10 +219,7 @@ public class LearningHubPage extends BorderPane {
 
   private static VBox buildSection(String title, javafx.scene.Node content) {
     Label heading = new Label(title);
-    heading.setStyle(
-        "-fx-text-fill: " + "#e0e0e0" + ";"
-            + "-fx-font-weight: bold;"
-            + "-fx-font-size: 14;");
+    ThemeStyles.addStyleClasses(heading, "learning-section-title");
 
     VBox section = new VBox(10, heading, content);
     return section;
