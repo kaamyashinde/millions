@@ -21,7 +21,6 @@ import view.components.image.ImageLoader;
 import view.components.image.ValidatingImageLoader;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -54,21 +53,22 @@ public class WorkspaceLayout extends StackPane {
       Runnable onSwitchUser,
       Runnable onLogout) {
     this.notifications = notifications;
+    ThemeStyles.addStyleClasses(this, "workspace-root");
 
     BorderPane content = new BorderPane();
     content.setPadding(new Insets(16));
-    content.setStyle(ThemeStyles.workspaceBackground());
+    ThemeStyles.addStyleClasses(content, "workspace-content");
 
     Text heading = new Text("Millions");
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
-    heading.setStyle("-fx-fill: " + ThemePalette.ACCENT + ";");
+    ThemeStyles.addStyleClasses(heading, "heading-accent");
 
     headerAvatar.setFitWidth(40);
     headerAvatar.setFitHeight(40);
     headerAvatar.setPreserveRatio(true);
     headerAvatar.setSmooth(true);
 
-    sessionSummaryLabel.setStyle(ThemeStyles.mutedText());
+    ThemeStyles.addStyleClasses(sessionSummaryLabel, "muted-text");
 
     Button profileButton = new Button("Profile");
     Button refreshButton = new Button("Refresh all");
@@ -90,9 +90,11 @@ public class WorkspaceLayout extends StackPane {
     HBox actions =
         new HBox(10, profileButton, refreshButton, helpButton, switchUserButton, logoutButton);
     actions.setAlignment(Pos.CENTER_RIGHT);
+    ThemeStyles.addStyleClasses(actions, "workspace-actions");
 
     HBox topRow = new HBox(16, heading, headerAvatar, sessionSummaryLabel, actions);
     topRow.setAlignment(Pos.CENTER_LEFT);
+    ThemeStyles.addStyleClasses(topRow, "workspace-header");
     HBox.setMargin(actions, new Insets(0, 0, 0, 16));
 
     VBox center = new VBox(14, topRow, tabs);
@@ -103,6 +105,7 @@ public class WorkspaceLayout extends StackPane {
     toastArea.setAlignment(Pos.TOP_RIGHT);
     toastArea.setPadding(new Insets(16, 16, 0, 0));
     toastArea.setMouseTransparent(true);
+    ThemeStyles.addStyleClasses(toastArea, "toast-overlay");
 
     getChildren().addAll(content, toastArea);
   }
