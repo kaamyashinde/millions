@@ -12,6 +12,7 @@ import javafx.stage.Window;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import util.MarkdownLoader;
+import view.theme.ThemeStyles;
 
 /**
  * Modal dialog that renders the welcome / help markdown in a themed {@link WebView}.
@@ -33,7 +34,7 @@ public final class WelcomeDialog {
   public static void show(Window owner) {
     String markdown = MarkdownLoader.load(WELCOME_RESOURCE);
     String bodyHtml = markdown.isEmpty()
-        ? "<p style='color:#bdbdbd'>Welcome content could not be loaded.</p>"
+        ? "<p style='color:#94A3B8'>Welcome content could not be loaded.</p>"
         : HTML_RENDERER.render(MD_PARSER.parse(markdown));
 
     String html = """
@@ -42,12 +43,12 @@ public final class WelcomeDialog {
         <head>
           <meta charset="UTF-8"/>
           <style>
-            body { font-family: system-ui, sans-serif; background: #ffffff; color: #111827;
+            body { font-family: system-ui, sans-serif; background: #0B1220; color: #F8FAFC;
                    margin: 16px 20px; line-height: 1.5; }
-            h1 { color: #6d28d9; font-size: 1.4rem; }
-            h2 { color: #374151; font-size: 1.1rem; margin-top: 1.2em; }
-            a { color: #6d28d9; }
-            code { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; }
+            h1 { color: #0EA5A4; font-size: 1.4rem; }
+            h2 { color: #CBD5E1; font-size: 1.1rem; margin-top: 1.2em; }
+            a { color: #0EA5A4; }
+            code { background: #111827; padding: 2px 6px; border-radius: 4px; color: #F8FAFC; }
           </style>
         </head>
         <body>%s</body>
@@ -60,15 +61,14 @@ public final class WelcomeDialog {
     ScrollPane scroll = new ScrollPane(webView);
     scroll.setFitToWidth(true);
     scroll.setPrefSize(520, 420);
-    scroll.setStyle("-fx-background: #ffffff;");
 
     Button close = new Button("Close");
-    view.theme.ThemeStyles.styleButton(close);
+    ThemeStyles.styleButton(close);
     BorderPane root = new BorderPane();
+    ThemeStyles.addStyleClasses(root, "dialog-root");
     root.setCenter(scroll);
     root.setBottom(close);
     BorderPane.setMargin(close, new Insets(12, 16, 16, 16));
-    root.setStyle("-fx-background-color: #ffffff;");
 
     Stage stage = new Stage();
     stage.setTitle("Welcome to us");
@@ -76,7 +76,9 @@ public final class WelcomeDialog {
     if (owner != null) {
       stage.initOwner(owner);
     }
-    stage.setScene(new Scene(root, 560, 480));
+    Scene scene = new Scene(root, 560, 480);
+    ThemeStyles.install(scene);
+    stage.setScene(scene);
     close.setOnAction(_ -> stage.close());
     stage.showAndWait();
   }

@@ -23,6 +23,8 @@ import model.session.SessionService;
 import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
 import view.components.image.ValidatingImageLoader;
+import view.theme.ThemePalette;
+import view.theme.ThemeStyles;
 
 /**
  * Modal editor for display name, avatar image, and profile deletion.
@@ -75,7 +77,7 @@ public final class ProfileEditorDialog {
     preview.setFitHeight(96);
     preview.setPreserveRatio(true);
     preview.setSmooth(true);
-    preview.setStyle("-fx-border-color: #d7dce5; -fx-border-radius: 8;");
+    preview.setStyle("-fx-border-color: " + ThemePalette.BORDER + "; -fx-border-radius: 8;");
 
     Path[] pendingImage = {null};
     boolean[] removeAvatar = {false};
@@ -99,7 +101,7 @@ public final class ProfileEditorDialog {
     reloadPreview.run();
 
     Label status = new Label();
-    status.setStyle("-fx-text-fill: #c62828;");
+    status.setStyle("-fx-text-fill: " + ThemePalette.ERROR + ";");
 
     Button chooseImage = new Button("Choose image…");
     chooseImage.setOnAction(_ -> {
@@ -155,7 +157,7 @@ public final class ProfileEditorDialog {
     deletePin.setPromptText("PIN to confirm delete");
 
     Button delete = new Button("Delete profile");
-    delete.setStyle("-fx-text-fill: #b71c1c;");
+    delete.setStyle("-fx-text-fill: " + ThemePalette.ERROR + ";");
     delete.setOnAction(_ -> {
       status.setText("");
       char[] pin = deletePin.getText().toCharArray();
@@ -192,7 +194,16 @@ public final class ProfileEditorDialog {
     root.setPadding(new Insets(16));
     root.setAlignment(Pos.TOP_LEFT);
 
-    stage.setScene(new Scene(root, 420, 460));
+    Scene scene = new Scene(root, 420, 460);
+    ThemeStyles.install(scene);
+    ThemeStyles.addStyleClasses(root, "dialog-root");
+    ThemeStyles.styleField(nameField);
+    ThemeStyles.styleField(deletePin);
+    ThemeStyles.styleButton(chooseImage);
+    ThemeStyles.styleButton(removeImage);
+    ThemeStyles.styleAccentButton(save);
+    ThemeStyles.styleButton(cancel);
+    stage.setScene(scene);
     stage.showAndWait();
   }
 }
