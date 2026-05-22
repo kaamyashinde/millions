@@ -89,8 +89,8 @@ public class StockDetailView extends BorderPane {
     fundamentalsBox =
         new VBox(4, fundamentalsHeading, revenueLabel, profitLabel, healthLabel);
     fundamentalsBox.setStyle(
-        "-fx-background-color: #f9fafc;"
-            + "-fx-border-color: #e2e6ee;"
+        "-fx-background-color: #111827;"
+            + "-fx-border-color: #334155;"
             + "-fx-background-radius: 10;"
             + "-fx-border-radius: 10;"
             + "-fx-padding: 12;");
@@ -106,8 +106,8 @@ public class StockDetailView extends BorderPane {
             fundamentalsBox);
     recommendationBox = new VBox(8, new Label("Recommendation"), recommendationLabel, basisLabel);
     recommendationBox.setStyle(
-        "-fx-background-color: #f6f7fb;"
-            + "-fx-border-color: #d7dce5;"
+        "-fx-background-color: #111827;"
+            + "-fx-border-color: #334155;"
             + "-fx-background-radius: 12;"
             + "-fx-border-radius: 12;"
             + "-fx-padding: 14;");
