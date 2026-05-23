@@ -62,7 +62,12 @@ public final class SessionWorkspaceBuilder {
             workspaceController.getPortfolio(),
             workspaceController.getTrading(),
             refreshAndPersist);
-    StocksPage stocksPage = new StocksPage(session.exchange());
+    StocksPage stocksPage =
+        new StocksPage(
+            workspaceController.getStocks(),
+            workspaceController.getStockDetail(),
+            workspaceController.getTrading(),
+            refreshAndPersist);
     FundsPage fundsPage = new FundsPage(session.exchange());
     SavingsPage savingsPage =
         new SavingsPage(workspaceController.getSavings(), refreshAndPersist);

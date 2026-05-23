@@ -3,6 +3,9 @@ package view;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import controller.StockDetailController;
+import controller.StocksController;
+import controller.TradingController;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -12,7 +15,9 @@ import javafx.application.Platform;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
 import model.core.market.Exchange;
+import model.core.player.Player;
 import model.core.asset.Stock;
+import view.components.notification.NotificationService;
 import view.pages.stocks.StocksPage;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -40,8 +45,9 @@ class StocksPageTest {
     Stock microsoft = stockWithPrices("MSFT", "Microsoft", "200.00", "194.00");
     Exchange exchange =
         new Exchange.Builder("NYSE").stocks(List.of(microsoft, apple)).build();
+    Player player = new Player("tester", new BigDecimal("10000.00"));
 
-    StocksPage panel = runOnFxThread(() -> new StocksPage(exchange));
+    StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
     SplitPane splitPane = (SplitPane) panel.getCenter();
     @SuppressWarnings("unchecked")
     TableView<Stock> table = (TableView<Stock>) splitPane.getItems().getFirst();
@@ -57,6 +63,14 @@ class StocksPageTest {
 
     assertNotNull(panel.getDetailView().getSelectedStock());
     assertEquals("MSFT", panel.getDetailView().getSelectedStock().getSymbol());
+  }
+
+  private static StocksPage createPage(Exchange exchange, Player player) {
+    StocksController stocks = new StocksController(exchange);
+    StockDetailController stockDetail = new StockDetailController(exchange);
+    TradingController trading =
+        new TradingController(exchange, player, new NotificationService());
+    return new StocksPage(stocks, stockDetail, trading, () -> {});
   }
 
   /**
