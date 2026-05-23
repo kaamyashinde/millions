@@ -31,14 +31,24 @@ public class StockChart extends LineChart<Number, Number> {
    * @param stock the stock whose historical prices are displayed
    */
   public StockChart(Stock stock) {
+    this(stock, ChartRange.ALL);
+  }
+
+  /**
+   * Creates a chart pre-populated with the selected range of {@code stock}'s price history.
+   *
+   * @param stock the stock whose historical prices are displayed
+   * @param range selected chart range
+   */
+  public StockChart(Stock stock, ChartRange range) {
     super(buildXAxis(), buildYAxis());
 
     setTitle(stock.getSymbol() + " \u2014 " + stock.getCompany());
-    setCreateSymbols(false);
+    setCreateSymbols(visiblePrices(stock.getHistoricalPrices(), range).size() == 1);
     setLegendVisible(false);
     setAnimated(false);
 
-    getData().add(buildSeries(stock.getHistoricalPrices()));
+    getData().add(buildSeries(stock.getHistoricalPrices(), range));
 
     setOnMouseClicked(
         event -> {
@@ -56,8 +66,13 @@ public class StockChart extends LineChart<Number, Number> {
                           .getValueForDisplay(
                               xAxis.sceneToLocal(event.getSceneX(), event.getSceneY()).getX())
                           .doubleValue());
-          int totalDays = getData().get(0).getData().size();
-          dayIndex = Math.max(1, Math.min(totalDays, dayIndex));
+          List<XYChart.Data<Number, Number>> visibleData = getData().getFirst().getData();
+          if (visibleData.isEmpty()) {
+            return;
+          }
+          int firstDay = visibleData.getFirst().getXValue().intValue();
+          int lastDay = visibleData.getLast().getXValue().intValue();
+          dayIndex = Math.max(firstDay, Math.min(lastDay, dayIndex));
           final int clampedDay = dayIndex;
           tools.forEach(
               t -> {
@@ -114,13 +129,28 @@ public class StockChart extends LineChart<Number, Number> {
    * Converts a list of closing prices into a chart series using 1-based day indices on the X axis.
    *
    * @param prices the ordered list of daily closing prices
+   * @param range selected chart range
    * @return a {@link XYChart.Series} ready to be added to the chart
    */
-  private static XYChart.Series<Number, Number> buildSeries(List<BigDecimal> prices) {
+  private static XYChart.Series<Number, Number> buildSeries(
+      List<BigDecimal> prices, ChartRange range) {
     XYChart.Series<Number, Number> series = new XYChart.Series<>();
-    for (int i = 0; i < prices.size(); i++) {
-      series.getData().add(new XYChart.Data<>(i + 1, prices.get(i).doubleValue()));
+    int startIndex = rangeStartIndex(prices, range);
+    List<BigDecimal> visiblePrices = prices.subList(startIndex, prices.size());
+    for (int i = 0; i < visiblePrices.size(); i++) {
+      series
+          .getData()
+          .add(new XYChart.Data<>(startIndex + i + 1, visiblePrices.get(i).doubleValue()));
     }
     return series;
+  }
+
+  private static List<BigDecimal> visiblePrices(List<BigDecimal> prices, ChartRange range) {
+    return prices.subList(rangeStartIndex(prices, range), prices.size());
+  }
+
+  private static int rangeStartIndex(List<BigDecimal> prices, ChartRange range) {
+    int visibleDays = range.getDayWindow().orElse(prices.size());
+    return Math.max(0, prices.size() - visibleDays);
   }
 }
