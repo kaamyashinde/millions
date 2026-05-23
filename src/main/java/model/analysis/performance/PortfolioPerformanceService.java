@@ -1,19 +1,25 @@
-package model.analysis;
+package model.analysis.performance;
+
+
+import model.analysis.metric.MetricStatus;
+import model.analysis.metric.PerformanceComparison;
+import model.analysis.metric.PerformanceMetrics;
+import model.analysis.series.HistoricalAssetPriceService;
 
 import static model.utils.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import model.Exchange;
-import model.InvestableAsset;
-import model.Player;
-import model.Portfolio;
-import model.Share;
-import model.transaction.Purchase;
-import model.transaction.Sale;
-import model.transaction.Transaction;
-import model.transactioncalculator.SaleCalculator;
+import model.core.market.Exchange;
+import model.core.asset.InvestableAsset;
+import model.core.player.Player;
+import model.core.player.Portfolio;
+import model.core.asset.Share;
+import model.trading.transaction.Purchase;
+import model.trading.transaction.Sale;
+import model.trading.transaction.Transaction;
+import model.trading.calculator.SaleCalculator;
 
 /**
  * Reconstructs the player's daily net worth and compares it with the market benchmark.

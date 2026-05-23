@@ -1,4 +1,5 @@
-package model.analysis;
+package model.analysis.metric;
+
 
 import static model.utils.Validator.checkNotNull;
 

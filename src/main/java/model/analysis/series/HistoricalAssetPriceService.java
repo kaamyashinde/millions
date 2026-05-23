@@ -1,13 +1,14 @@
-package model.analysis;
+package model.analysis.series;
+
 
 import static model.utils.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.List;
-import model.InvestableAsset;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.core.asset.InvestableAsset;
+import model.core.asset.Stock;
+import model.core.asset.fund.Fund;
+import model.core.asset.fund.FundComponent;
 
 /**
  * Resolves historical prices for stocks and derived fund prices on a trading day.

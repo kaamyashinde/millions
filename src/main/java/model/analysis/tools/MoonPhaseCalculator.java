@@ -1,4 +1,5 @@
-package model.analysis;
+package model.analysis.tools;
+
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

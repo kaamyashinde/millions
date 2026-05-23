@@ -1,4 +1,7 @@
-package model.analysis;
+package model.analysis.metric;
+
+
+import model.core.player.Portfolio;
 
 import static model.utils.Validator.checkNotNull;
 

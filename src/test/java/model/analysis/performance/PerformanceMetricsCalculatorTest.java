@@ -1,4 +1,8 @@
-package model.analysis;
+package model.analysis.performance;
+
+
+import model.analysis.metric.MetricStatus;
+import model.analysis.metric.PerformanceMetrics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -1,12 +1,18 @@
-package model.analysis;
+package model.analysis.performance;
+
+
+import model.analysis.metric.MetricStatus;
+import model.analysis.metric.PerformanceMetrics;
+import model.analysis.series.HistoricalAssetPriceService;
+import model.analysis.series.ReturnSeriesCalculator;
 
 import static model.utils.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import model.Exchange;
-import model.Stock;
+import model.core.market.Exchange;
+import model.core.asset.Stock;
 
 /**
  * Builds market benchmark metrics from the listed stocks on an exchange.

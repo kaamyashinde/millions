@@ -1,13 +1,19 @@
-package model.analysis;
+package model.analysis.performance;
+
+
+import model.analysis.metric.MetricStatus;
+import model.analysis.metric.PerformanceComparison;
+import model.analysis.series.HistoricalAssetPriceService;
+import model.analysis.series.ReturnSeriesCalculator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.List;
-import model.Exchange;
-import model.InvestableAsset;
-import model.Player;
-import model.Stock;
+import model.core.market.Exchange;
+import model.core.asset.InvestableAsset;
+import model.core.player.Player;
+import model.core.asset.Stock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

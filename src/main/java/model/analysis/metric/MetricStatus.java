@@ -1,4 +1,5 @@
-package model.analysis;
+package model.analysis.metric;
+
 
 /**
  * Availability state for one displayed performance metric.

@@ -1,4 +1,12 @@
-package model.analysis;
+package model.analysis.performance;
+
+
+import model.analysis.metric.MetricStatus;
+import model.analysis.metric.MetricValue;
+import model.analysis.metric.PerformanceMetrics;
+import model.analysis.series.ReturnSeriesCalculator;
+import model.analysis.series.SharpeRatioCalculator;
+import model.analysis.series.VolatilityCalculator;
 
 import static model.utils.Validator.checkNotNull;
 
