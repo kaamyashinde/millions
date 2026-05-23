@@ -6,13 +6,11 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import model.core.asset.InvestableAsset;
 import model.core.asset.Share;
@@ -31,7 +29,7 @@ import model.trading.transaction.Sale;
 import model.trading.transaction.Transaction;
 
 /**
- * Single JSON document for one user profile: account, game state, preferences, and saved runs.
+ * Single JSON document for one user profile: account, game state, and preferences.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ProfileFile(
@@ -50,8 +48,7 @@ public record ProfileFile(
     int day,
     List<PriceRow> stockPrices,
     List<EventRow> events,
-    EventRow lastEvent,
-    List<SavedRunRow> savedRuns
+    EventRow lastEvent
 ) {
 
   @JsonIgnoreProperties(ignoreUnknown = true)
@@ -80,16 +77,6 @@ public record ProfileFile(
       List<String> symbols,
       BigDecimal priceFactor) {}
 
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  public record SavedRunRow(
-      String id,
-      String savedAt,
-      String label,
-      int day,
-      BigDecimal cash,
-      BigDecimal netWorth,
-      boolean eligibleForLeaderboard) {}
-
   public record RestoredSession(Player player, Exchange exchange) {}
 
   public static String hashPin(String normalizedUsername, char[] pin) {
@@ -114,8 +101,7 @@ public record ProfileFile(
       String normalizedUsername,
       String pinHash,
       String displayName,
-      boolean hasSeenWelcome,
-      List<SavedRunRow> savedRuns) {
+      boolean hasSeenWelcome) {
     return new ProfileFile(
         username,
         normalizedUsername,
@@ -159,8 +145,7 @@ public record ProfileFile(
         exchange.getMarketEventHistory().stream()
             .map(ProfileFile::toEventRow)
             .toList(),
-        exchange.getLastMarketEvent().map(ProfileFile::toEventRow).orElse(null),
-        savedRuns == null ? List.of() : List.copyOf(savedRuns));
+        exchange.getLastMarketEvent().map(ProfileFile::toEventRow).orElse(null));
   }
 
   public RestoredSession restore(MarketData marketData) {
@@ -207,59 +192,18 @@ public record ProfileFile(
         .build();
   }
 
-  public SavedRunRow newSavedRun(Player player, Exchange exchange, String label) {
-    String safeLabel = label == null ? "" : label.trim();
-    return new SavedRunRow(
-        UUID.randomUUID().toString(),
-        Instant.now().toString(),
-        safeLabel,
-        exchange.getDay(),
-        player.getMoney(),
-        player.getNetWorth(),
-        false);
-  }
-
-  public ProfileFile withSavedRun(SavedRunRow run) {
-    List<SavedRunRow> updated = new java.util.ArrayList<>(savedRuns);
-    updated.add(run);
-    return copyWithSavedRuns(updated);
-  }
-
-  public ProfileFile withoutSavedRun(String runId) {
-    return copyWithSavedRuns(
-        savedRuns.stream().filter(row -> !row.id().equals(runId)).toList());
-  }
-
-  public ProfileFile withRunLeaderboardFlag(String runId, boolean eligible) {
-    List<SavedRunRow> updated = savedRuns.stream()
-        .map(row -> row.id().equals(runId)
-            ? new SavedRunRow(
-                row.id(), row.savedAt(), row.label(), row.day(),
-                row.cash(), row.netWorth(), eligible)
-            : row)
-        .toList();
-    return copyWithSavedRuns(updated);
-  }
-
   public ProfileFile withDisplayName(String displayName) {
     return new ProfileFile(
         username, normalizedUsername, pinHash, displayName, hasSeenWelcome,
         playerName, startingMoney, cash, holdings, transactions, savings,
-        exchangeName, day, stockPrices, events, lastEvent, savedRuns);
+        exchangeName, day, stockPrices, events, lastEvent);
   }
 
   public ProfileFile withWelcomeSeen() {
     return new ProfileFile(
         username, normalizedUsername, pinHash, displayName, true,
         playerName, startingMoney, cash, holdings, transactions, savings,
-        exchangeName, day, stockPrices, events, lastEvent, savedRuns);
-  }
-
-  private ProfileFile copyWithSavedRuns(List<SavedRunRow> runs) {
-    return new ProfileFile(
-        username, normalizedUsername, pinHash, displayName, hasSeenWelcome,
-        playerName, startingMoney, cash, holdings, transactions, savings,
-        exchangeName, day, stockPrices, events, lastEvent, runs);
+        exchangeName, day, stockPrices, events, lastEvent);
   }
 
   private static EventRow toEventRow(MarketEvent event) {
