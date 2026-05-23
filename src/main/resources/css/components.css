@@ -2,12 +2,18 @@
 
 .card,
 .metric-card,
-.leaderboard-panel {
+.leaderboard-panel,
+.table-card {
     -fx-background-color: -millions-surface;
     -fx-border-color: -millions-border;
     -fx-background-radius: 12;
     -fx-border-radius: 12;
     -fx-padding: 14;
+}
+
+.table-card {
+    -fx-padding: 1; /* Minimal padding for the table itself */
+    -fx-background-color: -millions-border; /* Border color for the container */
 }
 
 .metric-card {
@@ -27,6 +33,10 @@
 
 .field:focused {
     -fx-border-color: -millions-accent;
+}
+
+.field .text {
+    -fx-fill: -millions-text-primary;
 }
 
 .btn {
