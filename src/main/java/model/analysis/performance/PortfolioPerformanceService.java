@@ -1,11 +1,12 @@
 package model.analysis.performance;
 
 
+import model.analysis.PerformanceAnalyzer;
 import model.analysis.metric.MetricStatus;
 import model.analysis.metric.PerformanceComparison;
 import model.analysis.metric.PerformanceMetrics;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -25,30 +26,22 @@ import model.trading.calculator.SaleCalculator;
  */
 public class PortfolioPerformanceService {
 
-  private final PerformanceMetricsCalculator performanceMetricsCalculator;
   private final MarketBenchmarkService marketBenchmarkService;
 
   /**
    * Creates a service with default collaborators.
    */
   public PortfolioPerformanceService() {
-    this(
-        new PerformanceMetricsCalculator(),
-        new MarketBenchmarkService());
+    this(new MarketBenchmarkService());
   }
 
   /**
    * Creates a service with injected collaborators.
    *
-   * @param performanceMetricsCalculator helper used to derive metrics from value series
    * @param marketBenchmarkService helper used to derive benchmark metrics
    */
-  public PortfolioPerformanceService(
-      PerformanceMetricsCalculator performanceMetricsCalculator,
-      MarketBenchmarkService marketBenchmarkService) {
-    checkNotNull(performanceMetricsCalculator, "Performance metrics calculator");
+  public PortfolioPerformanceService(MarketBenchmarkService marketBenchmarkService) {
     checkNotNull(marketBenchmarkService, "Market benchmark service");
-    this.performanceMetricsCalculator = performanceMetricsCalculator;
     this.marketBenchmarkService = marketBenchmarkService;
   }
 
@@ -80,8 +73,7 @@ public class PortfolioPerformanceService {
     if (player.getTransactionArchive().isEmpty()) {
       return PerformanceMetrics.unavailable(MetricStatus.NO_TRADES);
     }
-    return performanceMetricsCalculator.calculateFromDailyValues(
-        buildDailyNetWorthSeries(player, exchange));
+    return PerformanceAnalyzer.calculateMetrics(buildDailyNetWorthSeries(player, exchange));
   }
 
   /**

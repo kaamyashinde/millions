@@ -1,13 +1,14 @@
 package model.analysis.performance;
 
 
+import model.analysis.PerformanceAnalyzer;
 import model.analysis.metric.MetricStatus;
 import model.analysis.metric.PerformanceMetrics;
-import model.analysis.series.ReturnSeriesCalculator;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import model.core.market.Exchange;
@@ -18,31 +19,12 @@ import model.core.asset.Stock;
  */
 public class MarketBenchmarkService {
 
-  private final PerformanceMetricsCalculator performanceMetricsCalculator;
-  private final ReturnSeriesCalculator returnSeriesCalculator;
+  private static final int SCALE = 8;
 
   /**
-   * Creates a benchmark service with default collaborators.
+   * Creates a benchmark service.
    */
   public MarketBenchmarkService() {
-    this(
-        new PerformanceMetricsCalculator(),
-        new ReturnSeriesCalculator());
-  }
-
-  /**
-   * Creates a benchmark service with injected collaborators.
-   *
-   * @param performanceMetricsCalculator helper used to derive performance metrics
-   * @param returnSeriesCalculator helper used to derive daily returns
-   */
-  public MarketBenchmarkService(
-      PerformanceMetricsCalculator performanceMetricsCalculator,
-      ReturnSeriesCalculator returnSeriesCalculator) {
-    checkNotNull(performanceMetricsCalculator, "Performance metrics calculator");
-    checkNotNull(returnSeriesCalculator, "Return series calculator");
-    this.performanceMetricsCalculator = performanceMetricsCalculator;
-    this.returnSeriesCalculator = returnSeriesCalculator;
   }
 
   /**
@@ -57,7 +39,7 @@ public class MarketBenchmarkService {
     if (stocks.isEmpty() || exchange.getDay() < 2) {
       return PerformanceMetrics.unavailable(MetricStatus.INSUFFICIENT_HISTORY);
     }
-    return performanceMetricsCalculator.calculateFromDailyValues(
+    return PerformanceAnalyzer.calculateMetrics(
         buildBenchmarkDailyValues(stocks, exchange.getDay()));
   }
 
@@ -94,8 +76,17 @@ public class MarketBenchmarkService {
     for (Stock stock : stocks) {
       BigDecimal previous = stock.getPriceOnDay(day - 1);
       BigDecimal current = stock.getPriceOnDay(day);
-      totalReturn = totalReturn.add(returnSeriesCalculator.calculateReturn(previous, current));
+      totalReturn = totalReturn.add(calculateReturn(previous, current));
     }
-    return totalReturn.divide(BigDecimal.valueOf(stocks.size()), 8, java.math.RoundingMode.HALF_UP);
+    return totalReturn.divide(BigDecimal.valueOf(stocks.size()), SCALE, RoundingMode.HALF_UP);
+  }
+
+  private BigDecimal calculateReturn(BigDecimal startValue, BigDecimal endValue) {
+    checkNotNull(startValue, "Start value");
+    checkNotNull(endValue, "End value");
+    if (startValue.signum() == 0) {
+      throw new IllegalArgumentException("Start value must be non-zero.");
+    }
+    return endValue.subtract(startValue).divide(startValue, SCALE, RoundingMode.HALF_UP);
   }
 }

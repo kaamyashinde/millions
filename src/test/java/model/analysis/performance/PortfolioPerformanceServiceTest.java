@@ -3,7 +3,6 @@ package model.analysis.performance;
 
 import model.analysis.metric.MetricStatus;
 import model.analysis.metric.PerformanceComparison;
-import model.analysis.series.ReturnSeriesCalculator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -60,12 +59,8 @@ class PortfolioPerformanceServiceTest {
     exchange.buy("AAPL", BigDecimal.ONE, player);
     exchange.advance(2);
 
-    MarketBenchmarkService benchmarkService = new MarketBenchmarkService(
-        new PerformanceMetricsCalculator(),
-        new ReturnSeriesCalculator());
-    PortfolioPerformanceService service = new PortfolioPerformanceService(
-        new PerformanceMetricsCalculator(),
-        benchmarkService);
+    MarketBenchmarkService benchmarkService = new MarketBenchmarkService();
+    PortfolioPerformanceService service = new PortfolioPerformanceService(benchmarkService);
 
     List<BigDecimal> series = service.buildDailyNetWorthSeries(player, exchange);
     PerformanceComparison comparison = service.compareAgainstMarket(player, exchange);
