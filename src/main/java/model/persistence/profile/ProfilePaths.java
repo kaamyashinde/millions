@@ -22,6 +22,7 @@ public final class ProfilePaths {
   private static final Pattern USERNAME_PATTERN = Pattern.compile("[A-Za-z0-9_-]{3,32}");
   private static final String PROFILE_FILE_NAME = "profile.json";
   private static final String AVATAR_FILE_NAME = "avatar.png";
+  private static final String MARKET_DATA_FILE_NAME = "market-data.csv";
 
   private final Path profilesRoot;
 
@@ -55,6 +56,16 @@ public final class ProfilePaths {
 
   public Path avatarFile(String username) {
     return profileDirectory(username).resolve(AVATAR_FILE_NAME);
+  }
+
+  /**
+   * Per-profile market data CSV (stocks and funds) used when creating and restoring sessions.
+   *
+   * @param username raw or canonical username
+   * @return path to {@code market-data.csv} in the profile directory
+   */
+  public Path marketDataFile(String username) {
+    return profileDirectory(username).resolve(MARKET_DATA_FILE_NAME);
   }
 
   public boolean profileExists(String username) {
