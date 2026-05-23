@@ -29,6 +29,7 @@ import view.pages.quiz.QuizLauncherPage;
 import view.pages.saved.SavedRunsPage;
 import view.pages.savings.SavingsPage;
 import view.pages.stocks.StocksPage;
+import view.pages.transactions.TransactionHistoryPage;
 import view.theme.ThemeStyles;
 
 /**
@@ -164,6 +165,8 @@ public class MillionsApp extends Application {
         ctrl.getStocks(), ctrl.getStockDetail(), ctrl.getTrading(), refreshAndPersist);
     FundsPage fundsPage = new FundsPage(session.exchange(), ctrl.getTrading(), refreshAndPersist);
     SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), refreshAndPersist);
+    TransactionHistoryPage transactionsPage =
+        new TransactionHistoryPage(session.exchange(), session.player());
     SavedRunsPage savedRunsPage = new SavedRunsPage(svc, ctrl::refreshAll);
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
     LearningHubPage learningHubPage =
@@ -174,6 +177,28 @@ public class MillionsApp extends Application {
     Tab stocksTab = makeTab("Stocks", stocksPage);
     Tab fundsTab = makeTab("Funds", fundsPage);
     Tab savingsTab = makeTab("Savings", savingsPage);
+    Tab transactionsTab = makeTab("Transactions", transactionsPage);
+
+    portfolioTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        portfolioPage.refresh();
+      }
+    });
+    stocksTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        stocksPage.refresh();
+      }
+    });
+    fundsTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        fundsPage.refresh();
+      }
+    });
+    transactionsTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        transactionsPage.refresh();
+      }
+    });
     Tab savedRunsTab = makeTab("Saved Runs", savedRunsPage);
     Tab leaderboardTab = makeTab("Leaderboard", leaderboardPage);
     Tab learningTab = makeTab("Learning Hub", learningHubPage);
@@ -182,7 +207,7 @@ public class MillionsApp extends Application {
     Tab notificationsTab = makeTab("Notifications", notificationsPage);
 
     TabPane tabs = new TabPane(
-        portfolioTab, stocksTab, fundsTab, savingsTab,
+        portfolioTab, stocksTab, fundsTab, savingsTab, transactionsTab,
         savedRunsTab, leaderboardTab, learningTab, quizTab, notificationsTab);
     tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
