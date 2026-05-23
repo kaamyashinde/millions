@@ -18,29 +18,17 @@ import model.exception.trading.InsufficientSharesException;
 import model.exception.trading.ShareNotFoundException;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
-import model.persistence.game.GameStateMapper;
-import model.persistence.game.GameStateRepository;
 import model.persistence.market.MarketData;
 import model.persistence.market.MarketDataLoader;
-import model.persistence.account.PinHashingService;
-import model.persistence.profile.ProfileImageService;
-import model.persistence.profile.ProfilePreferencesRepository;
-import model.persistence.savedrun.SavedRunMapper;
-import model.persistence.savedrun.SavedRunRepository;
-import model.persistence.account.UserAccountRepository;
 import model.trading.savings.RegularSavingsPlan;
 import model.trading.savings.RegularSavingsProcessor;
 import model.trading.savings.SavingsInstallmentMode;
 import model.session.ActiveSession;
-import model.session.auth.AuthService;
 import model.exception.auth.AuthenticationException;
 import model.exception.auth.DuplicateUsernameException;
-import model.session.game.GamePersistenceService;
-import model.session.profile.ProfilePreferencesService;
-import model.session.profile.ProfileService;
 import model.exception.auth.RegistrationValidationException;
-import model.session.game.SavedRunService;
 import model.session.SessionService;
+import model.session.SessionServiceFactory;
 import model.session.validation.ValidationError;
 import model.trading.transaction.Purchase;
 import model.trading.transaction.Transaction;
@@ -111,35 +99,10 @@ public class UserInterface {
    * Initialises the session layer and starts with no active user.
    */
   private static void init() {
-    UserAccountRepository userAccountRepository = new UserAccountRepository(PROFILES_ROOT);
-    PinHashingService pinHashingService = new PinHashingService();
-
-    GamePersistenceService gamePersistenceService = new GamePersistenceService(
-        new GameStateRepository(PROFILES_ROOT),
-        new GameStateMapper(EXCHANGE_NAME),
-        UserInterface::loadMarketData);
-
-    AuthService authService = new AuthService(
-        userAccountRepository, pinHashingService, gamePersistenceService);
-
-    ProfileService profileService = new ProfileService(
-        userAccountRepository,
-        new ProfileImageService(PROFILES_ROOT),
-        pinHashingService,
-        PROFILES_ROOT);
-
-    SavedRunService savedRunService = new SavedRunService(
-        new SavedRunRepository(PROFILES_ROOT), new SavedRunMapper());
-
-    ProfilePreferencesService profilePreferencesService = new ProfilePreferencesService(
-        new ProfilePreferencesRepository(PROFILES_ROOT));
-
-    sessionService = new SessionService(
-        authService,
-        profileService,
-        gamePersistenceService,
-        savedRunService,
-        profilePreferencesService);
+    sessionService = SessionServiceFactory.createLocalProfileSessionService(
+        PROFILES_ROOT,
+        UserInterface::loadMarketData,
+        EXCHANGE_NAME);
     player = null;
     exchange = null;
   }
