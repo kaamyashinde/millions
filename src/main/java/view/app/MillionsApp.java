@@ -17,6 +17,7 @@ import model.exception.market.MarketDataImportException;
 import model.session.SessionService;
 import model.session.SessionServiceFactory;
 import controller.WorkspaceController;
+import view.dialogs.ProfileEditorDialog;
 import view.layout.WorkspaceLayout;
 import view.pages.auth.LoginPage;
 import view.pages.auth.RegisterPage;
@@ -26,7 +27,6 @@ import view.pages.learning.LearningHubPage;
 import view.pages.notifications.NotificationsPage;
 import view.pages.portfolio.PlayerPortfolioPage;
 import view.pages.quiz.QuizLauncherPage;
-import view.pages.saved.SavedRunsPage;
 import view.pages.savings.SavingsPage;
 import view.pages.stocks.StocksPage;
 import view.pages.transactions.TransactionHistoryPage;
@@ -134,12 +134,25 @@ public class MillionsApp extends Application {
   }
 
   private WorkspaceLayout buildWorkspace(WorkspaceController ctrl) {
-    TabPane tabs = buildWorkspaceTabs(ctrl);
+    Runnable onProfileDeleted = () -> onProfileDeleted(ctrl);
+    TabPane tabs = buildWorkspaceTabs(ctrl, onProfileDeleted);
     WorkspaceLayout[] ref = new WorkspaceLayout[1];
+    Runnable refreshAndPersist = () -> {
+      ctrl.refreshAll();
+      sessionService.saveActiveSession();
+    };
     WorkspaceLayout workspace = new WorkspaceLayout(
         ctrl.getNotifications(),
         tabs,
-        () -> { /* profile editor: placeholder */ },
+        () -> {
+          var window = ref[0].getScene() != null ? ref[0].getScene().getWindow() : null;
+          ProfileEditorDialog.show(
+              window,
+              ctrl.createProfileEditorController(),
+              ctrl.getExitGame(),
+              refreshAndPersist,
+              onProfileDeleted);
+        },
         ctrl::refreshAll,
         () -> { /* help: placeholder */ },
         () -> switchUser(ctrl, ref[0]),
@@ -150,7 +163,14 @@ public class MillionsApp extends Application {
     return workspace;
   }
 
-  private TabPane buildWorkspaceTabs(WorkspaceController ctrl) {
+  private void onProfileDeleted(WorkspaceController ctrl) {
+    ctrl.dispose();
+    currentWorkspace = null;
+    scene.setRoot(buildLoginPage());
+    primaryStage.setTitle("Millions");
+  }
+
+  private TabPane buildWorkspaceTabs(WorkspaceController ctrl, Runnable onProfileDeleted) {
     ActiveSession session = ctrl.getSession();
     SessionService svc = ctrl.getSessionService();
 
@@ -160,14 +180,17 @@ public class MillionsApp extends Application {
     };
 
     PlayerPortfolioPage portfolioPage = new PlayerPortfolioPage(
-        ctrl.getPortfolio(), ctrl.getTrading(), refreshAndPersist);
+        ctrl.getPortfolio(),
+        ctrl.getTrading(),
+        ctrl.getExitGame(),
+        refreshAndPersist,
+        onProfileDeleted);
     StocksPage stocksPage = new StocksPage(
         ctrl.getStocks(), ctrl.getStockDetail(), ctrl.getTrading(), refreshAndPersist);
     FundsPage fundsPage = new FundsPage(session.exchange(), ctrl.getTrading(), refreshAndPersist);
     SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), refreshAndPersist);
     TransactionHistoryPage transactionsPage =
         new TransactionHistoryPage(session.exchange(), session.player());
-    SavedRunsPage savedRunsPage = new SavedRunsPage(svc, ctrl::refreshAll);
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
     LearningHubPage learningHubPage =
         new LearningHubPage(ctrl.getLearningHub(), ctrl.getQuiz());
@@ -199,7 +222,6 @@ public class MillionsApp extends Application {
         transactionsPage.refresh();
       }
     });
-    Tab savedRunsTab = makeTab("Saved Runs", savedRunsPage);
     Tab leaderboardTab = makeTab("Leaderboard", leaderboardPage);
     Tab learningTab = makeTab("Learning Hub", learningHubPage);
     Tab quizTab = new Tab("Quiz");
@@ -208,7 +230,7 @@ public class MillionsApp extends Application {
 
     TabPane tabs = new TabPane(
         portfolioTab, stocksTab, fundsTab, savingsTab, transactionsTab,
-        savedRunsTab, leaderboardTab, learningTab, quizTab, notificationsTab);
+        leaderboardTab, learningTab, quizTab, notificationsTab);
     tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
     java.util.function.Consumer<model.learning.content.LearningItem> openTopicInHub =

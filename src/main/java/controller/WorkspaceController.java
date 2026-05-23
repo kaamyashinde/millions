@@ -32,7 +32,7 @@ public class WorkspaceController {
   private final FundDetailController fundDetail;
   private final SavingsController savings;
   private final TradingController trading;
-  private final SavedRunsController savedRuns;
+  private final ExitGameController exitGame;
   private final LeaderboardController leaderboard;
   private final LearningHubController learningHub;
   private final QuizController quiz;
@@ -60,7 +60,7 @@ public class WorkspaceController {
         new SavingsController(session.exchange(), session.player(), notifications);
     this.trading =
         new TradingController(session.exchange(), session.player(), notifications);
-    this.savedRuns = new SavedRunsController(sessionService);
+    this.exitGame = new ExitGameController(sessionService);
     this.leaderboard = new LeaderboardController(sessionService);
     this.learningHub = new LearningHubController();
     this.quiz = new QuizController();
@@ -113,8 +113,8 @@ public class WorkspaceController {
     return trading;
   }
 
-  public SavedRunsController getSavedRuns() {
-    return savedRuns;
+  public ExitGameController getExitGame() {
+    return exitGame;
   }
 
   public LeaderboardController getLeaderboard() {

@@ -7,7 +7,6 @@ Thanks for using **Millions** — a stock-market simulation for learning and exp
 - **Player** — See your balance, holdings, and performance versus a simple market benchmark.
 - **Stocks & funds** — Browse listed assets and place trades.
 - **Savings** — Set up recurring purchase plans.
-- **Saved runs** — Capture snapshots of a playthrough to compare different approaches later.
 
 Use **Help** anytime from the toolbar or login screen to open this page again.
 
