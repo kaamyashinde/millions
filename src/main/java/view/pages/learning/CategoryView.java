@@ -15,10 +15,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import model.learninghub.Difficulty;
-import model.learninghub.LearningCategory;
-import model.learninghub.LearningContentStore;
-import model.learninghub.LearningItem;
+import model.learning.content.Difficulty;
+import model.learning.content.LearningCategory;
+import model.learning.store.LearningContentStore;
+import model.learning.content.LearningItem;
 import view.theme.ThemeStyles;
 
 /**

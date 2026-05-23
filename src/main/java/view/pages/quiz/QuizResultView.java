@@ -15,9 +15,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizQuestion;
-import model.learninghub.QuizSession;
+import model.learning.quiz.QuizAttempt;
+import model.learning.quiz.QuizQuestion;
+import model.learning.quiz.QuizSession;
 import view.theme.ThemeStyles;
 
 /**

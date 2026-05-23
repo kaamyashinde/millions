@@ -1,5 +1,7 @@
 package view.app;
 
+import model.core.player.Player;
+
 import controller.WorkspaceController;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;

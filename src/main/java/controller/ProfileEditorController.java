@@ -4,7 +4,7 @@ import static model.utils.Validator.checkNotNull;
 
 import java.nio.file.Path;
 import model.session.ActiveSession;
-import model.session.AuthenticationException;
+import model.exception.auth.AuthenticationException;
 import model.session.SessionService;
 
 /**

@@ -10,8 +10,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.core.asset.fund.Fund;
+import model.core.asset.fund.FundComponent;
 import view.components.table.AppTableView;
 
 /**

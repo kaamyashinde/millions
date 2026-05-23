@@ -5,7 +5,7 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
-import model.analysis.FibonacciRetracement;
+import model.analysis.tools.FibonacciRetracement;
 
 /**
  * Two-click chart tool that draws seven horizontal Fibonacci retracement lines.

@@ -21,9 +21,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
-import model.InvestableAsset;
-import model.savings.RegularSavingsPlan;
-import model.savings.SavingsInstallmentMode;
+import model.core.asset.InvestableAsset;
+import model.trading.savings.RegularSavingsPlan;
+import model.trading.savings.SavingsInstallmentMode;
 import view.theme.ThemeStyles;
 
 /**

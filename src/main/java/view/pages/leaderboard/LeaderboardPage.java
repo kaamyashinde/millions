@@ -1,5 +1,7 @@
 package view.pages.leaderboard;
 
+import model.core.player.Player;
+
 import java.math.RoundingMode;
 import java.util.List;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -18,7 +20,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.session.LocalLeaderboardService.LeaderboardRow;
+import model.session.leaderboard.LocalLeaderboardService.LeaderboardRow;
 import model.session.SessionService;
 import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;

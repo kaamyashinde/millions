@@ -13,11 +13,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
-import model.learninghub.LearningContentStore;
-import model.learninghub.LearningResource;
-import model.learninghub.QuizAnswer;
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizQuestion;
+import model.learning.store.LearningContentStore;
+import model.learning.content.LearningResource;
+import model.learning.quiz.QuizAnswer;
+import model.learning.quiz.QuizAttempt;
+import model.learning.quiz.QuizQuestion;
 import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 

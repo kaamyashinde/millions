@@ -2,9 +2,9 @@ package view.components.notification;
 
 import static model.utils.Validator.checkNotNull;
 
-import model.Player;
-import model.PlayerLevel;
-import model.PlayerObserver;
+import model.core.player.Player;
+import model.core.player.level.PlayerLevel;
+import model.core.player.PlayerObserver;
 import view.components.toast.ToastMode;
 
 /**

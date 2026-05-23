@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import model.session.PlayerLeaderboardEntry;
+import model.session.leaderboard.PlayerLeaderboardEntry;
 import view.pages.auth.AuthPlayerLeaderboardPanel;
 import view.pages.auth.LoginPage;
 

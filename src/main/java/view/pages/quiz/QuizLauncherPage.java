@@ -11,10 +11,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
-import model.learninghub.Quiz;
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizContentStore;
-import model.learninghub.QuizSession;
+import model.learning.quiz.Quiz;
+import model.learning.quiz.QuizAttempt;
+import model.learning.store.QuizContentStore;
+import model.learning.quiz.QuizSession;
 import view.theme.ThemeStyles;
 
 /**

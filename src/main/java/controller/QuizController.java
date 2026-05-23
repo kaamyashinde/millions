@@ -1,7 +1,7 @@
 package controller;
 
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizSession;
+import model.learning.quiz.QuizAttempt;
+import model.learning.quiz.QuizSession;
 
 /**
  * Manages quiz attempt lifecycle and session recording.

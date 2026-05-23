@@ -1,16 +1,19 @@
 package view.app;
 
+import model.core.player.Portfolio;
+import model.learning.quiz.Quiz;
+
 import java.math.BigDecimal;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
-import model.persistence.MarketData;
-import model.persistence.MarketDataLoader;
+import model.persistence.market.MarketData;
+import model.persistence.market.MarketDataLoader;
 import model.session.ActiveSession;
-import model.session.AuthenticationException;
-import model.session.DuplicateUsernameException;
+import model.exception.auth.AuthenticationException;
+import model.exception.auth.DuplicateUsernameException;
 import model.session.SessionService;
 import model.session.SessionServiceFactory;
 import controller.WorkspaceController;
