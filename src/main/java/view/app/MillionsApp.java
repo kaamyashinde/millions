@@ -158,9 +158,9 @@ public class MillionsApp extends Application {
     Tab stocksTab = makeTab("Stocks", stocksPage);
     Tab fundsTab = makeTab("Funds", fundsPage);
     Tab savingsTab = makeTab("Savings", savingsPage);
-    Tab savedRunsTab = makeTab("Saved runs", savedRunsPage);
+    Tab savedRunsTab = makeTab("Saved Runs", savedRunsPage);
     Tab leaderboardTab = makeTab("Leaderboard", leaderboardPage);
-    Tab learningTab = makeTab("Learning hub", learningHubPage);
+    Tab learningTab = makeTab("Learning Hub", learningHubPage);
     Tab quizTab = makeTab("Quiz", quizPage);
     Tab notificationsTab = makeTab("Notifications", notificationsPage);
 
