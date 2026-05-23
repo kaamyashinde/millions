@@ -13,6 +13,22 @@
     -fx-spacing: 10;
 }
 
+.auth-market-data-row {
+    -fx-spacing: 6;
+}
+
+.auth-market-data-actions {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+}
+
+.auth-market-data-button {
+    -fx-min-width: 0;
+    -fx-pref-width: -1;
+    -fx-max-width: infinity;
+    -fx-padding: 8 12;
+}
+
 .auth-leaderboard-panel {
     -fx-background-color: -millions-surface;
     -fx-border-color: -millions-border;

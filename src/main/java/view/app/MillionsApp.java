@@ -116,7 +116,7 @@ public class MillionsApp extends Application {
     } catch (DuplicateUsernameException e) {
       registerPage.setStatus("That username is already taken.");
     } catch (MarketDataImportException e) {
-      registerPage.setStatus(e.getMessage());
+      registerPage.setMarketDataStatus(e.getMessage());
     } catch (IllegalArgumentException e) {
       registerPage.setStatus(mapValidationMessage(e.getMessage()));
     }

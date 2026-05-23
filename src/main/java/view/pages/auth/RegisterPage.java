@@ -24,7 +24,8 @@ public class RegisterPage extends AuthLayout {
   private final TextField usernameField = new TextField();
   private final PasswordField pinField = new PasswordField();
   private final TextField startingMoneyField = new TextField();
-  private final Label marketDataFileLabel = new Label("Default market data");
+  private final Label marketDataFileNameLabel = new Label("Default market data");
+  private final Label marketDataStatusLabel = new Label();
   private Path selectedMarketDataFile;
 
   /**
@@ -78,22 +79,31 @@ public class RegisterPage extends AuthLayout {
     pinField.setMaxWidth(Double.MAX_VALUE);
     startingMoneyField.setMaxWidth(Double.MAX_VALUE);
 
-    marketDataFileLabel.setWrapText(true);
-    ThemeStyles.addStyleClasses(marketDataFileLabel, "text-subheading");
+    marketDataFileNameLabel.setWrapText(true);
+    ThemeStyles.addStyleClasses(marketDataFileNameLabel, "text-subheading");
+    marketDataStatusLabel.setWrapText(true);
+    marketDataStatusLabel.setVisible(false);
+    marketDataStatusLabel.setManaged(false);
+    ThemeStyles.addStyleClasses(marketDataStatusLabel, "text-subheading");
 
     Button chooseMarketDataButton = new Button("Choose market data…");
+    chooseMarketDataButton.getStyleClass().add("auth-market-data-button");
     ThemeStyles.styleButton(chooseMarketDataButton);
     chooseMarketDataButton.setOnAction(_ -> chooseMarketDataFile());
 
     Button clearMarketDataButton = new Button("Use default");
+    clearMarketDataButton.getStyleClass().add("auth-market-data-button");
     ThemeStyles.styleButton(clearMarketDataButton);
     clearMarketDataButton.setOnAction(_ -> clearMarketDataFile());
 
     HBox marketDataActions = new HBox(8, chooseMarketDataButton, clearMarketDataButton);
+    marketDataActions.getStyleClass().add("auth-market-data-actions");
     VBox marketDataRow = new VBox(6,
         new Label("Market data (optional)"),
         marketDataActions,
-        marketDataFileLabel);
+        marketDataFileNameLabel,
+        marketDataStatusLabel);
+    marketDataRow.getStyleClass().add("auth-market-data-row");
 
     Button registerButton = new Button("Create Profile");
     registerButton.setMaxWidth(Double.MAX_VALUE);
@@ -127,13 +137,31 @@ public class RegisterPage extends AuthLayout {
     java.io.File file = chooser.showOpenDialog(owner);
     if (file != null) {
       selectedMarketDataFile = file.toPath();
-      marketDataFileLabel.setText(file.getName());
+      marketDataFileNameLabel.setText(file.getName());
+      clearMarketDataStatus();
     }
   }
 
   private void clearMarketDataFile() {
     selectedMarketDataFile = null;
-    marketDataFileLabel.setText("Default market data");
+    marketDataFileNameLabel.setText("Default market data");
+    clearMarketDataStatus();
+  }
+
+  public void setMarketDataStatus(String message) {
+    if (message == null || message.isBlank()) {
+      clearMarketDataStatus();
+      return;
+    }
+    marketDataStatusLabel.setText(message);
+    marketDataStatusLabel.setVisible(true);
+    marketDataStatusLabel.setManaged(true);
+  }
+
+  private void clearMarketDataStatus() {
+    marketDataStatusLabel.setText("");
+    marketDataStatusLabel.setVisible(false);
+    marketDataStatusLabel.setManaged(false);
   }
 
   public void setStatus(String message) {
@@ -148,6 +176,14 @@ public class RegisterPage extends AuthLayout {
     usernameField.setText(username);
     pinField.setText(pin);
     startingMoneyField.setText(startingMoney);
+  }
+
+  public void clearForm() {
+    usernameField.clear();
+    pinField.clear();
+    startingMoneyField.clear();
+    clearMarketDataFile();
+    setStatus("");
   }
 
   @FunctionalInterface
