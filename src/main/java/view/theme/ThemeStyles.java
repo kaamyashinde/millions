@@ -5,6 +5,8 @@ import java.util.Arrays;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.TextField;
 
 /**
@@ -42,6 +44,30 @@ public final class ThemeStyles {
       if (!scene.getStylesheets().contains(externalForm)) {
         scene.getStylesheets().add(externalForm);
       }
+    }
+  }
+
+  /**
+   * Applies the Millions theme to a modal {@link Dialog} when its scene is created.
+   *
+   * @param dialog dialog whose pane should receive the stylesheet stack
+   */
+  public static void installOnDialog(Dialog<?> dialog) {
+    if (dialog == null) {
+      return;
+    }
+    DialogPane pane = dialog.getDialogPane();
+    addStyleClasses(pane, "dialog-root");
+    pane.sceneProperty()
+        .addListener(
+            (obs, oldScene, scene) -> {
+              if (scene != null) {
+                install(scene);
+              }
+            });
+    Scene existing = pane.getScene();
+    if (existing != null) {
+      install(existing);
     }
   }
 
