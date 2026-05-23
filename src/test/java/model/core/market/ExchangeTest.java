@@ -25,9 +25,9 @@ import model.exception.trading.InsufficientSharesException;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
 import model.core.market.event.MarketEvent;
+import model.core.market.pricing.DailyPriceMoveStrategy;
 import model.core.market.pricing.MarketEventStrategy;
 import model.core.market.event.SymbolMarketEventTarget;
-import model.core.market.pricing.UniformDailyPriceMoveStrategy;
 import model.trading.transaction.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -248,7 +248,7 @@ class ExchangeTest {
         new Exchange.Builder("NYSE")
             .stocks(List.of(appleStock, googleStock, microsoftStock))
             .random(new Random(7))
-            .dailyPriceMoveStrategy(new UniformDailyPriceMoveStrategy(0.05 / Math.sqrt(7)))
+            .dailyPriceMoveStrategy(DailyPriceMoveStrategy.uniform(0.05 / Math.sqrt(7)))
             .marketEventStrategy((stocks, tradingDay, random) -> Optional.empty())
             .build();
     BigDecimal initialApplePrice = appleStock.getSalesPrice();
@@ -439,6 +439,27 @@ class ExchangeTest {
     double dailySigma = 0.05 / Math.sqrt(7);
     BigDecimal normalUpperBound = initialApplePrice.multiply(BigDecimal.valueOf(1 + dailySigma));
     assertTrue(appleStock.getSalesPrice().compareTo(normalUpperBound) > 0);
+  }
+
+  @Test
+  void randomFromResources_loadsJsonTemplatesAndCreatesEvent() {
+    MarketEventStrategy strategy =
+        MarketEventStrategy.randomFromResources(1.0, MarketEventStrategy.DEFAULT_TEMPLATE_RESOURCE);
+
+    Optional<MarketEvent> generated =
+        strategy.maybeCreateEvent(List.of(appleStock), 8, new Random(4));
+
+    assertTrue(generated.isPresent());
+    MarketEvent event = generated.get();
+    assertTrue(List.of(
+        "AAPL: Earnings beat expectations",
+        "AAPL: Product launch gains traction",
+        "AAPL: Regulatory setback",
+        "AAPL: Guidance cut rattles investors").contains(event.title()));
+    assertTrue(event.description().contains("Apple Inc."));
+    assertTrue(event.description().contains("AAPL"));
+    assertEquals(Set.of("AAPL"), event.getAffectedSymbols());
+    assertTrue(event.priceFactor().compareTo(BigDecimal.ZERO) > 0);
   }
 
   @Test
