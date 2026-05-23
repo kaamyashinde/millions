@@ -1,4 +1,7 @@
-package model.exception;
+package model.exception.trading;
+
+
+import model.core.asset.Stock;
 
 /**
  * Optional domain-specific wrapper when a regular savings installment fails due to insufficient

@@ -1,4 +1,5 @@
-package model.exception;
+package model.exception.trading;
+
 
 /**
  * An exception thrown when a player attempts to commit a transaction that has already been

@@ -1,4 +1,7 @@
-package model.exception;
+package model.exception.trading;
+
+
+import model.core.asset.Stock;
 
 import java.math.BigDecimal;
 
