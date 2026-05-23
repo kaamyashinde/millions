@@ -89,8 +89,7 @@ public final class SessionService {
         existing.normalizedUsername(),
         existing.pinHash(),
         existing.displayName(),
-        existing.hasSeenWelcome(),
-        existing.savedRuns());
+        existing.hasSeenWelcome());
     jsonStorage.write(path, updated);
   }
 
@@ -130,54 +129,6 @@ public final class SessionService {
     return entries.stream()
         .sorted(PlayerLeaderboardRanking.bestFirstComparator(PlayerLeaderboardMetric.NET_WORTH))
         .toList();
-  }
-
-  public ProfileFile.SavedRunRow saveCurrentRun(String label) {
-    ActiveSession session = requireActiveSession();
-    saveActiveSession();
-    ProfileFile existing = jsonStorage.read(
-        profilePaths.profileFile(session.normalizedUsername()), ProfileFile.class);
-    ProfileFile.SavedRunRow run = existing.newSavedRun(session.player(), session.exchange(), label);
-    ProfileFile updated = existing.withSavedRun(run);
-    jsonStorage.write(profilePaths.profileFile(session.normalizedUsername()), updated);
-    return run;
-  }
-
-  public List<ProfileFile.SavedRunRow> listSavedRuns() {
-    ProfileFile profile = jsonStorage.read(
-        profilePaths.profileFile(requireActiveSession().normalizedUsername()),
-        ProfileFile.class);
-    return profile.savedRuns().stream()
-        .sorted((a, b) -> b.savedAt().compareTo(a.savedAt()))
-        .toList();
-  }
-
-  public boolean deleteSavedRun(String runId) {
-    ActiveSession session = requireActiveSession();
-    ProfileFile existing = jsonStorage.read(
-        profilePaths.profileFile(session.normalizedUsername()), ProfileFile.class);
-    boolean removed = existing.savedRuns().stream().anyMatch(row -> row.id().equals(runId));
-    if (!removed) {
-      return false;
-    }
-    jsonStorage.write(
-        profilePaths.profileFile(session.normalizedUsername()),
-        existing.withoutSavedRun(runId));
-    return true;
-  }
-
-  public boolean setRunLeaderboardEligible(String runId, boolean eligibleForLeaderboard) {
-    ActiveSession session = requireActiveSession();
-    ProfileFile existing = jsonStorage.read(
-        profilePaths.profileFile(session.normalizedUsername()), ProfileFile.class);
-    boolean found = existing.savedRuns().stream().anyMatch(row -> row.id().equals(runId));
-    if (!found) {
-      return false;
-    }
-    jsonStorage.write(
-        profilePaths.profileFile(session.normalizedUsername()),
-        existing.withRunLeaderboardFlag(runId, eligibleForLeaderboard));
-    return true;
   }
 
   public boolean hasSeenWelcome() {

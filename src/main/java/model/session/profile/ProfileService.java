@@ -59,8 +59,7 @@ public final class ProfileService {
         existing.normalizedUsername(),
         existing.pinHash(),
         stored,
-        existing.hasSeenWelcome(),
-        existing.savedRuns());
+        existing.hasSeenWelcome());
     jsonStorage.write(profilePaths.profileFile(session.normalizedUsername()), saved);
   }
 

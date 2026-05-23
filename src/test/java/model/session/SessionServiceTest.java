@@ -147,23 +147,6 @@ class SessionServiceTest {
   }
 
   @Test
-  void saveCurrentRun_persistsSnapshotForActiveUser() {
-    SessionService sessionService = createSessionService();
-    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
-    ActiveSession session = sessionService.getActiveSession().orElseThrow();
-    session.exchange().buy("AAPL", new BigDecimal("1.0"), session.player());
-
-    ProfileFile.SavedRunRow saved = sessionService.saveCurrentRun("strategy-a");
-
-    assertEquals("strategy-a", saved.label());
-    assertEquals(1, sessionService.listSavedRuns().size());
-    assertTrue(sessionService.setRunLeaderboardEligible(saved.id(), true));
-    assertTrue(sessionService.listSavedRuns().getFirst().eligibleForLeaderboard());
-    assertTrue(sessionService.deleteSavedRun(saved.id()));
-    assertTrue(sessionService.listSavedRuns().isEmpty());
-  }
-
-  @Test
   void updateDisplayName_persistsAcrossLogin() {
     SessionService sessionService = createSessionService();
     sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
