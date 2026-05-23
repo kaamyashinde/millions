@@ -29,4 +29,14 @@ public record FundComponent(Stock stock, BigDecimal weight) {
   public BigDecimal currentValueContribution() {
     return stock.getSalesPrice().multiply(weight);
   }
+
+  /**
+   * Returns this component's weighted contribution on a historical trading day.
+   *
+   * @param day trading day number, 1-based
+   * @return weighted contribution based on the stock price for that day
+   */
+  public BigDecimal valueContributionOnDay(int day) {
+    return stock.getPriceOnDay(day).multiply(weight);
+  }
 }

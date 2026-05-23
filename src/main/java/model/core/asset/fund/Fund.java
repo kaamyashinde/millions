@@ -68,6 +68,19 @@ public class Fund implements InvestableAsset {
   }
 
   /**
+   * Returns the fund price for a historical trading day, derived from weighted component prices.
+   *
+   * @param day trading day number, 1-based
+   * @return weighted historical value of all components
+   */
+  @Override
+  public BigDecimal getPriceOnDay(int day) {
+    return components.stream()
+        .map(component -> component.valueContributionOnDay(day))
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+  }
+
+  /**
    * Returns the asset type label used in listings and portfolio output.
    *
    * @return the string {@code Fund}

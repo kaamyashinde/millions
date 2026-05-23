@@ -91,6 +91,22 @@ public class Stock implements InvestableAsset {
   }
 
   /**
+   * Returns this stock's recorded price for a historical trading day.
+   *
+   * @param day trading day number, 1-based
+   * @return price recorded on the requested day
+   * @throws IllegalArgumentException if the day is before day 1 or no price is recorded for that day
+   */
+  @Override
+  public BigDecimal getPriceOnDay(int day) {
+    validateHistoricalDay(day);
+    if (price.size() < day) {
+      throw new IllegalArgumentException("Missing stock price for day " + day);
+    }
+    return price.get(day - 1);
+  }
+
+  /**
    * Returns the highest recorded price of a stock.
    *
    * @return The highest recorded price of the stock, or {@code BigDecimal.ZERO} if there are no
@@ -134,6 +150,12 @@ public class Stock implements InvestableAsset {
   @Override
   public BigDecimal getSalesPrice() {
     return price.getLast();
+  }
+
+  private static void validateHistoricalDay(int day) {
+    if (day < 1) {
+      throw new IllegalArgumentException("Trading day must be at least 1.");
+    }
   }
 
   /**

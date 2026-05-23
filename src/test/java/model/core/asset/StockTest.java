@@ -95,6 +95,29 @@ class StockTest {
   }
 
   @Test
+  void getPriceOnDayReturnsHistoricalPriceForTradingDay() {
+    assertEquals(BigDecimal.valueOf(152.25), stock.getPriceOnDay(2));
+  }
+
+  @Test
+  void getPriceOnDayThrowsWhenDayIsInvalid() {
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> stock.getPriceOnDay(0));
+    assertEquals("Trading day must be at least 1.", thrown.getMessage());
+  }
+
+  @Test
+  void getPriceOnDayThrowsWhenHistoryIsMissing() {
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> stock.getPriceOnDay(4));
+    assertEquals("Missing stock price for day 4", thrown.getMessage());
+  }
+
+  @Test
   void getHighestPriceReturnsMaximumPrice() {
     assertEquals(BigDecimal.valueOf(152.25), stock.getHighestPrice());
   }
