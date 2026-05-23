@@ -1,5 +1,6 @@
 package model.session.validation;
 
+
 /**
  * Outcome of a registration validation step or chain.
  *

@@ -1,4 +1,10 @@
-package model.session;
+package model.session.profile;
+
+
+import model.session.ActiveSession;
+import model.session.auth.AuthService;
+import model.exception.auth.AuthenticationException;
+import model.exception.auth.RegistrationValidationException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -6,12 +12,12 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
-import model.persistence.PersistenceException;
-import model.persistence.PinHashingService;
-import model.persistence.ProfileImageService;
-import model.persistence.UserAccountRecord;
-import model.persistence.UserAccountRepository;
-import model.session.validation.PinValidator;
+import model.exception.persistence.PersistenceException;
+import model.persistence.account.PinHashingService;
+import model.persistence.profile.ProfileImageService;
+import model.persistence.account.UserAccountRecord;
+import model.persistence.account.UserAccountRepository;
+import model.session.validation.rules.PinValidator;
 import model.session.validation.ValidationResult;
 
 /**
@@ -138,7 +144,7 @@ public final class ProfileService {
     deleteProfileDirectory(profilesRoot.resolve(account.normalizedUsername()));
   }
 
-  ProfileImageService profileImageService() {
+  public ProfileImageService profileImageService() {
     return profileImageService;
   }
 

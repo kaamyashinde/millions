@@ -1,12 +1,13 @@
-package model.session;
+package model.session.game;
+
 
 import java.util.List;
 import java.util.UUID;
-import model.Exchange;
-import model.Player;
-import model.persistence.SavedRunMapper;
-import model.persistence.SavedRunRecord;
-import model.persistence.SavedRunRepository;
+import model.core.market.Exchange;
+import model.core.player.Player;
+import model.persistence.savedrun.SavedRunMapper;
+import model.persistence.savedrun.SavedRunRecord;
+import model.persistence.savedrun.SavedRunRepository;
 
 /**
  * Manages saved playthrough snapshots for user profiles.

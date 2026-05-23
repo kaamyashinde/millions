@@ -1,5 +1,17 @@
 package model.session;
 
+
+import model.session.auth.AuthService;
+import model.session.game.GamePersistenceService;
+import model.session.game.SavedRunService;
+import model.session.leaderboard.LocalLeaderboardService;
+import model.session.leaderboard.PlayerLeaderboardEntry;
+import model.session.leaderboard.PlayerLeaderboardMetric;
+import model.session.leaderboard.PlayerLeaderboardRanking;
+import model.exception.profile.ProfileInUseException;
+import model.session.profile.ProfilePreferencesService;
+import model.session.profile.ProfileService;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -7,11 +19,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import model.Exchange;
-import model.Player;
-import model.persistence.GameStateSnapshot;
-import model.persistence.ProfileDirectories;
-import model.persistence.SavedRunRecord;
+import model.core.market.Exchange;
+import model.core.player.Player;
+import model.persistence.game.GameStateSnapshot;
+import model.persistence.profile.ProfileDirectories;
+import model.persistence.savedrun.SavedRunRecord;
 
 /**
  * Thin facade that coordinates sub-services and owns the active session lifecycle.

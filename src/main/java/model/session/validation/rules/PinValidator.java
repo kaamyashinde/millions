@@ -1,4 +1,9 @@
-package model.session.validation;
+package model.session.validation.rules;
+
+
+import model.session.validation.RegistrationValidator;
+import model.session.validation.ValidationError;
+import model.session.validation.ValidationResult;
 
 import java.math.BigDecimal;
 

@@ -1,5 +1,6 @@
 package model.session.validation;
 
+
 /**
  * Typed registration validation failures shared by the model and view layers.
  */

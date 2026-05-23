@@ -1,7 +1,12 @@
-package model.session.validation;
+package model.session.validation.rules;
+
+
+import model.session.validation.RegistrationValidator;
+import model.session.validation.ValidationError;
+import model.session.validation.ValidationResult;
 
 import java.math.BigDecimal;
-import model.persistence.ProfileDirectories;
+import model.persistence.profile.ProfileDirectories;
 
 /**
  * Validates that the username matches local profile naming rules.

@@ -1,4 +1,8 @@
-package model.session.validation;
+package model.session.validation.rules;
+
+
+import model.session.validation.ValidationError;
+import model.session.validation.ValidationResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;

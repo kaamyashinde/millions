@@ -1,4 +1,5 @@
-package model.session;
+package model.session.leaderboard;
+
 
 /**
  * Supported leaderboard ranking metrics.

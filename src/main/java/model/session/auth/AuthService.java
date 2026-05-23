@@ -1,18 +1,26 @@
-package model.session;
+package model.session.auth;
+
+
+import model.exception.auth.AuthenticationException;
+import model.exception.auth.DuplicateUsernameException;
+import model.exception.auth.RegistrationValidationException;
+
+import model.session.ActiveSession;
+import model.session.game.GamePersistenceService;
 
 import java.math.BigDecimal;
 import java.util.List;
-import model.Exchange;
-import model.Player;
-import model.persistence.GameStateSnapshot;
-import model.persistence.PinHashingService;
-import model.persistence.ProfileDirectories;
-import model.persistence.UserAccountRecord;
-import model.persistence.UserAccountRepository;
-import model.session.validation.PinValidator;
+import model.core.market.Exchange;
+import model.core.player.Player;
+import model.persistence.game.GameStateSnapshot;
+import model.persistence.account.PinHashingService;
+import model.persistence.profile.ProfileDirectories;
+import model.persistence.account.UserAccountRecord;
+import model.persistence.account.UserAccountRepository;
+import model.session.validation.rules.PinValidator;
 import model.session.validation.RegistrationValidator;
-import model.session.validation.StartingMoneyValidator;
-import model.session.validation.UsernameValidator;
+import model.session.validation.rules.StartingMoneyValidator;
+import model.session.validation.rules.UsernameValidator;
 import model.session.validation.ValidationResult;
 
 /**
@@ -117,11 +125,11 @@ public final class AuthService {
     return userAccountRepository.listUsernames();
   }
 
-  UserAccountRepository userAccountRepository() {
+  public UserAccountRepository userAccountRepository() {
     return userAccountRepository;
   }
 
-  static void validateLoginInput(String username, char[] pin) {
+  public static void validateLoginInput(String username, char[] pin) {
     ValidationResult credentials = LOGIN_CREDENTIALS.validate(username, pin, null);
     if (credentials instanceof ValidationResult.Failure) {
       throw new AuthenticationException("Invalid username or PIN.");

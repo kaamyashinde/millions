@@ -1,4 +1,5 @@
-package model.session;
+package model.session.leaderboard;
+
 
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -7,15 +8,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import model.Exchange;
-import model.Player;
-import model.persistence.GameStateMapper;
-import model.persistence.GameStateRepository;
-import model.persistence.GameStateSnapshot;
-import model.persistence.MarketData;
-import model.persistence.ProfileImageService;
-import model.persistence.UserAccountRecord;
-import model.persistence.UserAccountRepository;
+import model.core.market.Exchange;
+import model.core.player.Player;
+import model.persistence.game.GameStateMapper;
+import model.persistence.game.GameStateRepository;
+import model.persistence.game.GameStateSnapshot;
+import model.persistence.market.MarketData;
+import model.persistence.profile.ProfileImageService;
+import model.persistence.account.UserAccountRecord;
+import model.persistence.account.UserAccountRepository;
 
 /**
  * Ranks local profiles by net worth using each user's saved game state.

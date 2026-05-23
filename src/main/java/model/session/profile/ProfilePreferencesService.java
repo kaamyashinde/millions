@@ -1,7 +1,8 @@
-package model.session;
+package model.session.profile;
 
-import model.persistence.ProfilePreferences;
-import model.persistence.ProfilePreferencesRepository;
+
+import model.persistence.profile.ProfilePreferences;
+import model.persistence.profile.ProfilePreferencesRepository;
 
 /**
  * Manages per-profile UI preferences such as the welcome-dialog flag.
