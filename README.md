@@ -1,4 +1,4 @@
-# Millikons JavaFX Application
+# Millions JavaFX Application
 
 This project is a JavaFX-based application for simulating a stock game, developed as part of the IDATT2003 course. The application demonstrates the use of object-oriented design principles and best practices, and was developed collaboratively by two students using pair programming. The application was expanded from the core functional requirements to a more educational game by adding gamification elements.
 ## Table of Contents
