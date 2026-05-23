@@ -258,6 +258,11 @@ public class MillionsApp extends Application {
       }
     });
     Tab leaderboardTab = makeTab("Leaderboard", leaderboardPage);
+    leaderboardTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        leaderboardPage.refresh();
+      }
+    });
     Tab learningTab = makeTab("Learning Hub", learningHubPage);
     Tab quizTab = new Tab("Quiz");
     quizTab.setClosable(false);
