@@ -97,7 +97,7 @@
 }
 
 .tab-pane .tab:selected {
-    -fx-background-color: -millions-bg;
+    -fx-background-color: -millions-accent;
     -fx-border-color: -millions-accent;
 }
 
@@ -106,7 +106,8 @@
 }
 
 .tab-pane .tab:selected .tab-label {
-    -fx-text-fill: -millions-text-primary;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
 }
 
 .text-input {
