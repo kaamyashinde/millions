@@ -10,6 +10,8 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -22,6 +24,7 @@ import controller.StocksController;
 import controller.TradingController;
 import model.core.asset.Stock;
 import model.core.asset.info.StockFinancialInfo;
+import view.components.chart.ChartRange;
 import view.components.chart.StockChart;
 import view.theme.ThemeStyles;
 
@@ -39,6 +42,7 @@ public class StocksPage extends BorderPane {
   private final Label chartPlaceholder = new Label("Select a stock to view its price chart.");
   private final TableView<Stock> table = new TableView<>();
   private final StockDetailView detailView = new StockDetailView();
+  private ChartRange selectedChartRange = ChartRange.ALL;
 
   /**
    * @param stocks stocks list and selection state
@@ -178,17 +182,49 @@ public class StocksPage extends BorderPane {
     if (selected == null) {
       chartPlaceholder.setText("Select a stock to view its price chart.");
       chartPanel.setCenter(chartPlaceholder);
+      chartPanel.setBottom(null);
       return;
     }
     if (selected.getHistoricalPrices().isEmpty()) {
       chartPlaceholder.setText("No price history is available for " + selected.getSymbol() + " yet.");
       chartPanel.setCenter(chartPlaceholder);
+      chartPanel.setBottom(null);
       return;
     }
 
-    StockChart chart = new StockChart(selected);
+    StockChart chart = new StockChart(selected, selectedChartRange);
     chart.setMinHeight(360);
     chart.setPrefHeight(520);
     chartPanel.setCenter(chart);
+    chartPanel.setBottom(buildChartRangeBar(selected));
+  }
+
+  private HBox buildChartRangeBar(Stock selected) {
+    HBox rangeBar = new HBox(4);
+    ToggleGroup chartRangeGroup = new ToggleGroup();
+    ThemeStyles.addStyleClasses(rangeBar, "chart-range-bar");
+
+    for (ChartRange range : ChartRange.values()) {
+      ToggleButton button = new ToggleButton(range.getLabel());
+      button.setToggleGroup(chartRangeGroup);
+      button.setUserData(range);
+      button.setFocusTraversable(false);
+      ThemeStyles.addStyleClasses(button, "chart-range-button");
+      button.setSelected(range == selectedChartRange);
+      button.selectedProperty()
+          .addListener(
+              (obs, wasSelected, isSelected) -> {
+                if (isSelected) {
+                  selectedChartRange = range;
+                  updateChart(selected);
+                }
+                if (!isSelected && chartRangeGroup.getSelectedToggle() == null) {
+                  button.setSelected(true);
+                }
+              });
+      rangeBar.getChildren().add(button);
+    }
+
+    return rangeBar;
   }
 }
