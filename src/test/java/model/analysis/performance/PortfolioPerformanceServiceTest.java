@@ -59,8 +59,7 @@ class PortfolioPerformanceServiceTest {
     exchange.buy("AAPL", BigDecimal.ONE, player);
     exchange.advance(2);
 
-    MarketBenchmarkService benchmarkService = new MarketBenchmarkService();
-    PortfolioPerformanceService service = new PortfolioPerformanceService(benchmarkService);
+    PortfolioPerformanceService service = new PortfolioPerformanceService();
 
     List<BigDecimal> series = service.buildDailyNetWorthSeries(player, exchange);
     PerformanceComparison comparison = service.compareAgainstMarket(player, exchange);
