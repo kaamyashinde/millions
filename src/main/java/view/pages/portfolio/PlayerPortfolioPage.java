@@ -64,28 +64,25 @@ public class PlayerPortfolioPage extends BorderPane {
    * @param portfolio portfolio summary and holdings
    * @param trading trading operations for sell dialog
    * @param exitGame exit-game flow controller
-   * @param refreshAndPersist refreshes workspace controllers and persists session
+   * @param onTradeComplete invoked after a successful trade
    * @param onProfileDeleted invoked after profile deletion
    */
   public PlayerPortfolioPage(
       PortfolioController portfolio,
       TradingController trading,
       ExitGameController exitGame,
-      Runnable refreshAndPersist,
+      Runnable onTradeComplete,
       Runnable onProfileDeleted) {
     checkNotNull(portfolio, "portfolio");
     checkNotNull(trading, "trading");
     checkNotNull(exitGame, "exitGame");
-    checkNotNull(refreshAndPersist, "refreshAndPersist");
+    checkNotNull(onTradeComplete, "onTradeComplete");
     checkNotNull(onProfileDeleted, "onProfileDeleted");
     this.portfolio = portfolio;
     this.trading = trading;
     this.exitGame = exitGame;
     this.onProfileDeleted = onProfileDeleted;
-    this.onTradeComplete = () -> {
-      refreshAndPersist.run();
-      refresh();
-    };
+    this.onTradeComplete = onTradeComplete;
 
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
@@ -94,16 +91,12 @@ public class PlayerPortfolioPage extends BorderPane {
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
     ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
-    Button refreshButton = new Button("Refresh");
-    refreshButton.setOnAction(_ -> refresh());
-    ThemeStyles.styleButton(refreshButton);
-
     avatarView.setFitWidth(56);
     avatarView.setFitHeight(56);
     avatarView.setPreserveRatio(true);
     avatarView.setSmooth(true);
 
-    HBox topRow = new HBox(16, avatarView, heading, refreshButton);
+    HBox topRow = new HBox(16, avatarView, heading);
     topRow.setAlignment(Pos.CENTER_LEFT);
 
     GridPane summaryGrid = new GridPane();

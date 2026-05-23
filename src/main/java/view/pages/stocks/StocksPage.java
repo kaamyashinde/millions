@@ -5,7 +5,6 @@ import static util.Validator.checkNotNull;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
@@ -31,7 +30,6 @@ public class StocksPage extends BorderPane {
 
   private final StocksController stocks;
   private final StockDetailController stockDetail;
-  private final Runnable refreshAndPersist;
   private final Runnable onTradeComplete;
 
   private final Label metaLabel = new Label();
@@ -42,24 +40,20 @@ public class StocksPage extends BorderPane {
    * @param stocks stocks list and selection state
    * @param stockDetail fundamentals and market events for the detail pane
    * @param trading trading operations for buy dialog
-   * @param refreshAndPersist refreshes workspace controllers and persists session
+   * @param onTradeComplete invoked after a successful trade
    */
   public StocksPage(
       StocksController stocks,
       StockDetailController stockDetail,
       TradingController trading,
-      Runnable refreshAndPersist) {
+      Runnable onTradeComplete) {
     checkNotNull(stocks, "stocks");
     checkNotNull(stockDetail, "stockDetail");
     checkNotNull(trading, "trading");
-    checkNotNull(refreshAndPersist, "refreshAndPersist");
+    checkNotNull(onTradeComplete, "onTradeComplete");
     this.stocks = stocks;
     this.stockDetail = stockDetail;
-    this.refreshAndPersist = refreshAndPersist;
-    this.onTradeComplete = () -> {
-      refreshAndPersist.run();
-      refresh();
-    };
+    this.onTradeComplete = onTradeComplete;
 
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
@@ -72,11 +66,7 @@ public class StocksPage extends BorderPane {
     ThemeStyles.addStyleClasses(metaLabel, "finance-meta");
     VBox.setMargin(metaLabel, new Insets(0, 0, 8, 0));
 
-    Button refreshBtn = new Button("Refresh");
-    ThemeStyles.styleButton(refreshBtn);
-    refreshBtn.setOnAction(_ -> refresh());
-
-    HBox topRow = new HBox(16, heading, refreshBtn);
+    HBox topRow = new HBox(16, heading);
     topRow.setAlignment(Pos.CENTER_LEFT);
 
     VBox top = new VBox(4, topRow, metaLabel);

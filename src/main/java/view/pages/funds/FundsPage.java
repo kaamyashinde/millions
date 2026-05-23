@@ -8,7 +8,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
@@ -41,14 +40,10 @@ public class FundsPage extends BorderPane {
    *
    * @param exchange exchange whose listed funds are shown
    * @param trading trading controller for buy actions in the detail pane
-   * @param refreshAndPersist refreshes workspace and persists after trades
+   * @param onTradeComplete invoked after a successful trade
    */
-  public FundsPage(Exchange exchange, TradingController trading, Runnable refreshAndPersist) {
+  public FundsPage(Exchange exchange, TradingController trading, Runnable onTradeComplete) {
     this.exchange = exchange;
-    Runnable onTradeComplete = () -> {
-      refreshAndPersist.run();
-      refresh();
-    };
 
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
@@ -59,11 +54,7 @@ public class FundsPage extends BorderPane {
     ThemeStyles.addStyleClasses(metaLabel, "finance-meta");
     VBox.setMargin(metaLabel, new Insets(0, 0, 8, 0));
 
-    Button refreshBtn = new Button("Refresh");
-    styleButton(refreshBtn);
-    refreshBtn.setOnAction(_ -> refresh());
-
-    HBox topRow = new HBox(16, heading, refreshBtn);
+    HBox topRow = new HBox(16, heading);
     topRow.setAlignment(Pos.CENTER_LEFT);
     VBox top = new VBox(4, topRow, metaLabel);
     setTop(top);
@@ -134,9 +125,5 @@ public class FundsPage extends BorderPane {
       }
     }
     table.getSelectionModel().clearSelection();
-  }
-
-  private static void styleButton(Button button) {
-    ThemeStyles.styleButton(button);
   }
 }
