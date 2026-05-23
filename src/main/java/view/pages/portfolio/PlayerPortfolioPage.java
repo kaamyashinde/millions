@@ -80,7 +80,7 @@ public class PlayerPortfolioPage extends BorderPane {
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
 
-    Text heading = new Text("Player overview");
+    Text heading = new Text("Player Overview");
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
     ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
@@ -97,13 +97,15 @@ public class PlayerPortfolioPage extends BorderPane {
     topRow.setAlignment(Pos.CENTER_LEFT);
 
     GridPane summaryGrid = new GridPane();
-    summaryGrid.setHgap(18);
-    summaryGrid.setVgap(8);
-    summaryGrid.addRow(0, new Label("Player"), playerLabel, new Label("Trading day"), tradingDayLabel);
-    summaryGrid.addRow(1, new Label("Balance"), balanceLabel, new Label("Net worth"), netWorthLabel);
+    summaryGrid.setHgap(24);
+    summaryGrid.setVgap(10);
+    summaryGrid.addRow(0, createHeaderLabel("Player"), playerLabel, createHeaderLabel("Trading Day"), tradingDayLabel);
+    summaryGrid.addRow(1, createHeaderLabel("Balance"), balanceLabel, createHeaderLabel("Net Worth"), netWorthLabel);
 
-    VBox top = new VBox(12, topRow, summaryGrid);
-    setTop(top);
+    VBox summaryCard = new VBox(12, topRow, summaryGrid);
+    ThemeStyles.addStyleClasses(summaryCard, "card");
+    setTop(summaryCard);
+    BorderPane.setMargin(summaryCard, new Insets(0, 0, 16, 0));
 
     buildHoldingsTable();
     holdingsTable.setItems(holdings);
@@ -116,6 +118,13 @@ public class PlayerPortfolioPage extends BorderPane {
     setBottom(metricsBox);
 
     refresh();
+  }
+
+  private Label createHeaderLabel(String text) {
+    Label label = new Label(text);
+    ThemeStyles.addStyleClasses(label, "text-secondary");
+    label.setStyle("-fx-font-weight: bold;");
+    return label;
   }
 
   private void buildHoldingsTable() {
@@ -132,11 +141,11 @@ public class PlayerPortfolioPage extends BorderPane {
     quantityColumn.setCellValueFactory(
         c -> new SimpleStringProperty(c.getValue().getQuantity().toPlainString()));
 
-    TableColumn<Share, String> purchasePriceColumn = new TableColumn<>("Purchase price");
+    TableColumn<Share, String> purchasePriceColumn = new TableColumn<>("Purchase Price");
     purchasePriceColumn.setCellValueFactory(
         c -> new SimpleStringProperty(c.getValue().getPurchasePrice().toPlainString()));
 
-    TableColumn<Share, String> currentPriceColumn = new TableColumn<>("Current price");
+    TableColumn<Share, String> currentPriceColumn = new TableColumn<>("Current Price");
     currentPriceColumn.setCellValueFactory(
         c -> new SimpleStringProperty(c.getValue().getAsset().getSalesPrice().toPlainString()));
 
@@ -151,24 +160,24 @@ public class PlayerPortfolioPage extends BorderPane {
   }
 
   private VBox buildMetricsBox() {
-    Label heading = new Label("Risk-adjusted performance vs market");
+    Label heading = new Label("Risk-Adjusted Performance vs Market");
     heading.setFont(Font.font("System", FontWeight.BOLD, 16));
 
     GridPane metricsGrid = new GridPane();
-    metricsGrid.setHgap(18);
-    metricsGrid.setVgap(8);
+    metricsGrid.setHgap(24);
+    metricsGrid.setVgap(10);
 
-    metricsGrid.addRow(0, new Label("Metric"), new Label("Your portfolio"), new Label("Market benchmark"));
+    metricsGrid.addRow(0, createHeaderLabel("Metric"), createHeaderLabel("Your Portfolio"), createHeaderLabel("Market Benchmark"));
     metricsGrid.addRow(1, new Label("Return %"), portfolioReturnValueLabel, benchmarkReturnValueLabel);
     metricsGrid.addRow(
         2,
         new Label("Volatility"),
         portfolioVolatilityValueLabel,
         benchmarkVolatilityValueLabel);
-    metricsGrid.addRow(3, new Label("Sharpe ratio"), portfolioSharpeValueLabel, benchmarkSharpeValueLabel);
+    metricsGrid.addRow(3, new Label("Sharpe Ratio"), portfolioSharpeValueLabel, benchmarkSharpeValueLabel);
 
-    VBox metricsBox = new VBox(10, heading, metricsGrid);
-    metricsBox.setPadding(new Insets(14, 0, 0, 0));
+    VBox metricsBox = new VBox(12, heading, metricsGrid);
+    metricsBox.setPadding(new Insets(14));
     ThemeStyles.addStyleClasses(metricsBox, "finance-summary-card");
     BorderPane.setMargin(metricsBox, new Insets(16, 0, 0, 0));
     return metricsBox;
