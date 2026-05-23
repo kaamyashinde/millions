@@ -9,7 +9,7 @@ import model.core.asset.InvestableAsset;
 import model.core.asset.Share;
 import model.trading.calculator.PurchaseCalculator;
 import model.trading.calculator.SaleCalculator;
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * Computes share quantities for purchases (budget cap) and sales (net proceeds cap) using shared

@@ -1,6 +1,6 @@
 package controller;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.nio.file.Path;
 import model.session.ActiveSession;

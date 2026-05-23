@@ -154,7 +154,6 @@ public class MillionsApp extends Application {
     SavedRunsPage savedRunsPage = new SavedRunsPage(svc, ctrl::refreshAll);
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
     LearningHubPage learningHubPage = new LearningHubPage();
-    QuizLauncherPage quizPage = new QuizLauncherPage();
     NotificationsPage notificationsPage = new NotificationsPage(ctrl.getNotificationsTab());
 
     Tab portfolioTab = makeTab("Portfolio", portfolioPage);
@@ -164,13 +163,21 @@ public class MillionsApp extends Application {
     Tab savedRunsTab = makeTab("Saved Runs", savedRunsPage);
     Tab leaderboardTab = makeTab("Leaderboard", leaderboardPage);
     Tab learningTab = makeTab("Learning Hub", learningHubPage);
-    Tab quizTab = makeTab("Quiz", quizPage);
+    Tab quizTab = new Tab("Quiz");
+    quizTab.setClosable(false);
     Tab notificationsTab = makeTab("Notifications", notificationsPage);
 
     TabPane tabs = new TabPane(
         portfolioTab, stocksTab, fundsTab, savingsTab,
         savedRunsTab, leaderboardTab, learningTab, quizTab, notificationsTab);
     tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+
+    java.util.function.Consumer<model.learning.content.LearningItem> openTopicInHub =
+        item -> {
+          learningHubPage.openTopic(item.id());
+          tabs.getSelectionModel().select(learningTab);
+        };
+    quizTab.setContent(new QuizLauncherPage(openTopicInHub));
     return tabs;
   }
 

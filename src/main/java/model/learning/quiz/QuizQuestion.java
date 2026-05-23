@@ -5,7 +5,7 @@ import model.learning.content.LearningResource;
 
 import java.util.List;
 
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * A single multiple-choice question in a {@link Quiz}.

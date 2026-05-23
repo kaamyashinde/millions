@@ -1,17 +1,14 @@
 package model.analysis.performance;
 
 
-import model.analysis.metric.MetricStatus;
-import model.analysis.metric.PerformanceComparison;
-import model.analysis.series.HistoricalAssetPriceService;
-import model.analysis.series.ReturnSeriesCalculator;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import model.core.market.Exchange;
-import model.core.asset.InvestableAsset;
+import model.core.market.pricing.DailyPriceMoveStrategy;
+import model.core.market.pricing.MarketEventStrategy;
 import model.core.player.Player;
 import model.core.asset.Stock;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,28 +43,20 @@ class PortfolioPerformanceServiceTest {
 
   @Test
   void buildDailyNetWorthSeries_replaysTransactionsUsingHistoricalLiquidationValue() {
+    DailyPriceMoveStrategy tenDollarDailyIncrease =
+        (stock, random) -> stock.getSalesPrice().add(new BigDecimal("10.00"));
+    MarketEventStrategy noMarketEvents =
+        (listedStocks, tradingDay, random) -> Optional.empty();
+    exchange = new Exchange.Builder("NYSE")
+        .stocks(List.of(apple))
+        .dailyPriceMoveStrategy(tenDollarDailyIncrease)
+        .marketEventStrategy(noMarketEvents)
+        .build();
+
     exchange.buy("AAPL", BigDecimal.ONE, player);
     exchange.advance(2);
 
-    HistoricalAssetPriceService stubHistory = new HistoricalAssetPriceService() {
-      @Override
-      public BigDecimal getPriceOnDay(InvestableAsset asset, int day) {
-        return switch (day) {
-          case 1 -> new BigDecimal("100.00");
-          case 2 -> new BigDecimal("110.00");
-          case 3 -> new BigDecimal("120.00");
-          default -> throw new IllegalArgumentException("Unexpected trading day " + day);
-        };
-      }
-    };
-    MarketBenchmarkService benchmarkService = new MarketBenchmarkService(
-        stubHistory,
-        new PerformanceMetricsCalculator(),
-        new ReturnSeriesCalculator());
-    PortfolioPerformanceService service = new PortfolioPerformanceService(
-        stubHistory,
-        new PerformanceMetricsCalculator(),
-        benchmarkService);
+    PortfolioPerformanceService service = new PortfolioPerformanceService();
 
     List<BigDecimal> series = service.buildDailyNetWorthSeries(player, exchange);
     PerformanceComparison comparison = service.compareAgainstMarket(player, exchange);

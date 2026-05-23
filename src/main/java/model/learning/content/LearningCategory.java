@@ -1,7 +1,7 @@
 package model.learning.content;
 
 
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * A broad topic grouping for learning content.

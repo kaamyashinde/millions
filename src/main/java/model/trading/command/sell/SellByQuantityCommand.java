@@ -4,7 +4,7 @@ package model.trading.command.sell;
 import model.trading.command.TradeCommand;
 import model.trading.transaction.Sale;
 
-import static model.utils.Validator.requirePositive;
+import static util.Validator.requirePositive;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

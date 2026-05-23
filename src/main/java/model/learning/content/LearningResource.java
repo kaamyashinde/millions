@@ -1,7 +1,7 @@
 package model.learning.content;
 
 
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * An external learning resource (article, video, or download) linked from the Learning Hub.

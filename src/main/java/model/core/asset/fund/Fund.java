@@ -4,7 +4,7 @@ package model.core.asset.fund;
 import java.math.BigDecimal;
 import java.util.List;
 import model.core.asset.InvestableAsset;
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * Composite investable asset whose price is derived from weighted underlying stocks.
@@ -64,6 +64,19 @@ public class Fund implements InvestableAsset {
   public BigDecimal getSalesPrice() {
     return components.stream()
         .map(FundComponent::currentValueContribution)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+  }
+
+  /**
+   * Returns the fund price for a historical trading day, derived from weighted component prices.
+   *
+   * @param day trading day number, 1-based
+   * @return weighted historical value of all components
+   */
+  @Override
+  public BigDecimal getPriceOnDay(int day) {
+    return components.stream()
+        .map(component -> component.valueContributionOnDay(day))
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 

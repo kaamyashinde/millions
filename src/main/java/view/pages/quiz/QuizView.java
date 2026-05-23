@@ -1,6 +1,7 @@
 package view.pages.quiz;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -13,11 +14,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
-import model.learning.store.LearningContentStore;
-import model.learning.content.LearningResource;
+import model.learning.content.LearningItem;
 import model.learning.quiz.QuizAnswer;
 import model.learning.quiz.QuizAttempt;
 import model.learning.quiz.QuizQuestion;
+import view.components.learning.QuizWrongAnswerLinks;
 import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
@@ -33,6 +34,7 @@ public class QuizView extends BorderPane {
 
   private final QuizAttempt attempt;
   private final Runnable onFinish;
+  private final Consumer<LearningItem> onOpenHubTopic;
 
   private Label progressLabel;
   private VBox centerContent;
@@ -40,18 +42,23 @@ public class QuizView extends BorderPane {
   /**
    * Builds the quiz view.
    *
-   * @param attempt  the quiz attempt tracking progress and answers
-   * @param onBack   called when the back button is clicked
-   * @param onFinish called when the player has answered all questions
+   * @param attempt         the quiz attempt tracking progress and answers
+   * @param onBack          called when the back button is clicked
+   * @param onFinish        called when the player has answered all questions
+   * @param onOpenHubTopic  called when the player opens the linked hub topic from feedback
    */
-  public QuizView(QuizAttempt attempt, Runnable onBack, Runnable onFinish) {
+  public QuizView(
+      QuizAttempt attempt,
+      Runnable onBack,
+      Runnable onFinish,
+      Consumer<LearningItem> onOpenHubTopic) {
     this.attempt = attempt;
     this.onFinish = onFinish;
+    this.onOpenHubTopic = onOpenHubTopic;
 
     ThemeStyles.addStyleClasses(this, "quiz-root");
     setPadding(new Insets(16));
 
-    // ── TOP bar ──────────────────────────────────────────────────────────────
     Button backBtn = new Button("← Back");
     ThemeStyles.styleButton(backBtn);
     backBtn.setOnAction(_ -> onBack.run());
@@ -67,7 +74,6 @@ public class QuizView extends BorderPane {
     topBar.setPadding(new Insets(0, 0, 12, 0));
     setTop(topBar);
 
-    // ── CENTER (built dynamically per question) ───────────────────────────────
     centerContent = new VBox(16);
     ScrollPane scroll = new ScrollPane(centerContent);
     scroll.setFitToWidth(true);
@@ -76,8 +82,6 @@ public class QuizView extends BorderPane {
 
     refreshQuestion();
   }
-
-  // ── Question rendering ───────────────────────────────────────────────────────
 
   private void refreshQuestion() {
     centerContent.getChildren().clear();
@@ -88,7 +92,6 @@ public class QuizView extends BorderPane {
 
     progressLabel.setText("Question " + current + " of " + total);
 
-    // Question card
     Label questionText = new Label(q.questionText());
     questionText.setWrapText(true);
     ThemeStyles.addStyleClasses(questionText, "quiz-question-text");
@@ -97,19 +100,16 @@ public class QuizView extends BorderPane {
     questionCard.setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(questionCard, "quiz-question-card");
 
-    // Answer buttons
     VBox answersBox = new VBox(8);
     List<QuizAnswer> answers = q.answers();
     Button[] answerButtons = new Button[answers.size()];
 
-    // Feedback pane (hidden until answered)
     VBox feedbackPane = new VBox(8);
     feedbackPane.setVisible(false);
     feedbackPane.setManaged(false);
     feedbackPane.setPadding(new Insets(12));
     ThemeStyles.addStyleClasses(feedbackPane, "quiz-feedback");
 
-    // Next / finish button (hidden until answered)
     Button nextBtn = new Button(
         (attempt.currentIndex() + 1 >= attempt.totalQuestions()) ? "See Results →" : "Next →");
     nextBtn.setVisible(false);
@@ -131,7 +131,6 @@ public class QuizView extends BorderPane {
       answerButtons[i] = btn;
 
       btn.setOnAction(_ -> {
-        // Disable all buttons after selection
         for (Button b : answerButtons) {
           b.setDisable(true);
         }
@@ -139,24 +138,20 @@ public class QuizView extends BorderPane {
         String correctId = q.correctAnswerId();
         boolean correct = answer.id().equals(correctId);
 
-        // Highlight correct answer green
         for (Button b : answerButtons) {
           if (b.getUserData().equals(correctId)) {
             ThemeStyles.addStyleClasses(b, "quiz-answer-correct");
           }
         }
 
-        // Highlight wrong choice red
         if (!correct) {
           ThemeStyles.addStyleClasses(btn, "quiz-answer-wrong");
         }
 
-        // Build and show feedback
-        buildFeedbackContent(feedbackPane, q, correct, answer.id());
+        buildFeedbackContent(feedbackPane, q, correct);
         feedbackPane.setVisible(true);
         feedbackPane.setManaged(true);
 
-        // Store chosen answer on the next button for submission
         nextBtn.setUserData(answer.id());
         nextBtn.setVisible(true);
         nextBtn.setManaged(true);
@@ -180,8 +175,7 @@ public class QuizView extends BorderPane {
     return btn;
   }
 
-  private static void buildFeedbackContent(
-      VBox feedbackPane, QuizQuestion q, boolean correct, String chosenId) {
+  private void buildFeedbackContent(VBox feedbackPane, QuizQuestion q, boolean correct) {
     feedbackPane.getChildren().clear();
 
     String resultColor = correct ? ThemePalette.SUCCESS : ThemePalette.ERROR;
@@ -194,8 +188,8 @@ public class QuizView extends BorderPane {
     Label resultLabel = new Label(resultText);
     resultLabel.setStyle(
         "-fx-text-fill: " + resultColor + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 13;");
 
     Label explanation = new Label(q.explanationText());
     explanation.setWrapText(true);
@@ -203,46 +197,9 @@ public class QuizView extends BorderPane {
 
     feedbackPane.getChildren().addAll(resultLabel, explanation);
 
-    // On wrong answer with a linked resource — surface the resource card
-    if (!correct && q.linkedResourceId() != null) {
-      LearningContentStore.getResources().stream()
-          .filter(r -> r.id().equals(q.linkedResourceId()))
-          .findFirst()
-          .ifPresent(resource -> {
-            Label learnMore = new Label("Review this resource:");
-            learnMore.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 11;");
-            feedbackPane.getChildren().addAll(learnMore, buildResourceCard(resource));
-          });
+    if (!correct) {
+      QuizWrongAnswerLinks.appendTo(
+          feedbackPane, q, attempt.quiz().linkedItemId(), onOpenHubTopic);
     }
-  }
-
-  private static VBox buildResourceCard(LearningResource resource) {
-    Label sourceLabel = new Label(resource.sourceLabel());
-    sourceLabel.setStyle(
-        "-fx-background-color: " + ThemePalette.SUCCESS + "22;"
-        + "-fx-text-fill: " + ThemePalette.SUCCESS + ";"
-        + "-fx-background-radius: 4;"
-        + "-fx-padding: 2 6 2 6;"
-        + "-fx-font-size: 10;");
-
-    Label title = new Label(resource.title());
-    title.setStyle(
-        "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 12;");
-    title.setWrapText(true);
-
-    Label desc = new Label(resource.description());
-    desc.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 11;");
-    desc.setWrapText(true);
-
-    VBox card = new VBox(4, sourceLabel, title, desc);
-    card.setPadding(new Insets(10));
-    card.setStyle(
-        "-fx-background-color: " + ThemePalette.SURFACE + ";"
-        + "-fx-border-color: " + ThemePalette.SUCCESS + ";"
-        + "-fx-border-radius: 6;"
-        + "-fx-background-radius: 6;");
-    return card;
   }
 }

@@ -1,7 +1,7 @@
 package model.persistence.savedrun;
 
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -11,11 +11,11 @@ import java.util.UUID;
 import model.core.market.Exchange;
 import model.core.player.Player;
 import model.core.player.level.PlayerLevel;
-import model.core.asset.Share;
-import model.analysis.metric.MetricValue;
-import model.analysis.metric.PerformanceComparison;
-import model.analysis.metric.PerformanceMetrics;
+import model.analysis.performance.MetricValue;
+import model.analysis.performance.PerformanceComparison;
+import model.analysis.performance.PerformanceMetrics;
 import model.analysis.performance.PortfolioPerformanceService;
+import model.core.asset.Share;
 import model.trading.calculator.SaleCalculator;
 
 /**

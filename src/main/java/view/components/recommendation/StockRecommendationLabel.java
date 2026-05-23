@@ -1,6 +1,6 @@
 package view.components.recommendation;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import javafx.scene.control.Label;
 import javafx.scene.text.Font;

@@ -3,7 +3,7 @@ package model.trading.calculator;
 
 import java.math.BigDecimal;
 import model.core.asset.Share;
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * A class that implements TransactionCalculator to calculate sale transactions.
@@ -29,8 +29,20 @@ public class SaleCalculator implements TransactionCalculator {
    * @throws NullPointerException if {@code share} is null.
    */
   public SaleCalculator(Share share) {
+    this(share, share.getAsset().getSalesPrice());
+  }
+
+  /**
+   * Constructor for SaleCalculator using a specific sale price.
+   *
+   * @param share The share being sold.
+   * @param salePrice The sale price to use for valuation.
+   * @throws NullPointerException if {@code share} or {@code salePrice} is null.
+   */
+  public SaleCalculator(Share share, BigDecimal salePrice) {
     Validator.checkNotNull(share, "Share");
-    this.salePrice = share.getAsset().getSalesPrice();
+    Validator.checkNotNull(salePrice, "Sale price");
+    this.salePrice = salePrice;
     this.purchasePrice = share.getPurchasePrice();
     this.quantity = share.getQuantity();
   }

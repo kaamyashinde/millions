@@ -5,7 +5,7 @@ import model.core.asset.Share;
 import model.core.player.level.PlayerLevel;
 import model.core.player.level.PlayerLevels;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

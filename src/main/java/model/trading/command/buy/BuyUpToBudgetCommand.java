@@ -3,7 +3,7 @@ package model.trading.command.buy;
 
 import model.trading.command.TradeCommand;
 
-import static model.utils.Validator.requirePositive;
+import static util.Validator.requirePositive;
 
 import java.math.BigDecimal;
 import java.util.List;

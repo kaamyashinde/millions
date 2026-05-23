@@ -30,6 +30,14 @@ public interface InvestableAsset {
   BigDecimal getSalesPrice();
 
   /**
+   * Returns the price for one unit of the asset on a historical trading day.
+   *
+   * @param day trading day number, 1-based
+   * @return price on the requested trading day
+   */
+  BigDecimal getPriceOnDay(int day);
+
+  /**
    * Returns the broad asset type label for UI output.
    *
    * @return human-readable asset type

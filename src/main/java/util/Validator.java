@@ -1,26 +1,20 @@
-package model.utils;
-
+package util;
 
 import java.math.BigDecimal;
 
 /**
- * A utility class for validating objects. This serves as a centralized place for validation
- * methods, to avoid code duplication.
- *
- * @author kaamyashinde
- * @version 0.0.3
- * @since 30-01-2026
+ * Validates common argument and value preconditions.
  */
-public class Validator {
+public final class Validator {
 
   private Validator() {
   }
 
   /**
-   * Checks if an object is null.
+   * Checks that an object is not null.
    *
-   * @param obj    The object to be checked
-   * @param obType The type of the object, friendly name for error message
+   * @param obj object to check
+   * @param obType friendly name for the error message
    * @throws NullPointerException if the object is null
    */
   public static void checkNotNull(Object obj, String obType) {
@@ -32,9 +26,9 @@ public class Validator {
   /**
    * Requires a non-null {@link BigDecimal} strictly greater than zero.
    *
-   * @param value the value to check
-   * @param name  friendly name for error messages
-   * @throws NullPointerException      if {@code value} is null
+   * @param value value to check
+   * @param name friendly name for error messages
+   * @throws NullPointerException if {@code value} is null
    * @throws IllegalArgumentException if {@code value} is not positive
    */
   public static void requirePositive(BigDecimal value, String name) {
@@ -47,8 +41,8 @@ public class Validator {
   /**
    * Requires a strictly positive integer.
    *
-   * @param value the value to check
-   * @param name  friendly name for error messages
+   * @param value value to check
+   * @param name friendly name for error messages
    * @throws IllegalArgumentException if {@code value} is not positive
    */
   public static void requirePositive(int value, String name) {
@@ -58,11 +52,12 @@ public class Validator {
   }
 
   /**
-   * @param value a big decimal, possibly null
+   * Checks whether a decimal value is non-null and strictly positive.
+   *
+   * @param value value to check
    * @return {@code true} if {@code value} is non-null and strictly greater than zero
    */
   public static boolean isStrictlyPositive(BigDecimal value) {
     return value != null && value.signum() > 0;
   }
-
 }

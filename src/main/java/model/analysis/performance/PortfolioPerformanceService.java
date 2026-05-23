@@ -1,63 +1,28 @@
 package model.analysis.performance;
 
 
-import model.analysis.metric.MetricStatus;
-import model.analysis.metric.PerformanceComparison;
-import model.analysis.metric.PerformanceMetrics;
-import model.analysis.series.HistoricalAssetPriceService;
-
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import model.core.asset.Share;
+import model.core.asset.Stock;
 import model.core.market.Exchange;
-import model.core.asset.InvestableAsset;
 import model.core.player.Player;
 import model.core.player.Portfolio;
-import model.core.asset.Share;
+import model.trading.calculator.SaleCalculator;
 import model.trading.transaction.Purchase;
 import model.trading.transaction.Sale;
 import model.trading.transaction.Transaction;
-import model.trading.calculator.SaleCalculator;
 
 /**
  * Reconstructs the player's daily net worth and compares it with the market benchmark.
  */
 public class PortfolioPerformanceService {
 
-  private final HistoricalAssetPriceService historicalAssetPriceService;
-  private final PerformanceMetricsCalculator performanceMetricsCalculator;
-  private final MarketBenchmarkService marketBenchmarkService;
-
-  /**
-   * Creates a service with default collaborators.
-   */
-  public PortfolioPerformanceService() {
-    this(
-        new HistoricalAssetPriceService(),
-        new PerformanceMetricsCalculator(),
-        new MarketBenchmarkService());
-  }
-
-  /**
-   * Creates a service with injected collaborators.
-   *
-   * @param historicalAssetPriceService helper used to resolve historical asset prices
-   * @param performanceMetricsCalculator helper used to derive metrics from value series
-   * @param marketBenchmarkService helper used to derive benchmark metrics
-   */
-  public PortfolioPerformanceService(
-      HistoricalAssetPriceService historicalAssetPriceService,
-      PerformanceMetricsCalculator performanceMetricsCalculator,
-      MarketBenchmarkService marketBenchmarkService) {
-    checkNotNull(historicalAssetPriceService, "Historical asset price service");
-    checkNotNull(performanceMetricsCalculator, "Performance metrics calculator");
-    checkNotNull(marketBenchmarkService, "Market benchmark service");
-    this.historicalAssetPriceService = historicalAssetPriceService;
-    this.performanceMetricsCalculator = performanceMetricsCalculator;
-    this.marketBenchmarkService = marketBenchmarkService;
-  }
+  private static final int SCALE = 8;
 
   /**
    * Calculates the player's portfolio metrics and market benchmark metrics side by side.
@@ -71,7 +36,7 @@ public class PortfolioPerformanceService {
     checkNotNull(exchange, "Exchange");
     return new PerformanceComparison(
         calculatePortfolioMetrics(player, exchange),
-        marketBenchmarkService.calculateForExchange(exchange));
+        calculateBenchmarkMetrics(exchange));
   }
 
   /**
@@ -87,8 +52,59 @@ public class PortfolioPerformanceService {
     if (player.getTransactionArchive().isEmpty()) {
       return PerformanceMetrics.unavailable(MetricStatus.NO_TRADES);
     }
-    return performanceMetricsCalculator.calculateFromDailyValues(
-        buildDailyNetWorthSeries(player, exchange));
+    return PerformanceAnalyzer.calculateMetrics(buildDailyNetWorthSeries(player, exchange));
+  }
+
+  /**
+   * Calculates the market benchmark metrics from exchange stock history.
+   */
+  private PerformanceMetrics calculateBenchmarkMetrics(Exchange exchange) {
+    List<Stock> stocks = exchange.findStocks("");
+    if (stocks.isEmpty() || exchange.getDay() < 2) {
+      return PerformanceMetrics.unavailable(MetricStatus.INSUFFICIENT_HISTORY);
+    }
+    return PerformanceAnalyzer.calculateMetrics(
+        buildBenchmarkDailyValues(stocks, exchange.getDay()));
+  }
+
+  /**
+   * Builds an equal-weight market value series from listed stocks.
+   */
+  private List<BigDecimal> buildBenchmarkDailyValues(List<Stock> stocks, int tradingDays) {
+    List<BigDecimal> values = new ArrayList<>();
+    BigDecimal currentValue = BigDecimal.ONE;
+    values.add(currentValue);
+    for (int day = 2; day <= tradingDays; day++) {
+      BigDecimal averageReturn = averageDailyReturn(stocks, day);
+      currentValue = currentValue.multiply(BigDecimal.ONE.add(averageReturn));
+      values.add(currentValue);
+    }
+    return values;
+  }
+
+  /**
+   * Calculates the average stock return for one market day.
+   */
+  private BigDecimal averageDailyReturn(List<Stock> stocks, int day) {
+    BigDecimal totalReturn = BigDecimal.ZERO;
+    for (Stock stock : stocks) {
+      BigDecimal previous = stock.getPriceOnDay(day - 1);
+      BigDecimal current = stock.getPriceOnDay(day);
+      totalReturn = totalReturn.add(calculateReturn(previous, current));
+    }
+    return totalReturn.divide(BigDecimal.valueOf(stocks.size()), SCALE, RoundingMode.HALF_UP);
+  }
+
+  /**
+   * Computes one decimal return from a start value to an end value.
+   */
+  private BigDecimal calculateReturn(BigDecimal startValue, BigDecimal endValue) {
+    checkNotNull(startValue, "Start value");
+    checkNotNull(endValue, "End value");
+    if (startValue.signum() == 0) {
+      throw new IllegalArgumentException("Start value must be non-zero.");
+    }
+    return endValue.subtract(startValue).divide(startValue, SCALE, RoundingMode.HALF_UP);
   }
 
   /**
@@ -102,14 +118,16 @@ public class PortfolioPerformanceService {
     checkNotNull(player, "Player");
     checkNotNull(exchange, "Exchange");
 
-    List<Transaction> transactions = player.getTransactionArchive().getTransactions(exchange.getDay());
+    List<Transaction> transactions =
+        player.getTransactionArchive().getTransactions(exchange.getDay());
     Portfolio replayPortfolio = new Portfolio();
     BigDecimal cash = player.getStartingMoney();
     int transactionIndex = 0;
     List<BigDecimal> dailyValues = new ArrayList<>();
 
     for (int day = 1; day <= exchange.getDay(); day++) {
-      while (transactionIndex < transactions.size() && transactions.get(transactionIndex).getDay() == day) {
+      while (transactionIndex < transactions.size()
+          && transactions.get(transactionIndex).getDay() == day) {
         cash = applyTransaction(transactions.get(transactionIndex), replayPortfolio, cash);
         transactionIndex++;
       }
@@ -120,7 +138,13 @@ public class PortfolioPerformanceService {
     return dailyValues;
   }
 
-  private BigDecimal applyTransaction(Transaction transaction, Portfolio replayPortfolio, BigDecimal cash) {
+  /**
+   * Applies one historical transaction to the replayed portfolio and cash balance.
+   */
+  private BigDecimal applyTransaction(
+      Transaction transaction,
+      Portfolio replayPortfolio,
+      BigDecimal cash) {
     if (transaction instanceof Purchase purchase) {
       replayPortfolio.addShare(purchase.getShare());
       return cash.subtract(purchase.getCalculator().calculateTotal());
@@ -135,53 +159,20 @@ public class PortfolioPerformanceService {
         "Unsupported transaction type: " + transaction.getClass().getSimpleName());
   }
 
+  /**
+   * Calculates the replayed portfolio liquidation value for one day.
+   */
   private BigDecimal calculateHistoricalPortfolioValue(Portfolio replayPortfolio, int day) {
     return replayPortfolio.getShares().stream()
         .map(share -> calculateHistoricalShareValue(share, day))
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
-  private BigDecimal calculateHistoricalShareValue(Share share, int day) {
-    BigDecimal historicalPrice = historicalAssetPriceService.getPriceOnDay(share.getAsset(), day);
-    Share historicalShare = new Share(
-        new HistoricalAssetSnapshot(
-            share.getAsset().getSymbol(),
-            share.getAsset().getDisplayName(),
-            share.getAsset().getAssetType(),
-            historicalPrice),
-        share.getQuantity(),
-        share.getPurchasePrice());
-    return new SaleCalculator(historicalShare).calculateTotal();
-  }
-
   /**
-   * Lightweight historical asset wrapper so existing sale valuation logic can be reused for an
-   * arbitrary trading day.
+   * Calculates one historical share position using that day's asset price.
    */
-  private record HistoricalAssetSnapshot(
-      String symbol,
-      String displayName,
-      String assetType,
-      BigDecimal salesPrice) implements InvestableAsset {
-
-    @Override
-    public String getSymbol() {
-      return symbol;
-    }
-
-    @Override
-    public String getDisplayName() {
-      return displayName;
-    }
-
-    @Override
-    public BigDecimal getSalesPrice() {
-      return salesPrice;
-    }
-
-    @Override
-    public String getAssetType() {
-      return assetType;
-    }
+  private BigDecimal calculateHistoricalShareValue(Share share, int day) {
+    BigDecimal historicalPrice = share.getAsset().getPriceOnDay(day);
+    return new SaleCalculator(share, historicalPrice).calculateTotal();
   }
 }

@@ -2,7 +2,7 @@ package controller;
 
 import model.core.player.Player;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.nio.file.Path;
 import java.util.List;

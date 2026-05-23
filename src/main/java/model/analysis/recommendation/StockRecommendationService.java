@@ -1,9 +1,7 @@
 package model.analysis.recommendation;
 
 
-import model.analysis.recommendation.strategy.TrendRecommendationStrategy;
-
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,10 +23,10 @@ public class StockRecommendationService {
   private final RecommendationStrategy strategy;
 
   /**
-   * Creates a service that uses {@link TrendRecommendationStrategy} by default.
+   * Creates a service that uses {@link RecommendationStrategy#TREND} by default.
    */
   public StockRecommendationService() {
-    this(new TrendRecommendationStrategy());
+    this(RecommendationStrategy.TREND);
   }
 
   /**

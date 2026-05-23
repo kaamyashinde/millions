@@ -3,8 +3,10 @@ package view.app;
 import model.core.player.Player;
 
 import controller.WorkspaceController;
+import java.util.function.Consumer;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import model.learning.content.LearningItem;
 import model.session.ActiveSession;
 import model.session.SessionService;
 import view.dialogs.ProfileEditorDialog;
@@ -67,7 +69,6 @@ public final class SessionWorkspaceBuilder {
     SavedRunsPage savedRunsPage = new SavedRunsPage(sessionService, persistAction);
     LeaderboardPage leaderboardPage = new LeaderboardPage(sessionService);
     LearningHubPage learningHubPage = new LearningHubPage();
-    QuizLauncherPage quizLauncherPage = new QuizLauncherPage();
 
     Tab notificationsTab = new Tab("Notifications", notificationsPage);
     Tab playerTab = new Tab("Player", portfolioPage);
@@ -77,7 +78,7 @@ public final class SessionWorkspaceBuilder {
     Tab savedRunsTab = new Tab("Saved runs", savedRunsPage);
     Tab leaderboardTab = new Tab("Leaderboard", leaderboardPage);
     Tab learningTab = new Tab("Learning", learningHubPage);
-    Tab quizTab = new Tab("Quizzes", quizLauncherPage);
+    Tab quizTab = new Tab("Quizzes");
 
     for (Tab tab :
         new Tab[] {
@@ -132,6 +133,13 @@ public final class SessionWorkspaceBuilder {
             leaderboardTab,
             learningTab,
             quizTab);
+
+    Consumer<LearningItem> openTopicInHub = item -> {
+      learningHubPage.openTopic(item.id());
+      tabPane.getSelectionModel().select(learningTab);
+    };
+    QuizLauncherPage quizLauncherPage = new QuizLauncherPage(openTopicInHub);
+    quizTab.setContent(quizLauncherPage);
 
     final WorkspaceLayout[] layoutHolder = new WorkspaceLayout[1];
     layoutHolder[0] =

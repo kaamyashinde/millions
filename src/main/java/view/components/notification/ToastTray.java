@@ -1,6 +1,6 @@
 package view.components.notification;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -23,8 +23,6 @@ import model.core.asset.fund.Fund;
 import model.core.market.pricing.DailyPriceMoveStrategy;
 import model.core.market.event.MarketEvent;
 import model.core.market.pricing.MarketEventStrategy;
-import model.core.market.pricing.RandomMarketEventStrategy;
-import model.core.market.pricing.UniformDailyPriceMoveStrategy;
 import model.trading.command.buy.BuyCommand;
 import model.trading.command.buy.BuyUpToBudgetCommand;
 import model.trading.command.sell.SellByQuantityCommand;
@@ -127,13 +125,13 @@ public class Exchange {
       return this;
     }
 
-    /** Baseline daily price move strategy (default {@link UniformDailyPriceMoveStrategy}). */
+    /** Baseline daily price move strategy (default {@link DailyPriceMoveStrategy#uniform(double)}). */
     public Builder dailyPriceMoveStrategy(DailyPriceMoveStrategy strategy) {
       this.dailyPriceMoveStrategy = strategy;
       return this;
     }
 
-    /** Rare market event strategy (default {@link RandomMarketEventStrategy}). */
+    /** Rare market event strategy (default {@link MarketEventStrategy#randomFromResources()}). */
     public Builder marketEventStrategy(MarketEventStrategy strategy) {
       this.marketEventStrategy = strategy;
       return this;
@@ -165,9 +163,9 @@ public class Exchange {
       DailyPriceMoveStrategy resolvedDaily =
           dailyPriceMoveStrategy != null
               ? dailyPriceMoveStrategy
-              : new UniformDailyPriceMoveStrategy(DAILY_SIGMA);
+              : DailyPriceMoveStrategy.uniform(DAILY_SIGMA);
       MarketEventStrategy resolvedEvents =
-          marketEventStrategy != null ? marketEventStrategy : new RandomMarketEventStrategy();
+          marketEventStrategy != null ? marketEventStrategy : MarketEventStrategy.randomFromResources();
       List<Stock> stockList = List.copyOf(stocks);
       List<Fund> fundList = List.copyOf(funds);
       ArrayList<MarketEvent> historyCopy = new ArrayList<>(marketEventHistory);
