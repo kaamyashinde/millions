@@ -18,8 +18,8 @@ import model.exception.trading.InsufficientSharesException;
 import model.exception.trading.ShareNotFoundException;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
-import model.persistence.market.MarketData;
-import model.persistence.market.MarketDataLoader;
+import model.exception.market.MarketDataImportException;
+import java.util.Optional;
 import model.trading.savings.RegularSavingsPlan;
 import model.trading.savings.RegularSavingsProcessor;
 import model.trading.savings.SavingsInstallmentMode;
@@ -101,7 +101,8 @@ public class UserInterface {
   private static void init() {
     sessionService = SessionServiceFactory.createLocalProfileSessionService(
         PROFILES_ROOT,
-        UserInterface::loadMarketData,
+        DEMO_MARKET_DATA_RESOURCE,
+        UserInterface.class,
         EXCHANGE_NAME);
     player = null;
     exchange = null;
@@ -228,13 +229,21 @@ public class UserInterface {
     System.out.println(I18n.get("prompt.startingMoney"));
     try {
       BigDecimal startingMoney = new BigDecimal(input.nextLine().trim());
-      ActiveSession session = sessionService.register(username, pin, startingMoney);
+      System.out.println("Market data file path (leave blank for default):");
+      String marketDataPath = input.nextLine().trim();
+      Optional<Path> marketDataSource = marketDataPath.isEmpty()
+          ? Optional.empty()
+          : Optional.of(Path.of(marketDataPath));
+      ActiveSession session = sessionService.register(
+          username, pin, startingMoney, marketDataSource);
       applyActiveSession(session);
       System.out.println(I18n.format("auth.registered", session.username(), startingMoney));
     } catch (NumberFormatException e) {
       System.out.println(I18n.get("invalid.input"));
     } catch (DuplicateUsernameException e) {
       System.out.println(I18n.get("auth.duplicateUsername"));
+    } catch (MarketDataImportException e) {
+      System.out.println(e.getMessage());
     } catch (RegistrationValidationException e) {
       System.out.println(registrationValidationMessage(e.error()));
     }
@@ -1007,22 +1016,6 @@ public class UserInterface {
       String qty = t.getShare().getQuantity().toString();
       System.out.println(I18n.format("transaction.line", t.getDay(), type, sym, qty));
     });
-  }
-
-  /**
-   * Loads the bundled market data used to create fresh per-user exchanges.
-   *
-   * @return bundled market-data payload
-   */
-  private static MarketData loadMarketData() {
-    MarketData marketData = MarketDataLoader.loadFromResource(
-        UserInterface.class,
-        DEMO_MARKET_DATA_RESOURCE);
-    if (marketData.stocks().isEmpty()) {
-      throw new IllegalStateException("Could not load demo market data from "
-          + DEMO_MARKET_DATA_RESOURCE);
-    }
-    return marketData;
   }
 
   /**
