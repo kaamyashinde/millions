@@ -18,6 +18,11 @@
     -fx-alignment: center-right;
 }
 
+.workspace-skip-days {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+}
+
 .toast-overlay {
     -fx-padding: 16 16 0 0;
 }

@@ -27,7 +27,7 @@ import model.trading.savings.SavingsInstallmentMode;
 import view.theme.ThemeStyles;
 
 /**
- * Regular savings plans page: list, add, edit, remove, and advance trading day.
+ * Regular savings plans page: list, add, edit, and remove plans.
  */
 public class SavingsPage extends BorderPane {
 
@@ -60,10 +60,7 @@ public class SavingsPage extends BorderPane {
     ThemeStyles.addStyleClasses(this, "finance-page");
     updateDayLabel();
 
-    Button advanceBtn = new Button("Advance 1 trading day");
-    ThemeStyles.styleButton(advanceBtn);
-    advanceBtn.setOnAction(_ -> advanceOneDay());
-    HBox top = new HBox(16, dayLabel, advanceBtn);
+    HBox top = new HBox(16, dayLabel);
     top.setAlignment(Pos.CENTER_LEFT);
     setTop(top);
 
@@ -151,15 +148,9 @@ public class SavingsPage extends BorderPane {
     table.getColumns().setAll(colSym, colMode, colAmt, colInt, colDue, colAct);
   }
 
-  private void advanceOneDay() {
-    status.setText("");
-    String skipped = controller.advanceOneDay();
+  /** Refreshes the trading-day label from the current exchange state. */
+  public void refresh() {
     updateDayLabel();
-    if (!skipped.isEmpty()) {
-      status.setText(
-          "Regular savings skipped (insufficient funds): " + skipped + ". See Notifications.");
-    }
-    afterModelChange.run();
   }
 
   private void addPlan() {

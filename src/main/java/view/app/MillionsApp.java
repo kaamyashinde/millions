@@ -156,7 +156,12 @@ public class MillionsApp extends Application {
         ctrl::refreshAll,
         () -> { /* help: placeholder */ },
         () -> switchUser(ctrl, ref[0]),
-        () -> logout(ctrl));
+        () -> logout(ctrl),
+        days -> {
+          ctrl.advanceTradingDays(String.valueOf(days));
+          ref[0].setSessionSummary(ctrl.getSessionSummary());
+          refreshAndPersist.run();
+        });
     ref[0] = workspace;
     workspace.setSessionSummary(ctrl.getSessionSummary());
     workspace.loadHeaderAvatar(ctrl.getAvatarPath());
@@ -220,6 +225,11 @@ public class MillionsApp extends Application {
     transactionsTab.selectedProperty().addListener((obs, oldVal, sel) -> {
       if (Boolean.TRUE.equals(sel)) {
         transactionsPage.refresh();
+      }
+    });
+    savingsTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        savingsPage.refresh();
       }
     });
     Tab leaderboardTab = makeTab("Leaderboard", leaderboardPage);

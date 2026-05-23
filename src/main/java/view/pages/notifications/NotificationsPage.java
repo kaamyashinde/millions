@@ -4,9 +4,7 @@ import controller.NotificationsController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -36,19 +34,6 @@ public class NotificationsPage extends BorderPane {
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
     ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
-    Label daysLabel = new Label("Days:");
-    ThemeStyles.addStyleClasses(daysLabel, "muted-text");
-    TextField daysField = new TextField();
-    daysField.setPromptText("e.g. 14");
-    daysField.setPrefWidth(100);
-    ThemeStyles.styleField(daysField);
-
-    Button advanceWeeksBtn = new Button("Advance by weeks");
-    ThemeStyles.styleButton(advanceWeeksBtn);
-
-    HBox advanceRow = new HBox(12, daysLabel, daysField, advanceWeeksBtn);
-    advanceRow.setAlignment(Pos.CENTER);
-
     Button errBtn = makeButton(notifications, "Error", ToastMode.ERROR,
         "Something went wrong!", "Check the logs for more details.", "Dismiss");
     Button warnBtn = makeButton(notifications, "Warning", ToastMode.WARNING,
@@ -66,7 +51,7 @@ public class NotificationsPage extends BorderPane {
     buttons.setAlignment(Pos.CENTER);
     ThemeStyles.addStyleClasses(buttons, "finance-notification-actions");
 
-    VBox top = new VBox(28, heading, advanceRow, buttons);
+    VBox top = new VBox(28, heading, buttons);
     top.setAlignment(Pos.CENTER);
     setTop(top);
 

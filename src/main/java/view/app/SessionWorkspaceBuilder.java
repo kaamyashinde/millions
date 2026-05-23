@@ -125,6 +125,11 @@ public final class SessionWorkspaceBuilder {
         transactionsPage.refresh();
       }
     });
+    savingsTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        savingsPage.refresh();
+      }
+    });
     leaderboardTab.selectedProperty().addListener((obs, oldVal, sel) -> {
       if (Boolean.TRUE.equals(sel)) {
         leaderboardPage.refresh();
@@ -173,7 +178,12 @@ public final class SessionWorkspaceBuilder {
             refreshAndPersist,
             helpAction,
             switchUserAction,
-            logoutAction);
+            logoutAction,
+            days -> {
+              workspaceController.advanceTradingDays(String.valueOf(days));
+              layoutHolder[0].setSessionSummary(workspaceController.getSessionSummary());
+              refreshAndPersist.run();
+            });
 
     layoutHolder[0].setSessionSummary(workspaceController.getSessionSummary());
     layoutHolder[0].loadHeaderAvatar(workspaceController.getAvatarPath());
