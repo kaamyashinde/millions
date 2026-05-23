@@ -1,6 +1,7 @@
 package view.pages.quiz;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -11,6 +12,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
+import model.learning.content.LearningItem;
 import model.learning.quiz.Quiz;
 import model.learning.quiz.QuizAttempt;
 import model.learning.store.QuizContentStore;
@@ -27,10 +29,17 @@ import view.theme.ThemeStyles;
  */
 public class QuizLauncherPage extends BorderPane {
 
+  private final Consumer<LearningItem> onOpenHubTopic;
   private javafx.scene.Node launcherView;
 
-  /** Builds the panel and shows the quiz list. */
-  public QuizLauncherPage() {
+  /**
+   * Builds the panel and shows the quiz list.
+   *
+   * @param onOpenHubTopic called when the player opens a linked hub topic from quiz feedback
+   */
+  public QuizLauncherPage(Consumer<LearningItem> onOpenHubTopic) {
+    this.onOpenHubTopic = onOpenHubTopic;
+
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "quiz-root");
 
@@ -85,12 +94,14 @@ public class QuizLauncherPage extends BorderPane {
     setCenter(new QuizView(
         attempt,
         backToLauncher,
-        () -> showResult(attempt, backToLauncher)));
+        () -> showResult(attempt, backToLauncher),
+        onOpenHubTopic));
   }
 
   private void showResult(QuizAttempt attempt, Runnable onBackToTopic) {
     QuizSession.record(attempt);
-    setCenter(new QuizResultView(attempt, onBackToTopic, this::showLauncher));
+    setCenter(new QuizResultView(
+        attempt, onBackToTopic, this::showLauncher, onOpenHubTopic));
   }
 
   private void showLauncher() {

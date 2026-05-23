@@ -195,6 +195,17 @@ public class LearningHubPage extends BorderPane {
 
   // ── Navigation ───────────────────────────────────────────────────────────────
 
+  /**
+   * Opens the topic detail view for the given learning item ID.
+   *
+   * @param itemId {@link LearningItem#id()}
+   */
+  public void openTopic(String itemId) {
+    LearningContentStore.getItemsByIds(List.of(itemId)).stream()
+        .findFirst()
+        .ifPresent(this::onItemCardClicked);
+  }
+
   private void showLanding() {
     setCenter(landingView);
   }
@@ -219,11 +230,13 @@ public class LearningHubPage extends BorderPane {
     setCenter(new QuizView(
         attempt,
         backToItem,
-        () -> showQuizResult(attempt, backToItem)));
+        () -> showQuizResult(attempt, backToItem),
+        this::onItemCardClicked));
   }
 
   private void showQuizResult(QuizAttempt attempt, Runnable onBackToTopic) {
     QuizSession.record(attempt);
-    setCenter(new QuizResultView(attempt, onBackToTopic, this::showLanding));
+    setCenter(new QuizResultView(
+        attempt, onBackToTopic, this::showLanding, this::onItemCardClicked));
   }
 }
