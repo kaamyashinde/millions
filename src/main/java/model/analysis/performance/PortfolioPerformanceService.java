@@ -4,7 +4,6 @@ package model.analysis.performance;
 import model.analysis.metric.MetricStatus;
 import model.analysis.metric.PerformanceComparison;
 import model.analysis.metric.PerformanceMetrics;
-import model.analysis.series.HistoricalAssetPriceService;
 
 import static model.utils.Validator.checkNotNull;
 
@@ -26,7 +25,6 @@ import model.trading.calculator.SaleCalculator;
  */
 public class PortfolioPerformanceService {
 
-  private final HistoricalAssetPriceService historicalAssetPriceService;
   private final PerformanceMetricsCalculator performanceMetricsCalculator;
   private final MarketBenchmarkService marketBenchmarkService;
 
@@ -35,7 +33,6 @@ public class PortfolioPerformanceService {
    */
   public PortfolioPerformanceService() {
     this(
-        new HistoricalAssetPriceService(),
         new PerformanceMetricsCalculator(),
         new MarketBenchmarkService());
   }
@@ -43,18 +40,14 @@ public class PortfolioPerformanceService {
   /**
    * Creates a service with injected collaborators.
    *
-   * @param historicalAssetPriceService helper used to resolve historical asset prices
    * @param performanceMetricsCalculator helper used to derive metrics from value series
    * @param marketBenchmarkService helper used to derive benchmark metrics
    */
   public PortfolioPerformanceService(
-      HistoricalAssetPriceService historicalAssetPriceService,
       PerformanceMetricsCalculator performanceMetricsCalculator,
       MarketBenchmarkService marketBenchmarkService) {
-    checkNotNull(historicalAssetPriceService, "Historical asset price service");
     checkNotNull(performanceMetricsCalculator, "Performance metrics calculator");
     checkNotNull(marketBenchmarkService, "Market benchmark service");
-    this.historicalAssetPriceService = historicalAssetPriceService;
     this.performanceMetricsCalculator = performanceMetricsCalculator;
     this.marketBenchmarkService = marketBenchmarkService;
   }
@@ -142,7 +135,7 @@ public class PortfolioPerformanceService {
   }
 
   private BigDecimal calculateHistoricalShareValue(Share share, int day) {
-    BigDecimal historicalPrice = historicalAssetPriceService.getPriceOnDay(share.getAsset(), day);
+    BigDecimal historicalPrice = share.getAsset().getPriceOnDay(day);
     Share historicalShare = new Share(
         new HistoricalAssetSnapshot(
             share.getAsset().getSymbol(),
@@ -176,6 +169,14 @@ public class PortfolioPerformanceService {
 
     @Override
     public BigDecimal getSalesPrice() {
+      return salesPrice;
+    }
+
+    @Override
+    public BigDecimal getPriceOnDay(int day) {
+      if (day < 1) {
+        throw new IllegalArgumentException("Trading day must be at least 1.");
+      }
       return salesPrice;
     }
 

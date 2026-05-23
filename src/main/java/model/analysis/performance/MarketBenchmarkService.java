@@ -3,7 +3,6 @@ package model.analysis.performance;
 
 import model.analysis.metric.MetricStatus;
 import model.analysis.metric.PerformanceMetrics;
-import model.analysis.series.HistoricalAssetPriceService;
 import model.analysis.series.ReturnSeriesCalculator;
 
 import static model.utils.Validator.checkNotNull;
@@ -19,7 +18,6 @@ import model.core.asset.Stock;
  */
 public class MarketBenchmarkService {
 
-  private final HistoricalAssetPriceService historicalAssetPriceService;
   private final PerformanceMetricsCalculator performanceMetricsCalculator;
   private final ReturnSeriesCalculator returnSeriesCalculator;
 
@@ -28,7 +26,6 @@ public class MarketBenchmarkService {
    */
   public MarketBenchmarkService() {
     this(
-        new HistoricalAssetPriceService(),
         new PerformanceMetricsCalculator(),
         new ReturnSeriesCalculator());
   }
@@ -36,18 +33,14 @@ public class MarketBenchmarkService {
   /**
    * Creates a benchmark service with injected collaborators.
    *
-   * @param historicalAssetPriceService helper used to resolve historical prices
    * @param performanceMetricsCalculator helper used to derive performance metrics
    * @param returnSeriesCalculator helper used to derive daily returns
    */
   public MarketBenchmarkService(
-      HistoricalAssetPriceService historicalAssetPriceService,
       PerformanceMetricsCalculator performanceMetricsCalculator,
       ReturnSeriesCalculator returnSeriesCalculator) {
-    checkNotNull(historicalAssetPriceService, "Historical asset price service");
     checkNotNull(performanceMetricsCalculator, "Performance metrics calculator");
     checkNotNull(returnSeriesCalculator, "Return series calculator");
-    this.historicalAssetPriceService = historicalAssetPriceService;
     this.performanceMetricsCalculator = performanceMetricsCalculator;
     this.returnSeriesCalculator = returnSeriesCalculator;
   }
@@ -99,8 +92,8 @@ public class MarketBenchmarkService {
   private BigDecimal averageDailyReturn(List<Stock> stocks, int day) {
     BigDecimal totalReturn = BigDecimal.ZERO;
     for (Stock stock : stocks) {
-      BigDecimal previous = historicalAssetPriceService.getStockPriceOnDay(stock, day - 1);
-      BigDecimal current = historicalAssetPriceService.getStockPriceOnDay(stock, day);
+      BigDecimal previous = stock.getPriceOnDay(day - 1);
+      BigDecimal current = stock.getPriceOnDay(day);
       totalReturn = totalReturn.add(returnSeriesCalculator.calculateReturn(previous, current));
     }
     return totalReturn.divide(BigDecimal.valueOf(stocks.size()), 8, java.math.RoundingMode.HALF_UP);
