@@ -43,11 +43,11 @@ public class ElliottWaveTool extends AbstractChartTool {
     "Wave 1", "Wave 2", "Wave 3", "Wave 4", "Wave 5", "Wave A", "Wave B", "Wave C"
   };
 
-  /** Blue hex colour applied to impulse waves 1–5. */
-  private static final String IMPULSE_COLOR = "#00bfff";
+  /** Teal hex colour applied to impulse waves 1–5. */
+  private static final String IMPULSE_COLOR = "#0EA5A4";
 
-  /** Red hex colour applied to corrective waves A–C. */
-  private static final String CORRECTIVE_COLOR = "#ff6b6b";
+  /** Controlled red applied to corrective waves A–C (not dominant brand color). */
+  private static final String CORRECTIVE_COLOR = "#EF4444";
 
   /** Collected click points; each entry is {@code [dayIndex, price]}. */
   private final List<double[]> points = new ArrayList<>();

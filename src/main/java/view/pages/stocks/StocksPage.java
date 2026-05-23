@@ -56,12 +56,13 @@ public class StocksPage extends BorderPane {
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
 
-    Text heading = new Text("Available stocks");
+    Text heading = new Text("Available Stocks");
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
     ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
     metaLabel.setWrapText(true);
     ThemeStyles.addStyleClasses(metaLabel, "finance-meta");
+    VBox.setMargin(metaLabel, new Insets(0, 0, 8, 0));
 
     Button refreshBtn = new Button("Refresh");
     styleButton(refreshBtn);
@@ -70,7 +71,7 @@ public class StocksPage extends BorderPane {
     HBox topRow = new HBox(16, heading, refreshBtn);
     topRow.setAlignment(Pos.CENTER_LEFT);
 
-    VBox top = new VBox(8, topRow, metaLabel);
+    VBox top = new VBox(4, topRow, metaLabel);
     setTop(top);
 
     buildTable();
@@ -99,11 +100,11 @@ public class StocksPage extends BorderPane {
     TableColumn<Stock, String> colCompany = new TableColumn<>("Company");
     colCompany.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCompany()));
 
-    TableColumn<Stock, String> colPrice = new TableColumn<>("Latest price");
+    TableColumn<Stock, String> colPrice = new TableColumn<>("Latest Price");
     colPrice.setCellValueFactory(
         c -> new SimpleStringProperty(c.getValue().getSalesPrice().toPlainString()));
 
-    TableColumn<Stock, String> colRevenue = new TableColumn<>("Revenue (mock)");
+    TableColumn<Stock, String> colRevenue = new TableColumn<>("Revenue (Mock)");
     colRevenue.setCellValueFactory(
         c ->
             new SimpleStringProperty(

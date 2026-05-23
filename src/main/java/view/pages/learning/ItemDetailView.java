@@ -27,6 +27,8 @@ import model.learninghub.Quiz;
 import model.learninghub.QuizAttempt;
 import model.learninghub.QuizContentStore;
 import util.MarkdownLoader;
+import view.theme.ThemePalette;
+import view.theme.ThemeStyles;
 
 /**
  * Detail view for a single {@link LearningItem}. Renders the item's markdown content file in a
@@ -38,15 +40,6 @@ import util.MarkdownLoader;
  * @since 04-04-2026
  */
 public class ItemDetailView extends BorderPane {
-
-  private static final String COLOR_BG_CARD = "#1e1e1e";
-  private static final String COLOR_BORDER_ACCENT = "#2196F3";
-  private static final String COLOR_BORDER_RESOURCE = "#4CAF50";
-  private static final String COLOR_HEADING = "#e0e0e0";
-  private static final String COLOR_SUBTITLE = "#9e9e9e";
-  private static final String COLOR_DIFFICULTY_BEGINNER = "#4CAF50";
-  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#FFA500";
-  private static final String COLOR_DIFFICULTY_ADVANCED = "#FF4444";
 
   private static final Parser MD_PARSER = Parser.builder().build();
   private static final HtmlRenderer HTML_RENDERER = HtmlRenderer.builder().build();
@@ -68,7 +61,7 @@ public class ItemDetailView extends BorderPane {
 
     // ── TOP: back button ─────────────────────────────────────────────────────
     Button backBtn = new Button("← Back");
-    backBtn.setStyle("-fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;");
+    ThemeStyles.styleButton(backBtn);
     backBtn.setOnAction(_ -> onBack.run());
 
     HBox topBar = new HBox(backBtn);
@@ -94,7 +87,7 @@ public class ItemDetailView extends BorderPane {
   private static javafx.scene.Node buildMarkdownView(LearningItem item) {
     String markdown = MarkdownLoader.load(item.contentFile());
     String bodyHtml = markdown.isEmpty()
-        ? "<p style='color:#9e9e9e'>Content not available.</p>"
+        ? "<p style='color:#CBD5E1'>Content not available.</p>"
         : HTML_RENDERER.render(MD_PARSER.parse(markdown));
 
     String html = """
@@ -104,25 +97,25 @@ public class ItemDetailView extends BorderPane {
         <meta charset="UTF-8">
         <style>
           body {
-            background: #121212;
-            color: #e0e0e0;
+            background: #0B1220;
+            color: #F8FAFC;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-size: 14px;
             line-height: 1.7;
             margin: 0;
             padding: 8px 4px;
           }
-          h1, h2, h3 { color: #ffffff; margin-top: 1.2em; margin-bottom: 0.4em; }
-          h2 { font-size: 1.15em; border-bottom: 1px solid #2a2a2a; padding-bottom: 4px; }
+          h1, h2, h3 { color: #F8FAFC; margin-top: 1.2em; margin-bottom: 0.4em; }
+          h2 { font-size: 1.15em; border-bottom: 1px solid #334155; padding-bottom: 4px; }
           p { margin: 0.6em 0; }
           ul, ol { padding-left: 1.4em; margin: 0.6em 0; }
           li { margin-bottom: 4px; }
-          a { color: #64b5f6; text-decoration: none; }
+          a { color: #0EA5A4; text-decoration: none; }
           a:hover { text-decoration: underline; }
-          code { background: #1e1e1e; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
-          pre { background: #1e1e1e; padding: 10px; border-radius: 6px; overflow-x: auto; }
-          hr { border: none; border-top: 1px solid #2a2a2a; margin: 1em 0; }
-          strong { color: #ffffff; }
+          code { background: #111827; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+          pre { background: #111827; padding: 10px; border-radius: 6px; overflow-x: auto; }
+          hr { border: none; border-top: 1px solid #334155; margin: 1em 0; }
+          strong { color: #F8FAFC; }
         </style>
         </head>
         <body>
@@ -156,7 +149,7 @@ public class ItemDetailView extends BorderPane {
 
     Label heading = new Label("Further Reading");
     heading.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
+        "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
         + "-fx-font-weight: bold;"
         + "-fx-font-size: 13;");
     section.getChildren().add(heading);
@@ -165,7 +158,7 @@ public class ItemDetailView extends BorderPane {
       Label fallback = new Label(
           "Open links in the Further Reading section above to explore more.");
       fallback.setStyle(
-          "-fx-text-fill: " + COLOR_SUBTITLE + ";"
+          "-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + ";"
           + "-fx-font-size: 11;"
           + "-fx-font-style: italic;");
       fallback.setWrapText(true);
@@ -182,31 +175,31 @@ public class ItemDetailView extends BorderPane {
   private static javafx.scene.Node buildResourceCard(LearningResource resource) {
     Label sourceLabel = new Label(resource.sourceLabel());
     sourceLabel.setStyle(
-        "-fx-background-color: " + COLOR_BORDER_RESOURCE + "22;"
-        + "-fx-text-fill: " + COLOR_BORDER_RESOURCE + ";"
+        "-fx-background-color: " + ThemePalette.SUCCESS + "22;"
+        + "-fx-text-fill: " + ThemePalette.SUCCESS + ";"
         + "-fx-background-radius: 4;"
         + "-fx-padding: 2 6 2 6;"
         + "-fx-font-size: 10;");
 
     Label title = new Label(resource.title());
     title.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
+        "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
         + "-fx-font-weight: bold;"
         + "-fx-font-size: 13;");
 
     Label desc = new Label(resource.description());
-    desc.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    desc.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 11;");
     desc.setWrapText(true);
 
     Label cta = new Label("Open →");
-    cta.setStyle("-fx-text-fill: " + COLOR_BORDER_RESOURCE + "; -fx-font-size: 11;");
+    cta.setStyle("-fx-text-fill: " + ThemePalette.SUCCESS + "; -fx-font-size: 11;");
 
     VBox card = new VBox(6, sourceLabel, title, desc, cta);
     card.setPadding(new Insets(12));
     card.setMaxWidth(Double.MAX_VALUE);
     card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_BORDER_RESOURCE + ";"
+        "-fx-background-color: " + ThemePalette.SURFACE + ";"
+        + "-fx-border-color: " + ThemePalette.SUCCESS + ";"
         + "-fx-border-radius: 8;"
         + "-fx-background-radius: 8;"
         + "-fx-cursor: hand;");
@@ -226,7 +219,7 @@ public class ItemDetailView extends BorderPane {
 
     Label heading = new Label("Suggested Next Topics");
     heading.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
+        "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
         + "-fx-font-weight: bold;"
         + "-fx-font-size: 13;");
     section.getChildren().add(heading);
@@ -251,22 +244,22 @@ public class ItemDetailView extends BorderPane {
         + "-fx-font-size: 10;");
 
     Label title = new Label(item.title());
-    title.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-weight: bold;");
+    title.setStyle("-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + "; -fx-font-weight: bold;");
     title.setWrapText(true);
 
     Label summary = new Label(item.summary());
-    summary.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    summary.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 11;");
     summary.setWrapText(true);
 
     Label category = new Label(item.category().emoji() + "  " + item.category().name());
-    category.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 10;");
+    category.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 10;");
 
     VBox card = new VBox(6, badge, title, summary, category);
     card.setPadding(new Insets(12));
     card.setMaxWidth(Double.MAX_VALUE);
     card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
+        "-fx-background-color: " + ThemePalette.SURFACE + ";"
+        + "-fx-border-color: " + ThemePalette.ACCENT + ";"
         + "-fx-border-radius: 8;"
         + "-fx-background-radius: 8;"
         + "-fx-cursor: hand;");
@@ -283,7 +276,7 @@ public class ItemDetailView extends BorderPane {
 
     Label heading = new Label("Test Your Knowledge");
     heading.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
+        "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
         + "-fx-font-weight: bold;"
         + "-fx-font-size: 13;");
 
@@ -291,9 +284,9 @@ public class ItemDetailView extends BorderPane {
     quizBtn.setMaxWidth(Double.MAX_VALUE);
     quizBtn.setWrapText(true);
     quizBtn.setStyle(
-        "-fx-background-color: #2196F322;"
-        + "-fx-text-fill: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
+        "-fx-background-color: #0EA5A422;"
+        + "-fx-text-fill: " + ThemePalette.ACCENT + ";"
+        + "-fx-border-color: " + ThemePalette.ACCENT + ";"
         + "-fx-border-radius: 8;"
         + "-fx-background-radius: 8;"
         + "-fx-cursor: hand;"
@@ -309,9 +302,9 @@ public class ItemDetailView extends BorderPane {
 
   private static String difficultyColor(Difficulty d) {
     return switch (d) {
-      case BEGINNER -> COLOR_DIFFICULTY_BEGINNER;
-      case INTERMEDIATE -> COLOR_DIFFICULTY_INTERMEDIATE;
-      case ADVANCED -> COLOR_DIFFICULTY_ADVANCED;
+      case BEGINNER -> ThemePalette.DIFFICULTY_BEGINNER;
+      case INTERMEDIATE -> ThemePalette.DIFFICULTY_INTERMEDIATE;
+      case ADVANCED -> ThemePalette.DIFFICULTY_ADVANCED;
     };
   }
 

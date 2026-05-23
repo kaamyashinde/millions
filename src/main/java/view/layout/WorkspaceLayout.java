@@ -71,10 +71,10 @@ public class WorkspaceLayout extends StackPane {
     ThemeStyles.addStyleClasses(sessionSummaryLabel, "muted-text");
 
     Button profileButton = new Button("Profile");
-    Button refreshButton = new Button("Refresh all");
+    Button refreshButton = new Button("Refresh All");
     Button helpButton = new Button("Help");
-    Button switchUserButton = new Button("Compare / switch user");
-    Button logoutButton = new Button("Log out");
+    Button switchUserButton = new Button("Compare / Switch User");
+    Button logoutButton = new Button("Log Out");
     ThemeStyles.styleButton(profileButton);
     ThemeStyles.styleButton(refreshButton);
     ThemeStyles.styleButton(helpButton);

@@ -61,7 +61,7 @@ public class LoginPage extends AuthLayout {
   }
 
   private void wireForm(VBox form, LoginAction loginAction) {
-    Label heading = new Label("Welcome back");
+    Label heading = new Label("Welcome Back");
     ThemeStyles.addStyleClasses(heading, "heading-lg");
 
     Label subheading = new Label("Enter your username and PIN to log in.");
@@ -75,7 +75,7 @@ public class LoginPage extends AuthLayout {
     ThemeStyles.styleField(pinField);
     pinField.setMaxWidth(Double.MAX_VALUE);
 
-    Button loginButton = new Button("Log in");
+    Button loginButton = new Button("Log In");
     loginButton.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.styleAccentButton(loginButton);
     loginButton.setOnAction(_ -> loginAction.run(usernameField.getText(), pinField.getText()));

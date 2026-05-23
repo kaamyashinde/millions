@@ -1,24 +1,29 @@
 /* Millions theme tokens and global JavaFX defaults. */
 
 .root {
-    -millions-accent: #6d28d9;
-    -millions-accent-light: #f0eeff;
-    -millions-bg: #ffffff;
-    -millions-surface: #f6f7fb;
-    -millions-surface-strong: #eef1f7;
-    -millions-border: #d7dce5;
-    -millions-text-primary: #111827;
-    -millions-text-secondary: #6b7280;
-    -millions-text-muted: #9ca3af;
-    -millions-error: #c62828;
-    -millions-success: #1f9d55;
-    -millions-warning: #c58b00;
-    -millions-info: #2563eb;
-    -millions-input-bg: #f5f5f5;
-    -millions-input-border: #d1d5db;
-    -millions-top-one: #fff4cc;
-    -millions-top-two: #eef3f8;
-    -millions-top-three: #fbe9dd;
+    -millions-accent: #0EA5A4;
+    -millions-accent-light: #0EA5A420;
+    -millions-primary-hover: #14B8A6;
+    -millions-bg: #0B1220;
+    -millions-surface: #111827;
+    -millions-data-surface: #0F2D35;
+    -millions-surface-light: #16434D;
+    -millions-surface-strong: #16434D;
+    -millions-border: #2A6F73;
+    -millions-text-primary: #F8FAFC;
+    -millions-text-secondary: #CBD5E1;
+    -millions-text-muted: #94A3B8;
+    -millions-error: #EF4444;
+    -millions-success: #22C55E;
+    -millions-positive: #22C55E;
+    -millions-negative: #EF4444;
+    -millions-warning: #F59E0B;
+    -millions-info: #0EA5A4;
+    -millions-input-bg: #1E293B;
+    -millions-input-border: #334155;
+    -millions-top-one: #F59E0B33;
+    -millions-top-two: #0EA5A422;
+    -millions-top-three: #CBD5E133;
     -fx-background-color: -millions-bg;
     -fx-font-family: "System";
     -fx-text-fill: -millions-text-primary;
@@ -96,23 +101,225 @@
     -fx-border-color: -millions-accent;
 }
 
+.tab-pane .tab .tab-label {
+    -fx-text-fill: -millions-text-secondary;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: -millions-text-primary;
+}
+
+.text-input {
+    -fx-prompt-text-fill: -millions-text-muted;
+}
+
 .table-view {
-    -fx-background-color: -millions-bg;
+    -fx-background-color: -millions-data-surface;
     -fx-border-color: -millions-border;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
+    -fx-table-cell-border-color: #1D5660;
 }
 
 .table-view .column-header-background {
-    -fx-background-color: -millions-surface;
+    -fx-background-color: -millions-surface-strong;
+    -fx-border-color: transparent transparent -millions-border transparent;
+    -fx-border-width: 0 0 1.5 0;
 }
 
 .table-view .column-header,
 .table-view .filler {
     -fx-background-color: transparent;
+    -fx-size: 38px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -millions-text-primary;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.table-view .virtual-flow,
+.table-view .virtual-flow .clipped-container,
+.table-view .virtual-flow .sheet,
+.table-view .placeholder {
+    -fx-background-color: -millions-data-surface;
 }
 
 .table-row-cell:selected {
     -fx-background-color: -millions-accent-light;
     -fx-text-background-color: -millions-text-primary;
+}
+
+.table-row-cell {
+    -fx-background-color: -millions-data-surface;
+    -fx-text-background-color: -millions-text-primary;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #123943;
+}
+
+.table-row-cell:empty {
+    -fx-background-color: -millions-data-surface;
+}
+
+.table-cell {
+    -fx-text-fill: -millions-text-primary;
+}
+
+.chart {
+    -fx-background-color: transparent;
+}
+
+.chart-plot-background {
+    -fx-background-color: -millions-data-surface;
+    -fx-background-radius: 8;
+}
+
+.chart-title {
+    -fx-text-fill: -millions-text-primary;
+}
+
+.axis-label {
+    -fx-text-fill: -millions-text-secondary;
+}
+
+.axis-tick-label {
+    -fx-fill: -millions-text-muted;
+}
+
+.chart-horizontal-grid-lines,
+.chart-vertical-grid-lines {
+    -fx-stroke: -millions-border;
+}
+
+.chart-alternative-row-fill {
+    -fx-fill: transparent;
+}
+
+.chart-alternative-column-fill {
+    -fx-fill: transparent;
+}
+
+.chart-legend {
+    -fx-background-color: -millions-data-surface;
+    -fx-border-color: -millions-border;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.chart-legend-item {
+    -fx-text-fill: -millions-text-secondary;
+}
+
+.default-color0.chart-series-line {
+    -fx-stroke: -millions-accent;
+}
+
+.list-view {
+    -fx-background-color: -millions-bg;
+    -fx-border-color: -millions-border;
+}
+
+.list-cell {
+    -fx-background-color: -millions-bg;
+    -fx-text-fill: -millions-text-primary;
+}
+
+.list-cell:odd {
+    -fx-background-color: -millions-surface;
+}
+
+.list-cell:selected {
+    -fx-background-color: -millions-accent-light;
+    -fx-text-fill: -millions-text-primary;
+}
+
+.list-cell:empty {
+    -fx-background-color: -millions-bg;
+}
+
+.combo-box {
+    -fx-background-color: -millions-input-bg;
+    -fx-border-color: -millions-input-border;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: -millions-text-primary;
+    -fx-background-color: transparent;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: -millions-surface;
+    -fx-border-color: -millions-border;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: -millions-surface;
+    -fx-text-fill: -millions-text-primary;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: -millions-accent-light;
+}
+
+.split-pane {
+    -fx-background-color: -millions-bg;
+}
+
+.split-pane > .split-pane-divider {
+    -fx-background-color: -millions-border;
+    -fx-padding: 0 2;
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -millions-border;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: "";
+    -fx-padding: 0;
+}
+
+.separator .line {
+    -fx-border-color: -millions-border;
+}
+
+.check-box {
+    -fx-text-fill: -millions-text-primary;
+}
+
+.check-box .box {
+    -fx-background-color: -millions-input-bg;
+    -fx-border-color: -millions-input-border;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.check-box:selected .box {
+    -fx-background-color: -millions-accent;
+    -fx-border-color: -millions-accent;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: white;
 }

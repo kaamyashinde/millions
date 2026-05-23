@@ -1,9 +1,10 @@
 package view.pages.funds;
 
+import java.math.BigDecimal;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -11,16 +12,18 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.fund.Fund;
 import model.fund.FundComponent;
+import view.components.table.AppTableView;
 
 /**
  * Dedicated fund detail view showing the latest derived price and composite holdings.
  */
 public class FundDetailView extends BorderPane {
 
-  private final Label titleLabel = new Label("Fund details");
+  private final Label titleLabel = new Label("Fund Details");
   private final Label subtitleLabel = new Label("Select a fund to inspect its stock composition.");
-  private final Label latestPriceLabel = new Label("Latest price: -");
-  private final ListView<String> componentList = new ListView<>();
+  private final Label latestPriceLabel = new Label("Latest Price: -");
+  private final AppTableView<FundComponent> componentList =
+      new AppTableView<>("No component holdings to show.");
   private Fund selectedFund;
 
   /**
@@ -32,7 +35,16 @@ public class FundDetailView extends BorderPane {
 
     titleLabel.setFont(Font.font("System", FontWeight.BOLD, 20));
     subtitleLabel.setWrapText(true);
-    componentList.setPlaceholder(new Label("No component holdings to show."));
+
+    TableColumn<FundComponent, String> symbolColumn =
+        AppTableView.createTextColumn("Symbol", c -> c.stock().getSymbol());
+    TableColumn<FundComponent, String> companyColumn =
+        AppTableView.createTextColumn("Company", c -> c.stock().getCompany());
+    TableColumn<FundComponent, BigDecimal> weightColumn =
+        AppTableView.createNumericColumn(
+            "Weight", FundComponent::weight, BigDecimal::toPlainString);
+    componentList.getColumns().addAll(symbolColumn, companyColumn, weightColumn);
+
     VBox content = new VBox(12, titleLabel, subtitleLabel, latestPriceLabel, componentList);
     VBox.setVgrow(componentList, Priority.ALWAYS);
     setCenter(content);
@@ -55,10 +67,7 @@ public class FundDetailView extends BorderPane {
     titleLabel.setText(fund.getSymbol() + " · " + fund.getDisplayName());
     subtitleLabel.setText("Composite fund built from weighted stock holdings.");
     latestPriceLabel.setText("Latest price: " + fund.getSalesPrice().toPlainString());
-    componentList.setItems(FXCollections.observableArrayList(
-        fund.getComponents().stream()
-            .map(FundDetailView::formatComponent)
-            .toList()));
+    componentList.setItems(FXCollections.observableArrayList(fund.getComponents()));
   }
 
   /**
@@ -66,13 +75,5 @@ public class FundDetailView extends BorderPane {
    */
   public void refresh() {
     showFund(selectedFund);
-  }
-
-  private static String formatComponent(FundComponent component) {
-    return component.stock().getSymbol()
-        + " - "
-        + component.stock().getCompany()
-        + " | weight "
-        + component.weight().toPlainString();
   }
 }

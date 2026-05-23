@@ -49,7 +49,7 @@ public class SavedRunsPage extends BorderPane {
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page", "finance-panel");
 
-    Text heading = new Text("Saved playthroughs");
+    Text heading = new Text("Saved Playthroughs");
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
     ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
@@ -58,7 +58,7 @@ public class SavedRunsPage extends BorderPane {
     hint.setWrapText(true);
     ThemeStyles.addStyleClasses(hint, "finance-meta");
 
-    Button saveButton = new Button("Save current run");
+    Button saveButton = new Button("Save Current Run");
     styleButton(saveButton);
     saveButton.setOnAction(_ -> promptSaveRun());
 
@@ -74,7 +74,7 @@ public class SavedRunsPage extends BorderPane {
     daysCol.setCellValueFactory(c -> c.getValue().tradingDaysProperty());
     daysCol.setPrefWidth(56);
 
-    TableColumn<SavedRunRow, String> netWorthCol = new TableColumn<>("Net worth");
+    TableColumn<SavedRunRow, String> netWorthCol = new TableColumn<>("Net Worth");
     netWorthCol.setCellValueFactory(c -> c.getValue().netWorthProperty());
     netWorthCol.setPrefWidth(110);
 
@@ -152,6 +152,7 @@ public class SavedRunsPage extends BorderPane {
     dialog.setTitle("Save playthrough");
     dialog.setHeaderText("Optional label (e.g. \"dividend focus\")");
     dialog.setContentText("Label:");
+    ThemeStyles.installOnDialog(dialog);
     dialog.showAndWait().ifPresent(label -> {
       sessionService.saveCurrentRun(label.trim());
       afterMutation.run();
@@ -164,6 +165,7 @@ public class SavedRunsPage extends BorderPane {
     alert.setTitle("Delete saved run");
     alert.setHeaderText("Remove this playthrough snapshot?");
     alert.setContentText("Label: " + (record.label().isEmpty() ? "(none)" : record.label()));
+    ThemeStyles.installOnDialog(alert);
     alert.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(_ -> {
       sessionService.deleteSavedRun(UUID.fromString(record.runId()));
       afterMutation.run();

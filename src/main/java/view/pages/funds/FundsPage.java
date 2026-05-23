@@ -46,10 +46,11 @@ public class FundsPage extends BorderPane {
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
 
-    Text heading = new Text("Available funds");
+    Text heading = new Text("Available Funds");
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
     ThemeStyles.addStyleClasses(heading, "finance-page-title");
     ThemeStyles.addStyleClasses(metaLabel, "finance-meta");
+    VBox.setMargin(metaLabel, new Insets(0, 0, 8, 0));
 
     Button refreshBtn = new Button("Refresh");
     styleButton(refreshBtn);
@@ -57,7 +58,7 @@ public class FundsPage extends BorderPane {
 
     HBox topRow = new HBox(16, heading, refreshBtn);
     topRow.setAlignment(Pos.CENTER_LEFT);
-    VBox top = new VBox(8, topRow, metaLabel);
+    VBox top = new VBox(4, topRow, metaLabel);
     setTop(top);
 
     buildTable();
@@ -83,7 +84,7 @@ public class FundsPage extends BorderPane {
         exchange.getName()
             + " · "
             + exchange.getFunds().size()
-            + " fund listing(s)");
+            + " Fund Listing(s)");
     List<Fund> sorted = new ArrayList<>(exchange.findFunds(""));
     sorted.sort(Comparator.comparing(Fund::getSymbol));
     Fund previousSelection = table.getSelectionModel().getSelectedItem();
@@ -104,7 +105,7 @@ public class FundsPage extends BorderPane {
     nameColumn.setCellValueFactory(
         cell -> new SimpleStringProperty(cell.getValue().getDisplayName()));
 
-    TableColumn<Fund, String> priceColumn = new TableColumn<>("Latest price");
+    TableColumn<Fund, String> priceColumn = new TableColumn<>("Latest Price");
     priceColumn.setCellValueFactory(
         cell -> new SimpleStringProperty(cell.getValue().getSalesPrice().toPlainString()));
 

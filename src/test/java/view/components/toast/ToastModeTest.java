@@ -41,22 +41,22 @@ class ToastModeTest {
 
   @Test
   void errorColorHex() {
-    assertEquals("#FF4444", ToastMode.ERROR.getColorHex());
+    assertEquals("#EF4444", ToastMode.ERROR.getColorHex());
   }
 
   @Test
   void warningColorHex() {
-    assertEquals("#FFA500", ToastMode.WARNING.getColorHex());
+    assertEquals("#F59E0B", ToastMode.WARNING.getColorHex());
   }
 
   @Test
   void infoColorHex() {
-    assertEquals("#2196F3", ToastMode.INFO.getColorHex());
+    assertEquals("#0EA5A4", ToastMode.INFO.getColorHex());
   }
 
   @Test
   void successColorHex() {
-    assertEquals("#4CAF50", ToastMode.SUCCESS.getColorHex());
+    assertEquals("#22C55E", ToastMode.SUCCESS.getColorHex());
   }
 
   @Test

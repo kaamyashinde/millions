@@ -21,10 +21,10 @@ import model.analysis.MoonPhaseCalculator;
 public class MoonPhaseTool extends AbstractChartTool {
 
   /** Grey hex colour used for vertical dashed lines marking new-moon days. */
-  private static final String NEW_MOON_COLOR = "#aaaaaa";
+  private static final String NEW_MOON_COLOR = "#94A3B8";
 
   /** Gold hex colour used for vertical dashed lines marking full-moon days. */
-  private static final String FULL_MOON_COLOR = "#ffd700";
+  private static final String FULL_MOON_COLOR = "#F59E0B";
 
   /** Calendar date corresponding to day index 1 on the chart's x-axis. */
   private final LocalDate startDate;
