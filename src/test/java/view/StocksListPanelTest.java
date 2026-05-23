@@ -15,14 +15,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import model.core.market.Exchange;
 import model.core.player.Player;
 import model.core.asset.Stock;
+import view.components.chart.ChartRange;
 import view.components.chart.StockChart;
 import view.components.notification.NotificationService;
 import view.pages.stocks.StocksPage;
@@ -83,6 +86,49 @@ class StocksPageTest {
     assertTrue(microsoftUpperBound > appleUpperBound);
   }
 
+  @Test
+  void chartRangeBarFiltersChartAndPersistsWhenSwitchingStocks() throws Exception {
+    Stock apple =
+        stockWithPrices("AAPL", "Apple Inc.", "100", "101", "102", "103", "104", "105", "106");
+    Stock microsoft =
+        stockWithPrices("MSFT", "Microsoft", "900", "901", "902", "903", "904", "905", "906");
+    Exchange exchange =
+        new Exchange.Builder("NYSE").stocks(List.of(microsoft, apple)).build();
+    Player player = new Player("tester", new BigDecimal("10000.00"));
+
+    StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
+    SplitPane splitPane = (SplitPane) panel.getCenter();
+    BorderPane chartPanel = (BorderPane) splitPane.getItems().getFirst();
+    ScrollPane rightScroll = (ScrollPane) splitPane.getItems().get(1);
+    VBox rightColumn = (VBox) rightScroll.getContent();
+    @SuppressWarnings("unchecked")
+    TableView<Stock> table = (TableView<Stock>) rightColumn.getChildren().getFirst();
+
+    assertTrue(chartPanel.getBottom() instanceof HBox);
+    assertEquals(7, dataPointCount((StockChart) chartPanel.getCenter()));
+
+    runOnFxThread(
+        () -> {
+          rangeButton(chartPanel, ChartRange.FIVE_DAYS).fire();
+          return panel;
+        });
+
+    assertEquals(5, dataPointCount((StockChart) chartPanel.getCenter()));
+    assertEquals(3, firstChartDay((StockChart) chartPanel.getCenter()));
+    assertTrue(rangeButton(chartPanel, ChartRange.FIVE_DAYS).isSelected());
+
+    runOnFxThread(
+        () -> {
+          table.getSelectionModel().select(1);
+          return panel;
+        });
+
+    assertEquals("MSFT", panel.getDetailView().getSelectedStock().getSymbol());
+    assertEquals(5, dataPointCount((StockChart) chartPanel.getCenter()));
+    assertEquals(3, firstChartDay((StockChart) chartPanel.getCenter()));
+    assertTrue(rangeButton(chartPanel, ChartRange.FIVE_DAYS).isSelected());
+  }
+
   private static StocksPage createPage(Exchange exchange, Player player) {
     StocksController stocks = new StocksController(exchange);
     StockDetailController stockDetail = new StockDetailController(exchange);
@@ -109,6 +155,24 @@ class StocksPageTest {
 
   private static double yAxisUpperBound(StockChart chart) {
     return ((NumberAxis) chart.getYAxis()).getUpperBound();
+  }
+
+  private static int dataPointCount(StockChart chart) {
+    return chart.getData().getFirst().getData().size();
+  }
+
+  private static int firstChartDay(StockChart chart) {
+    return chart.getData().getFirst().getData().getFirst().getXValue().intValue();
+  }
+
+  private static ToggleButton rangeButton(BorderPane chartPanel, ChartRange range) {
+    HBox rangeBar = (HBox) chartPanel.getBottom();
+    return rangeBar.getChildren().stream()
+        .filter(ToggleButton.class::isInstance)
+        .map(ToggleButton.class::cast)
+        .filter(button -> button.getText().equals(range.getLabel()))
+        .findFirst()
+        .orElseThrow();
   }
 
   private static void layout(StocksPage panel) {

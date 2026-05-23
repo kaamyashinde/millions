@@ -1,5 +1,6 @@
 package view.components.chart;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -43,6 +44,57 @@ class StockChartTest {
     assertTrue(highPriceBounds.lowerBound() <= 900.00);
     assertTrue(highPriceBounds.upperBound() >= 1200.00);
     assertTrue(highPriceBounds.upperBound() > lowPriceBounds.upperBound());
+  }
+
+  @Test
+  void allRangeRendersFullPriceHistory() throws Exception {
+    StockChart chart =
+        runOnFxThread(
+            () -> new StockChart(stockWithPrices("FULL", "Full Range", "10", "11", "12")));
+
+    assertEquals(3, chart.getData().getFirst().getData().size());
+    assertEquals(1, chart.getData().getFirst().getData().getFirst().getXValue());
+    assertEquals(3, chart.getData().getFirst().getData().getLast().getXValue());
+  }
+
+  @Test
+  void limitedRangeRendersLatestPriceHistoryWithOriginalDayNumbers() throws Exception {
+    StockChart chart =
+        runOnFxThread(
+            () ->
+                new StockChart(
+                    stockWithPrices("LIM", "Limited Range", "10", "11", "12", "13", "14", "15"),
+                    ChartRange.FIVE_DAYS));
+
+    assertEquals(5, chart.getData().getFirst().getData().size());
+    assertEquals(2, chart.getData().getFirst().getData().getFirst().getXValue());
+    assertEquals(6, chart.getData().getFirst().getData().getLast().getXValue());
+  }
+
+  @Test
+  void rangeLargerThanHistoryRendersAllAvailablePrices() throws Exception {
+    StockChart chart =
+        runOnFxThread(
+            () ->
+                new StockChart(
+                    stockWithPrices("SHORT", "Short History", "10", "11"), ChartRange.FIVE_DAYS));
+
+    assertEquals(2, chart.getData().getFirst().getData().size());
+    assertEquals(1, chart.getData().getFirst().getData().getFirst().getXValue());
+    assertEquals(2, chart.getData().getFirst().getData().getLast().getXValue());
+  }
+
+  @Test
+  void oneDayRangeShowsSinglePointSymbol() throws Exception {
+    StockChart chart =
+        runOnFxThread(
+            () ->
+                new StockChart(
+                    stockWithPrices("ONE", "One Day", "10", "11", "12"), ChartRange.ONE_DAY));
+
+    assertEquals(1, chart.getData().getFirst().getData().size());
+    assertEquals(3, chart.getData().getFirst().getData().getFirst().getXValue());
+    assertTrue(chart.getCreateSymbols());
   }
 
   private static AxisBounds axisBoundsFor(Stock stock) {
