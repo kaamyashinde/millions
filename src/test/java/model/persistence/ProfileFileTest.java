@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import model.core.asset.Stock;
@@ -78,6 +79,24 @@ class ProfileFileTest {
     ProfileFile loaded = storage.read(file, ProfileFile.class);
     assertEquals("Alice", loaded.username());
     assertEquals("NYSE", loaded.exchangeName());
+  }
+
+  @Test
+  void listUsernames_ignoresBackupDirectoriesWithInvalidNames() throws Exception {
+    ProfilePaths paths = new ProfilePaths(tempDir);
+    JsonStorage storage = new JsonStorage();
+    MarketData marketData = sampleMarketData();
+    Exchange exchange = ProfileFile.createFreshExchange(marketData, "NYSE");
+    Player player = new Player("Alice", new BigDecimal("500"));
+    ProfileFile original = ProfileFile.capture(
+        player, exchange, "Alice", "alice", "pinhash", null, false);
+
+    storage.write(paths.profileFile("alice"), original);
+    Path backupProfile = tempDir.resolve("alice.corrupt-backup").resolve("profile.json");
+    Files.createDirectories(backupProfile.getParent());
+    Files.writeString(backupProfile, "{\"stockPrices\":[{\"prices\":[not-json]}]}");
+
+    assertEquals(List.of("Alice"), paths.listUsernames(storage));
   }
 
   private static MarketData sampleMarketData() {
