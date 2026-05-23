@@ -68,7 +68,8 @@ public final class SessionWorkspaceBuilder {
             workspaceController.getStockDetail(),
             workspaceController.getTrading(),
             refreshAndPersist);
-    FundsPage fundsPage = new FundsPage(session.exchange());
+    FundsPage fundsPage =
+        new FundsPage(session.exchange(), workspaceController.getTrading(), refreshAndPersist);
     SavingsPage savingsPage =
         new SavingsPage(workspaceController.getSavings(), refreshAndPersist);
     SavedRunsPage savedRunsPage = new SavedRunsPage(sessionService, persistAction);

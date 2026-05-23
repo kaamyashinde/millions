@@ -162,7 +162,7 @@ public class MillionsApp extends Application {
         ctrl.getPortfolio(), ctrl.getTrading(), refreshAndPersist);
     StocksPage stocksPage = new StocksPage(
         ctrl.getStocks(), ctrl.getStockDetail(), ctrl.getTrading(), refreshAndPersist);
-    FundsPage fundsPage = new FundsPage(session.exchange());
+    FundsPage fundsPage = new FundsPage(session.exchange(), ctrl.getTrading(), refreshAndPersist);
     SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), refreshAndPersist);
     SavedRunsPage savedRunsPage = new SavedRunsPage(svc, ctrl::refreshAll);
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
