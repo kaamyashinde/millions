@@ -1,7 +1,6 @@
 package model.session;
 
 
-import model.session.auth.AuthService;
 import model.exception.auth.AuthenticationException;
 import model.exception.auth.DuplicateUsernameException;
 import model.exception.auth.RegistrationValidationException;
@@ -18,12 +17,9 @@ import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import model.core.asset.Stock;
-import model.core.asset.fund.Fund;
-import model.core.asset.fund.FundComponent;
+import java.util.Optional;
 import model.persistence.ProfileFile;
 import model.persistence.io.JsonStorage;
-import model.persistence.market.MarketData;
 import model.persistence.profile.ProfilePaths;
 import model.session.validation.ValidationError;
 import org.junit.jupiter.api.Test;
@@ -200,25 +196,38 @@ class SessionServiceTest {
         () -> sessionService.deleteProfile("Alice", "1234".toCharArray()));
   }
 
-  private SessionService createSessionService() {
-    return SessionServiceFactory.createLocalProfileSessionService(
-        tempDir, SessionServiceTest::sampleMarketData, "NYSE");
+  @Test
+  void register_withCustomMarketDataFile_usesUploadedSymbols() throws Exception {
+    SessionService sessionService = createSessionService();
+    Path customCsv = tempDir.resolve("upload.csv");
+    Files.writeString(customCsv, "STOCK,CUSTOM,Custom Inc,99.00\n");
+
+    ActiveSession session = sessionService.register(
+        "Trader", "1234".toCharArray(), new BigDecimal("500.00"), Optional.of(customCsv));
+
+    assertEquals("CUSTOM", session.exchange().getStocks().getFirst().getSymbol());
+    assertTrue(Files.isRegularFile(tempDir.resolve("trader").resolve("market-data.csv")));
   }
 
-  private static MarketData sampleMarketData() {
-    Stock apple = new Stock("AAPL", "Apple Inc.");
-    apple.addNewSalesPrice(new BigDecimal("150.00"));
+  @Test
+  void login_restoresUsingProfileMarketDataFile() throws Exception {
+    SessionService sessionService = createSessionService();
+    Path customCsv = tempDir.resolve("only.csv");
+    Files.writeString(customCsv, "STOCK,ONLY,Only Inc,12.00\n");
+    sessionService.register(
+        "Solo", "1234".toCharArray(), new BigDecimal("100.00"), Optional.of(customCsv));
+    sessionService.logout();
 
-    Stock microsoft = new Stock("MSFT", "Microsoft Corp.");
-    microsoft.addNewSalesPrice(new BigDecimal("300.00"));
+    ActiveSession restored = sessionService.login("Solo", "1234".toCharArray());
 
-    Fund blend = new Fund(
-        "BLEND",
-        "Blend Fund",
-        List.of(
-            new FundComponent(apple, new BigDecimal("0.60")),
-            new FundComponent(microsoft, new BigDecimal("0.40"))));
+    assertEquals("ONLY", restored.exchange().getStocks().getFirst().getSymbol());
+  }
 
-    return new MarketData(List.of(apple, microsoft), List.of(blend));
+  private SessionService createSessionService() {
+    return SessionServiceFactory.createLocalProfileSessionService(
+        tempDir,
+        "/data/demo-stocks.csv",
+        SessionServiceTest.class,
+        "NYSE");
   }
 }
