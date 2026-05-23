@@ -1,7 +1,7 @@
 package model.analysis.metric;
 
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 

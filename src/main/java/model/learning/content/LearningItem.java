@@ -2,7 +2,7 @@ package model.learning.content;
 
 
 import java.util.List;
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * A single educational topic that belongs to a {@link LearningCategory}.

@@ -5,7 +5,7 @@ import model.learning.content.LearningItem;
 
 import java.util.List;
 
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * A quiz linked to a single {@link LearningItem}, containing a fixed set of

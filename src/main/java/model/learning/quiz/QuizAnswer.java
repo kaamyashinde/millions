@@ -1,7 +1,7 @@
 package model.learning.quiz;
 
 
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * An answer option for a {@link QuizQuestion}.

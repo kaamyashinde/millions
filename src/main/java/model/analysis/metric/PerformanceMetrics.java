@@ -1,7 +1,7 @@
 package model.analysis.metric;
 
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 /**
  * Groups the displayed metrics for one portfolio or benchmark.

@@ -1,6 +1,6 @@
 package view.components.notification;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import model.core.player.Player;
 import model.core.player.level.PlayerLevel;

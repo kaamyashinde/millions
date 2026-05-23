@@ -4,7 +4,7 @@ package model.core.market.pricing;
 import model.core.market.event.MarketEvent;
 import model.core.market.event.SymbolMarketEventTarget;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.List;

@@ -3,7 +3,7 @@ package model.core.asset;
 
 import model.trading.transaction.Purchase;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 import java.math.BigDecimal;
 
 /**

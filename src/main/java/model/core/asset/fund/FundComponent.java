@@ -3,7 +3,7 @@ package model.core.asset.fund;
 
 import java.math.BigDecimal;
 import model.core.asset.Stock;
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * Immutable stock allocation inside a fund composite.

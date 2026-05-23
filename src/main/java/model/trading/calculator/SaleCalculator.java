@@ -3,7 +3,7 @@ package model.trading.calculator;
 
 import java.math.BigDecimal;
 import model.core.asset.Share;
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * A class that implements TransactionCalculator to calculate sale transactions.

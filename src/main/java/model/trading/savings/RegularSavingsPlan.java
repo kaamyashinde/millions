@@ -4,7 +4,7 @@ package model.trading.savings;
 import model.core.asset.Share;
 
 import java.math.BigDecimal;
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * Recurring purchase plan for a single stock symbol: installment mode, amount, interval in trading

@@ -1,7 +1,7 @@
 package model.core.market.event;
 
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.Set;

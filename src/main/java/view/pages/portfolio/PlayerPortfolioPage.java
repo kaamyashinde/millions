@@ -3,7 +3,7 @@ package view.pages.portfolio;
 import model.core.player.Portfolio;
 import model.trading.transaction.Purchase;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

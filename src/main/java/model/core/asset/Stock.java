@@ -3,7 +3,7 @@ package model.core.asset;
 
 import model.core.market.Exchange;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;

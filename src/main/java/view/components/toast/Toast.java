@@ -1,6 +1,6 @@
 package view.components.toast;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

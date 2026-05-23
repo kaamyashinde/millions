@@ -4,7 +4,7 @@ package model.core.asset.fund;
 import java.math.BigDecimal;
 import java.util.List;
 import model.core.asset.InvestableAsset;
-import model.utils.Validator;
+import util.Validator;
 
 /**
  * Composite investable asset whose price is derived from weighted underlying stocks.
