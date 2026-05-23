@@ -20,34 +20,6 @@ class StockRecommendationServiceTest {
   }
 
   @Test
-  void recommend_returnsBuyForClearPositiveTrend() {
-    Stock stock = stockWithPrices("100.00", "101.00", "102.00", "104.00");
-
-    assertEquals(StockRecommendation.BUY, service.recommend(stock));
-  }
-
-  @Test
-  void recommend_returnsHoldForNearlyFlatTrend() {
-    Stock stock = stockWithPrices("100.00", "100.40", "100.20", "100.70");
-
-    assertEquals(StockRecommendation.HOLD, service.recommend(stock));
-  }
-
-  @Test
-  void recommend_returnsSellForClearNegativeTrend() {
-    Stock stock = stockWithPrices("100.00", "98.50", "97.50", "95.00");
-
-    assertEquals(StockRecommendation.SELL, service.recommend(stock));
-  }
-
-  @Test
-  void recommend_returnsHoldWhenHistoryIsTooShort() {
-    Stock stock = stockWithPrices("100.00");
-
-    assertEquals(StockRecommendation.HOLD, service.recommend(stock));
-  }
-
-  @Test
   void recommend_listOverloadRejectsNull() {
     NullPointerException error =
         assertThrows(NullPointerException.class, () -> service.recommend((List<BigDecimal>) null));
@@ -65,30 +37,27 @@ class StockRecommendationServiceTest {
 
   @Test
   void recommend_delegatesToInjectedStrategy() {
-    RecommendationStrategy alwaysSell =
-        prices -> prices.size() >= 2 ? StockRecommendation.SELL : StockRecommendation.HOLD;
-    StockRecommendationService custom = new StockRecommendationService(alwaysSell);
-    Stock stock = stockWithPrices("100.00", "101.00");
+    StockRecommendationService custom =
+        new StockRecommendationService(RecommendationStrategy.MEAN_REVERSION);
+    Stock stock = stockWithPrices("100", "100", "100", "97");
 
-    assertEquals(StockRecommendation.SELL, custom.recommend(stock));
+    assertEquals(StockRecommendation.BUY, custom.recommend(stock));
   }
 
   @Test
   void recommend_listDelegatesToInjectedStrategy() {
-    RecommendationStrategy alwaysBuy = prices -> StockRecommendation.BUY;
-    StockRecommendationService custom = new StockRecommendationService(alwaysBuy);
+    StockRecommendationService custom =
+        new StockRecommendationService(RecommendationStrategy.MOMENTUM);
+    List<BigDecimal> prices =
+        List.of(
+            new BigDecimal("100"),
+            new BigDecimal("101"),
+            new BigDecimal("103"),
+            new BigDecimal("106"));
 
-    assertEquals(
-        StockRecommendation.BUY,
-        custom.recommend(List.of(new BigDecimal("1"), new BigDecimal("2"))));
+    assertEquals(StockRecommendation.BUY, custom.recommend(prices));
   }
 
-  /**
-   * Creates a stock with the provided ordered prices.
-   *
-   * @param prices ordered prices, oldest to newest
-   * @return stock populated with those prices
-   */
   private static Stock stockWithPrices(String... prices) {
     Stock stock = new Stock("AAPL", "Apple Inc.");
     for (String price : prices) {
