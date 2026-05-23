@@ -25,6 +25,7 @@ import model.core.market.event.MarketEvent;
 import model.core.market.pricing.MarketEventStrategy;
 import model.trading.command.buy.BuyCommand;
 import model.trading.command.buy.BuyUpToBudgetCommand;
+import model.trading.command.sell.SellAllHoldingsCommand;
 import model.trading.command.sell.SellByQuantityCommand;
 import model.trading.command.sell.SellCommand;
 import model.trading.command.sell.SellUpToTargetNetCommand;
@@ -395,6 +396,16 @@ public class Exchange {
    */
   public List<Transaction> sellUpToTargetNet(String symbol, BigDecimal targetNet, Player player) {
     return new SellUpToTargetNetCommand(this, symbol, targetNet).execute(player);
+  }
+
+  /**
+   * Sells every symbol held in the player's portfolio using FIFO lots.
+   *
+   * @param player the player
+   * @return all sale transactions (empty when the portfolio has no holdings)
+   */
+  public List<Transaction> sellAllHoldings(Player player) {
+    return new SellAllHoldingsCommand(this).execute(player);
   }
 
   /**
