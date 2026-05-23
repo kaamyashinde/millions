@@ -68,7 +68,8 @@ public final class SessionWorkspaceBuilder {
         new SavingsPage(workspaceController.getSavings(), refreshAndPersist);
     SavedRunsPage savedRunsPage = new SavedRunsPage(sessionService, persistAction);
     LeaderboardPage leaderboardPage = new LeaderboardPage(sessionService);
-    LearningHubPage learningHubPage = new LearningHubPage();
+    LearningHubPage learningHubPage =
+        new LearningHubPage(workspaceController.getLearningHub(), workspaceController.getQuiz());
 
     Tab notificationsTab = new Tab("Notifications", notificationsPage);
     Tab playerTab = new Tab("Player", portfolioPage);
@@ -138,7 +139,10 @@ public final class SessionWorkspaceBuilder {
       learningHubPage.openTopic(item.id());
       tabPane.getSelectionModel().select(learningTab);
     };
-    QuizLauncherPage quizLauncherPage = new QuizLauncherPage(openTopicInHub);
+    QuizLauncherPage quizLauncherPage = new QuizLauncherPage(
+        workspaceController.getQuiz(),
+        workspaceController.getLearningHub(),
+        openTopicInHub);
     quizTab.setContent(quizLauncherPage);
 
     final WorkspaceLayout[] layoutHolder = new WorkspaceLayout[1];

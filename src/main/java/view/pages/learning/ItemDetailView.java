@@ -1,9 +1,10 @@
 package view.pages.learning;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
+import controller.LearningHubController;
+import controller.QuizController;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,19 +14,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
-
 import model.learning.content.Difficulty;
-import model.learning.store.LearningContentStore;
 import model.learning.content.LearningItem;
 import model.learning.content.LearningResource;
 import model.learning.quiz.Quiz;
 import model.learning.quiz.QuizAttempt;
-import model.learning.store.QuizContentStore;
 import util.ExternalLinkOpener;
-import util.MarkdownLoader;
 import view.components.learning.LearningResourceCard;
 import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
@@ -36,30 +30,36 @@ import view.theme.ThemeStyles;
  * topics.
  *
  * @author kaamyashinde
- * @version 1.2.0
+ * @version 2.0.0
  * @since 04-04-2026
  */
 public class ItemDetailView extends BorderPane {
 
-  private static final Parser MD_PARSER = Parser.builder().build();
-  private static final HtmlRenderer HTML_RENDERER = HtmlRenderer.builder().build();
+  private final LearningHubController learningHub;
+  private final QuizController quiz;
 
   /**
    * Builds the detail view for the given item.
    *
+   * @param learningHub   supplies catalog and rendered article content
+   * @param quiz          supplies linked quiz content
    * @param item          the learning item to display
    * @param onBack        called when the back button is clicked
    * @param onItemClicked called when a related topic card is clicked
    * @param onTakeQuiz    called with a fresh {@link QuizAttempt} when the player starts the quiz
    */
   public ItemDetailView(
+      LearningHubController learningHub,
+      QuizController quiz,
       LearningItem item,
       Runnable onBack,
       Consumer<LearningItem> onItemClicked,
       Consumer<QuizAttempt> onTakeQuiz) {
+    this.learningHub = learningHub;
+    this.quiz = quiz;
+
     setPadding(new Insets(16));
 
-    // ── TOP: back button ─────────────────────────────────────────────────────
     Button backBtn = new Button("← Back");
     ThemeStyles.styleButton(backBtn);
     backBtn.setOnAction(_ -> onBack.run());
@@ -68,7 +68,6 @@ public class ItemDetailView extends BorderPane {
     topBar.setPadding(new Insets(0, 0, 8, 0));
     setTop(topBar);
 
-    // ── CENTER: WebView for markdown + resource cards + related topics + quiz ──
     VBox content = new VBox(16);
     content.setPadding(new Insets(0, 0, 16, 0));
 
@@ -84,11 +83,8 @@ public class ItemDetailView extends BorderPane {
     setCenter(scroll);
   }
 
-  private static javafx.scene.Node buildMarkdownView(LearningItem item) {
-    String markdown = MarkdownLoader.load(item.contentFile());
-    String bodyHtml = markdown.isEmpty()
-        ? "<p style='color:#CBD5E1'>Content not available.</p>"
-        : HTML_RENDERER.render(MD_PARSER.parse(markdown));
+  private javafx.scene.Node buildMarkdownView(LearningItem item) {
+    String bodyHtml = learningHub.getItemBodyHtml(item);
 
     String html = """
         <!DOCTYPE html>
@@ -130,7 +126,6 @@ public class ItemDetailView extends BorderPane {
     webView.setPrefHeight(520);
     webView.setMaxWidth(Double.MAX_VALUE);
 
-    // Open clicked links in the system browser instead of inside the WebView
     webView.getEngine().locationProperty().addListener((obs, oldLoc, newLoc) -> {
       if (newLoc != null && !newLoc.isEmpty() && !newLoc.startsWith("about:")) {
         webView.getEngine().loadContent(html, "text/html");
@@ -141,8 +136,8 @@ public class ItemDetailView extends BorderPane {
     return webView;
   }
 
-  private static javafx.scene.Node buildResourcesSection(LearningItem item) {
-    List<LearningResource> resources = LearningContentStore.getResourcesForItem(item);
+  private javafx.scene.Node buildResourcesSection(LearningItem item) {
+    List<LearningResource> resources = learningHub.getResourcesForItem(item);
 
     VBox section = new VBox(10);
     section.setPadding(new Insets(8, 0, 0, 0));
@@ -150,8 +145,8 @@ public class ItemDetailView extends BorderPane {
     Label heading = new Label("Further Reading");
     heading.setStyle(
         "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 13;");
     section.getChildren().add(heading);
 
     if (resources.isEmpty()) {
@@ -159,8 +154,8 @@ public class ItemDetailView extends BorderPane {
           "Open links in the Further Reading section above to explore more.");
       fallback.setStyle(
           "-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + ";"
-          + "-fx-font-size: 11;"
-          + "-fx-font-style: italic;");
+              + "-fx-font-size: 11;"
+              + "-fx-font-style: italic;");
       fallback.setWrapText(true);
       section.getChildren().add(fallback);
     } else {
@@ -172,9 +167,9 @@ public class ItemDetailView extends BorderPane {
     return section;
   }
 
-  private static javafx.scene.Node buildRelatedTopicsSection(
+  private javafx.scene.Node buildRelatedTopicsSection(
       LearningItem item, Consumer<LearningItem> onItemClicked) {
-    List<LearningItem> related = LearningContentStore.getItemsByIds(item.relatedTopicIds());
+    List<LearningItem> related = learningHub.getItemsByIds(item.relatedTopicIds());
     if (related.isEmpty()) {
       return new Region();
     }
@@ -185,8 +180,8 @@ public class ItemDetailView extends BorderPane {
     Label heading = new Label("Suggested Next Topics");
     heading.setStyle(
         "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 13;");
     section.getChildren().add(heading);
 
     for (LearningItem relatedItem : related) {
@@ -203,10 +198,10 @@ public class ItemDetailView extends BorderPane {
     Label badge = new Label(item.difficulty().name());
     badge.setStyle(
         "-fx-background-color: " + badgeColor + "22;"
-        + "-fx-text-fill: " + badgeColor + ";"
-        + "-fx-background-radius: 4;"
-        + "-fx-padding: 2 6 2 6;"
-        + "-fx-font-size: 10;");
+            + "-fx-text-fill: " + badgeColor + ";"
+            + "-fx-background-radius: 4;"
+            + "-fx-padding: 2 6 2 6;"
+            + "-fx-font-size: 10;");
 
     Label title = new Label(item.title());
     title.setStyle("-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + "; -fx-font-weight: bold;");
@@ -224,41 +219,43 @@ public class ItemDetailView extends BorderPane {
     card.setMaxWidth(Double.MAX_VALUE);
     card.setStyle(
         "-fx-background-color: " + ThemePalette.SURFACE + ";"
-        + "-fx-border-color: " + ThemePalette.ACCENT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;");
+            + "-fx-border-color: " + ThemePalette.ACCENT + ";"
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;"
+            + "-fx-cursor: hand;");
     card.setOnMouseClicked(_ -> onItemClicked.accept(item));
     return card;
   }
 
-  private static javafx.scene.Node buildQuizSection(
+  private javafx.scene.Node buildQuizSection(
       LearningItem item, Consumer<QuizAttempt> onTakeQuiz) {
-    Optional<Quiz> quiz = QuizContentStore.getQuizForItem(item.id());
-    if (quiz.isEmpty()) {
-      return new Region();
-    }
+    return quiz.getQuizForItem(item.id())
+        .map(found -> buildQuizSectionContent(found, onTakeQuiz))
+        .orElseGet(Region::new);
+  }
 
+  private static javafx.scene.Node buildQuizSectionContent(
+      Quiz quiz, Consumer<QuizAttempt> onTakeQuiz) {
     Label heading = new Label("Test Your Knowledge");
     heading.setStyle(
         "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+            + "-fx-font-weight: bold;"
+            + "-fx-font-size: 13;");
 
-    Button quizBtn = new Button("Take Quiz: " + quiz.get().title() + "  →");
+    Button quizBtn = new Button("Take Quiz: " + quiz.title() + "  →");
     quizBtn.setMaxWidth(Double.MAX_VALUE);
     quizBtn.setWrapText(true);
     quizBtn.setStyle(
         "-fx-background-color: #0EA5A422;"
-        + "-fx-text-fill: " + ThemePalette.ACCENT + ";"
-        + "-fx-border-color: " + ThemePalette.ACCENT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;"
-        + "-fx-font-size: 13;"
-        + "-fx-font-weight: bold;"
-        + "-fx-padding: 12 16 12 16;");
-    quizBtn.setOnAction(_ -> onTakeQuiz.accept(new QuizAttempt(quiz.get())));
+            + "-fx-text-fill: " + ThemePalette.ACCENT + ";"
+            + "-fx-border-color: " + ThemePalette.ACCENT + ";"
+            + "-fx-border-radius: 8;"
+            + "-fx-background-radius: 8;"
+            + "-fx-cursor: hand;"
+            + "-fx-font-size: 13;"
+            + "-fx-font-weight: bold;"
+            + "-fx-padding: 12 16 12 16;");
+    quizBtn.setOnAction(_ -> onTakeQuiz.accept(new QuizAttempt(quiz)));
 
     VBox section = new VBox(8, heading, quizBtn);
     section.setPadding(new Insets(8, 0, 0, 0));
@@ -272,5 +269,4 @@ public class ItemDetailView extends BorderPane {
       case ADVANCED -> ThemePalette.DIFFICULTY_ADVANCED;
     };
   }
-
 }

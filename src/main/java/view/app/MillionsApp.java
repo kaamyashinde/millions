@@ -153,7 +153,8 @@ public class MillionsApp extends Application {
     SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), ctrl::refreshAll);
     SavedRunsPage savedRunsPage = new SavedRunsPage(svc, ctrl::refreshAll);
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
-    LearningHubPage learningHubPage = new LearningHubPage();
+    LearningHubPage learningHubPage =
+        new LearningHubPage(ctrl.getLearningHub(), ctrl.getQuiz());
     NotificationsPage notificationsPage = new NotificationsPage(ctrl.getNotificationsTab());
 
     Tab portfolioTab = makeTab("Portfolio", portfolioPage);
@@ -177,7 +178,8 @@ public class MillionsApp extends Application {
           learningHubPage.openTopic(item.id());
           tabs.getSelectionModel().select(learningTab);
         };
-    quizTab.setContent(new QuizLauncherPage(openTopicInHub));
+    quizTab.setContent(new QuizLauncherPage(
+        ctrl.getQuiz(), ctrl.getLearningHub(), openTopicInHub));
     return tabs;
   }
 

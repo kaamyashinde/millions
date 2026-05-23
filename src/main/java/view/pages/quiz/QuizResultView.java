@@ -3,6 +3,7 @@ package view.pages.quiz;
 import java.util.List;
 import java.util.function.Consumer;
 
+import controller.LearningHubController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -42,6 +43,7 @@ public class QuizResultView extends BorderPane {
   private static final String COLOR_ORANGE = "#F59E0B";
   private static final String COLOR_BORDER_DEFAULT = "#334155";
 
+  private final LearningHubController learningHub;
   private final Consumer<LearningItem> onOpenHubTopic;
 
   /**
@@ -50,13 +52,16 @@ public class QuizResultView extends BorderPane {
    * @param attempt        the completed quiz attempt
    * @param onBackToTopic  called when the player returns to the topic detail view
    * @param onBackToHub    called when the player returns to the Learning Hub landing
+   * @param learningHub    supplies linked topic and resource lookups for breakdown links
    * @param onOpenHubTopic called when the player opens a linked hub topic from breakdown links
    */
   public QuizResultView(
       QuizAttempt attempt,
       Runnable onBackToTopic,
       Runnable onBackToHub,
+      LearningHubController learningHub,
       Consumer<LearningItem> onOpenHubTopic) {
+    this.learningHub = learningHub;
     this.onOpenHubTopic = onOpenHubTopic;
 
     setStyle("-fx-background-color: " + COLOR_BG + ";");
@@ -150,7 +155,7 @@ public class QuizResultView extends BorderPane {
 
       VBox linksBox = new VBox(8);
       QuizWrongAnswerLinks.appendTo(
-          linksBox, q, attempt.quiz().linkedItemId(), onOpenHubTopic);
+          linksBox, learningHub, q, attempt.quiz().linkedItemId(), onOpenHubTopic);
       row.getChildren().add(linksBox);
     }
 
