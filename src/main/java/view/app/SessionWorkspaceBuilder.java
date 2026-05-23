@@ -20,6 +20,7 @@ import view.pages.quiz.QuizLauncherPage;
 import view.pages.saved.SavedRunsPage;
 import view.pages.savings.SavingsPage;
 import view.pages.stocks.StocksPage;
+import view.pages.transactions.TransactionHistoryPage;
 
 /**
  * Builds a {@link WorkspaceLayout} with all session tabs wired to a {@link WorkspaceController}.
@@ -59,13 +60,21 @@ public final class SessionWorkspaceBuilder {
         new NotificationsPage(workspaceController.getNotificationsTab());
     PlayerPortfolioPage portfolioPage =
         new PlayerPortfolioPage(
-            session.exchange(),
-            session.player(),
-            sessionService.avatarPath(session.normalizedUsername()));
-    StocksPage stocksPage = new StocksPage(session.exchange());
-    FundsPage fundsPage = new FundsPage(session.exchange());
+            workspaceController.getPortfolio(),
+            workspaceController.getTrading(),
+            refreshAndPersist);
+    StocksPage stocksPage =
+        new StocksPage(
+            workspaceController.getStocks(),
+            workspaceController.getStockDetail(),
+            workspaceController.getTrading(),
+            refreshAndPersist);
+    FundsPage fundsPage =
+        new FundsPage(session.exchange(), workspaceController.getTrading(), refreshAndPersist);
     SavingsPage savingsPage =
         new SavingsPage(workspaceController.getSavings(), refreshAndPersist);
+    TransactionHistoryPage transactionsPage =
+        new TransactionHistoryPage(session.exchange(), session.player());
     SavedRunsPage savedRunsPage = new SavedRunsPage(sessionService, persistAction);
     LeaderboardPage leaderboardPage = new LeaderboardPage(sessionService);
     LearningHubPage learningHubPage =
@@ -76,6 +85,7 @@ public final class SessionWorkspaceBuilder {
     Tab stocksTab = new Tab("Stocks", stocksPage);
     Tab fundsTab = new Tab("Funds", fundsPage);
     Tab savingsTab = new Tab("Savings", savingsPage);
+    Tab transactionsTab = new Tab("Transactions", transactionsPage);
     Tab savedRunsTab = new Tab("Saved runs", savedRunsPage);
     Tab leaderboardTab = new Tab("Leaderboard", leaderboardPage);
     Tab learningTab = new Tab("Learning", learningHubPage);
@@ -88,6 +98,7 @@ public final class SessionWorkspaceBuilder {
           stocksTab,
           fundsTab,
           savingsTab,
+          transactionsTab,
           savedRunsTab,
           leaderboardTab,
           learningTab,
@@ -111,6 +122,11 @@ public final class SessionWorkspaceBuilder {
         fundsPage.refresh();
       }
     });
+    transactionsTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        transactionsPage.refresh();
+      }
+    });
     savedRunsTab.selectedProperty().addListener((obs, oldVal, sel) -> {
       if (Boolean.TRUE.equals(sel)) {
         savedRunsPage.refresh();
@@ -130,6 +146,7 @@ public final class SessionWorkspaceBuilder {
             stocksTab,
             fundsTab,
             savingsTab,
+            transactionsTab,
             savedRunsTab,
             leaderboardTab,
             learningTab,

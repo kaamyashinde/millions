@@ -31,6 +31,7 @@ public class WorkspaceController {
   private final FundsController funds;
   private final FundDetailController fundDetail;
   private final SavingsController savings;
+  private final TradingController trading;
   private final SavedRunsController savedRuns;
   private final LeaderboardController leaderboard;
   private final LearningHubController learningHub;
@@ -57,6 +58,8 @@ public class WorkspaceController {
     this.fundDetail = new FundDetailController();
     this.savings =
         new SavingsController(session.exchange(), session.player(), notifications);
+    this.trading =
+        new TradingController(session.exchange(), session.player(), notifications);
     this.savedRuns = new SavedRunsController(sessionService);
     this.leaderboard = new LeaderboardController(sessionService);
     this.learningHub = new LearningHubController();
@@ -104,6 +107,10 @@ public class WorkspaceController {
 
   public SavingsController getSavings() {
     return savings;
+  }
+
+  public TradingController getTrading() {
+    return trading;
   }
 
   public SavedRunsController getSavedRuns() {

@@ -1,11 +1,8 @@
 package view.pages.stocks;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import static util.Validator.checkNotNull;
+
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -20,38 +17,49 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.core.market.Exchange;
+import controller.StockDetailController;
+import controller.StocksController;
+import controller.TradingController;
 import model.core.asset.Stock;
-import model.core.asset.info.StockFinancialInfoProvider;
-import model.core.market.event.MarketEvent;
+import model.core.asset.info.StockFinancialInfo;
 import view.theme.ThemeStyles;
 
 /**
- * JavaFX panel listing all stocks on an {@link Exchange}: symbol, company, latest price, mock
- * revenue, and health indicator.
- * Prices reflect the same {@link Stock} instances as the rest of the demo; use {@link #refresh()}
- * after trading days advance so the table re-renders updated values.
- *
- * @author kevindmazali
- * @version 1.0.0
- * @since 30-03-2026
+ * JavaFX panel listing stocks with a detail pane and buy actions.
  */
 public class StocksPage extends BorderPane {
 
-  private final Exchange exchange;
-  private final StockFinancialInfoProvider financialInfoProvider = new StockFinancialInfoProvider();
+  private final StocksController stocks;
+  private final StockDetailController stockDetail;
+  private final Runnable refreshAndPersist;
+  private final Runnable onTradeComplete;
+
   private final Label metaLabel = new Label();
   private final TableView<Stock> table = new TableView<>();
-  private final ObservableList<Stock> rows = FXCollections.observableArrayList();
   private final StockDetailView detailView = new StockDetailView();
 
   /**
-   * Builds a read-only listing for the given exchange.
-   *
-   * @param exchange exchange whose listed stocks are shown (via {@link Exchange#findStocks(String)})
+   * @param stocks stocks list and selection state
+   * @param stockDetail fundamentals and market events for the detail pane
+   * @param trading trading operations for buy dialog
+   * @param refreshAndPersist refreshes workspace controllers and persists session
    */
-  public StocksPage(Exchange exchange) {
-    this.exchange = exchange;
+  public StocksPage(
+      StocksController stocks,
+      StockDetailController stockDetail,
+      TradingController trading,
+      Runnable refreshAndPersist) {
+    checkNotNull(stocks, "stocks");
+    checkNotNull(stockDetail, "stockDetail");
+    checkNotNull(trading, "trading");
+    checkNotNull(refreshAndPersist, "refreshAndPersist");
+    this.stocks = stocks;
+    this.stockDetail = stockDetail;
+    this.refreshAndPersist = refreshAndPersist;
+    this.onTradeComplete = () -> {
+      refreshAndPersist.run();
+      refresh();
+    };
 
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
@@ -65,7 +73,7 @@ public class StocksPage extends BorderPane {
     VBox.setMargin(metaLabel, new Insets(0, 0, 8, 0));
 
     Button refreshBtn = new Button("Refresh");
-    styleButton(refreshBtn);
+    ThemeStyles.styleButton(refreshBtn);
     refreshBtn.setOnAction(_ -> refresh());
 
     HBox topRow = new HBox(16, heading, refreshBtn);
@@ -75,16 +83,18 @@ public class StocksPage extends BorderPane {
     setTop(top);
 
     buildTable();
-    table.setItems(rows);
+    table.setItems(stocks.getStocks());
     table.setPlaceholder(new Label("No stocks available."));
     table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
     VBox.setVgrow(table, Priority.ALWAYS);
-    table.getSelectionModel().selectedItemProperty().addListener((obs, previous, selected) ->
-        detailView.showStock(
-            selected,
-            exchange.getDay(),
-            exchange.getLastMarketEvent(),
-            getMarketHistoryForStock(selected)));
+
+    table.getSelectionModel().selectedItemProperty().addListener((obs, previous, selected) -> {
+      stocks.setSelectedStock(selected);
+      updateDetail(selected);
+    });
+
+    detailView.setTradeHandlers(
+        trading, () -> getScene() != null ? getScene().getWindow() : null, onTradeComplete);
 
     SplitPane splitPane = new SplitPane(table, detailView);
     splitPane.setDividerPositions(0.46);
@@ -106,90 +116,46 @@ public class StocksPage extends BorderPane {
 
     TableColumn<Stock, String> colRevenue = new TableColumn<>("Revenue (Mock)");
     colRevenue.setCellValueFactory(
-        c ->
-            new SimpleStringProperty(
-                financialInfoProvider.formatMoney(
-                    financialInfoProvider.forStock(c.getValue()).revenue())));
+        c -> {
+          StockFinancialInfo fin = stockDetail.financialInfo(c.getValue());
+          return new SimpleStringProperty(stockDetail.formatMoney(fin.revenue()));
+        });
 
     TableColumn<Stock, String> colHealth = new TableColumn<>("Health");
     colHealth.setCellValueFactory(
-        c ->
-            new SimpleStringProperty(
-                financialInfoProvider.forStock(c.getValue()).health().displayLabel()));
+        c -> new SimpleStringProperty(stockDetail.financialInfo(c.getValue()).health().displayLabel()));
 
-    table.getColumns().setAll(List.of(colSym, colCompany, colPrice, colRevenue, colHealth));
+    table.getColumns().setAll(colSym, colCompany, colPrice, colRevenue, colHealth);
   }
 
   /**
-   * Reloads row order from the exchange, updates the day label, and forces the table to redraw
-   * prices (needed after another tab advances the trading day).
+   * Reloads list metadata and the detail pane for the current selection.
    */
   public void refresh() {
-    metaLabel.setText(
-        exchange.getName()
-            + " · trading day "
-            + exchange.getDay()
-            + " · "
-            + exchange.findStocks("").size()
-            + " listing(s)");
-    List<Stock> sorted = new ArrayList<>(exchange.findStocks(""));
-    sorted.sort(Comparator.comparing(Stock::getSymbol));
-    Stock previousSelection = table.getSelectionModel().getSelectedItem();
-    rows.setAll(sorted);
-    restoreSelection(previousSelection, sorted);
-    if (table.getSelectionModel().getSelectedItem() == null && !sorted.isEmpty()) {
-      table.getSelectionModel().selectFirst();
+    metaLabel.setText(stocks.getMetaText());
+    stocks.refresh();
+    Stock selected = stocks.getSelectedStock();
+    if (selected != null) {
+      table.getSelectionModel().select(selected);
     }
     table.refresh();
-    detailView.refresh(
-        exchange.getDay(),
-        exchange.getLastMarketEvent(),
-        getMarketHistoryForStock(detailView.getSelectedStock()));
+    updateDetail(stocks.getSelectedStock());
   }
 
   /**
-   * Returns the embedded stock detail view used by this list panel.
-   *
-   * @return detail view bound to the current table selection
+   * @return embedded stock detail view
    */
   public StockDetailView getDetailView() {
     return detailView;
   }
 
-  /**
-   * Restores the previous stock selection after the backing rows are rebuilt.
-   *
-   * @param previousSelection previously selected stock, possibly null
-   * @param sorted current sorted table rows
-   */
-  private void restoreSelection(Stock previousSelection, List<Stock> sorted) {
-    if (previousSelection == null) {
-      table.getSelectionModel().clearSelection();
-      return;
-    }
-    for (Stock stock : sorted) {
-      if (stock.getSymbol().equals(previousSelection.getSymbol())) {
-        table.getSelectionModel().select(stock);
-        return;
-      }
-    }
-    table.getSelectionModel().clearSelection();
-  }
-
-  /**
-   * Returns the market-event history relevant to the given stock.
-   *
-   * @param stock selected stock, or {@code null} when no row is selected
-   * @return immutable list of relevant market events
-   */
-  private List<MarketEvent> getMarketHistoryForStock(Stock stock) {
-    if (stock == null) {
-      return List.of();
-    }
-    return exchange.getMarketEventsForStock(stock.getSymbol());
-  }
-
-  private static void styleButton(Button b) {
-    ThemeStyles.styleButton(b);
+  private void updateDetail(Stock selected) {
+    int day = stocks.getExchange().getDay();
+    detailView.showStock(
+        selected,
+        day,
+        stockDetail.getLastMarketEvent(),
+        stockDetail.getMarketHistory(selected),
+        stockDetail);
   }
 }

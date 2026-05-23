@@ -20,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import controller.TradingController;
 import model.core.market.Exchange;
 import model.core.asset.fund.Fund;
 import view.theme.ThemeStyles;
@@ -36,12 +37,18 @@ public class FundsPage extends BorderPane {
   private final FundDetailView detailView = new FundDetailView();
 
   /**
-   * Builds a read-only fund listing for the given exchange.
+   * Builds a fund listing for the given exchange.
    *
    * @param exchange exchange whose listed funds are shown
+   * @param trading trading controller for buy actions in the detail pane
+   * @param refreshAndPersist refreshes workspace and persists after trades
    */
-  public FundsPage(Exchange exchange) {
+  public FundsPage(Exchange exchange, TradingController trading, Runnable refreshAndPersist) {
     this.exchange = exchange;
+    Runnable onTradeComplete = () -> {
+      refreshAndPersist.run();
+      refresh();
+    };
 
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
@@ -68,6 +75,9 @@ public class FundsPage extends BorderPane {
     VBox.setVgrow(table, Priority.ALWAYS);
     table.getSelectionModel().selectedItemProperty().addListener((obs, oldFund, newFund) ->
         detailView.showFund(newFund));
+
+    detailView.setTradeHandlers(
+        trading, () -> getScene() != null ? getScene().getWindow() : null, onTradeComplete);
 
     SplitPane splitPane = new SplitPane(table, detailView);
     splitPane.setDividerPositions(0.46);

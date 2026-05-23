@@ -5,10 +5,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
+import javafx.stage.Window;
+import controller.StockDetailController;
+import controller.TradingController;
+import view.dialogs.TradeDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -61,9 +68,17 @@ public class StockDetailView extends BorderPane {
   private final VBox recommendationBox;
   private final VBox content = new VBox(16);
 
+  private final HBox tradeActionsBox = new HBox(10);
+  private final Button buyButton = new Button("Buy");
+  private final Button sellButton = new Button("Sell");
+
   private Stock selectedStock;
   private Optional<MarketEvent> selectedMarketEvent = Optional.empty();
   private List<MarketEvent> selectedMarketHistory = List.of();
+  private StockDetailController stockDetailController;
+  private TradingController tradingController;
+  private Supplier<Window> dialogOwnerSupplier;
+  private Runnable onTradeComplete;
 
   /**
    * Builds an initially empty stock detail view.
@@ -103,7 +118,13 @@ public class StockDetailView extends BorderPane {
     recommendationBox = new VBox(8, new Label("Recommendation"), recommendationLabel, basisLabel);
     ThemeStyles.addStyleClasses(recommendationBox, "finance-summary-card");
 
-    content.getChildren().addAll(recommendationBox, placeholderLabel);
+    ThemeStyles.styleAccentButton(buyButton);
+    ThemeStyles.styleButton(sellButton);
+    tradeActionsBox.getChildren().addAll(buyButton, sellButton);
+    tradeActionsBox.setVisible(false);
+    tradeActionsBox.setManaged(false);
+
+    content.getChildren().addAll(tradeActionsBox, recommendationBox, placeholderLabel);
     VBox.setVgrow(content, Priority.ALWAYS);
 
     setTop(header);
@@ -140,11 +161,42 @@ public class StockDetailView extends BorderPane {
    * @param marketEvent latest market event, if one occurred on the current day
    * @param marketHistory past market events relevant to the selected stock
    */
+  /**
+   * Configures buy/sell actions shown when a stock is selected.
+   *
+   * @param trading trading controller
+   * @param dialogOwnerSupplier supplies the modal owner window
+   * @param onTradeComplete invoked after a successful trade
+   */
+  public void setTradeHandlers(
+      TradingController trading,
+      Supplier<Window> dialogOwnerSupplier,
+      Runnable onTradeComplete) {
+    this.tradingController = trading;
+    this.dialogOwnerSupplier = dialogOwnerSupplier;
+    this.onTradeComplete = onTradeComplete;
+    wireTradeButtons();
+    updateTradeActions(selectedStock);
+  }
+
   public void showStock(
       Stock stock,
       int tradingDay,
       Optional<MarketEvent> marketEvent,
       List<MarketEvent> marketHistory) {
+    showStock(stock, tradingDay, marketEvent, marketHistory, null);
+  }
+
+  /**
+   * Displays stock details using an optional {@link StockDetailController} for fundamentals.
+   */
+  public void showStock(
+      Stock stock,
+      int tradingDay,
+      Optional<MarketEvent> marketEvent,
+      List<MarketEvent> marketHistory,
+      StockDetailController stockDetail) {
+    stockDetailController = stockDetail;
     selectedStock = stock;
     selectedMarketEvent = marketEvent;
     selectedMarketHistory = List.copyOf(marketHistory);
@@ -159,7 +211,8 @@ public class StockDetailView extends BorderPane {
       marketHistoryList.setItems(FXCollections.observableArrayList());
       recommendationLabel.setRecommendation(StockRecommendation.HOLD);
       placeholderLabel.setText("Choose a stock from the list to view chart and recommendation details.");
-      content.getChildren().setAll(recommendationBox, placeholderLabel);
+      content.getChildren().setAll(tradeActionsBox, recommendationBox, placeholderLabel);
+      updateTradeActions(null);
       return;
     }
 
@@ -169,18 +222,68 @@ public class StockDetailView extends BorderPane {
     marketEventLabel.setText(buildMarketEventText(stock, marketEvent));
     applyFundamentalsLabels(stock);
     marketHistoryList.setItems(FXCollections.observableArrayList(buildMarketHistoryItems(marketHistory)));
-    recommendationLabel.setRecommendation(recommendationService.recommend(stock));
+    recommendationLabel.setRecommendation(resolveRecommendation(stock));
+    updateTradeActions(stock);
 
     if (stock.getHistoricalPrices().isEmpty()) {
       placeholderLabel.setText("No price history is available for this stock yet.");
-      content.getChildren().setAll(recommendationBox, marketHistoryHeading, marketHistoryList, placeholderLabel);
+      content.getChildren().setAll(
+          tradeActionsBox, recommendationBox, marketHistoryHeading, marketHistoryList, placeholderLabel);
       return;
     }
 
     StockChart chart = new StockChart(stock);
     chart.setMinHeight(280);
     VBox.setVgrow(chart, Priority.ALWAYS);
-    content.getChildren().setAll(recommendationBox, marketHistoryHeading, marketHistoryList, chart);
+    content.getChildren().setAll(
+        tradeActionsBox, recommendationBox, marketHistoryHeading, marketHistoryList, chart);
+  }
+
+  private StockRecommendation resolveRecommendation(Stock stock) {
+    if (stockDetailController != null) {
+      return stockDetailController.recommend(stock);
+    }
+    return recommendationService.recommend(stock);
+  }
+
+  private void wireTradeButtons() {
+    buyButton.setOnAction(_ -> {
+      if (selectedStock == null || tradingController == null || dialogOwnerSupplier == null) {
+        return;
+      }
+      TradeDialog.showBuy(
+          dialogOwnerSupplier.get(),
+          tradingController,
+          selectedStock.getSymbol(),
+          onTradeComplete);
+    });
+    sellButton.setOnAction(_ -> {
+      if (selectedStock == null || tradingController == null || dialogOwnerSupplier == null) {
+        return;
+      }
+      TradeDialog.showSell(
+          dialogOwnerSupplier.get(),
+          tradingController,
+          selectedStock.getSymbol(),
+          onTradeComplete);
+    });
+  }
+
+  private void updateTradeActions(Stock stock) {
+    if (tradingController == null || stock == null) {
+      tradeActionsBox.setVisible(false);
+      tradeActionsBox.setManaged(false);
+      return;
+    }
+    tradeActionsBox.setVisible(true);
+    tradeActionsBox.setManaged(true);
+    buyButton.setText("Buy " + stock.getSymbol());
+    boolean hasShares = tradingController.getOwnedQuantity(stock.getSymbol()).signum() > 0;
+    sellButton.setVisible(hasShares);
+    sellButton.setManaged(hasShares);
+    if (hasShares) {
+      sellButton.setText("Sell " + stock.getSymbol());
+    }
   }
 
   /**
@@ -298,9 +401,20 @@ public class StockDetailView extends BorderPane {
   }
 
   private void applyFundamentalsLabels(Stock stock) {
-    StockFinancialInfo fin = financialInfoProvider.forStock(stock);
-    revenueLabel.setText("Revenue: " + financialInfoProvider.formatMoney(fin.revenue()));
-    profitLabel.setText("Profit: " + financialInfoProvider.formatMoney(fin.profit()));
+    StockFinancialInfo fin =
+        stockDetailController != null
+            ? stockDetailController.financialInfo(stock)
+            : financialInfoProvider.forStock(stock);
+    revenueLabel.setText(
+        "Revenue: "
+            + (stockDetailController != null
+                ? stockDetailController.formatMoney(fin.revenue())
+                : financialInfoProvider.formatMoney(fin.revenue())));
+    profitLabel.setText(
+        "Profit: "
+            + (stockDetailController != null
+                ? stockDetailController.formatMoney(fin.profit())
+                : financialInfoProvider.formatMoney(fin.profit())));
     healthLabel.setText("Health: " + fin.health().displayLabel());
   }
 
