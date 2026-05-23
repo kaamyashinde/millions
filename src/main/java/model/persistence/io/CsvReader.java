@@ -46,7 +46,17 @@ public final class CsvReader {
    */
   public static MarketData readMarketData(Path directory, String fileName) {
     Path path = directory.resolve(fileName + ".csv");
-    try (Stream<String> lines = Files.lines(path)) {
+    return readMarketDataFromFile(path);
+  }
+
+  /**
+   * Reads mixed market data from a CSV file at an arbitrary path.
+   *
+   * @param file path to a {@code .csv} file
+   * @return parsed stocks and funds
+   */
+  public static MarketData readMarketDataFromFile(Path file) {
+    try (Stream<String> lines = Files.lines(file)) {
       return marketDataFromLineStream(lines);
     } catch (IOException exception) {
       throw new UncheckedIOException(exception);

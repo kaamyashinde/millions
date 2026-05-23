@@ -24,6 +24,17 @@ class CsvReaderTest {
   Path tempDir;
 
   @Test
+  void readMarketDataFromFile_parsesFullPath() throws IOException {
+    Path csvFile = tempDir.resolve("full-path.csv");
+    Files.writeString(csvFile, "STOCK,ZZZ,Zeta Corp,42.00\n");
+
+    MarketData marketData = CsvReader.readMarketDataFromFile(csvFile);
+
+    assertEquals(1, marketData.stocks().size());
+    assertEquals("ZZZ", marketData.stocks().getFirst().getSymbol());
+  }
+
+  @Test
   void readMarketData_parsesStocksAndFundsFromPath() throws IOException {
     String csvContent = """
         STOCK,NVDA,Nvidia,191.27
