@@ -22,6 +22,7 @@ import model.stockinfo.StockFinancialInfo;
 import model.stockinfo.StockFinancialInfoProvider;
 import view.components.chart.StockChart;
 import view.components.recommendation.StockRecommendationLabel;
+import view.theme.ThemeStyles;
 
 /**
  * Dedicated stock detail view showing summary data, mock company fundamentals, trend-based
@@ -88,12 +89,7 @@ public class StockDetailView extends BorderPane {
     healthLabel.setWrapText(true);
     fundamentalsBox =
         new VBox(4, fundamentalsHeading, revenueLabel, profitLabel, healthLabel);
-    fundamentalsBox.setStyle(
-        "-fx-background-color: #111827;"
-            + "-fx-border-color: #334155;"
-            + "-fx-background-radius: 10;"
-            + "-fx-border-radius: 10;"
-            + "-fx-padding: 12;");
+    ThemeStyles.addStyleClasses(fundamentalsBox, "card");
 
     VBox header =
         new VBox(
@@ -105,12 +101,7 @@ public class StockDetailView extends BorderPane {
             marketEventLabel,
             fundamentalsBox);
     recommendationBox = new VBox(8, new Label("Recommendation"), recommendationLabel, basisLabel);
-    recommendationBox.setStyle(
-        "-fx-background-color: #111827;"
-            + "-fx-border-color: #334155;"
-            + "-fx-background-radius: 12;"
-            + "-fx-border-radius: 12;"
-            + "-fx-padding: 14;");
+    ThemeStyles.addStyleClasses(recommendationBox, "finance-summary-card");
 
     content.getChildren().addAll(recommendationBox, placeholderLabel);
     VBox.setVgrow(content, Priority.ALWAYS);

@@ -6,9 +6,10 @@
     -millions-primary-hover: #14B8A6;
     -millions-bg: #0B1220;
     -millions-surface: #111827;
-    -millions-surface-light: #1E293B;
-    -millions-surface-strong: #1E293B;
-    -millions-border: #334155;
+    -millions-data-surface: #0F2D35;
+    -millions-surface-light: #16434D;
+    -millions-surface-strong: #16434D;
+    -millions-border: #2A6F73;
     -millions-text-primary: #F8FAFC;
     -millions-text-secondary: #CBD5E1;
     -millions-text-muted: #94A3B8;
@@ -113,15 +114,17 @@
 }
 
 .table-view {
-    -fx-background-color: -millions-bg;
+    -fx-background-color: -millions-data-surface;
     -fx-border-color: -millions-border;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
+    -fx-table-cell-border-color: #1D5660;
 }
 
 .table-view .column-header-background {
-    -fx-background-color: -millions-surface-light;
+    -fx-background-color: -millions-surface-strong;
     -fx-border-color: transparent transparent -millions-border transparent;
+    -fx-border-width: 0 0 1.5 0;
 }
 
 .table-view .column-header,
@@ -136,22 +139,29 @@
     -fx-alignment: CENTER_LEFT;
 }
 
+.table-view .virtual-flow,
+.table-view .virtual-flow .clipped-container,
+.table-view .virtual-flow .sheet,
+.table-view .placeholder {
+    -fx-background-color: -millions-data-surface;
+}
+
 .table-row-cell:selected {
     -fx-background-color: -millions-accent-light;
     -fx-text-background-color: -millions-text-primary;
 }
 
 .table-row-cell {
-    -fx-background-color: -millions-bg;
+    -fx-background-color: -millions-data-surface;
     -fx-text-background-color: -millions-text-primary;
 }
 
 .table-row-cell:odd {
-    -fx-background-color: -millions-surface;
+    -fx-background-color: #123943;
 }
 
 .table-row-cell:empty {
-    -fx-background-color: -millions-bg;
+    -fx-background-color: -millions-data-surface;
 }
 
 .table-cell {
@@ -163,7 +173,8 @@
 }
 
 .chart-plot-background {
-    -fx-background-color: -millions-surface;
+    -fx-background-color: -millions-data-surface;
+    -fx-background-radius: 8;
 }
 
 .chart-title {
@@ -192,8 +203,10 @@
 }
 
 .chart-legend {
-    -fx-background-color: -millions-surface;
+    -fx-background-color: -millions-data-surface;
     -fx-border-color: -millions-border;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
 }
 
 .chart-legend-item {
