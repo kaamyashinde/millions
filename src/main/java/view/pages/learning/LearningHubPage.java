@@ -27,6 +27,7 @@ import model.learninghub.QuizAttempt;
 import model.learninghub.QuizSession;
 import view.pages.quiz.QuizResultView;
 import view.pages.quiz.QuizView;
+import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -40,12 +41,6 @@ import view.theme.ThemeStyles;
 public class LearningHubPage extends BorderPane {
 
   private javafx.scene.Node landingView;
-
-  private static final String COLOR_BORDER_RESOURCE = "#22C55E";
-
-  private static final String COLOR_DIFFICULTY_BEGINNER = "#22C55E";
-  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#F59E0B";
-  private static final String COLOR_DIFFICULTY_ADVANCED = "#EF4444";
 
   /**
    * Builds the panel, wires up all sections from {@link LearningContentStore}.
@@ -184,8 +179,8 @@ public class LearningHubPage extends BorderPane {
   private javafx.scene.Node buildResourceCard(LearningResource resource) {
     Label sourceLabel = new Label(resource.sourceLabel());
     sourceLabel.setStyle(
-        "-fx-background-color: " + COLOR_BORDER_RESOURCE + "22;"
-            + "-fx-text-fill: " + COLOR_BORDER_RESOURCE + ";"
+        "-fx-background-color: " + ThemePalette.SUCCESS + "22;"
+            + "-fx-text-fill: " + ThemePalette.SUCCESS + ";"
             + "-fx-background-radius: 4;"
             + "-fx-padding: 2 6 2 6;"
             + "-fx-font-size: 10;");
@@ -221,9 +216,9 @@ public class LearningHubPage extends BorderPane {
 
   private static String difficultyColor(Difficulty difficulty) {
     return switch (difficulty) {
-      case BEGINNER -> COLOR_DIFFICULTY_BEGINNER;
-      case INTERMEDIATE -> COLOR_DIFFICULTY_INTERMEDIATE;
-      case ADVANCED -> COLOR_DIFFICULTY_ADVANCED;
+      case BEGINNER -> ThemePalette.DIFFICULTY_BEGINNER;
+      case INTERMEDIATE -> ThemePalette.DIFFICULTY_INTERMEDIATE;
+      case ADVANCED -> ThemePalette.DIFFICULTY_ADVANCED;
     };
   }
 
