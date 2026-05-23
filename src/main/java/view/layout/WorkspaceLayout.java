@@ -12,7 +12,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -43,7 +42,6 @@ public class WorkspaceLayout extends StackPane {
    * @param notifications session-scoped notification service for the toast tray
    * @param tabs tab pane content (non-closable tabs supplied by caller)
    * @param onProfile opens the profile editor
-   * @param onRefresh refreshes all session-bound panels
    * @param onHelp opens help / welcome content
    * @param onSwitchUser begins the compare / switch-user flow
    * @param onLogout logs out the current user
@@ -53,7 +51,6 @@ public class WorkspaceLayout extends StackPane {
       NotificationService notifications,
       TabPane tabs,
       Runnable onProfile,
-      Runnable onRefresh,
       Runnable onHelp,
       Runnable onSwitchUser,
       Runnable onLogout,
@@ -77,18 +74,15 @@ public class WorkspaceLayout extends StackPane {
     ThemeStyles.addStyleClasses(sessionSummaryLabel, "muted-text");
 
     Button profileButton = new Button("Profile");
-    Button refreshButton = new Button("Refresh All");
     Button helpButton = new Button("Help");
     Button switchUserButton = new Button("Compare / Switch User");
     Button logoutButton = new Button("Log Out");
     ThemeStyles.styleButton(profileButton);
-    ThemeStyles.styleButton(refreshButton);
     ThemeStyles.styleButton(helpButton);
     ThemeStyles.styleButton(switchUserButton);
     ThemeStyles.styleButton(logoutButton);
 
     profileButton.setOnAction(_ -> onProfile.run());
-    refreshButton.setOnAction(_ -> onRefresh.run());
     helpButton.setOnAction(_ -> onHelp.run());
     switchUserButton.setOnAction(_ -> onSwitchUser.run());
     logoutButton.setOnAction(_ -> onLogout.run());
@@ -118,7 +112,7 @@ public class WorkspaceLayout extends StackPane {
     ThemeStyles.addStyleClasses(skipDaysBox, "workspace-skip-days");
 
     HBox actions =
-        new HBox(10, profileButton, refreshButton, helpButton, switchUserButton, logoutButton);
+        new HBox(10, profileButton, helpButton, switchUserButton, logoutButton);
     actions.setAlignment(Pos.CENTER_RIGHT);
     ThemeStyles.addStyleClasses(actions, "workspace-actions");
 
