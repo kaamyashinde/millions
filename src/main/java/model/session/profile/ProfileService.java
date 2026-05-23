@@ -76,6 +76,19 @@ public final class ProfileService {
   }
 
   public void deleteActiveProfile(String username, char[] pin) {
+    verifyDeletionPin(username, pin);
+    deleteProfileDirectory(username);
+  }
+
+  /**
+   * Validates PIN format and matches the stored profile PIN before deletion.
+   *
+   * @param username profile username (normalized path key)
+   * @param pin PIN entered by the user
+   * @throws RegistrationValidationException if PIN format is invalid
+   * @throws AuthenticationException if PIN does not match
+   */
+  public void verifyDeletionPin(String username, char[] pin) {
     ValidationResult pinFormat = new PinValidator().validate("", pin, null);
     if (pinFormat instanceof ValidationResult.Failure(var error)) {
       throw new RegistrationValidationException(error);
@@ -85,6 +98,14 @@ public final class ProfileService {
     if (!profile.matchesPin(pin)) {
       throw new AuthenticationException("Invalid PIN.");
     }
+  }
+
+  /**
+   * Deletes the on-disk profile directory for the given username without PIN checks.
+   *
+   * @param username profile username (normalized path key)
+   */
+  public void deleteProfileDirectory(String username) {
     deleteProfileDirectory(profilePaths.profileDirectory(username));
   }
 

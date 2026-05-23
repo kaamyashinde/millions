@@ -12,11 +12,14 @@ import model.session.profile.ProfileService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import model.core.player.Player;
 import model.persistence.ProfileFile;
+import model.trading.transaction.Transaction;
 import model.persistence.io.JsonStorage;
 import model.persistence.profile.ProfilePaths;
 
@@ -166,6 +169,30 @@ public final class SessionService {
     String username = session.username();
     activeSession = null;
     profileService.deleteActiveProfile(username, pin);
+  }
+
+  /**
+   * Liquidates all holdings, clears savings plans, deletes the active profile, and ends the session.
+   *
+   * @param pin PIN confirming the action
+   * @return summary of liquidation before profile removal
+   */
+  public ExitGameResult exitGameAndDeleteProfile(char[] pin) {
+    ActiveSession session = requireActiveSession();
+    String username = session.username();
+    Player player = session.player();
+    Set<String> symbols = new LinkedHashSet<>();
+    player.getPortfolio().getShares().stream()
+        .map(share -> share.getAsset().getSymbol())
+        .forEach(symbols::add);
+    int symbolsSold = symbols.size();
+    profileService.verifyDeletionPin(username, pin);
+    List<Transaction> transactions = session.exchange().sellAllHoldings(player);
+    player.clearRegularSavingsPlans();
+    BigDecimal finalCash = player.getMoney();
+    activeSession = null;
+    profileService.deleteProfileDirectory(username);
+    return new ExitGameResult(symbolsSold, transactions.size(), finalCash);
   }
 
   public void deleteProfile(String username, char[] pin) {
