@@ -100,6 +100,18 @@
     -fx-border-color: -millions-accent;
 }
 
+.tab-pane .tab .tab-label {
+    -fx-text-fill: -millions-text-secondary;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: -millions-text-primary;
+}
+
+.text-input {
+    -fx-prompt-text-fill: -millions-text-muted;
+}
+
 .table-view {
     -fx-background-color: -millions-bg;
     -fx-border-color: -millions-border;
@@ -108,12 +120,20 @@
 }
 
 .table-view .column-header-background {
-    -fx-background-color: -millions-surface;
+    -fx-background-color: -millions-surface-light;
+    -fx-border-color: transparent transparent -millions-border transparent;
 }
 
 .table-view .column-header,
 .table-view .filler {
     -fx-background-color: transparent;
+    -fx-size: 38px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -millions-text-primary;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
 }
 
 .table-row-cell:selected {
@@ -136,4 +156,157 @@
 
 .table-cell {
     -fx-text-fill: -millions-text-primary;
+}
+
+.chart {
+    -fx-background-color: transparent;
+}
+
+.chart-plot-background {
+    -fx-background-color: -millions-surface;
+}
+
+.chart-title {
+    -fx-text-fill: -millions-text-primary;
+}
+
+.axis-label {
+    -fx-text-fill: -millions-text-secondary;
+}
+
+.axis-tick-label {
+    -fx-fill: -millions-text-muted;
+}
+
+.chart-horizontal-grid-lines,
+.chart-vertical-grid-lines {
+    -fx-stroke: -millions-border;
+}
+
+.chart-alternative-row-fill {
+    -fx-fill: transparent;
+}
+
+.chart-alternative-column-fill {
+    -fx-fill: transparent;
+}
+
+.chart-legend {
+    -fx-background-color: -millions-surface;
+    -fx-border-color: -millions-border;
+}
+
+.chart-legend-item {
+    -fx-text-fill: -millions-text-secondary;
+}
+
+.default-color0.chart-series-line {
+    -fx-stroke: -millions-accent;
+}
+
+.list-view {
+    -fx-background-color: -millions-bg;
+    -fx-border-color: -millions-border;
+}
+
+.list-cell {
+    -fx-background-color: -millions-bg;
+    -fx-text-fill: -millions-text-primary;
+}
+
+.list-cell:odd {
+    -fx-background-color: -millions-surface;
+}
+
+.list-cell:selected {
+    -fx-background-color: -millions-accent-light;
+    -fx-text-fill: -millions-text-primary;
+}
+
+.list-cell:empty {
+    -fx-background-color: -millions-bg;
+}
+
+.combo-box {
+    -fx-background-color: -millions-input-bg;
+    -fx-border-color: -millions-input-border;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: -millions-text-primary;
+    -fx-background-color: transparent;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: -millions-surface;
+    -fx-border-color: -millions-border;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: -millions-surface;
+    -fx-text-fill: -millions-text-primary;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: -millions-accent-light;
+}
+
+.split-pane {
+    -fx-background-color: -millions-bg;
+}
+
+.split-pane > .split-pane-divider {
+    -fx-background-color: -millions-border;
+    -fx-padding: 0 2;
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -millions-border;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: "";
+    -fx-padding: 0;
+}
+
+.separator .line {
+    -fx-border-color: -millions-border;
+}
+
+.check-box {
+    -fx-text-fill: -millions-text-primary;
+}
+
+.check-box .box {
+    -fx-background-color: -millions-input-bg;
+    -fx-border-color: -millions-input-border;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.check-box:selected .box {
+    -fx-background-color: -millions-accent;
+    -fx-border-color: -millions-accent;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: white;
 }
