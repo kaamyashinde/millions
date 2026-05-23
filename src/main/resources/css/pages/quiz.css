@@ -67,3 +67,18 @@
 .quiz-feedback-wrong {
     -fx-border-color: -millions-error;
 }
+
+.quiz-feedback-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+.quiz-feedback-explanation {
+    -fx-text-fill: -millions-text-primary;
+    -fx-font-size: 12px;
+}
+
+.quiz-feedback-meta {
+    -fx-text-fill: -millions-text-secondary;
+    -fx-font-size: 11px;
+}
