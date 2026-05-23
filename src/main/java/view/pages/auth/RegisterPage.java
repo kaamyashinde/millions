@@ -1,5 +1,7 @@
 package view.pages.auth;
 
+import java.nio.file.Path;
+import java.util.Optional;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -7,7 +9,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import view.layout.AuthLayout;
 import view.theme.ThemeStyles;
 
@@ -19,6 +24,8 @@ public class RegisterPage extends AuthLayout {
   private final TextField usernameField = new TextField();
   private final PasswordField pinField = new PasswordField();
   private final TextField startingMoneyField = new TextField();
+  private final Label marketDataFileLabel = new Label("Default market data");
+  private Path selectedMarketDataFile;
 
   /**
    * @param registerAction registration submit handler
@@ -71,15 +78,35 @@ public class RegisterPage extends AuthLayout {
     pinField.setMaxWidth(Double.MAX_VALUE);
     startingMoneyField.setMaxWidth(Double.MAX_VALUE);
 
+    marketDataFileLabel.setWrapText(true);
+    ThemeStyles.addStyleClasses(marketDataFileLabel, "text-subheading");
+
+    Button chooseMarketDataButton = new Button("Choose market data…");
+    ThemeStyles.styleButton(chooseMarketDataButton);
+    chooseMarketDataButton.setOnAction(_ -> chooseMarketDataFile());
+
+    Button clearMarketDataButton = new Button("Use default");
+    ThemeStyles.styleButton(clearMarketDataButton);
+    clearMarketDataButton.setOnAction(_ -> clearMarketDataFile());
+
+    HBox marketDataActions = new HBox(8, chooseMarketDataButton, clearMarketDataButton);
+    VBox marketDataRow = new VBox(6,
+        new Label("Market data (optional)"),
+        marketDataActions,
+        marketDataFileLabel);
+
     Button registerButton = new Button("Create Profile");
     registerButton.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.styleAccentButton(registerButton);
     registerButton.setOnAction(
         _ ->
             registerAction.run(
-                usernameField.getText(), pinField.getText(), startingMoneyField.getText()));
+                usernameField.getText(),
+                pinField.getText(),
+                startingMoneyField.getText(),
+                Optional.ofNullable(selectedMarketDataFile)));
 
-    VBox fields = new VBox(10, usernameField, pinField, startingMoneyField);
+    VBox fields = new VBox(10, usernameField, pinField, startingMoneyField, marketDataRow);
     fields.setMaxWidth(360);
     ThemeStyles.addStyleClasses(fields, "auth-form-fields");
 
@@ -89,6 +116,24 @@ public class RegisterPage extends AuthLayout {
     form.setMaxWidth(360);
     form.setPadding(new Insets(0, 32, 0, 32));
     form.getChildren().setAll(content);
+  }
+
+  private void chooseMarketDataFile() {
+    FileChooser chooser = new FileChooser();
+    chooser.setTitle("Market data");
+    chooser.getExtensionFilters().add(
+        new FileChooser.ExtensionFilter("CSV files", "*.csv"));
+    Window owner = getScene() == null ? null : getScene().getWindow();
+    java.io.File file = chooser.showOpenDialog(owner);
+    if (file != null) {
+      selectedMarketDataFile = file.toPath();
+      marketDataFileLabel.setText(file.getName());
+    }
+  }
+
+  private void clearMarketDataFile() {
+    selectedMarketDataFile = null;
+    marketDataFileLabel.setText("Default market data");
   }
 
   public void setStatus(String message) {
@@ -107,6 +152,6 @@ public class RegisterPage extends AuthLayout {
 
   @FunctionalInterface
   public interface RegisterAction {
-    void run(String username, String pin, String startingMoney);
+    void run(String username, String pin, String startingMoney, Optional<Path> marketDataFile);
   }
 }
