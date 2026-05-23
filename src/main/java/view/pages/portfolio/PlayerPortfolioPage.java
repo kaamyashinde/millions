@@ -1,21 +1,13 @@
 package view.pages.portfolio;
 
-import model.core.player.Portfolio;
-import model.trading.transaction.Purchase;
-
 import static util.Validator.checkNotNull;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.file.Path;
-import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
@@ -27,15 +19,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.core.market.Exchange;
-import model.core.player.Player;
-import model.analysis.performance.MetricValue;
+import controller.PortfolioController;
+import controller.TradingController;
 import model.analysis.performance.PerformanceComparison;
-import model.analysis.performance.PortfolioPerformanceService;
 import model.core.asset.Share;
 import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
 import view.components.image.ValidatingImageLoader;
+import view.dialogs.TradeDialog;
 import view.theme.ThemeStyles;
 
 /**
@@ -43,10 +34,9 @@ import view.theme.ThemeStyles;
  */
 public class PlayerPortfolioPage extends BorderPane {
 
-  private final Exchange exchange;
-  private final Player player;
-  private final Path avatarPath;
-  private final PortfolioPerformanceService performanceService = new PortfolioPerformanceService();
+  private final PortfolioController portfolio;
+  private final TradingController trading;
+  private final Runnable onTradeComplete;
 
   private final Label playerLabel = new Label();
   private final Label balanceLabel = new Label();
@@ -61,24 +51,25 @@ public class PlayerPortfolioPage extends BorderPane {
   private final Label benchmarkSharpeValueLabel = new Label();
 
   private final TableView<Share> holdingsTable = new TableView<>();
-  private final ObservableList<Share> holdings = FXCollections.observableArrayList();
   private final ImageView avatarView = new ImageView();
   private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
 
   /**
-   * Builds a player summary panel backed by the given exchange and player.
-   *
-   * @param exchange exchange supplying market and trading-day state
-   * @param player player whose summary and holdings should be shown
-   * @param avatarPath path to profile avatar image (may not exist yet)
+   * @param portfolio portfolio summary and holdings
+   * @param trading trading operations for sell dialog
+   * @param refreshAndPersist refreshes workspace controllers and persists session
    */
-  public PlayerPortfolioPage(Exchange exchange, Player player, Path avatarPath) {
-    checkNotNull(exchange, "Exchange");
-    checkNotNull(player, "Player");
-    checkNotNull(avatarPath, "avatarPath");
-    this.exchange = exchange;
-    this.player = player;
-    this.avatarPath = avatarPath;
+  public PlayerPortfolioPage(
+      PortfolioController portfolio, TradingController trading, Runnable refreshAndPersist) {
+    checkNotNull(portfolio, "portfolio");
+    checkNotNull(trading, "trading");
+    checkNotNull(refreshAndPersist, "refreshAndPersist");
+    this.portfolio = portfolio;
+    this.trading = trading;
+    this.onTradeComplete = () -> {
+      refreshAndPersist.run();
+      refresh();
+    };
 
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
@@ -89,7 +80,7 @@ public class PlayerPortfolioPage extends BorderPane {
 
     Button refreshButton = new Button("Refresh");
     refreshButton.setOnAction(_ -> refresh());
-    styleButton(refreshButton);
+    ThemeStyles.styleButton(refreshButton);
 
     avatarView.setFitWidth(56);
     avatarView.setFitHeight(56);
@@ -111,7 +102,7 @@ public class PlayerPortfolioPage extends BorderPane {
     BorderPane.setMargin(summaryCard, new Insets(0, 0, 16, 0));
 
     buildHoldingsTable();
-    holdingsTable.setItems(holdings);
+    holdingsTable.setItems(portfolio.getHoldings());
     holdingsTable.setPlaceholder(new Label("No holdings yet."));
     holdingsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
     VBox.setVgrow(holdingsTable, Priority.ALWAYS);
@@ -152,14 +143,40 @@ public class PlayerPortfolioPage extends BorderPane {
     currentPriceColumn.setCellValueFactory(
         c -> new SimpleStringProperty(c.getValue().getAsset().getSalesPrice().toPlainString()));
 
+    TableColumn<Share, Void> actionsColumn = new TableColumn<>("Actions");
+    actionsColumn.setPrefWidth(90);
+    actionsColumn.setCellFactory(_ -> new TableCell<>() {
+      private final Button sellButton = new Button("Sell");
+
+      {
+        ThemeStyles.styleButton(sellButton);
+        sellButton.setOnAction(_ -> {
+          Share share = getTableRow() != null ? getTableRow().getItem() : null;
+          if (share != null && getScene() != null) {
+            TradeDialog.showSell(
+                getScene().getWindow(),
+                trading,
+                share.getAsset().getSymbol(),
+                onTradeComplete);
+          }
+        });
+      }
+
+      @Override
+      protected void updateItem(Void item, boolean empty) {
+        super.updateItem(item, empty);
+        setGraphic(empty ? null : sellButton);
+      }
+    });
+
     holdingsTable.getColumns().setAll(
-        List.of(
-            symbolColumn,
-            nameColumn,
-            typeColumn,
-            quantityColumn,
-            purchasePriceColumn,
-            currentPriceColumn));
+        symbolColumn,
+        nameColumn,
+        typeColumn,
+        quantityColumn,
+        purchasePriceColumn,
+        currentPriceColumn,
+        actionsColumn);
   }
 
   private VBox buildMetricsBox() {
@@ -190,92 +207,65 @@ public class PlayerPortfolioPage extends BorderPane {
    * Refreshes the labels, holdings list, and side-by-side metrics from the live model state.
    */
   public void refresh() {
+    portfolio.refresh();
     loadAvatarThumbnail();
-    playerLabel.setText(player.getName());
-    tradingDayLabel.setText(Integer.toString(exchange.getDay()));
-    balanceLabel.setText(player.getMoney().setScale(2, RoundingMode.HALF_UP).toPlainString());
-    netWorthLabel.setText(player.getNetWorth().setScale(2, RoundingMode.HALF_UP).toPlainString());
-    holdings.setAll(player.getPortfolio().getShares());
+    playerLabel.setText(portfolio.getPlayerName());
+    tradingDayLabel.setText(Integer.toString(portfolio.getTradingDay()));
+    balanceLabel.setText(portfolio.getFormattedBalance());
+    netWorthLabel.setText(portfolio.getFormattedNetWorth());
 
-    PerformanceComparison comparison = performanceService.compareAgainstMarket(player, exchange);
-    portfolioReturnValueLabel.setText(formatMetricValue(comparison.portfolio().returnPercent(), true));
-    portfolioVolatilityValueLabel.setText(formatMetricValue(comparison.portfolio().volatility(), true));
-    portfolioSharpeValueLabel.setText(formatMetricValue(comparison.portfolio().sharpeRatio(), false));
-    benchmarkReturnValueLabel.setText(formatMetricValue(comparison.benchmark().returnPercent(), true));
-    benchmarkVolatilityValueLabel.setText(formatMetricValue(comparison.benchmark().volatility(), true));
-    benchmarkSharpeValueLabel.setText(formatMetricValue(comparison.benchmark().sharpeRatio(), false));
+    PerformanceComparison comparison = portfolio.getLastComparison();
+    portfolioReturnValueLabel.setText(
+        PortfolioController.formatMetricValue(comparison.portfolio().returnPercent(), true));
+    portfolioVolatilityValueLabel.setText(
+        PortfolioController.formatMetricValue(comparison.portfolio().volatility(), true));
+    portfolioSharpeValueLabel.setText(
+        PortfolioController.formatMetricValue(comparison.portfolio().sharpeRatio(), false));
+    benchmarkReturnValueLabel.setText(
+        PortfolioController.formatMetricValue(comparison.benchmark().returnPercent(), true));
+    benchmarkVolatilityValueLabel.setText(
+        PortfolioController.formatMetricValue(comparison.benchmark().volatility(), true));
+    benchmarkSharpeValueLabel.setText(
+        PortfolioController.formatMetricValue(comparison.benchmark().sharpeRatio(), false));
     holdingsTable.refresh();
   }
 
   private void loadAvatarThumbnail() {
-    avatarView.setImage(avatarLoader.load(avatarPath, 56));
+    avatarView.setImage(avatarLoader.load(portfolio.getAvatarPath(), 56));
   }
 
   /**
-   * Returns the visible player label text.
-   *
-   * @return displayed player name
+   * @return visible player label text
    */
   public String getDisplayedPlayerName() {
     return playerLabel.getText();
   }
 
   /**
-   * Returns the visible balance label text.
-   *
-   * @return displayed balance
+   * @return visible balance label text
    */
   public String getDisplayedBalance() {
     return balanceLabel.getText();
   }
 
   /**
-   * Returns the visible portfolio return text.
-   *
-   * @return displayed portfolio return text
+   * @return visible portfolio return text
    */
   public String getPortfolioReturnText() {
     return portfolioReturnValueLabel.getText();
   }
 
   /**
-   * Returns the visible benchmark return text.
-   *
-   * @return displayed benchmark return text
+   * @return visible benchmark return text
    */
   public String getBenchmarkReturnText() {
     return benchmarkReturnValueLabel.getText();
   }
 
   /**
-   * Returns the number of visible holdings rows.
-   *
    * @return current holdings row count
    */
   public int getHoldingCount() {
-    return holdings.size();
-  }
-
-  private static String formatMetricValue(MetricValue metric, boolean percentDisplay) {
-    if (!metric.isAvailable()) {
-      return switch (metric.status()) {
-        case NO_TRADES -> "N/A (no trades yet)";
-        case INSUFFICIENT_HISTORY -> "N/A (need more history)";
-        case ZERO_VOLATILITY -> "N/A (zero volatility)";
-        case AVAILABLE -> throw new IllegalArgumentException("Available metrics do not need fallback text.");
-      };
-    }
-
-    BigDecimal value = metric.value();
-    if (percentDisplay) {
-      return value.multiply(BigDecimal.valueOf(100))
-          .setScale(2, RoundingMode.HALF_UP)
-          .toPlainString() + "%";
-    }
-    return value.setScale(3, RoundingMode.HALF_UP).toPlainString();
-  }
-
-  private static void styleButton(Button button) {
-    ThemeStyles.styleButton(button);
+    return portfolio.getHoldings().size();
   }
 }

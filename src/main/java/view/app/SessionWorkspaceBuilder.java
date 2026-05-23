@@ -59,9 +59,9 @@ public final class SessionWorkspaceBuilder {
         new NotificationsPage(workspaceController.getNotificationsTab());
     PlayerPortfolioPage portfolioPage =
         new PlayerPortfolioPage(
-            session.exchange(),
-            session.player(),
-            sessionService.avatarPath(session.normalizedUsername()));
+            workspaceController.getPortfolio(),
+            workspaceController.getTrading(),
+            refreshAndPersist);
     StocksPage stocksPage = new StocksPage(session.exchange());
     FundsPage fundsPage = new FundsPage(session.exchange());
     SavingsPage savingsPage =

@@ -3,6 +3,8 @@ package view;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import controller.PortfolioController;
+import controller.TradingController;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
@@ -13,6 +15,7 @@ import javafx.application.Platform;
 import model.core.market.Exchange;
 import model.core.player.Player;
 import model.core.asset.Stock;
+import view.components.notification.NotificationService;
 import view.pages.portfolio.PlayerPortfolioPage;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -40,8 +43,7 @@ class PlayerPortfolioPageTest {
     Exchange exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
     Player player = new Player("k", new BigDecimal("5000.00"));
 
-    PlayerPortfolioPage panel =
-        runOnFxThread(() -> new PlayerPortfolioPage(exchange, player, Path.of("/no/avatar.png")));
+    PlayerPortfolioPage panel = runOnFxThread(() -> createPage(exchange, player));
 
     assertEquals("k", panel.getDisplayedPlayerName());
     assertEquals("5000.00", panel.getDisplayedBalance());
@@ -55,8 +57,7 @@ class PlayerPortfolioPageTest {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
     Exchange exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
     Player player = new Player("k", new BigDecimal("5000.00"));
-    PlayerPortfolioPage panel =
-        runOnFxThread(() -> new PlayerPortfolioPage(exchange, player, Path.of("/no/avatar.png")));
+    PlayerPortfolioPage panel = runOnFxThread(() -> createPage(exchange, player));
 
     exchange.buy("AAPL", BigDecimal.ONE, player);
     exchange.advance();
@@ -69,6 +70,14 @@ class PlayerPortfolioPageTest {
     assertEquals(1, panel.getHoldingCount());
     assertTrue(panel.getPortfolioReturnText().endsWith("%"));
     assertTrue(panel.getBenchmarkReturnText().endsWith("%"));
+  }
+
+  private static PlayerPortfolioPage createPage(Exchange exchange, Player player) {
+    Path avatarPath = Path.of("/no/avatar.png");
+    PortfolioController portfolio = new PortfolioController(exchange, player, avatarPath);
+    TradingController trading =
+        new TradingController(exchange, player, new NotificationService());
+    return new PlayerPortfolioPage(portfolio, trading, () -> {});
   }
 
   /**

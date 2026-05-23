@@ -153,11 +153,16 @@ public class MillionsApp extends Application {
     ActiveSession session = ctrl.getSession();
     SessionService svc = ctrl.getSessionService();
 
+    Runnable refreshAndPersist = () -> {
+      ctrl.refreshAll();
+      sessionService.saveActiveSession();
+    };
+
     PlayerPortfolioPage portfolioPage = new PlayerPortfolioPage(
-        session.exchange(), session.player(), ctrl.getAvatarPath());
+        ctrl.getPortfolio(), ctrl.getTrading(), refreshAndPersist);
     StocksPage stocksPage = new StocksPage(session.exchange());
     FundsPage fundsPage = new FundsPage(session.exchange());
-    SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), ctrl::refreshAll);
+    SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), refreshAndPersist);
     SavedRunsPage savedRunsPage = new SavedRunsPage(svc, ctrl::refreshAll);
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
     LearningHubPage learningHubPage =
