@@ -84,7 +84,7 @@ public class LeaderboardPage extends BorderPane {
     nameCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().displayName()));
     nameCol.setPrefWidth(200);
 
-    TableColumn<LeaderboardRow, String> worthCol = new TableColumn<>("Net worth");
+    TableColumn<LeaderboardRow, String> worthCol = new TableColumn<>("Net Worth");
     worthCol.setCellValueFactory(
         c -> new SimpleStringProperty(
             c.getValue().netWorth().setScale(2, RoundingMode.HALF_UP).toPlainString()));
