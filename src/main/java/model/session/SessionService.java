@@ -12,16 +12,12 @@ import model.session.profile.ProfileService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
-import model.core.market.Exchange;
 import model.core.player.Player;
 import model.persistence.ProfileFile;
 import model.persistence.io.JsonStorage;
-import model.persistence.market.MarketData;
 import model.persistence.profile.ProfilePaths;
 
 /**
@@ -33,7 +29,6 @@ public final class SessionService {
   private final ProfileService profileService;
   private final ProfilePaths profilePaths;
   private final JsonStorage jsonStorage;
-  private final Supplier<MarketData> marketDataSupplier;
 
   private ActiveSession activeSession;
 
@@ -41,18 +36,24 @@ public final class SessionService {
       AuthService authService,
       ProfileService profileService,
       ProfilePaths profilePaths,
-      JsonStorage jsonStorage,
-      Supplier<MarketData> marketDataSupplier) {
+      JsonStorage jsonStorage) {
     this.authService = authService;
     this.profileService = profileService;
     this.profilePaths = profilePaths;
     this.jsonStorage = jsonStorage;
-    this.marketDataSupplier = marketDataSupplier;
   }
 
   public ActiveSession register(String username, char[] pin, BigDecimal startingMoney) {
+    return register(username, pin, startingMoney, Optional.empty());
+  }
+
+  public ActiveSession register(
+      String username,
+      char[] pin,
+      BigDecimal startingMoney,
+      Optional<Path> marketDataSource) {
     saveActiveSession();
-    activeSession = authService.register(username, pin, startingMoney);
+    activeSession = authService.register(username, pin, startingMoney, marketDataSource);
     return activeSession;
   }
 
@@ -107,7 +108,6 @@ public final class SessionService {
 
   public List<PlayerLeaderboardEntry> listLeaderboardEntries() {
     List<PlayerLeaderboardEntry> entries = new ArrayList<>();
-    MarketData marketData = requireMarketData();
     for (String username : authService.listRegisteredUsers()) {
       String normalized = ProfilePaths.normalizeUsername(username);
       if (activeSession != null && activeSession.normalizedUsername().equals(normalized)) {
@@ -115,7 +115,9 @@ public final class SessionService {
         continue;
       }
       ProfileFile profile = authService.loadProfileOrThrow(username);
-      Player player = profile.restore(marketData).player();
+      Player player = profile
+          .restore(authService.marketDataFileService().loadForProfile(normalized))
+          .player();
       if (profile.displayName() != null && !profile.displayName().isBlank()) {
         try {
           player.setName(profile.displayName().trim());
@@ -231,7 +233,7 @@ public final class SessionService {
     return new LocalLeaderboardService(
         profilePaths,
         jsonStorage,
-        marketDataSupplier,
+        authService.marketDataFileService(),
         profileService.profileImageService());
   }
 
@@ -240,14 +242,6 @@ public final class SessionService {
       throw new IllegalStateException("No active session.");
     }
     return activeSession;
-  }
-
-  private MarketData requireMarketData() {
-    MarketData marketData = marketDataSupplier.get();
-    if (marketData == null || marketData.isEmpty()) {
-      throw new IllegalStateException("Could not load market data.");
-    }
-    return marketData;
   }
 
   private static PlayerLeaderboardEntry toLeaderboardEntry(Player player) {

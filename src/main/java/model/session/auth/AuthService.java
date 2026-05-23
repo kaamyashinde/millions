@@ -8,6 +8,7 @@ import model.exception.auth.RegistrationValidationException;
 import model.persistence.ProfileFile;
 import model.persistence.io.JsonStorage;
 import model.persistence.market.MarketData;
+import model.persistence.market.MarketDataFileService;
 import model.persistence.profile.ProfilePaths;
 import model.session.ActiveSession;
 import model.session.validation.rules.PinValidator;
@@ -17,8 +18,9 @@ import model.session.validation.rules.UsernameValidator;
 import model.session.validation.ValidationResult;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Optional;
 import model.core.market.Exchange;
 import model.core.player.Player;
 
@@ -35,21 +37,25 @@ public final class AuthService {
 
   private final ProfilePaths profilePaths;
   private final JsonStorage jsonStorage;
-  private final Supplier<MarketData> marketDataSupplier;
+  private final MarketDataFileService marketDataFileService;
   private final String exchangeName;
 
   public AuthService(
       ProfilePaths profilePaths,
       JsonStorage jsonStorage,
-      Supplier<MarketData> marketDataSupplier,
+      MarketDataFileService marketDataFileService,
       String exchangeName) {
     this.profilePaths = profilePaths;
     this.jsonStorage = jsonStorage;
-    this.marketDataSupplier = marketDataSupplier;
+    this.marketDataFileService = marketDataFileService;
     this.exchangeName = exchangeName;
   }
 
-  public ActiveSession register(String username, char[] pin, BigDecimal startingMoney) {
+  public ActiveSession register(
+      String username,
+      char[] pin,
+      BigDecimal startingMoney,
+      Optional<Path> marketDataSource) {
     ValidationResult registration = REGISTRATION_CHAIN.validate(username, pin, startingMoney);
     if (registration instanceof ValidationResult.Failure(var error)) {
       throw new RegistrationValidationException(error);
@@ -61,7 +67,9 @@ public final class AuthService {
 
     String trimmedUsername = username.trim();
     String pinHash = ProfileFile.hashPin(normalizedUsername, pin);
-    MarketData marketData = requireMarketData();
+    MarketData marketData = marketDataSource
+        .map(source -> marketDataFileService.importFromFile(source, normalizedUsername))
+        .orElseGet(() -> marketDataFileService.installDefault(normalizedUsername));
     Exchange exchange = ProfileFile.createFreshExchange(marketData, exchangeName);
     Player player = new Player(trimmedUsername, startingMoney);
 
@@ -87,7 +95,8 @@ public final class AuthService {
       throw new AuthenticationException("Invalid username or PIN.");
     }
 
-    ProfileFile.RestoredSession restored = profile.restore(requireMarketData());
+    MarketData marketData = marketDataFileService.loadForProfile(profile.normalizedUsername());
+    ProfileFile.RestoredSession restored = profile.restore(marketData);
     applyDisplayName(profile, restored.player());
     return new ActiveSession(
         profile.username(), profile.normalizedUsername(), restored.player(), restored.exchange());
@@ -100,6 +109,10 @@ public final class AuthService {
   public ProfileFile loadProfileOrThrow(String username) {
     return loadProfile(username)
         .orElseThrow(() -> new IllegalStateException("Profile not found: " + username));
+  }
+
+  public MarketDataFileService marketDataFileService() {
+    return marketDataFileService;
   }
 
   public static void validateLoginInput(String username, char[] pin) {
@@ -115,14 +128,6 @@ public final class AuthService {
     }
     return java.util.Optional.of(
         jsonStorage.read(profilePaths.profileFile(username), ProfileFile.class));
-  }
-
-  private MarketData requireMarketData() {
-    MarketData marketData = marketDataSupplier.get();
-    if (marketData == null || marketData.isEmpty()) {
-      throw new IllegalStateException("Could not load market data for profile session.");
-    }
-    return marketData;
   }
 
   private static void applyDisplayName(ProfileFile profile, Player player) {

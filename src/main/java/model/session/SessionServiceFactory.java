@@ -5,9 +5,8 @@ import model.session.auth.AuthService;
 import model.session.profile.ProfileService;
 
 import java.nio.file.Path;
-import java.util.function.Supplier;
 import model.persistence.io.JsonStorage;
-import model.persistence.market.MarketData;
+import model.persistence.market.MarketDataFileService;
 import model.persistence.profile.ProfileImageService;
 import model.persistence.profile.ProfilePaths;
 
@@ -23,16 +22,28 @@ public final class SessionServiceFactory {
     return Path.of(System.getProperty("user.home"), ".millions", "profiles");
   }
 
+  /**
+   * Creates a local-profile session service with per-profile market-data files.
+   *
+   * @param profilesRoot              base directory containing all user profiles
+   * @param defaultMarketDataResource classpath resource path for the default CSV
+   * @param defaultResourceAnchor       class used to load the default CSV resource
+   * @param exchangeName                exchange name used for newly created profiles
+   * @return fully wired session service
+   */
   public static SessionService createLocalProfileSessionService(
       Path profilesRoot,
-      Supplier<MarketData> marketDataSupplier,
+      String defaultMarketDataResource,
+      Class<?> defaultResourceAnchor,
       String exchangeName) {
     ProfilePaths profilePaths = new ProfilePaths(profilesRoot);
     JsonStorage jsonStorage = new JsonStorage();
     ProfileImageService profileImageService = new ProfileImageService(profilePaths);
+    MarketDataFileService marketDataFileService = new MarketDataFileService(
+        profilePaths, defaultResourceAnchor, defaultMarketDataResource);
 
     AuthService authService = new AuthService(
-        profilePaths, jsonStorage, marketDataSupplier, exchangeName);
+        profilePaths, jsonStorage, marketDataFileService, exchangeName);
 
     ProfileService profileService = new ProfileService(
         profilePaths, jsonStorage, profileImageService);
@@ -41,7 +52,6 @@ public final class SessionServiceFactory {
         authService,
         profileService,
         profilePaths,
-        jsonStorage,
-        marketDataSupplier);
+        jsonStorage);
   }
 }
