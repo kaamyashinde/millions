@@ -18,6 +18,7 @@ import model.session.ActiveSession;
 import model.exception.auth.AuthenticationException;
 import model.exception.auth.DuplicateUsernameException;
 import model.exception.market.MarketDataImportException;
+import model.exception.persistence.PersistenceException;
 import model.session.SessionService;
 import model.session.SessionServiceFactory;
 import controller.WorkspaceController;
@@ -101,6 +102,8 @@ public class MillionsApp extends Application {
       onSessionStarted(session);
     } catch (AuthenticationException e) {
       loginPage.setStatus("Invalid username or PIN.");
+    } catch (PersistenceException e) {
+      loginPage.setStatus("Profile data could not be read. Reset this profile or restore a backup.");
     } catch (IllegalArgumentException e) {
       loginPage.setStatus(mapValidationMessage(e.getMessage()));
     }
