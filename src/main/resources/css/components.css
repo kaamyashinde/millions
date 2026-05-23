@@ -117,6 +117,34 @@
     -fx-text-fill: #EF4444;
 }
 
+.chart-range-bar {
+    -fx-padding: 8 0 0 0;
+    -fx-spacing: 4;
+    -fx-alignment: center-left;
+}
+
+.chart-range-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4;
+    -fx-cursor: hand;
+    -fx-font-size: 11px;
+    -fx-padding: 4 7;
+    -fx-text-fill: -millions-text-secondary;
+}
+
+.chart-range-button:hover {
+    -fx-background-color: -millions-surface-light;
+    -fx-text-fill: -millions-text-primary;
+}
+
+.chart-range-button:selected {
+    -fx-background-color: -millions-accent;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
 .toast {
     -fx-background-color: -millions-surface;
     -fx-background-radius: 8;
