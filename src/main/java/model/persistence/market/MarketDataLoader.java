@@ -1,4 +1,7 @@
-package model.persistence;
+package model.persistence.market;
+
+
+import model.persistence.io.CsvReader;
 
 import java.io.IOException;
 import java.io.InputStream;

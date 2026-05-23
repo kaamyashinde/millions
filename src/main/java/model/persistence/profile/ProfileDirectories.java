@@ -1,4 +1,5 @@
-package model.persistence;
+package model.persistence.profile;
+
 
 import java.nio.file.Path;
 import java.util.Locale;

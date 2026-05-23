@@ -1,4 +1,7 @@
-package model.persistence;
+package model.persistence.savedrun;
+
+
+import model.core.player.level.PlayerLevel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
@@ -55,7 +58,7 @@ public record SavedRunRecord(
    *
    * @param netWorth                  total net worth (cash + holdings)
    * @param startingMoney             profile starting balance
-   * @param playerLevel               resolved {@link model.PlayerLevel} name
+   * @param playerLevel               resolved {@link model.core.player.level.PlayerLevel} name
    * @param portfolioReturnPercent    total return % when available
    * @param portfolioVolatility       volatility metric when available
    * @param portfolioSharpeRatio      Sharpe ratio when available

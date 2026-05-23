@@ -1,4 +1,7 @@
-package model.persistence;
+package model.persistence.io;
+
+
+import model.persistence.market.MarketData;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,9 +16,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.core.asset.Stock;
+import model.core.asset.fund.Fund;
+import model.core.asset.fund.FundComponent;
 
 /**
  * Reads mixed market data from CSV where each row is either a stock or a fund definition.

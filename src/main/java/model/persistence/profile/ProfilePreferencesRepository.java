@@ -1,4 +1,7 @@
-package model.persistence;
+package model.persistence.profile;
+
+
+import model.persistence.io.JsonStorage;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -1,4 +1,5 @@
-package model.persistence;
+package model.persistence.savedrun;
+
 
 import static model.utils.Validator.checkNotNull;
 
@@ -7,15 +8,15 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import model.Exchange;
-import model.Player;
-import model.PlayerLevel;
-import model.Share;
-import model.analysis.MetricValue;
-import model.analysis.PerformanceComparison;
-import model.analysis.PerformanceMetrics;
-import model.analysis.PortfolioPerformanceService;
-import model.transactioncalculator.SaleCalculator;
+import model.core.market.Exchange;
+import model.core.player.Player;
+import model.core.player.level.PlayerLevel;
+import model.core.asset.Share;
+import model.analysis.metric.MetricValue;
+import model.analysis.metric.PerformanceComparison;
+import model.analysis.metric.PerformanceMetrics;
+import model.analysis.performance.PortfolioPerformanceService;
+import model.trading.calculator.SaleCalculator;
 
 /**
  * Builds {@link SavedRunRecord} snapshots from live {@link Player} and {@link Exchange} state.

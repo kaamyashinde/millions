@@ -1,4 +1,7 @@
-package model.persistence;
+package model.persistence.io;
+
+
+import model.exception.persistence.PersistenceException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

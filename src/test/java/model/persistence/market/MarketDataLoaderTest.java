@@ -1,10 +1,11 @@
-package model.persistence;
+package model.persistence.market;
+
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.List;
-import model.Exchange;
-import model.Stock;
+import model.core.market.Exchange;
+import model.core.asset.Stock;
 import org.junit.jupiter.api.Test;
 
 class MarketDataLoaderTest {

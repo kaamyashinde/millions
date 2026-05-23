@@ -1,4 +1,5 @@
-package model.persistence;
+package model.persistence.profile;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

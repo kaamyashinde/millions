@@ -1,4 +1,7 @@
-package model.persistence;
+package model.persistence.game;
+
+
+import model.persistence.market.MarketData;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -6,19 +9,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import model.Exchange;
-import model.InvestableAsset;
-import model.Player;
-import model.Share;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
-import model.marketevent.MarketEvent;
-import model.marketevent.SymbolMarketEventTarget;
-import model.savings.RegularSavingsPlan;
-import model.transaction.Purchase;
-import model.transaction.Sale;
-import model.transaction.Transaction;
+import model.core.market.Exchange;
+import model.core.asset.InvestableAsset;
+import model.core.player.Player;
+import model.core.asset.Share;
+import model.core.asset.Stock;
+import model.core.asset.fund.Fund;
+import model.core.asset.fund.FundComponent;
+import model.core.market.event.MarketEvent;
+import model.core.market.event.SymbolMarketEventTarget;
+import model.trading.savings.RegularSavingsPlan;
+import model.trading.transaction.Purchase;
+import model.trading.transaction.Sale;
+import model.trading.transaction.Transaction;
 
 /**
  * Converts between mutable domain objects and immutable persisted snapshots.

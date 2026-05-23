@@ -1,4 +1,8 @@
-package model.persistence;
+package model.persistence.game;
+
+
+import model.persistence.io.JsonStorage;
+import model.persistence.profile.ProfileDirectories;
 
 import java.nio.file.Path;
 import java.util.Optional;

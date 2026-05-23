@@ -1,8 +1,9 @@
-package model.persistence;
+package model.persistence.game;
+
 
 import java.math.BigDecimal;
 import java.util.List;
-import model.savings.SavingsInstallmentMode;
+import model.trading.savings.SavingsInstallmentMode;
 
 /**
  * Persisted user-specific game state snapshot.

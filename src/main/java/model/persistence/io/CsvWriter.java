@@ -1,4 +1,7 @@
-package model.persistence;
+package model.persistence.io;
+
+
+import model.persistence.market.MarketData;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -7,9 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.core.asset.Stock;
+import model.core.asset.fund.Fund;
+import model.core.asset.fund.FundComponent;
 
 /**
  * Writes mixed market-data CSV files containing both stocks and funds.

@@ -1,4 +1,7 @@
-package model.persistence;
+package model.persistence.io;
+
+
+import model.persistence.market.MarketData;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,9 +12,9 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
+import model.core.asset.Stock;
+import model.core.asset.fund.Fund;
+import model.core.asset.fund.FundComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

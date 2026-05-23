@@ -1,4 +1,7 @@
-package model.persistence;
+package model.persistence.profile;
+
+
+import model.exception.persistence.PersistenceException;
 
 import java.awt.Graphics2D;
 import java.awt.Image;

@@ -1,4 +1,5 @@
-package model.persistence;
+package model.persistence.account;
+
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;

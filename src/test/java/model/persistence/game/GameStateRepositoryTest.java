@@ -1,4 +1,7 @@
-package model.persistence;
+package model.persistence.game;
+
+
+import model.persistence.market.MarketData;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -6,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
-import model.Exchange;
-import model.Player;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
-import model.savings.RegularSavingsPlan;
-import model.savings.SavingsInstallmentMode;
+import model.core.market.Exchange;
+import model.core.player.Player;
+import model.core.asset.Stock;
+import model.core.asset.fund.Fund;
+import model.core.asset.fund.FundComponent;
+import model.trading.savings.RegularSavingsPlan;
+import model.trading.savings.SavingsInstallmentMode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

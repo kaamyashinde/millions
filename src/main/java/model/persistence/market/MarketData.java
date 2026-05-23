@@ -1,8 +1,9 @@
-package model.persistence;
+package model.persistence.market;
+
 
 import java.util.List;
-import model.Stock;
-import model.fund.Fund;
+import model.core.asset.Stock;
+import model.core.asset.fund.Fund;
 
 /**
  * Immutable persisted market payload containing all loaded stocks and funds.
