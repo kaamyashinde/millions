@@ -16,26 +16,15 @@ import javax.imageio.ImageIO;
  */
 public final class ProfileImageService {
 
-  /** Maximum source file size (bytes) before decode. */
   public static final long MAX_FILE_BYTES = 2 * 1024 * 1024;
-
-  /** Maximum width or height stored (larger images are scaled down). */
   public static final int MAX_DIMENSION = 512;
 
-  private final ProfileDirectories profileDirectories;
+  private final ProfilePaths profilePaths;
 
-  public ProfileImageService(Path profilesRoot) {
-    this.profileDirectories = new ProfileDirectories(profilesRoot);
+  public ProfileImageService(ProfilePaths profilePaths) {
+    this.profilePaths = profilePaths;
   }
 
-  /**
-   * Reads an image file, validates it, scales if needed, and writes {@code avatar.png} for the
-   * profile.
-   *
-   * @param sourceImage path to PNG or JPEG
-   * @param normalizedUsername profile key
-   * @throws IllegalArgumentException if the file is missing, too large, or not a supported image
-   */
   public void saveAvatarFromFile(Path sourceImage, String normalizedUsername) {
     if (sourceImage == null || !Files.isRegularFile(sourceImage)) {
       throw new IllegalArgumentException("Image file not found.");
@@ -59,7 +48,7 @@ public final class ProfileImageService {
       throw new IllegalArgumentException("Unsupported or corrupt image (use PNG or JPEG).");
     }
     BufferedImage scaled = scaleDown(decoded);
-    Path dest = profileDirectories.avatarFile(normalizedUsername);
+    Path dest = profilePaths.avatarFile(normalizedUsername);
     try {
       Files.createDirectories(dest.getParent());
       if (!ImageIO.write(scaled, "png", dest.toFile())) {
@@ -70,13 +59,8 @@ public final class ProfileImageService {
     }
   }
 
-  /**
-   * Removes the avatar file for a profile if present.
-   *
-   * @param normalizedUsername profile key
-   */
   public void deleteAvatar(String normalizedUsername) {
-    Path dest = profileDirectories.avatarFile(normalizedUsername);
+    Path dest = profilePaths.avatarFile(normalizedUsername);
     try {
       Files.deleteIfExists(dest);
     } catch (IOException exception) {
@@ -84,11 +68,8 @@ public final class ProfileImageService {
     }
   }
 
-  /**
-   * Returns the path to the avatar file for a profile (may not exist).
-   */
   public Path avatarPath(String normalizedUsername) {
-    return profileDirectories.avatarFile(normalizedUsername);
+    return profilePaths.avatarFile(normalizedUsername);
   }
 
   private static BufferedImage scaleDown(BufferedImage source) {
