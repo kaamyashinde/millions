@@ -2,6 +2,7 @@ package view;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import controller.StockDetailController;
 import controller.StocksController;
@@ -12,11 +13,17 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
 import model.core.market.Exchange;
 import model.core.player.Player;
 import model.core.asset.Stock;
+import view.components.chart.StockChart;
 import view.components.notification.NotificationService;
 import view.pages.stocks.StocksPage;
 
@@ -42,16 +49,22 @@ class StocksPageTest {
   @Test
   void selectingARowUpdatesTheEmbeddedDetailView() throws Exception {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00", "102.00");
-    Stock microsoft = stockWithPrices("MSFT", "Microsoft", "200.00", "194.00");
+    Stock microsoft = stockWithPrices("MSFT", "Microsoft", "900.00", "1200.00");
     Exchange exchange =
         new Exchange.Builder("NYSE").stocks(List.of(microsoft, apple)).build();
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
     SplitPane splitPane = (SplitPane) panel.getCenter();
+    BorderPane chartPanel = (BorderPane) splitPane.getItems().getFirst();
+    ScrollPane rightScroll = (ScrollPane) splitPane.getItems().get(1);
+    VBox rightColumn = (VBox) rightScroll.getContent();
     @SuppressWarnings("unchecked")
-    TableView<Stock> table = (TableView<Stock>) splitPane.getItems().getFirst();
+    TableView<Stock> table = (TableView<Stock>) rightColumn.getChildren().getFirst();
 
+    assertEquals(StockChart.class, chartPanel.getCenter().getClass());
+    layout(panel);
+    double appleUpperBound = yAxisUpperBound((StockChart) chartPanel.getCenter());
     assertNotNull(panel.getDetailView().getSelectedStock());
     assertEquals("AAPL", panel.getDetailView().getSelectedStock().getSymbol());
 
@@ -63,6 +76,11 @@ class StocksPageTest {
 
     assertNotNull(panel.getDetailView().getSelectedStock());
     assertEquals("MSFT", panel.getDetailView().getSelectedStock().getSymbol());
+    assertEquals(StockChart.class, chartPanel.getCenter().getClass());
+    layout(panel);
+    double microsoftUpperBound = yAxisUpperBound((StockChart) chartPanel.getCenter());
+    assertTrue(microsoftUpperBound >= 1200.00);
+    assertTrue(microsoftUpperBound > appleUpperBound);
   }
 
   private static StocksPage createPage(Exchange exchange, Player player) {
@@ -87,6 +105,18 @@ class StocksPageTest {
       stock.addNewSalesPrice(new BigDecimal(price));
     }
     return stock;
+  }
+
+  private static double yAxisUpperBound(StockChart chart) {
+    return ((NumberAxis) chart.getYAxis()).getUpperBound();
+  }
+
+  private static void layout(StocksPage panel) {
+    if (panel.getScene() == null) {
+      new Scene(panel, 1000, 700);
+    }
+    panel.applyCss();
+    panel.layout();
   }
 
   /**

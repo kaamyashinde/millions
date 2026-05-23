@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -21,6 +22,7 @@ import controller.StocksController;
 import controller.TradingController;
 import model.core.asset.Stock;
 import model.core.asset.info.StockFinancialInfo;
+import view.components.chart.StockChart;
 import view.theme.ThemeStyles;
 
 /**
@@ -33,6 +35,8 @@ public class StocksPage extends BorderPane {
   private final Runnable onTradeComplete;
 
   private final Label metaLabel = new Label();
+  private final BorderPane chartPanel = new BorderPane();
+  private final Label chartPlaceholder = new Label("Select a stock to view its price chart.");
   private final TableView<Stock> table = new TableView<>();
   private final StockDetailView detailView = new StockDetailView();
 
@@ -76,6 +80,8 @@ public class StocksPage extends BorderPane {
     table.setItems(stocks.getStocks());
     table.setPlaceholder(new Label("No stocks available."));
     table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+    table.setMinHeight(220);
+    table.setPrefHeight(320);
     VBox.setVgrow(table, Priority.ALWAYS);
 
     table.getSelectionModel().selectedItemProperty().addListener((obs, previous, selected) -> {
@@ -86,8 +92,21 @@ public class StocksPage extends BorderPane {
     detailView.setTradeHandlers(
         trading, () -> getScene() != null ? getScene().getWindow() : null, onTradeComplete);
 
-    SplitPane splitPane = new SplitPane(table, detailView);
-    splitPane.setDividerPositions(0.46);
+    chartPlaceholder.setWrapText(true);
+    ThemeStyles.addStyleClasses(chartPlaceholder, "empty-state");
+    chartPanel.setPadding(new Insets(16));
+    chartPanel.setMinWidth(360);
+    ThemeStyles.addStyleClasses(chartPanel, "finance-panel");
+
+    VBox rightColumn = new VBox(12, table, detailView);
+    rightColumn.setFillWidth(true);
+    ScrollPane rightScroll = new ScrollPane(rightColumn);
+    rightScroll.setFitToWidth(true);
+    rightScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+    rightScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+    SplitPane splitPane = new SplitPane(chartPanel, rightScroll);
+    splitPane.setDividerPositions(0.58);
     setCenter(splitPane);
 
     refresh();
@@ -141,11 +160,35 @@ public class StocksPage extends BorderPane {
 
   private void updateDetail(Stock selected) {
     int day = stocks.getExchange().getDay();
+    updateChart(selected);
     detailView.showStock(
         selected,
         day,
         stockDetail.getLastMarketEvent(),
         stockDetail.getMarketHistory(selected),
         stockDetail);
+  }
+
+  /**
+   * Refreshes the primary chart panel for the selected stock.
+   *
+   * @param selected selected stock, or {@code null} when no stock is available
+   */
+  private void updateChart(Stock selected) {
+    if (selected == null) {
+      chartPlaceholder.setText("Select a stock to view its price chart.");
+      chartPanel.setCenter(chartPlaceholder);
+      return;
+    }
+    if (selected.getHistoricalPrices().isEmpty()) {
+      chartPlaceholder.setText("No price history is available for " + selected.getSymbol() + " yet.");
+      chartPanel.setCenter(chartPlaceholder);
+      return;
+    }
+
+    StockChart chart = new StockChart(selected);
+    chart.setMinHeight(360);
+    chart.setPrefHeight(520);
+    chartPanel.setCenter(chart);
   }
 }

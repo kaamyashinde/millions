@@ -27,13 +27,12 @@ import model.analysis.recommendation.StockRecommendation;
 import model.analysis.recommendation.StockRecommendationService;
 import model.core.asset.info.StockFinancialInfo;
 import model.core.asset.info.StockFinancialInfoProvider;
-import view.components.chart.StockChart;
 import view.components.recommendation.StockRecommendationLabel;
 import view.theme.ThemeStyles;
 
 /**
  * Dedicated stock detail view showing summary data, mock company fundamentals, trend-based
- * recommendation, and price history.
+ * recommendation, and market event context.
  *
  * <p>The recommendation is computed through {@link StockRecommendationService}, keeping expert
  * advice presentation separate from the stock's actual price-update logic. Mock revenue and profit
@@ -133,7 +132,7 @@ public class StockDetailView extends BorderPane {
   }
 
   /**
-   * Displays details for the selected stock and refreshes the recommendation and chart.
+   * Displays details for the selected stock and refreshes the recommendation.
    *
    * @param stock selected stock, or {@code null} to show the empty state
    * @param tradingDay current exchange trading day
@@ -232,11 +231,8 @@ public class StockDetailView extends BorderPane {
       return;
     }
 
-    StockChart chart = new StockChart(stock);
-    chart.setMinHeight(280);
-    VBox.setVgrow(chart, Priority.ALWAYS);
     content.getChildren().setAll(
-        tradeActionsBox, recommendationBox, marketHistoryHeading, marketHistoryList, chart);
+        tradeActionsBox, recommendationBox, marketHistoryHeading, marketHistoryList);
   }
 
   private StockRecommendation resolveRecommendation(Stock stock) {
