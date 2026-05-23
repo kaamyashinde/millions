@@ -6,12 +6,12 @@ import java.math.BigDecimal;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.Exchange;
-import model.InvestableAsset;
-import model.Player;
-import model.savings.RegularSavingsPlan;
-import model.savings.RegularSavingsProcessor;
-import model.savings.SavingsInstallmentMode;
+import model.core.market.Exchange;
+import model.core.asset.InvestableAsset;
+import model.core.player.Player;
+import model.trading.savings.RegularSavingsPlan;
+import model.trading.savings.RegularSavingsProcessor;
+import model.trading.savings.SavingsInstallmentMode;
 import view.components.notification.NotificationService;
 import view.components.toast.ToastMode;
 

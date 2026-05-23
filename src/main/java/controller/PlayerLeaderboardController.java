@@ -1,14 +1,16 @@
 package controller;
 
+import model.session.SessionService;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.session.PlayerLeaderboardEntry;
-import model.session.PlayerLeaderboardMetric;
-import model.session.PlayerLeaderboardRanking;
+import model.session.leaderboard.PlayerLeaderboardEntry;
+import model.session.leaderboard.PlayerLeaderboardMetric;
+import model.session.leaderboard.PlayerLeaderboardRanking;
 
 /**
  * Manages auth-screen player comparison leaderboard sorting and rank display.

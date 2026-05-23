@@ -1,10 +1,10 @@
 package controller;
 
 import java.util.List;
-import model.learninghub.LearningCategory;
-import model.learninghub.LearningContentStore;
-import model.learninghub.LearningItem;
-import model.learninghub.LearningResource;
+import model.learning.content.LearningCategory;
+import model.learning.store.LearningContentStore;
+import model.learning.content.LearningItem;
+import model.learning.content.LearningResource;
 
 /**
  * Supplies learning hub content and navigation helpers.

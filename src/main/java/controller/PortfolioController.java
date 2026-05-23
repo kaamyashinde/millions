@@ -8,12 +8,12 @@ import java.nio.file.Path;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.Exchange;
-import model.Player;
-import model.Share;
-import model.analysis.MetricValue;
-import model.analysis.PerformanceComparison;
-import model.analysis.PortfolioPerformanceService;
+import model.core.market.Exchange;
+import model.core.player.Player;
+import model.core.asset.Share;
+import model.analysis.metric.MetricValue;
+import model.analysis.metric.PerformanceComparison;
+import model.analysis.performance.PortfolioPerformanceService;
 
 /**
  * Supplies portfolio summary, holdings, and performance metrics for the player tab.

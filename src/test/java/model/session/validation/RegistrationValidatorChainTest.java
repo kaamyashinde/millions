@@ -1,5 +1,10 @@
 package model.session.validation;
 
+
+import model.session.validation.rules.PinValidator;
+import model.session.validation.rules.StartingMoneyValidator;
+import model.session.validation.rules.UsernameValidator;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 

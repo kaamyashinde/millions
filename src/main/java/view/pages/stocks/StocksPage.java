@@ -20,10 +20,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.Exchange;
-import model.Stock;
-import model.stockinfo.StockFinancialInfoProvider;
-import model.marketevent.MarketEvent;
+import model.core.market.Exchange;
+import model.core.asset.Stock;
+import model.core.asset.info.StockFinancialInfoProvider;
+import model.core.market.event.MarketEvent;
 import view.theme.ThemeStyles;
 
 /**

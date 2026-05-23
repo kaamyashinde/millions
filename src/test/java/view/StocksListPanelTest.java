@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
-import model.Exchange;
-import model.Stock;
+import model.core.market.Exchange;
+import model.core.asset.Stock;
 import view.pages.stocks.StocksPage;
 
 import org.junit.jupiter.api.BeforeAll;

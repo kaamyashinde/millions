@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import controller.ProfileEditorController;
 import model.session.ActiveSession;
-import model.session.AuthenticationException;
+import model.exception.auth.AuthenticationException;
 import model.session.SessionService;
 import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;

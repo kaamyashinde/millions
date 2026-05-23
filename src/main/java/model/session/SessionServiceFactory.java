@@ -1,16 +1,23 @@
 package model.session;
 
+
+import model.session.auth.AuthService;
+import model.session.game.GamePersistenceService;
+import model.session.game.SavedRunService;
+import model.session.profile.ProfilePreferencesService;
+import model.session.profile.ProfileService;
+
 import java.nio.file.Path;
 import java.util.function.Supplier;
-import model.persistence.GameStateMapper;
-import model.persistence.GameStateRepository;
-import model.persistence.MarketData;
-import model.persistence.PinHashingService;
-import model.persistence.ProfileImageService;
-import model.persistence.ProfilePreferencesRepository;
-import model.persistence.SavedRunMapper;
-import model.persistence.SavedRunRepository;
-import model.persistence.UserAccountRepository;
+import model.persistence.game.GameStateMapper;
+import model.persistence.game.GameStateRepository;
+import model.persistence.market.MarketData;
+import model.persistence.account.PinHashingService;
+import model.persistence.profile.ProfileImageService;
+import model.persistence.profile.ProfilePreferencesRepository;
+import model.persistence.savedrun.SavedRunMapper;
+import model.persistence.savedrun.SavedRunRepository;
+import model.persistence.account.UserAccountRepository;
 
 /**
  * Creates fully wired local-profile session services for application entry points.

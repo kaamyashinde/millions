@@ -1,11 +1,13 @@
 package controller;
 
+import model.core.player.Player;
+
 import static model.utils.Validator.checkNotNull;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import model.Stock;
+import model.core.asset.Stock;
 import model.session.ActiveSession;
 import model.session.SessionService;
 import view.components.notification.LevelUpNotificationObserver;

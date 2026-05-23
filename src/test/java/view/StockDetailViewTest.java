@@ -10,15 +10,15 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import model.Stock;
-import model.marketevent.MarketEvent;
-import model.stockinfo.StockFinancialInfo;
-import model.stockinfo.StockFinancialInfoProvider;
+import model.core.asset.Stock;
+import model.core.market.event.MarketEvent;
+import model.core.asset.info.StockFinancialInfo;
+import model.core.asset.info.StockFinancialInfoProvider;
 import view.pages.stocks.StockDetailView;
-import model.marketevent.SymbolMarketEventTarget;
+import model.core.market.event.SymbolMarketEventTarget;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import model.recommendation.StockRecommendation;
+import model.analysis.recommendation.StockRecommendation;
 
 /**
  * Tests refresh behavior of the stock detail view.

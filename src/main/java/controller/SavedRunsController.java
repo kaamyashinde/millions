@@ -4,7 +4,7 @@ import static model.utils.Validator.checkNotNull;
 
 import java.util.List;
 import java.util.UUID;
-import model.persistence.SavedRunRecord;
+import model.persistence.savedrun.SavedRunRecord;
 import model.session.SessionService;
 
 /**

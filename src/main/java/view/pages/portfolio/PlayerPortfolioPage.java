@@ -1,5 +1,8 @@
 package view.pages.portfolio;
 
+import model.core.player.Portfolio;
+import model.trading.transaction.Purchase;
+
 import static model.utils.Validator.checkNotNull;
 
 import java.math.BigDecimal;
@@ -24,12 +27,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.Exchange;
-import model.Player;
-import model.Share;
-import model.analysis.MetricValue;
-import model.analysis.PerformanceComparison;
-import model.analysis.PortfolioPerformanceService;
+import model.core.market.Exchange;
+import model.core.player.Player;
+import model.core.asset.Share;
+import model.analysis.metric.MetricValue;
+import model.analysis.metric.PerformanceComparison;
+import model.analysis.performance.PortfolioPerformanceService;
 import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
 import view.components.image.ValidatingImageLoader;
