@@ -1,4 +1,4 @@
-package model.analysis.metric;
+package model.analysis.performance;
 
 
 import model.core.player.Portfolio;

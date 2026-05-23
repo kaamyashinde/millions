@@ -1,11 +1,6 @@
 package model.analysis.performance;
 
 
-import model.analysis.PerformanceAnalyzer;
-import model.analysis.metric.MetricStatus;
-import model.analysis.metric.PerformanceComparison;
-import model.analysis.metric.PerformanceMetrics;
-
 import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;

@@ -1,14 +1,14 @@
 package model.analysis;
 
 
-import model.analysis.metric.MetricStatus;
-import model.analysis.metric.PerformanceMetrics;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import model.analysis.performance.MetricStatus;
+import model.analysis.performance.PerformanceAnalyzer;
+import model.analysis.performance.PerformanceMetrics;
 
 class PerformanceAnalyzerTest {
 

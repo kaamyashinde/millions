@@ -1,9 +1,6 @@
 package model.analysis.performance;
 
 
-import model.analysis.metric.MetricStatus;
-import model.analysis.metric.PerformanceComparison;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;

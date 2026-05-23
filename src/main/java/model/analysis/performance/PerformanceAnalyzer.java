@@ -1,4 +1,4 @@
-package model.analysis;
+package model.analysis.performance;
 
 import static util.Validator.checkNotNull;
 
@@ -6,9 +6,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import model.analysis.metric.MetricStatus;
-import model.analysis.metric.MetricValue;
-import model.analysis.metric.PerformanceMetrics;
 
 /**
  * Calculates performance metrics from an ordered daily value series.

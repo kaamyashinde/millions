@@ -10,10 +10,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.core.market.Exchange;
 import model.core.player.Player;
-import model.core.asset.Share;
-import model.analysis.metric.MetricValue;
-import model.analysis.metric.PerformanceComparison;
+import model.analysis.performance.MetricValue;
+import model.analysis.performance.PerformanceComparison;
 import model.analysis.performance.PortfolioPerformanceService;
+import model.core.asset.Share;
 
 /**
  * Supplies portfolio summary, holdings, and performance metrics for the player tab.
