@@ -18,6 +18,7 @@ import model.learninghub.LearningResource;
 import model.learninghub.QuizAnswer;
 import model.learninghub.QuizAttempt;
 import model.learninghub.QuizQuestion;
+import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -29,12 +30,6 @@ import view.theme.ThemeStyles;
  * @since 04-04-2026
  */
 public class QuizView extends BorderPane {
-
-  private static final String COLOR_BG_CARD = "#111827";
-  private static final String COLOR_HEADING = "#F8FAFC";
-  private static final String COLOR_SUBTITLE = "#CBD5E1";
-  private static final String COLOR_CORRECT = "#22C55E";
-  private static final String COLOR_WRONG = "#EF4444";
 
   private final QuizAttempt attempt;
   private final Runnable onFinish;
@@ -189,7 +184,7 @@ public class QuizView extends BorderPane {
       VBox feedbackPane, QuizQuestion q, boolean correct, String chosenId) {
     feedbackPane.getChildren().clear();
 
-    String resultColor = correct ? COLOR_CORRECT : COLOR_WRONG;
+    String resultColor = correct ? ThemePalette.SUCCESS : ThemePalette.ERROR;
     String resultText = correct ? "✓  Correct!" : "✗  Not quite.";
 
     feedbackPane.getStyleClass().removeAll("quiz-feedback-correct", "quiz-feedback-wrong");
@@ -204,7 +199,7 @@ public class QuizView extends BorderPane {
 
     Label explanation = new Label(q.explanationText());
     explanation.setWrapText(true);
-    explanation.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-size: 12;");
+    explanation.setStyle("-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + "; -fx-font-size: 12;");
 
     feedbackPane.getChildren().addAll(resultLabel, explanation);
 
@@ -215,7 +210,7 @@ public class QuizView extends BorderPane {
           .findFirst()
           .ifPresent(resource -> {
             Label learnMore = new Label("Review this resource:");
-            learnMore.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+            learnMore.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 11;");
             feedbackPane.getChildren().addAll(learnMore, buildResourceCard(resource));
           });
     }
@@ -224,28 +219,28 @@ public class QuizView extends BorderPane {
   private static VBox buildResourceCard(LearningResource resource) {
     Label sourceLabel = new Label(resource.sourceLabel());
     sourceLabel.setStyle(
-        "-fx-background-color: " + COLOR_CORRECT + "22;"
-        + "-fx-text-fill: " + COLOR_CORRECT + ";"
+        "-fx-background-color: " + ThemePalette.SUCCESS + "22;"
+        + "-fx-text-fill: " + ThemePalette.SUCCESS + ";"
         + "-fx-background-radius: 4;"
         + "-fx-padding: 2 6 2 6;"
         + "-fx-font-size: 10;");
 
     Label title = new Label(resource.title());
     title.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
+        "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
         + "-fx-font-weight: bold;"
         + "-fx-font-size: 12;");
     title.setWrapText(true);
 
     Label desc = new Label(resource.description());
-    desc.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    desc.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 11;");
     desc.setWrapText(true);
 
     VBox card = new VBox(4, sourceLabel, title, desc);
     card.setPadding(new Insets(10));
     card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_CORRECT + ";"
+        "-fx-background-color: " + ThemePalette.SURFACE + ";"
+        + "-fx-border-color: " + ThemePalette.SUCCESS + ";"
         + "-fx-border-radius: 6;"
         + "-fx-background-radius: 6;");
     return card;

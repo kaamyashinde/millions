@@ -18,6 +18,7 @@ import javafx.scene.text.FontWeight;
 import model.learninghub.QuizAttempt;
 import model.learninghub.QuizQuestion;
 import model.learninghub.QuizSession;
+import view.theme.ThemeStyles;
 
 /**
  * Displays the score summary after a quiz is completed.
@@ -51,11 +52,11 @@ public class QuizResultView extends BorderPane {
 
     // ── TOP bar ──────────────────────────────────────────────────────────────
     Button backToTopicBtn = new Button("← Back to Topic");
-    backToTopicBtn.setStyle("-fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;");
+    ThemeStyles.styleButton(backToTopicBtn);
     backToTopicBtn.setOnAction(_ -> onBackToTopic.run());
 
     Button backToHubBtn = new Button("Learning Hub");
-    backToHubBtn.setStyle("-fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;");
+    ThemeStyles.styleButton(backToHubBtn);
     backToHubBtn.setOnAction(_ -> onBackToHub.run());
 
     Region spacer = new Region();
