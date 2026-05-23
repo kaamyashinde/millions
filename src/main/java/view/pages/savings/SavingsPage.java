@@ -210,7 +210,7 @@ public class SavingsPage extends BorderPane {
   }
 
   private void updateDayLabel() {
-    dayLabel.setText("Trading day: " + controller.getTradingDay());
+    dayLabel.setText("Trading Day: " + controller.getTradingDay());
   }
 
   private static void configureAssetCombo(ComboBox<InvestableAsset> combo) {
