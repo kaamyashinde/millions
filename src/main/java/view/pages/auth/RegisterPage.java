@@ -55,7 +55,7 @@ public class RegisterPage extends AuthLayout {
   }
 
   private void wireForm(VBox form, RegisterAction registerAction) {
-    Label heading = new Label("Create your profile");
+    Label heading = new Label("Create Your Profile");
     ThemeStyles.addStyleClasses(heading, "heading-lg");
 
     Label subheading = new Label("Choose a username, PIN, and starting balance.");
@@ -63,7 +63,7 @@ public class RegisterPage extends AuthLayout {
 
     usernameField.setPromptText("Username");
     pinField.setPromptText("PIN (4–8 digits)");
-    startingMoneyField.setPromptText("Starting money");
+    startingMoneyField.setPromptText("Starting Money");
     ThemeStyles.styleField(usernameField);
     ThemeStyles.styleField(pinField);
     ThemeStyles.styleField(startingMoneyField);
@@ -71,7 +71,7 @@ public class RegisterPage extends AuthLayout {
     pinField.setMaxWidth(Double.MAX_VALUE);
     startingMoneyField.setMaxWidth(Double.MAX_VALUE);
 
-    Button registerButton = new Button("Create profile");
+    Button registerButton = new Button("Create Profile");
     registerButton.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.styleAccentButton(registerButton);
     registerButton.setOnAction(
