@@ -1,7 +1,5 @@
 package view.pages.learning;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -26,7 +24,9 @@ import model.learning.content.LearningResource;
 import model.learning.quiz.Quiz;
 import model.learning.quiz.QuizAttempt;
 import model.learning.store.QuizContentStore;
+import util.ExternalLinkOpener;
 import util.MarkdownLoader;
+import view.components.learning.LearningResourceCard;
 import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
@@ -134,7 +134,7 @@ public class ItemDetailView extends BorderPane {
     webView.getEngine().locationProperty().addListener((obs, oldLoc, newLoc) -> {
       if (newLoc != null && !newLoc.isEmpty() && !newLoc.startsWith("about:")) {
         webView.getEngine().loadContent(html, "text/html");
-        openUrl(newLoc);
+        ExternalLinkOpener.open(newLoc);
       }
     });
 
@@ -165,46 +165,11 @@ public class ItemDetailView extends BorderPane {
       section.getChildren().add(fallback);
     } else {
       for (LearningResource res : resources) {
-        section.getChildren().add(buildResourceCard(res));
+        section.getChildren().add(LearningResourceCard.create(res));
       }
     }
 
     return section;
-  }
-
-  private static javafx.scene.Node buildResourceCard(LearningResource resource) {
-    Label sourceLabel = new Label(resource.sourceLabel());
-    sourceLabel.setStyle(
-        "-fx-background-color: " + ThemePalette.SUCCESS + "22;"
-        + "-fx-text-fill: " + ThemePalette.SUCCESS + ";"
-        + "-fx-background-radius: 4;"
-        + "-fx-padding: 2 6 2 6;"
-        + "-fx-font-size: 10;");
-
-    Label title = new Label(resource.title());
-    title.setStyle(
-        "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
-
-    Label desc = new Label(resource.description());
-    desc.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 11;");
-    desc.setWrapText(true);
-
-    Label cta = new Label("Open →");
-    cta.setStyle("-fx-text-fill: " + ThemePalette.SUCCESS + "; -fx-font-size: 11;");
-
-    VBox card = new VBox(6, sourceLabel, title, desc, cta);
-    card.setPadding(new Insets(12));
-    card.setMaxWidth(Double.MAX_VALUE);
-    card.setStyle(
-        "-fx-background-color: " + ThemePalette.SURFACE + ";"
-        + "-fx-border-color: " + ThemePalette.SUCCESS + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;");
-    card.setOnMouseClicked(_ -> openUrl(resource.url()));
-    return card;
   }
 
   private static javafx.scene.Node buildRelatedTopicsSection(
@@ -308,11 +273,4 @@ public class ItemDetailView extends BorderPane {
     };
   }
 
-  private static void openUrl(String url) {
-    try {
-      Desktop.getDesktop().browse(URI.create(url));
-    } catch (Exception ignored) {
-      // Silent fail — desktop browsing may be unavailable in some environments
-    }
-  }
 }

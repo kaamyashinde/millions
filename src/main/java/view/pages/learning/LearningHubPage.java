@@ -1,7 +1,5 @@
 package view.pages.learning;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.util.List;
 
 import javafx.geometry.Insets;
@@ -25,6 +23,7 @@ import model.learning.content.LearningItem;
 import model.learning.content.LearningResource;
 import model.learning.quiz.QuizAttempt;
 import model.learning.quiz.QuizSession;
+import view.components.learning.LearningResourceCard;
 import view.pages.quiz.QuizResultView;
 import view.pages.quiz.QuizView;
 import view.theme.ThemePalette;
@@ -120,7 +119,7 @@ public class LearningHubPage extends BorderPane {
         .findFirst()
         .orElse(LearningContentStore.getResources().get(0));
 
-    return buildSection("Start Here", buildResourceCard(resource));
+    return buildSection("Start Here", LearningResourceCard.create(resource));
   }
 
   // ── Card builders ────────────────────────────────────────────────────────────
@@ -176,34 +175,6 @@ public class LearningHubPage extends BorderPane {
     return card;
   }
 
-  private javafx.scene.Node buildResourceCard(LearningResource resource) {
-    Label sourceLabel = new Label(resource.sourceLabel());
-    sourceLabel.setStyle(
-        "-fx-background-color: " + ThemePalette.SUCCESS + "22;"
-            + "-fx-text-fill: " + ThemePalette.SUCCESS + ";"
-            + "-fx-background-radius: 4;"
-            + "-fx-padding: 2 6 2 6;"
-            + "-fx-font-size: 10;");
-
-    Label title = new Label(resource.title());
-    ThemeStyles.addStyleClasses(title, "learning-resource-title");
-
-    Label desc = new Label(resource.description());
-    ThemeStyles.addStyleClasses(desc, "learning-card-summary");
-    desc.setWrapText(true);
-
-    Label cta = new Label("Open article →");
-    ThemeStyles.addStyleClasses(cta, "learning-resource-cta");
-
-    VBox card = new VBox(6, sourceLabel, title, desc, cta);
-    card.setPadding(new Insets(14));
-    card.setMaxWidth(Double.MAX_VALUE);
-    ThemeStyles.addStyleClasses(card, "learning-card-resource");
-
-    card.setOnMouseClicked(_ -> openUrl(resource.url()));
-    return card;
-  }
-
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
   private static VBox buildSection(String title, javafx.scene.Node content) {
@@ -220,14 +191,6 @@ public class LearningHubPage extends BorderPane {
       case INTERMEDIATE -> ThemePalette.DIFFICULTY_INTERMEDIATE;
       case ADVANCED -> ThemePalette.DIFFICULTY_ADVANCED;
     };
-  }
-
-  private static void openUrl(String url) {
-    try {
-      Desktop.getDesktop().browse(URI.create(url));
-    } catch (Exception ignored) {
-      // Silent fail — desktop browsing may be unavailable in some environments
-    }
   }
 
   // ── Navigation ───────────────────────────────────────────────────────────────
