@@ -1,0 +1,196 @@
+{
+  "categories": [
+    {
+      "id": "basics",
+      "name": "Basics",
+      "description": "Core concepts every investor should know",
+      "emoji": "📖"
+    },
+    {
+      "id": "how-investing-works",
+      "name": "How Investing Works",
+      "description": "Understand how money grows in markets",
+      "emoji": "💡"
+    },
+    {
+      "id": "risk-diversification",
+      "name": "Risk & Diversification",
+      "description": "Manage uncertainty and spread your exposure",
+      "emoji": "⚖️"
+    },
+    {
+      "id": "market-understanding",
+      "name": "Market Understanding",
+      "description": "Read the market and understand price movements",
+      "emoji": "📈"
+    },
+    {
+      "id": "strategies",
+      "name": "Strategies",
+      "description": "Proven approaches to building a portfolio",
+      "emoji": "🎯"
+    },
+    {
+      "id": "practical-learning",
+      "name": "Practical Learning",
+      "description": "Hands-on tools and real-world exercises",
+      "emoji": "🛠️"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-aksjer-for-alle",
+      "title": "Aksjer for alle",
+      "sourceLabel": "Oslo Børs",
+      "type": "ARTICLE",
+      "url": "https://www.oslobors.no/Oslo-Boers/Handel/Aksjer-og-egenkapitalbevis/Aksjer-for-alle",
+      "description": "Oslo Børs's beginner guide to buying and owning shares."
+    },
+    {
+      "id": "res-investopedia-stocks",
+      "title": "Stocks Overview",
+      "sourceLabel": "Investopedia",
+      "type": "ARTICLE",
+      "url": "https://www.investopedia.com/terms/s/stock.asp",
+      "description": "Comprehensive reference covering stock types, markets, and valuation."
+    },
+    {
+      "id": "res-nordnet-academy",
+      "title": "Nordnet Academy",
+      "sourceLabel": "Nordnet",
+      "type": "ARTICLE",
+      "url": "https://www.nordnet.no/magasinet/investering/",
+      "description": "Norwegian-language investing guides from a leading Nordic broker."
+    },
+    {
+      "id": "res-yt-investing-basics",
+      "title": "Investing Basics (Video)",
+      "sourceLabel": "YouTube",
+      "type": "VIDEO",
+      "url": "https://www.youtube.com/watch?v=Xn7KWR9EOGQ",
+      "description": "A short, beginner-friendly introduction to investing in the stock market."
+    }
+  ],
+  "items": [
+    {
+      "id": "what-is-a-stock",
+      "title": "What Is a Stock?",
+      "slug": "what-is-a-stock",
+      "summary": "Learn what owning a share of a company actually means.",
+      "categoryId": "basics",
+      "difficulty": "BEGINNER",
+      "featured": true,
+      "contentFile": "learninghub/what-is-a-stock.md",
+      "relatedTopicIds": ["stocks-vs-bonds", "how-stock-prices-move"],
+      "resourceIds": ["res-aksjer-for-alle", "res-investopedia-stocks"]
+    },
+    {
+      "id": "how-stock-prices-move",
+      "title": "How Stock Prices Move",
+      "slug": "how-stock-prices-move",
+      "summary": "Discover the forces of supply and demand that drive price changes.",
+      "categoryId": "how-investing-works",
+      "difficulty": "BEGINNER",
+      "featured": true,
+      "contentFile": "learninghub/how-stock-prices-move.md",
+      "relatedTopicIds": ["reading-stock-charts", "what-is-investment-risk"],
+      "resourceIds": ["res-investopedia-stocks", "res-yt-investing-basics"]
+    },
+    {
+      "id": "what-is-investment-risk",
+      "title": "What Is Investment Risk?",
+      "slug": "what-is-investment-risk",
+      "summary": "Understand why all investments carry some level of uncertainty.",
+      "categoryId": "risk-diversification",
+      "difficulty": "BEGINNER",
+      "featured": true,
+      "contentFile": "learninghub/what-is-investment-risk.md",
+      "relatedTopicIds": ["diversification-basics", "stocks-vs-bonds"],
+      "resourceIds": ["res-nordnet-academy"]
+    },
+    {
+      "id": "stocks-vs-bonds",
+      "title": "Stocks vs. Bonds",
+      "slug": "stocks-vs-bonds",
+      "summary": "Compare the two most common asset classes side by side.",
+      "categoryId": "basics",
+      "difficulty": "BEGINNER",
+      "featured": false,
+      "contentFile": "learninghub/stocks-vs-bonds.md",
+      "relatedTopicIds": ["what-is-a-stock", "diversification-basics"],
+      "resourceIds": ["res-investopedia-stocks", "res-nordnet-academy"]
+    },
+    {
+      "id": "compound-interest",
+      "title": "The Power of Compound Interest",
+      "slug": "compound-interest",
+      "summary": "See how reinvesting returns accelerates portfolio growth over time.",
+      "categoryId": "how-investing-works",
+      "difficulty": "BEGINNER",
+      "featured": false,
+      "contentFile": "learninghub/compound-interest.md",
+      "relatedTopicIds": ["index-funds-explained", "dollar-cost-averaging"],
+      "resourceIds": ["res-nordnet-academy", "res-yt-investing-basics"]
+    },
+    {
+      "id": "diversification-basics",
+      "title": "Diversification Basics",
+      "slug": "diversification-basics",
+      "summary": "Why spreading investments across assets reduces overall risk.",
+      "categoryId": "risk-diversification",
+      "difficulty": "INTERMEDIATE",
+      "featured": false,
+      "contentFile": "learninghub/diversification-basics.md",
+      "relatedTopicIds": ["what-is-investment-risk", "index-funds-explained"],
+      "resourceIds": ["res-nordnet-academy", "res-aksjer-for-alle"]
+    },
+    {
+      "id": "reading-stock-charts",
+      "title": "Reading Stock Charts",
+      "slug": "reading-stock-charts",
+      "summary": "Interpret candlestick charts and identify key price patterns.",
+      "categoryId": "market-understanding",
+      "difficulty": "INTERMEDIATE",
+      "featured": false,
+      "contentFile": "learninghub/reading-stock-charts.md",
+      "relatedTopicIds": ["how-stock-prices-move", "dollar-cost-averaging"],
+      "resourceIds": ["res-investopedia-stocks", "res-yt-investing-basics"]
+    },
+    {
+      "id": "index-funds-explained",
+      "title": "Index Funds Explained",
+      "slug": "index-funds-explained",
+      "summary": "Low-cost, passive investing through broad market indices.",
+      "categoryId": "strategies",
+      "difficulty": "BEGINNER",
+      "featured": false,
+      "contentFile": "learninghub/index-funds-explained.md",
+      "relatedTopicIds": ["dollar-cost-averaging", "diversification-basics"],
+      "resourceIds": ["res-nordnet-academy", "res-aksjer-for-alle"]
+    },
+    {
+      "id": "dollar-cost-averaging",
+      "title": "Dollar-Cost Averaging",
+      "slug": "dollar-cost-averaging",
+      "summary": "Invest a fixed amount regularly to reduce timing risk.",
+      "categoryId": "strategies",
+      "difficulty": "BEGINNER",
+      "featured": false,
+      "contentFile": "learninghub/dollar-cost-averaging.md",
+      "relatedTopicIds": ["index-funds-explained", "paper-trading"],
+      "resourceIds": ["res-nordnet-academy"]
+    },
+    {
+      "id": "paper-trading",
+      "title": "Paper Trading: Practice Without Risk",
+      "slug": "paper-trading",
+      "summary": "Simulate real trades in a risk-free environment before going live.",
+      "categoryId": "practical-learning",
+      "difficulty": "BEGINNER",
+      "featured": false,
+      "contentFile": "learninghub/paper-trading.md",
+      "relatedTopicIds": ["dollar-cost-averaging", "reading-stock-charts"],
+      "resourceIds": ["res-yt-investing-basics"]
+    }
+  ]
+}

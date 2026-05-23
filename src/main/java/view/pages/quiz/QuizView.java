@@ -3,6 +3,7 @@ package view.pages.quiz;
 import java.util.List;
 import java.util.function.Consumer;
 
+import controller.LearningHubController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -34,6 +35,7 @@ public class QuizView extends BorderPane {
 
   private final QuizAttempt attempt;
   private final Runnable onFinish;
+  private final LearningHubController learningHub;
   private final Consumer<LearningItem> onOpenHubTopic;
 
   private Label progressLabel;
@@ -45,15 +47,18 @@ public class QuizView extends BorderPane {
    * @param attempt         the quiz attempt tracking progress and answers
    * @param onBack          called when the back button is clicked
    * @param onFinish        called when the player has answered all questions
+   * @param learningHub     supplies linked topic and resource lookups for feedback
    * @param onOpenHubTopic  called when the player opens the linked hub topic from feedback
    */
   public QuizView(
       QuizAttempt attempt,
       Runnable onBack,
       Runnable onFinish,
+      LearningHubController learningHub,
       Consumer<LearningItem> onOpenHubTopic) {
     this.attempt = attempt;
     this.onFinish = onFinish;
+    this.learningHub = learningHub;
     this.onOpenHubTopic = onOpenHubTopic;
 
     ThemeStyles.addStyleClasses(this, "quiz-root");
@@ -199,7 +204,7 @@ public class QuizView extends BorderPane {
 
     if (!correct) {
       QuizWrongAnswerLinks.appendTo(
-          feedbackPane, q, attempt.quiz().linkedItemId(), onOpenHubTopic);
+          feedbackPane, learningHub, q, attempt.quiz().linkedItemId(), onOpenHubTopic);
     }
   }
 }

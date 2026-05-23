@@ -5,23 +5,24 @@ import model.exception.auth.AuthenticationException;
 import model.exception.auth.DuplicateUsernameException;
 import model.exception.auth.RegistrationValidationException;
 
+import model.persistence.ProfileFile;
+import model.persistence.io.JsonStorage;
+import model.persistence.market.MarketData;
+import model.persistence.market.MarketDataFileService;
+import model.persistence.profile.ProfilePaths;
 import model.session.ActiveSession;
-import model.session.game.GamePersistenceService;
-
-import java.math.BigDecimal;
-import java.util.List;
-import model.core.market.Exchange;
-import model.core.player.Player;
-import model.persistence.game.GameStateSnapshot;
-import model.persistence.account.PinHashingService;
-import model.persistence.profile.ProfileDirectories;
-import model.persistence.account.UserAccountRecord;
-import model.persistence.account.UserAccountRepository;
 import model.session.validation.rules.PinValidator;
 import model.session.validation.RegistrationValidator;
 import model.session.validation.rules.StartingMoneyValidator;
 import model.session.validation.rules.UsernameValidator;
 import model.session.validation.ValidationResult;
+
+import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import model.core.market.Exchange;
+import model.core.player.Player;
 
 /**
  * Handles user registration, authentication, and credential validation.
@@ -34,99 +35,84 @@ public final class AuthService {
   private static final RegistrationValidator LOGIN_CREDENTIALS =
       new UsernameValidator().then(new PinValidator());
 
-  private final UserAccountRepository userAccountRepository;
-  private final PinHashingService pinHashingService;
-  private final GamePersistenceService gamePersistenceService;
+  private final ProfilePaths profilePaths;
+  private final JsonStorage jsonStorage;
+  private final MarketDataFileService marketDataFileService;
+  private final String exchangeName;
 
-  /**
-   * Creates an authentication service with the supplied dependencies.
-   *
-   * @param userAccountRepository  account metadata repository
-   * @param pinHashingService      PIN hashing and verification
-   * @param gamePersistenceService game state persistence for new and restored profiles
-   */
   public AuthService(
-      UserAccountRepository userAccountRepository,
-      PinHashingService pinHashingService,
-      GamePersistenceService gamePersistenceService) {
-    this.userAccountRepository = userAccountRepository;
-    this.pinHashingService = pinHashingService;
-    this.gamePersistenceService = gamePersistenceService;
+      ProfilePaths profilePaths,
+      JsonStorage jsonStorage,
+      MarketDataFileService marketDataFileService,
+      String exchangeName) {
+    this.profilePaths = profilePaths;
+    this.jsonStorage = jsonStorage;
+    this.marketDataFileService = marketDataFileService;
+    this.exchangeName = exchangeName;
   }
 
-  /**
-   * Registers a new user profile with validated credentials and fresh game state.
-   *
-   * @param username      requested username
-   * @param pin           numeric PIN
-   * @param startingMoney initial cash balance
-   * @return new active session for the registered profile
-   * @throws DuplicateUsernameException if the username is already taken
-   * @throws RegistrationValidationException if username, PIN, or starting money is invalid
-   */
-  public ActiveSession register(String username, char[] pin, BigDecimal startingMoney) {
+  public ActiveSession register(
+      String username,
+      char[] pin,
+      BigDecimal startingMoney,
+      Optional<Path> marketDataSource) {
     ValidationResult registration = REGISTRATION_CHAIN.validate(username, pin, startingMoney);
     if (registration instanceof ValidationResult.Failure(var error)) {
       throw new RegistrationValidationException(error);
     }
-    String normalizedUsername = ProfileDirectories.normalizeUsername(username);
-    if (userAccountRepository.exists(normalizedUsername)) {
+    String normalizedUsername = ProfilePaths.normalizeUsername(username);
+    if (profilePaths.profileExists(normalizedUsername)) {
       throw new DuplicateUsernameException("That username is already registered.");
     }
 
     String trimmedUsername = username.trim();
-    String saltBase64 = pinHashingService.generateSaltBase64();
-    UserAccountRecord account = new UserAccountRecord(
-        trimmedUsername,
-        normalizedUsername,
-        saltBase64,
-        pinHashingService.hashPin(pin, saltBase64));
-
-    Exchange exchange = gamePersistenceService.createFreshExchange();
+    String pinHash = ProfileFile.hashPin(normalizedUsername, pin);
+    MarketData marketData = marketDataSource
+        .map(source -> marketDataFileService.importFromFile(source, normalizedUsername))
+        .orElseGet(() -> marketDataFileService.installDefault(normalizedUsername));
+    Exchange exchange = ProfileFile.createFreshExchange(marketData, exchangeName);
     Player player = new Player(trimmedUsername, startingMoney);
 
-    userAccountRepository.save(account);
-    gamePersistenceService.saveSession(normalizedUsername, player, exchange);
+    ProfileFile profile = ProfileFile.capture(
+        player,
+        exchange,
+        trimmedUsername,
+        normalizedUsername,
+        pinHash,
+        null,
+        false,
+        List.of());
+    jsonStorage.write(profilePaths.profileFile(normalizedUsername), profile);
 
     return new ActiveSession(trimmedUsername, normalizedUsername, player, exchange);
   }
 
-  /**
-   * Authenticates an existing user and restores their game state.
-   *
-   * @param username username to log in
-   * @param pin      numeric PIN
-   * @return active session for the authenticated user
-   * @throws AuthenticationException if credentials are invalid
-   */
   public ActiveSession login(String username, char[] pin) {
     validateLoginInput(username, pin);
-    UserAccountRecord account = userAccountRepository.findByUsername(username)
+    ProfileFile profile = loadProfile(username)
         .orElseThrow(() -> new AuthenticationException("Invalid username or PIN."));
-    if (!pinHashingService.verifyPin(pin, account.saltBase64(), account.pinHashBase64())) {
+    if (!profile.matchesPin(pin)) {
       throw new AuthenticationException("Invalid username or PIN.");
     }
 
-    GameStateSnapshot snapshot = gamePersistenceService.loadSnapshot(account.normalizedUsername())
-        .orElseThrow(() -> new IllegalStateException(
-            "Saved game state not found for " + account.username() + "."));
-    Exchange exchange = gamePersistenceService.restoreExchange(snapshot.exchange());
-    Player player = gamePersistenceService.restorePlayer(snapshot.player(), exchange);
-    applyAccountDisplayName(account, player);
-    return new ActiveSession(account.username(), account.normalizedUsername(), player, exchange);
+    MarketData marketData = marketDataFileService.loadForProfile(profile.normalizedUsername());
+    ProfileFile.RestoredSession restored = profile.restore(marketData);
+    applyDisplayName(profile, restored.player());
+    return new ActiveSession(
+        profile.username(), profile.normalizedUsername(), restored.player(), restored.exchange());
   }
 
-  /**
-   * Lists all registered usernames alphabetically.
-   *
-   * @return sorted usernames
-   */
   public List<String> listRegisteredUsers() {
-    return userAccountRepository.listUsernames();
+    return profilePaths.listUsernames(jsonStorage);
   }
 
-  public UserAccountRepository userAccountRepository() {
-    return userAccountRepository;
+  public ProfileFile loadProfileOrThrow(String username) {
+    return loadProfile(username)
+        .orElseThrow(() -> new IllegalStateException("Profile not found: " + username));
+  }
+
+  public MarketDataFileService marketDataFileService() {
+    return marketDataFileService;
   }
 
   public static void validateLoginInput(String username, char[] pin) {
@@ -136,12 +122,20 @@ public final class AuthService {
     }
   }
 
-  private static void applyAccountDisplayName(UserAccountRecord account, Player player) {
-    if (account.displayName() != null && !account.displayName().isBlank()) {
+  private java.util.Optional<ProfileFile> loadProfile(String username) {
+    if (!profilePaths.profileExists(username)) {
+      return java.util.Optional.empty();
+    }
+    return java.util.Optional.of(
+        jsonStorage.read(profilePaths.profileFile(username), ProfileFile.class));
+  }
+
+  private static void applyDisplayName(ProfileFile profile, Player player) {
+    if (profile.displayName() != null && !profile.displayName().isBlank()) {
       try {
-        player.setName(account.displayName().trim());
+        player.setName(profile.displayName().trim());
       } catch (IllegalArgumentException ignored) {
-        // keep snapshot name when stored value is invalid
+        // keep restored player name
       }
     }
   }

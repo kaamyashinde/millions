@@ -1,160 +1,39 @@
 package model.learning.store;
 
 
-import model.core.asset.Stock;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import model.learning.content.Difficulty;
 import model.learning.content.LearningCategory;
 import model.learning.content.LearningItem;
 import model.learning.content.LearningResource;
 import model.learning.content.LearningResourceType;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
- * Central store (Facade) for all Learning Hub content. Acts as the single source of truth for
- * categories, items, and resources — the UI never contains hardcoded copy.
- *
- * <p>All content is held as {@code private static final} fields. The class is non-instantiable.
+ * Central store for all Learning Hub catalog content. Loads categories, items, and resources
+ * from {@code learninghub/catalog.json} on the classpath.
  *
  * @author kaamyashinde
- * @version 1.0.0
+ * @version 2.0.0
  * @since 04-04-2026
  */
 public final class LearningContentStore {
 
+  private static final String CATALOG_RESOURCE = "learninghub/catalog.json";
+
+  private static final List<LearningCategory> CATEGORIES = loadCategories();
+  private static final List<LearningResource> RESOURCES = loadResources();
+  private static final List<LearningItem> ITEMS = loadItems();
+
   private LearningContentStore() {
   }
-
-  // ── Categories ──────────────────────────────────────────────────────────────
-
-  private static final LearningCategory CAT_BASICS =
-      new LearningCategory("basics", "Basics", "Core concepts every investor should know", "📖");
-
-  private static final LearningCategory CAT_HOW_INVESTING_WORKS =
-      new LearningCategory("how-investing-works", "How Investing Works",
-          "Understand how money grows in markets", "💡");
-
-  private static final LearningCategory CAT_RISK =
-      new LearningCategory("risk-diversification", "Risk & Diversification",
-          "Manage uncertainty and spread your exposure", "⚖️");
-
-  private static final LearningCategory CAT_MARKET =
-      new LearningCategory("market-understanding", "Market Understanding",
-          "Read the market and understand price movements", "📈");
-
-  private static final LearningCategory CAT_STRATEGIES =
-      new LearningCategory("strategies", "Strategies",
-          "Proven approaches to building a portfolio", "🎯");
-
-  private static final LearningCategory CAT_PRACTICAL =
-      new LearningCategory("practical-learning", "Practical Learning",
-          "Hands-on tools and real-world exercises", "🛠️");
-
-  // ── Items ────────────────────────────────────────────────────────────────────
-
-  private static final LearningItem ITEM_WHAT_IS_STOCK =
-      new LearningItem("what-is-a-stock", "What Is a Stock?", "what-is-a-stock",
-          "Learn what owning a share of a company actually means.",
-          CAT_BASICS, Difficulty.BEGINNER, true, "learninghub/what-is-a-stock.md",
-          List.of("stocks-vs-bonds", "how-stock-prices-move"),
-          List.of("res-aksjer-for-alle", "res-investopedia-stocks"));
-
-  private static final LearningItem ITEM_HOW_PRICES_MOVE =
-      new LearningItem("how-stock-prices-move", "How Stock Prices Move", "how-stock-prices-move",
-          "Discover the forces of supply and demand that drive price changes.",
-          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, true, "learninghub/how-stock-prices-move.md",
-          List.of("reading-stock-charts", "what-is-investment-risk"),
-          List.of("res-investopedia-stocks", "res-yt-investing-basics"));
-
-  private static final LearningItem ITEM_WHAT_IS_RISK =
-      new LearningItem("what-is-investment-risk", "What Is Investment Risk?",
-          "what-is-investment-risk",
-          "Understand why all investments carry some level of uncertainty.",
-          CAT_RISK, Difficulty.BEGINNER, true, "learninghub/what-is-investment-risk.md",
-          List.of("diversification-basics", "stocks-vs-bonds"),
-          List.of("res-nordnet-academy"));
-
-  private static final LearningItem ITEM_STOCK_VS_BOND =
-      new LearningItem("stocks-vs-bonds", "Stocks vs. Bonds", "stocks-vs-bonds",
-          "Compare the two most common asset classes side by side.",
-          CAT_BASICS, Difficulty.BEGINNER, false, "learninghub/stocks-vs-bonds.md",
-          List.of("what-is-a-stock", "diversification-basics"),
-          List.of("res-investopedia-stocks", "res-nordnet-academy"));
-
-  private static final LearningItem ITEM_COMPOUND_INTEREST =
-      new LearningItem("compound-interest", "The Power of Compound Interest",
-          "compound-interest",
-          "See how reinvesting returns accelerates portfolio growth over time.",
-          CAT_HOW_INVESTING_WORKS, Difficulty.BEGINNER, false, "learninghub/compound-interest.md",
-          List.of("index-funds-explained", "dollar-cost-averaging"),
-          List.of("res-nordnet-academy", "res-yt-investing-basics"));
-
-  private static final LearningItem ITEM_DIVERSIFICATION =
-      new LearningItem("diversification-basics", "Diversification Basics",
-          "diversification-basics",
-          "Why spreading investments across assets reduces overall risk.",
-          CAT_RISK, Difficulty.INTERMEDIATE, false, "learninghub/diversification-basics.md",
-          List.of("what-is-investment-risk", "index-funds-explained"),
-          List.of("res-nordnet-academy", "res-aksjer-for-alle"));
-
-  private static final LearningItem ITEM_READING_CHARTS =
-      new LearningItem("reading-stock-charts", "Reading Stock Charts", "reading-stock-charts",
-          "Interpret candlestick charts and identify key price patterns.",
-          CAT_MARKET, Difficulty.INTERMEDIATE, false, "learninghub/reading-stock-charts.md",
-          List.of("how-stock-prices-move", "dollar-cost-averaging"),
-          List.of("res-investopedia-stocks", "res-yt-investing-basics"));
-
-  private static final LearningItem ITEM_INDEX_FUNDS =
-      new LearningItem("index-funds-explained", "Index Funds Explained", "index-funds-explained",
-          "Low-cost, passive investing through broad market indices.",
-          CAT_STRATEGIES, Difficulty.BEGINNER, false, "learninghub/index-funds-explained.md",
-          List.of("dollar-cost-averaging", "diversification-basics"),
-          List.of("res-nordnet-academy", "res-aksjer-for-alle"));
-
-  private static final LearningItem ITEM_DOLLAR_COST =
-      new LearningItem("dollar-cost-averaging", "Dollar-Cost Averaging",
-          "dollar-cost-averaging",
-          "Invest a fixed amount regularly to reduce timing risk.",
-          CAT_STRATEGIES, Difficulty.BEGINNER, false, "learninghub/dollar-cost-averaging.md",
-          List.of("index-funds-explained", "paper-trading"),
-          List.of("res-nordnet-academy"));
-
-  private static final LearningItem ITEM_PAPER_TRADING =
-      new LearningItem("paper-trading", "Paper Trading: Practice Without Risk",
-          "paper-trading",
-          "Simulate real trades in a risk-free environment before going live.",
-          CAT_PRACTICAL, Difficulty.BEGINNER, false, "learninghub/paper-trading.md",
-          List.of("dollar-cost-averaging", "reading-stock-charts"),
-          List.of("res-yt-investing-basics"));
-
-  // ── Resources ────────────────────────────────────────────────────────────────
-
-  private static final LearningResource RES_AKSJER_FOR_ALLE =
-      new LearningResource("res-aksjer-for-alle", "Aksjer for alle", "Oslo Børs",
-          LearningResourceType.ARTICLE,
-          "https://www.oslobors.no/Oslo-Boers/Handel/Aksjer-og-egenkapitalbevis/Aksjer-for-alle",
-          "Oslo Børs's beginner guide to buying and owning shares.");
-
-  private static final LearningResource RES_INVESTOPEDIA =
-      new LearningResource("res-investopedia-stocks", "Stocks Overview", "Investopedia",
-          LearningResourceType.ARTICLE,
-          "https://www.investopedia.com/terms/s/stock.asp",
-          "Comprehensive reference covering stock types, markets, and valuation.");
-
-  private static final LearningResource RES_NORDNET_ACADEMY =
-      new LearningResource("res-nordnet-academy", "Nordnet Academy", "Nordnet",
-          LearningResourceType.ARTICLE,
-          "https://www.nordnet.no/magasinet/investering/",
-          "Norwegian-language investing guides from a leading Nordic broker.");
-
-  private static final LearningResource RES_YOUTUBE_BASICS =
-      new LearningResource("res-yt-investing-basics", "Investing Basics (Video)", "YouTube",
-          LearningResourceType.VIDEO,
-          "https://www.youtube.com/watch?v=Xn7KWR9EOGQ",
-          "A short, beginner-friendly introduction to investing in the stock market.");
-
-  // ── Public API ───────────────────────────────────────────────────────────────
 
   /**
    * Returns all six learning categories in display order.
@@ -162,13 +41,7 @@ public final class LearningContentStore {
    * @return immutable list of {@link LearningCategory}
    */
   public static List<LearningCategory> getCategories() {
-    return List.of(
-        CAT_BASICS,
-        CAT_HOW_INVESTING_WORKS,
-        CAT_RISK,
-        CAT_MARKET,
-        CAT_STRATEGIES,
-        CAT_PRACTICAL);
+    return CATEGORIES;
   }
 
   /**
@@ -178,7 +51,7 @@ public final class LearningContentStore {
    * @return immutable list of matching {@link LearningItem}s
    */
   public static List<LearningItem> getItemsByCategory(LearningCategory category) {
-    return getAllItems().stream()
+    return ITEMS.stream()
         .filter(item -> item.category().equals(category))
         .toList();
   }
@@ -189,7 +62,7 @@ public final class LearningContentStore {
    * @return immutable list of featured {@link LearningItem}s
    */
   public static List<LearningItem> getFeaturedItems() {
-    return getAllItems().stream()
+    return ITEMS.stream()
         .filter(LearningItem::featured)
         .sorted(Comparator.comparingInt(item -> item.difficulty().ordinal()))
         .toList();
@@ -201,11 +74,7 @@ public final class LearningContentStore {
    * @return immutable list of {@link LearningResource}
    */
   public static List<LearningResource> getResources() {
-    return List.of(
-        RES_AKSJER_FOR_ALLE,
-        RES_INVESTOPEDIA,
-        RES_NORDNET_ACADEMY,
-        RES_YOUTUBE_BASICS);
+    return RESOURCES;
   }
 
   /**
@@ -217,7 +86,7 @@ public final class LearningContentStore {
    */
   public static List<LearningItem> getItemsByIds(List<String> ids) {
     return ids.stream()
-        .flatMap(id -> getAllItems().stream().filter(item -> item.id().equals(id)))
+        .flatMap(id -> ITEMS.stream().filter(item -> item.id().equals(id)))
         .toList();
   }
 
@@ -231,23 +100,100 @@ public final class LearningContentStore {
   public static List<LearningResource> getResourcesForItem(LearningItem item) {
     List<String> ids = item.resourceIds();
     return ids.stream()
-        .flatMap(id -> getResources().stream().filter(r -> r.id().equals(id)))
+        .flatMap(id -> RESOURCES.stream().filter(r -> r.id().equals(id)))
         .toList();
   }
 
-  // ── Private helpers ──────────────────────────────────────────────────────────
+  private static List<LearningCategory> loadCategories() {
+    return List.copyOf(readCatalog().categories().stream()
+        .map(c -> new LearningCategory(c.id(), c.name(), c.description(), c.emoji()))
+        .toList());
+  }
 
-  private static List<LearningItem> getAllItems() {
-    return List.of(
-        ITEM_WHAT_IS_STOCK,
-        ITEM_HOW_PRICES_MOVE,
-        ITEM_WHAT_IS_RISK,
-        ITEM_STOCK_VS_BOND,
-        ITEM_COMPOUND_INTEREST,
-        ITEM_DIVERSIFICATION,
-        ITEM_READING_CHARTS,
-        ITEM_INDEX_FUNDS,
-        ITEM_DOLLAR_COST,
-        ITEM_PAPER_TRADING);
+  private static List<LearningResource> loadResources() {
+    return List.copyOf(readCatalog().resources().stream()
+        .map(r -> new LearningResource(
+            r.id(),
+            r.title(),
+            r.sourceLabel(),
+            LearningResourceType.valueOf(r.type()),
+            r.url(),
+            r.description()))
+        .toList());
+  }
+
+  private static List<LearningItem> loadItems() {
+    CatalogDocument catalog = readCatalog();
+    Map<String, LearningCategory> categoriesById = catalog.categories().stream()
+        .map(c -> new LearningCategory(c.id(), c.name(), c.description(), c.emoji()))
+        .collect(Collectors.toMap(LearningCategory::id, Function.identity(), (a, b) -> a,
+            java.util.LinkedHashMap::new));
+
+    return List.copyOf(catalog.items().stream()
+        .map(raw -> toItem(raw, categoriesById))
+        .toList());
+  }
+
+  private static LearningItem toItem(JsonItem raw, Map<String, LearningCategory> categoriesById) {
+    LearningCategory category = categoriesById.get(raw.categoryId());
+    if (category == null) {
+      throw new IllegalStateException(
+          "Unknown categoryId '" + raw.categoryId() + "' for item '" + raw.id() + "'");
+    }
+    return new LearningItem(
+        raw.id(),
+        raw.title(),
+        raw.slug(),
+        raw.summary(),
+        category,
+        Difficulty.valueOf(raw.difficulty()),
+        raw.featured(),
+        raw.contentFile(),
+        List.copyOf(raw.relatedTopicIds()),
+        List.copyOf(raw.resourceIds()));
+  }
+
+  private static CatalogDocument readCatalog() {
+    try (InputStream input = LearningContentStore.class.getClassLoader()
+        .getResourceAsStream(CATALOG_RESOURCE)) {
+      if (input == null) {
+        throw new IllegalStateException("Missing learning catalog resource: " + CATALOG_RESOURCE);
+      }
+      return new ObjectMapper().readValue(input, CatalogDocument.class);
+    } catch (IOException exception) {
+      throw new IllegalStateException("Unable to load learning catalog: " + CATALOG_RESOURCE,
+          exception);
+    }
+  }
+
+  private record CatalogDocument(
+      List<JsonCategory> categories,
+      List<JsonResource> resources,
+      List<JsonItem> items) {
+  }
+
+  private record JsonCategory(String id, String name, String description, String emoji) {
+  }
+
+  private record JsonResource(
+      String id,
+      String title,
+      String sourceLabel,
+      String type,
+      String url,
+      String description) {
+  }
+
+  private record JsonItem(
+      String id,
+      String title,
+      String slug,
+      String summary,
+      String categoryId,
+      String difficulty,
+      boolean featured,
+      String contentFile,
+      List<String> relatedTopicIds,
+      List<String> resourceIds) {
   }
 }

@@ -3,8 +3,8 @@ package view.components.learning;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import controller.LearningHubController;
 import javafx.scene.layout.VBox;
-
 import model.learning.quiz.QuizAnswer;
 import model.learning.quiz.QuizQuestion;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,14 +35,15 @@ class QuizWrongAnswerLinksTest {
 
     VBox parent = new VBox();
     AtomicInteger openCount = new AtomicInteger();
+    LearningHubController learningHub = new LearningHubController();
 
     QuizWrongAnswerLinks.appendTo(
         parent,
+        learningHub,
         question,
         "what-is-a-stock",
         item -> openCount.incrementAndGet());
 
-    // section labels + topic card + resource card
     assertTrue(parent.getChildren().size() >= 4);
   }
 
@@ -57,9 +58,11 @@ class QuizWrongAnswerLinksTest {
         "res-investopedia-stocks");
 
     VBox parent = new VBox();
-    QuizWrongAnswerLinks.appendTo(parent, question, "what-is-a-stock", null);
+    LearningHubController learningHub = new LearningHubController();
 
-    // resource section label + resource card only
+    QuizWrongAnswerLinks.appendTo(
+        parent, learningHub, question, "what-is-a-stock", null);
+
     assertTrue(parent.getChildren().size() >= 2);
     assertTrue(parent.getChildren().size() < 4);
   }

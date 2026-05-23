@@ -3,6 +3,7 @@ package view.pages.learning;
 import java.util.List;
 import java.util.function.Consumer;
 
+import controller.LearningHubController;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -14,10 +15,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
 import model.learning.content.Difficulty;
 import model.learning.content.LearningCategory;
-import model.learning.store.LearningContentStore;
 import model.learning.content.LearningItem;
 import view.theme.ThemeStyles;
 
@@ -26,7 +25,7 @@ import view.theme.ThemeStyles;
  * {@link LearningCategory} as clickable cards, with difficulty filter toggle buttons.
  *
  * @author kaamyashinde
- * @version 1.1.0
+ * @version 2.0.0
  * @since 04-04-2026
  */
 public class CategoryView extends BorderPane {
@@ -42,19 +41,22 @@ public class CategoryView extends BorderPane {
   /**
    * Builds the category view.
    *
+   * @param learningHub   supplies items for the category
    * @param category      the category whose items are displayed
    * @param onBack        called when the back button is clicked
    * @param onItemClicked called with the clicked item
    */
   public CategoryView(
-      LearningCategory category, Runnable onBack, Consumer<LearningItem> onItemClicked) {
+      LearningHubController learningHub,
+      LearningCategory category,
+      Runnable onBack,
+      Consumer<LearningItem> onItemClicked) {
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "learning-root");
 
-    this.items = LearningContentStore.getItemsByCategory(category);
+    this.items = learningHub.getItemsForCategory(category);
     this.onItemClicked = onItemClicked;
 
-    // ── TOP: back button + category header ───────────────────────────────────
     Button backBtn = new Button("← Back");
     ThemeStyles.styleButton(backBtn);
     backBtn.setOnAction(_ -> onBack.run());
@@ -70,7 +72,6 @@ public class CategoryView extends BorderPane {
     ThemeStyles.addStyleClasses(desc, "learning-card-summary");
     desc.setWrapText(true);
 
-    // ── Filter bar ───────────────────────────────────────────────────────────
     ToggleGroup filterGroup = new ToggleGroup();
     ToggleButton btnAll = makeFilterToggle("All", null, filterGroup);
     ToggleButton btnBeginner = makeFilterToggle("Beginner", Difficulty.BEGINNER, filterGroup);
@@ -85,7 +86,6 @@ public class CategoryView extends BorderPane {
     header.setPadding(new Insets(0, 0, 16, 0));
     setTop(header);
 
-    // ── CENTER: item cards ───────────────────────────────────────────────────
     content.setPadding(new Insets(4, 0, 16, 0));
     applyFilter(null);
 

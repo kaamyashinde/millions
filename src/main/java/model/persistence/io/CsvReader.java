@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import model.core.asset.Stock;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
+import util.MarketDataCsvValidator;
 
 /**
  * Reads mixed market data from CSV where each row is either a stock or a fund definition.
@@ -33,9 +34,6 @@ import model.core.asset.fund.FundComponent;
  */
 public final class CsvReader {
 
-  private static final String STOCK_RECORD = "STOCK";
-  private static final String FUND_RECORD = "FUND";
-
   private CsvReader() {
   }
 
@@ -48,7 +46,17 @@ public final class CsvReader {
    */
   public static MarketData readMarketData(Path directory, String fileName) {
     Path path = directory.resolve(fileName + ".csv");
-    try (Stream<String> lines = Files.lines(path)) {
+    return readMarketDataFromFile(path);
+  }
+
+  /**
+   * Reads mixed market data from a CSV file at an arbitrary path.
+   *
+   * @param file path to a {@code .csv} file
+   * @return parsed stocks and funds
+   */
+  public static MarketData readMarketDataFromFile(Path file) {
+    try (Stream<String> lines = Files.lines(file)) {
       return marketDataFromLineStream(lines);
     } catch (IOException exception) {
       throw new UncheckedIOException(exception);
@@ -96,22 +104,21 @@ public final class CsvReader {
         .toList();
     Map<String, Stock> stocksBySymbol = parseStocks(cleanedLines);
     List<Fund> funds = parseFunds(cleanedLines, stocksBySymbol);
-    ensureUniqueFundSymbols(stocksBySymbol, funds);
+    MarketDataCsvValidator.requireUniqueFundSymbols(stocksBySymbol, funds);
     return new MarketData(List.copyOf(stocksBySymbol.values()), funds);
   }
 
   private static Map<String, Stock> parseStocks(List<String> cleanedLines) {
     Map<String, Stock> stocksBySymbol = new LinkedHashMap<>();
     for (String line : cleanedLines) {
-      String[] tokens = splitLine(line);
-      if (!STOCK_RECORD.equals(tokens[0])) {
+      String[] tokens = MarketDataCsvValidator.splitValidatedRow(line);
+      if (!MarketDataCsvValidator.STOCK_RECORD.equals(tokens[0])) {
         continue;
       }
-      if (tokens.length != 4) {
-        throw new IllegalArgumentException("Invalid stock row: " + line);
-      }
+      MarketDataCsvValidator.requireStockColumns(tokens, line);
       Stock stock = parseStock(tokens);
-      ensureUniqueSymbol(stocksBySymbol, stock.getSymbol(), "Duplicate stock symbol: ");
+      MarketDataCsvValidator.requireUniqueSymbol(
+          stocksBySymbol, stock.getSymbol(), "Duplicate stock symbol: ");
       stocksBySymbol.put(stock.getSymbol(), stock);
     }
     return stocksBySymbol;
@@ -119,25 +126,10 @@ public final class CsvReader {
 
   private static List<Fund> parseFunds(List<String> cleanedLines, Map<String, Stock> stocksBySymbol) {
     return cleanedLines.stream()
-        .map(CsvReader::splitLine)
-        .filter(tokens -> FUND_RECORD.equals(tokens[0]))
+        .map(MarketDataCsvValidator::splitValidatedRow)
+        .filter(tokens -> MarketDataCsvValidator.FUND_RECORD.equals(tokens[0]))
         .map(tokens -> parseFund(tokens, stocksBySymbol))
         .toList();
-  }
-
-  private static String[] splitLine(String line) {
-    String[] rawTokens = line.split(",");
-    if (rawTokens.length == 0) {
-      throw new IllegalArgumentException("Invalid market-data row: " + line);
-    }
-    String[] tokens = new String[rawTokens.length];
-    for (int index = 0; index < rawTokens.length; index++) {
-      tokens[index] = rawTokens[index].trim();
-    }
-    if (!STOCK_RECORD.equals(tokens[0]) && !FUND_RECORD.equals(tokens[0])) {
-      throw new IllegalArgumentException("Unknown market-data record type: " + line);
-    }
-    return tokens;
   }
 
   private static Stock parseStock(String[] tokens) {
@@ -148,9 +140,7 @@ public final class CsvReader {
   }
 
   private static Fund parseFund(String[] tokens, Map<String, Stock> stocksBySymbol) {
-    if (tokens.length < 4) {
-      throw new IllegalArgumentException("Invalid fund row: " + String.join(",", tokens));
-    }
+    MarketDataCsvValidator.requireFundColumns(tokens);
     List<FundComponent> components = Stream.of(tokens)
         .skip(3)
         .map(componentToken -> parseFundComponent(componentToken, stocksBySymbol))
@@ -161,36 +151,9 @@ public final class CsvReader {
   private static FundComponent parseFundComponent(
       String componentToken,
       Map<String, Stock> stocksBySymbol) {
-    String[] parts = componentToken.split(":");
-    if (parts.length != 2) {
-      throw new IllegalArgumentException("Invalid fund component: " + componentToken);
-    }
-    String symbol = parts[0].trim().toUpperCase();
-    Stock stock = stocksBySymbol.get(symbol);
-    if (stock == null) {
-      throw new IllegalArgumentException("Unknown stock symbol in fund component: " + symbol);
-    }
-    BigDecimal weight = new BigDecimal(parts[1].trim());
+    String[] parts = MarketDataCsvValidator.requireFundComponentParts(componentToken);
+    Stock stock = MarketDataCsvValidator.requireKnownStock(parts[0], stocksBySymbol);
+    BigDecimal weight = new BigDecimal(parts[1]);
     return new FundComponent(stock, weight);
-  }
-
-  private static void ensureUniqueFundSymbols(Map<String, Stock> stocksBySymbol, List<Fund> funds) {
-    Map<String, Fund> fundsBySymbol = new LinkedHashMap<>();
-    for (Fund fund : funds) {
-      if (stocksBySymbol.containsKey(fund.getSymbol())) {
-        throw new IllegalArgumentException("Duplicate asset symbol: " + fund.getSymbol());
-      }
-      ensureUniqueSymbol(fundsBySymbol, fund.getSymbol(), "Duplicate fund symbol: ");
-      fundsBySymbol.put(fund.getSymbol(), fund);
-    }
-  }
-
-  private static <T> void ensureUniqueSymbol(
-      Map<String, T> assetsBySymbol,
-      String symbol,
-      String messagePrefix) {
-    if (assetsBySymbol.containsKey(symbol)) {
-      throw new IllegalArgumentException(messagePrefix + symbol);
-    }
   }
 }

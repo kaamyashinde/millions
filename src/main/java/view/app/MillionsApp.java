@@ -9,11 +9,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
-import model.persistence.market.MarketData;
-import model.persistence.market.MarketDataLoader;
+import java.util.Optional;
 import model.session.ActiveSession;
 import model.exception.auth.AuthenticationException;
 import model.exception.auth.DuplicateUsernameException;
+import model.exception.market.MarketDataImportException;
 import model.session.SessionService;
 import model.session.SessionServiceFactory;
 import controller.WorkspaceController;
@@ -100,16 +100,23 @@ public class MillionsApp extends Application {
     }
   }
 
-  private void handleRegistration(String username, String pin, String startingMoneyText) {
+  private void handleRegistration(
+      String username,
+      String pin,
+      String startingMoneyText,
+      Optional<java.nio.file.Path> marketDataFile) {
     RegisterPage registerPage = (RegisterPage) scene.getRoot();
     try {
       BigDecimal startingMoney = new BigDecimal(startingMoneyText.trim());
-      ActiveSession session = sessionService.register(username, pin.toCharArray(), startingMoney);
+      ActiveSession session = sessionService.register(
+          username, pin.toCharArray(), startingMoney, marketDataFile);
       onSessionStarted(session);
     } catch (NumberFormatException e) {
       registerPage.setStatus("Starting money must be a valid number.");
     } catch (DuplicateUsernameException e) {
       registerPage.setStatus("That username is already taken.");
+    } catch (MarketDataImportException e) {
+      registerPage.setMarketDataStatus(e.getMessage());
     } catch (IllegalArgumentException e) {
       registerPage.setStatus(mapValidationMessage(e.getMessage()));
     }
@@ -153,7 +160,8 @@ public class MillionsApp extends Application {
     SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), ctrl::refreshAll);
     SavedRunsPage savedRunsPage = new SavedRunsPage(svc, ctrl::refreshAll);
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
-    LearningHubPage learningHubPage = new LearningHubPage();
+    LearningHubPage learningHubPage =
+        new LearningHubPage(ctrl.getLearningHub(), ctrl.getQuiz());
     NotificationsPage notificationsPage = new NotificationsPage(ctrl.getNotificationsTab());
 
     Tab portfolioTab = makeTab("Portfolio", portfolioPage);
@@ -177,7 +185,8 @@ public class MillionsApp extends Application {
           learningHubPage.openTopic(item.id());
           tabs.getSelectionModel().select(learningTab);
         };
-    quizTab.setContent(new QuizLauncherPage(openTopicInHub));
+    quizTab.setContent(new QuizLauncherPage(
+        ctrl.getQuiz(), ctrl.getLearningHub(), openTopicInHub));
     return tabs;
   }
 
@@ -210,17 +219,9 @@ public class MillionsApp extends Application {
   private static SessionService createSessionService() {
     return SessionServiceFactory.createLocalProfileSessionService(
         SessionServiceFactory.defaultProfilesRoot(),
-        MillionsApp::loadMarketData,
+        MARKET_DATA_RESOURCE,
+        MillionsApp.class,
         EXCHANGE_NAME);
-  }
-
-  private static MarketData loadMarketData() {
-    MarketData data = MarketDataLoader.loadFromResource(MillionsApp.class, MARKET_DATA_RESOURCE);
-    if (data.isEmpty()) {
-      throw new IllegalStateException(
-          "Could not load bundled market data from " + MARKET_DATA_RESOURCE);
-    }
-    return data;
   }
 
   private static String mapValidationMessage(String message) {

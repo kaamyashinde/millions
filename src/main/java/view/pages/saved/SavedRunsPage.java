@@ -1,9 +1,7 @@
 package view.pages.saved;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
-import java.util.UUID;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -25,7 +23,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.persistence.savedrun.SavedRunRecord;
+import model.persistence.ProfileFile;
 import model.session.SessionService;
 import view.theme.ThemeStyles;
 
@@ -38,10 +36,6 @@ public class SavedRunsPage extends BorderPane {
   private final Runnable afterMutation;
   private final TableView<SavedRunRow> table = new TableView<>();
 
-  /**
-   * @param sessionService session API for run persistence
-   * @param afterMutation  invoked after save/delete/leaderboard change (e.g. persist parent state)
-   */
   public SavedRunsPage(SessionService sessionService, Runnable afterMutation) {
     this.sessionService = sessionService;
     this.afterMutation = afterMutation;
@@ -74,13 +68,13 @@ public class SavedRunsPage extends BorderPane {
     daysCol.setCellValueFactory(c -> c.getValue().tradingDaysProperty());
     daysCol.setPrefWidth(56);
 
+    TableColumn<SavedRunRow, String> cashCol = new TableColumn<>("Cash");
+    cashCol.setCellValueFactory(c -> c.getValue().cashProperty());
+    cashCol.setPrefWidth(100);
+
     TableColumn<SavedRunRow, String> netWorthCol = new TableColumn<>("Net Worth");
     netWorthCol.setCellValueFactory(c -> c.getValue().netWorthProperty());
     netWorthCol.setPrefWidth(110);
-
-    TableColumn<SavedRunRow, String> returnCol = new TableColumn<>("Return %");
-    returnCol.setCellValueFactory(c -> c.getValue().returnPercentProperty());
-    returnCol.setPrefWidth(90);
 
     TableColumn<SavedRunRow, SavedRunRow> leaderboardCol = new TableColumn<>("Leaderboard");
     leaderboardCol.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue()));
@@ -96,8 +90,7 @@ public class SavedRunsPage extends BorderPane {
         box.setSelected(row.record().eligibleForLeaderboard());
         box.setOnAction(ev -> {
           ev.consume();
-          UUID id = UUID.fromString(row.record().runId());
-          sessionService.setRunLeaderboardEligible(id, box.isSelected());
+          sessionService.setRunLeaderboardEligible(row.record().id(), box.isSelected());
           afterMutation.run();
           refresh();
         });
@@ -125,7 +118,7 @@ public class SavedRunsPage extends BorderPane {
     actionsCol.setPrefWidth(90);
 
     table.getColumns().setAll(
-        List.of(savedCol, labelCol, daysCol, netWorthCol, returnCol, leaderboardCol, actionsCol));
+        List.of(savedCol, labelCol, daysCol, cashCol, netWorthCol, leaderboardCol, actionsCol));
     table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
     table.setPrefHeight(400);
 
@@ -137,12 +130,9 @@ public class SavedRunsPage extends BorderPane {
     refresh();
   }
 
-  /**
-   * Reloads rows from disk.
-   */
   public void refresh() {
     table.getItems().clear();
-    for (SavedRunRecord record : sessionService.listSavedRuns()) {
+    for (ProfileFile.SavedRunRow record : sessionService.listSavedRuns()) {
       table.getItems().add(SavedRunRow.fromRecord(record));
     }
   }
@@ -160,14 +150,14 @@ public class SavedRunsPage extends BorderPane {
     });
   }
 
-  private void confirmDelete(SavedRunRecord record) {
+  private void confirmDelete(ProfileFile.SavedRunRow record) {
     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
     alert.setTitle("Delete saved run");
     alert.setHeaderText("Remove this playthrough snapshot?");
     alert.setContentText("Label: " + (record.label().isEmpty() ? "(none)" : record.label()));
     ThemeStyles.installOnDialog(alert);
     alert.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(_ -> {
-      sessionService.deleteSavedRun(UUID.fromString(record.runId()));
+      sessionService.deleteSavedRun(record.id());
       afterMutation.run();
       refresh();
     });
@@ -177,32 +167,29 @@ public class SavedRunsPage extends BorderPane {
     ThemeStyles.styleButton(button);
   }
 
-  /**
-   * Table row with JavaFX properties for columns.
-   */
   public static final class SavedRunRow {
-    private final SavedRunRecord record;
+    private final ProfileFile.SavedRunRow record;
     private final StringProperty savedAt = new SimpleStringProperty();
     private final StringProperty label = new SimpleStringProperty();
     private final IntegerProperty tradingDays = new SimpleIntegerProperty();
+    private final StringProperty cash = new SimpleStringProperty();
     private final StringProperty netWorth = new SimpleStringProperty();
-    private final StringProperty returnPercent = new SimpleStringProperty();
 
-    private SavedRunRow(SavedRunRecord record) {
+    private SavedRunRow(ProfileFile.SavedRunRow record) {
       this.record = record;
     }
 
-    static SavedRunRow fromRecord(SavedRunRecord record) {
+    static SavedRunRow fromRecord(ProfileFile.SavedRunRow record) {
       SavedRunRow row = new SavedRunRow(record);
       row.savedAt.set(record.savedAt());
       row.label.set(record.label().isEmpty() ? "—" : record.label());
-      row.tradingDays.set(record.tradingDays());
-      row.netWorth.set(formatMoney(record.stats().netWorth()));
-      row.returnPercent.set(formatReturn(record.stats().portfolioReturnPercent()));
+      row.tradingDays.set(record.day());
+      row.cash.set(formatMoney(record.cash()));
+      row.netWorth.set(formatMoney(record.netWorth()));
       return row;
     }
 
-    SavedRunRecord record() {
+    ProfileFile.SavedRunRow record() {
       return record;
     }
 
@@ -218,23 +205,16 @@ public class SavedRunsPage extends BorderPane {
       return tradingDays;
     }
 
+    StringProperty cashProperty() {
+      return cash;
+    }
+
     StringProperty netWorthProperty() {
       return netWorth;
     }
 
-    StringProperty returnPercentProperty() {
-      return returnPercent;
-    }
-
-    private static String formatMoney(BigDecimal v) {
-      return v == null ? "—" : v.toPlainString();
-    }
-
-    private static String formatReturn(BigDecimal v) {
-      if (v == null) {
-        return "—";
-      }
-      return v.multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_UP).toPlainString() + "%";
+    private static String formatMoney(BigDecimal value) {
+      return value == null ? "—" : value.toPlainString();
     }
   }
 }
