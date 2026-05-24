@@ -2,6 +2,7 @@ package view.pages.stocks;
 
 import static util.Validator.checkNotNull;
 
+import java.time.LocalDate;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -24,14 +25,21 @@ import controller.StocksController;
 import controller.TradingController;
 import model.core.asset.Stock;
 import model.core.asset.info.StockFinancialInfo;
+import view.components.chart.AnalysisToolbar;
 import view.components.chart.ChartRange;
+import view.components.chart.ChartToolSelection;
 import view.components.chart.StockChart;
+import view.components.chart.tool.ElliottWaveTool;
+import view.components.chart.tool.FibonacciTool;
+import view.components.chart.tool.MoonPhaseTool;
 import view.theme.ThemeStyles;
 
 /**
  * JavaFX panel listing stocks with a detail pane and buy actions.
  */
 public class StocksPage extends BorderPane {
+
+  private static final LocalDate SIMULATION_START_DATE = LocalDate.of(2024, 1, 11);
 
   private final StocksController stocks;
   private final StockDetailController stockDetail;
@@ -43,6 +51,7 @@ public class StocksPage extends BorderPane {
   private final TableView<Stock> table = new TableView<>();
   private final StockDetailView detailView = new StockDetailView();
   private ChartRange selectedChartRange = ChartRange.ALL;
+  private ChartToolSelection selectedChartTool = ChartToolSelection.NONE;
 
   /**
    * @param stocks stocks list and selection state
@@ -193,10 +202,29 @@ public class StocksPage extends BorderPane {
     }
 
     StockChart chart = new StockChart(selected, selectedChartRange);
+    registerAnalysisTools(chart);
     chart.setMinHeight(360);
     chart.setPrefHeight(520);
     chartPanel.setCenter(chart);
-    chartPanel.setBottom(buildChartRangeBar(selected));
+    chartPanel.setBottom(buildChartControls(selected, chart));
+  }
+
+  private void registerAnalysisTools(StockChart chart) {
+    chart.registerTool(new FibonacciTool());
+    chart.registerTool(new ElliottWaveTool());
+    chart.registerTool(new MoonPhaseTool(SIMULATION_START_DATE));
+  }
+
+  private VBox buildChartControls(Stock selected, StockChart chart) {
+    AnalysisToolbar analysisToolbar =
+        new AnalysisToolbar(
+            chart.getTools(),
+            chart,
+            selectedChartTool,
+            selection -> selectedChartTool = selection);
+    VBox controls = new VBox(6, analysisToolbar, buildChartRangeBar(selected));
+    ThemeStyles.addStyleClasses(controls, "chart-control-stack");
+    return controls;
   }
 
   private HBox buildChartRangeBar(Stock selected) {
