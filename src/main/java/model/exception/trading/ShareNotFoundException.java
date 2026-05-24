@@ -12,7 +12,7 @@ import model.core.asset.Share;
  *
  * @author kevindmazali
  * @version 0.0.1
- * @since 07-02-2026
+ * @since 2026-02-07
  */
 
 public class ShareNotFoundException extends RuntimeException {

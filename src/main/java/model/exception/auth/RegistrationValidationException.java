@@ -10,6 +10,7 @@ import model.session.validation.ValidationError;
  */
 public class RegistrationValidationException extends RuntimeException {
 
+  /** Typed validation error that caused registration to fail. */
   private final ValidationError error;
 
   /**
