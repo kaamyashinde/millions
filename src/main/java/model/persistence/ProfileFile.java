@@ -30,6 +30,33 @@ import model.trading.transaction.Transaction;
 
 /**
  * Single JSON document for one user profile: account, game state, and preferences.
+ *
+ * <p>The record is intentionally persistence-shaped: nested row records capture holdings,
+ * transactions, savings plans, stock prices, and market events in a Jackson-friendly structure.
+ * Use {@link #capture(Player, Exchange, String, String, String, String, boolean)} to serialize live
+ * model state and {@link #restore(MarketData)} to rebuild an active session.
+ *
+ * @param username original username as entered by the player
+ * @param normalizedUsername normalized username used for file names and PIN hashing
+ * @param pinHash hashed PIN payload
+ * @param displayName display name shown in the UI
+ * @param hasSeenWelcome whether the welcome screen has already been acknowledged
+ * @param playerName saved player name
+ * @param startingMoney player's initial cash amount
+ * @param cash player's current cash balance
+ * @param holdings persisted share lots
+ * @param transactions persisted transaction history
+ * @param savings persisted regular savings plans
+ * @param exchangeName saved exchange display name
+ * @param day saved exchange trading day
+ * @param stockPrices persisted stock price histories
+ * @param events persisted market event history
+ * @param lastEvent most recent market event, or {@code null}
+ *
+ * @author kaamyashinde
+ * @contributor kevindmazali
+ * @version 1.0.0
+ * @since 2026-05-23
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ProfileFile(
@@ -48,9 +75,12 @@ public record ProfileFile(
     int day,
     List<PriceRow> stockPrices,
     List<EventRow> events,
-    EventRow lastEvent
+  EventRow lastEvent
 ) {
 
+  /**
+   * Normalizes nullable persisted lists to empty immutable lists.
+   */
   public ProfileFile {
     holdings = emptyIfNull(holdings);
     transactions = emptyIfNull(transactions);
@@ -59,12 +89,38 @@ public record ProfileFile(
     events = emptyIfNull(events);
   }
 
+  /**
+   * Persisted share lot row.
+   *
+   * @param symbol held asset symbol
+   * @param quantity share quantity in the lot
+   * @param purchasePrice original purchase price for the lot
+   */
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record HoldingRow(String symbol, BigDecimal quantity, BigDecimal purchasePrice) {}
 
+  /**
+   * Persisted transaction row.
+   *
+   * @param type transaction type name, such as {@code PURCHASE} or {@code SALE}
+   * @param symbol traded asset symbol
+   * @param quantity traded quantity
+   * @param purchasePrice price stored on the transaction share
+   * @param day exchange day when the transaction occurred
+   */
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record TxRow(String type, String symbol, BigDecimal quantity, BigDecimal purchasePrice, int day) {}
 
+  /**
+   * Persisted regular savings plan row.
+   *
+   * @param symbol target asset symbol
+   * @param mode installment sizing mode
+   * @param amount share quantity or budget amount, depending on {@code mode}
+   * @param intervalDays trading days between installments
+   * @param nextDueDay next day on which the plan should run
+   * @param active whether the plan should be processed
+   */
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record SavingsRow(
       String symbol,
@@ -74,9 +130,24 @@ public record ProfileFile(
       int nextDueDay,
       boolean active) {}
 
+  /**
+   * Persisted stock price history row.
+   *
+   * @param symbol stock symbol
+   * @param prices historical prices in trading-day order
+   */
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record PriceRow(String symbol, List<BigDecimal> prices) {}
 
+  /**
+   * Persisted market event row.
+   *
+   * @param day trading day on which the event occurred
+   * @param title short event title
+   * @param description event description
+   * @param symbols affected stock symbols
+   * @param priceFactor multiplicative price factor applied by the event
+   */
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record EventRow(
       int day,
@@ -85,8 +156,21 @@ public record ProfileFile(
       List<String> symbols,
       BigDecimal priceFactor) {}
 
+  /**
+   * Restored runtime session assembled from a profile file and market data.
+   *
+   * @param player restored player
+   * @param exchange restored exchange
+   */
   public record RestoredSession(Player player, Exchange exchange) {}
 
+  /**
+   * Hashes a PIN with the normalized username as a simple profile-local salt.
+   *
+   * @param normalizedUsername normalized username used in the hash payload
+   * @param pin PIN characters
+   * @return lowercase hexadecimal SHA-256 hash
+   */
   public static String hashPin(String normalizedUsername, char[] pin) {
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -98,10 +182,28 @@ public record ProfileFile(
     }
   }
 
+  /**
+   * Checks whether a PIN matches the stored hash.
+   *
+   * @param pin PIN characters to verify
+   * @return {@code true} when the PIN matches this profile
+   */
   public boolean matchesPin(char[] pin) {
     return pinHash != null && pinHash.equals(hashPin(normalizedUsername, pin));
   }
 
+  /**
+   * Captures live player and exchange state into a persistence record.
+   *
+   * @param player player to persist
+   * @param exchange exchange to persist
+   * @param username original username
+   * @param normalizedUsername normalized username
+   * @param pinHash hashed PIN
+   * @param displayName optional display name
+   * @param hasSeenWelcome whether the welcome screen has been acknowledged
+   * @return profile file snapshot
+   */
   public static ProfileFile capture(
       Player player,
       Exchange exchange,
@@ -156,6 +258,12 @@ public record ProfileFile(
         exchange.getLastMarketEvent().map(ProfileFile::toEventRow).orElse(null));
   }
 
+  /**
+   * Restores runtime model objects from this persistence record.
+   *
+   * @param marketData base market data for fund definitions and stock names
+   * @return restored player and exchange
+   */
   public RestoredSession restore(MarketData marketData) {
     Map<String, Stock> stocksBySymbol = rebuildStocks(stockPrices, marketData);
     List<Fund> funds = rebuildFunds(marketData.funds(), stocksBySymbol);
@@ -182,6 +290,13 @@ public record ProfileFile(
     return new RestoredSession(player, exchange);
   }
 
+  /**
+   * Creates a fresh exchange from market data for a new profile.
+   *
+   * @param marketData market data used to seed listings
+   * @param exchangeName exchange display name
+   * @return fresh exchange with copied stock history
+   */
   public static Exchange createFreshExchange(MarketData marketData, String exchangeName) {
     Map<String, Stock> stocks = marketData.stocks().stream()
         .collect(Collectors.toMap(
@@ -200,6 +315,12 @@ public record ProfileFile(
         .build();
   }
 
+  /**
+   * Returns a copy with a new display name.
+   *
+   * @param displayName new display name
+   * @return profile copy with updated display name
+   */
   public ProfileFile withDisplayName(String displayName) {
     return new ProfileFile(
         username, normalizedUsername, pinHash, displayName, hasSeenWelcome,
@@ -207,6 +328,11 @@ public record ProfileFile(
         exchangeName, day, stockPrices, events, lastEvent);
   }
 
+  /**
+   * Returns a copy with the welcome flag set.
+   *
+   * @return profile copy marked as having seen the welcome screen
+   */
   public ProfileFile withWelcomeSeen() {
     return new ProfileFile(
         username, normalizedUsername, pinHash, displayName, true,
