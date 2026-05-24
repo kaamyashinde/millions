@@ -18,12 +18,6 @@ import model.analysis.tools.MoonPhaseCalculator;
  */
 public class MoonPhaseTool extends AbstractChartTool {
 
-  /** Grey hex colour used for vertical dashed lines marking new-moon days. */
-  private static final String NEW_MOON_COLOR = "#94A3B8";
-
-  /** Gold hex colour used for vertical dashed lines marking full-moon days. */
-  private static final String FULL_MOON_COLOR = "#F59E0B";
-
   /** Calendar date corresponding to day index 1 on the chart's x-axis. */
   private final LocalDate startDate;
 
@@ -80,7 +74,7 @@ public class MoonPhaseTool extends AbstractChartTool {
               MoonPhaseCalculator.Phase phase = entry.getValue();
               boolean isNewMoon = phase == MoonPhaseCalculator.Phase.NEW_MOON;
               String seriesName = (isNewMoon ? "New Moon" : "Full Moon") + " (Day " + day + ")";
-              String color = isNewMoon ? NEW_MOON_COLOR : FULL_MOON_COLOR;
+              String phaseClass = isNewMoon ? "moon-phase-new" : "moon-phase-full";
 
               XYChart.Series<Number, Number> series = new XYChart.Series<>();
               series.setName(seriesName);
@@ -88,9 +82,7 @@ public class MoonPhaseTool extends AbstractChartTool {
               series.getData().add(new XYChart.Data<>(day, markerHigh));
 
               addSeries(chart, series);
-              styleSeries(
-                  series,
-                  "-fx-stroke: " + color + "; -fx-stroke-width: 1.5; -fx-stroke-dash-array: 6 4;");
+              applyStyleClasses(series, "event-marker-line", phaseClass);
             });
 
     status.set(ownedSeries.isEmpty() ? "No moon phases in this range" : "");

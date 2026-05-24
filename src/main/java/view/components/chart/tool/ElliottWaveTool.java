@@ -42,12 +42,6 @@ public class ElliottWaveTool extends AbstractChartTool {
     "Wave 1", "Wave 2", "Wave 3", "Wave 4", "Wave 5", "Wave A", "Wave B", "Wave C"
   };
 
-  /** Amber hex colour applied to impulse waves 1–5. */
-  private static final String IMPULSE_COLOR = "#F59E0B";
-
-  /** Controlled red applied to corrective waves A–C (not dominant brand color). */
-  private static final String CORRECTIVE_COLOR = "#EF4444";
-
   /** Collected click points; each entry is {@code [dayIndex, price]}. */
   private final List<double[]> points = new ArrayList<>();
 
@@ -154,9 +148,8 @@ public class ElliottWaveTool extends AbstractChartTool {
       series.getData().add(new XYChart.Data<>(from[0], from[1]));
       series.getData().add(new XYChart.Data<>(to[0], to[1]));
 
-      final String color = (i < 5) ? IMPULSE_COLOR : CORRECTIVE_COLOR;
       addSeries(chart, series);
-      styleSeries(series, "-fx-stroke: " + color + "; -fx-stroke-width: 2.0;");
+      applyStyleClasses(series, "chart-overlay-solid-thick");
     }
   }
 

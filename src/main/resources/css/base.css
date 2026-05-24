@@ -24,6 +24,14 @@
     -millions-top-one: #F59E0B33;
     -millions-top-two: #0EA5A422;
     -millions-top-three: #CBD5E133;
+    -millions-chart-0: -millions-accent;
+    -millions-chart-1: -millions-warning;
+    -millions-chart-2: -millions-success;
+    -millions-chart-3: -millions-error;
+    -millions-chart-4: -millions-info;
+    -millions-chart-5: -millions-primary-hover;
+    -millions-chart-6: -millions-text-muted;
+    -millions-chart-7: #EC4899;
     -fx-background-color: -millions-bg;
     -fx-font-family: "System";
     -fx-text-fill: -millions-text-primary;
@@ -215,7 +223,83 @@
 }
 
 .default-color0.chart-series-line {
-    -fx-stroke: -millions-accent;
+    -fx-stroke: -millions-chart-0;
+}
+
+.default-color0.chart-line-symbol {
+    -fx-background-color: -millions-chart-0;
+}
+
+.default-color1.chart-series-line {
+    -fx-stroke: -millions-chart-1;
+}
+
+.default-color1.chart-line-symbol {
+    -fx-background-color: -millions-chart-1;
+}
+
+.default-color2.chart-series-line {
+    -fx-stroke: -millions-chart-2;
+}
+
+.default-color2.chart-line-symbol {
+    -fx-background-color: -millions-chart-2;
+}
+
+.default-color3.chart-series-line {
+    -fx-stroke: -millions-chart-3;
+}
+
+.default-color3.chart-line-symbol {
+    -fx-background-color: -millions-chart-3;
+}
+
+.default-color4.chart-series-line {
+    -fx-stroke: -millions-chart-4;
+}
+
+.default-color4.chart-line-symbol {
+    -fx-background-color: -millions-chart-4;
+}
+
+.default-color5.chart-series-line {
+    -fx-stroke: -millions-chart-5;
+}
+
+.default-color5.chart-line-symbol {
+    -fx-background-color: -millions-chart-5;
+}
+
+.default-color6.chart-series-line {
+    -fx-stroke: -millions-chart-6;
+}
+
+.default-color6.chart-line-symbol {
+    -fx-background-color: -millions-chart-6;
+}
+
+.default-color7.chart-series-line {
+    -fx-stroke: -millions-chart-7;
+}
+
+.default-color7.chart-line-symbol {
+    -fx-background-color: -millions-chart-7;
+}
+
+.event-marker-line.chart-series-line,
+.moon-phase-new.chart-series-line,
+.moon-phase-full.chart-series-line {
+    -fx-stroke-width: 1.5;
+    -fx-stroke-dash-array: 6 4;
+}
+
+.chart-overlay-dashed.chart-series-line {
+    -fx-stroke-width: 1.5;
+    -fx-stroke-dash-array: 6 4;
+}
+
+.chart-overlay-solid-thick.chart-series-line {
+    -fx-stroke-width: 2.0;
 }
 
 .list-view {

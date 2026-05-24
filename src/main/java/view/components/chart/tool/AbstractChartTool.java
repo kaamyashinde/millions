@@ -110,16 +110,16 @@ public abstract class AbstractChartTool implements ChartTool {
   }
 
   /**
-   * Applies CSS styling to a series node after JavaFX has created it.
+   * Applies CSS style classes to a series node after JavaFX has created it.
    *
-   * @param series the series whose node should be styled
-   * @param css    JavaFX CSS fragment (e.g. stroke color and dash pattern)
+   * @param series  the series whose node should be styled
+   * @param classes CSS class names defined in {@code base.css}
    */
-  protected void styleSeries(XYChart.Series<Number, Number> series, String css) {
+  protected void applyStyleClasses(XYChart.Series<Number, Number> series, String... classes) {
     Platform.runLater(
         () -> {
           if (series.getNode() != null) {
-            series.getNode().setStyle(css);
+            series.getNode().getStyleClass().addAll(classes);
           }
         });
   }

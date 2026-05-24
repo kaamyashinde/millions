@@ -28,13 +28,6 @@ public class FibonacciTool extends AbstractChartTool {
     AWAITING_SECOND
   }
 
-  /**
-   * Seven hex colour strings mapped to Fibonacci retracement levels in order (0 % through 100 %).
-   */
-  private static final String[] COLORS = {
-    "#F8FAFC", "#F59E0B", "#EF4444", "#14B8A6", "#0EA5A4", "#22C55E", "#94A3B8"
-  };
-
   /** Current interaction state of the two-click workflow. */
   private State state = State.IDLE;
 
@@ -117,11 +110,8 @@ public class FibonacciTool extends AbstractChartTool {
       series.getData().add(new XYChart.Data<>(firstDay, levelPrice));
       series.getData().add(new XYChart.Data<>(lastDay, levelPrice));
 
-      final String color = COLORS[i];
       addSeries(chart, series);
-      styleSeries(
-          series,
-          "-fx-stroke: " + color + "; -fx-stroke-width: 1.5; -fx-stroke-dash-array: 6 4;");
+      applyStyleClasses(series, "chart-overlay-dashed");
     }
 
     chart.setLegendVisible(true);

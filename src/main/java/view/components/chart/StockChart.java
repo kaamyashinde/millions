@@ -3,7 +3,9 @@ package view.components.chart;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -28,6 +30,7 @@ public class StockChart extends LineChart<Number, Number> {
   private static final double FALLBACK_AXIS_PADDING = 1.0;
 
   private final List<ChartTool> tools = new ArrayList<>();
+  private final Map<Integer, XYChart.Series<Number, Number>> eventMarkers = new HashMap<>();
 
   /**
    * Creates a chart pre-populated with the price history of {@code stock}.
@@ -109,6 +112,67 @@ public class StockChart extends LineChart<Number, Number> {
    */
   public List<ChartTool> getTools() {
     return Collections.unmodifiableList(tools);
+  }
+
+  /**
+   * Toggles a vertical marker at the given trading day. A second call for the same day removes it.
+   *
+   * @param day   1-based trading day on the X axis
+   * @param label series name shown in the chart legend
+   */
+  public void toggleEventMarker(int day, String label) {
+    if (eventMarkers.containsKey(day)) {
+      XYChart.Series<Number, Number> existing = eventMarkers.remove(day);
+      getData().remove(existing);
+      if (eventMarkers.isEmpty() && tools.stream().noneMatch(t -> t.activeProperty().get())) {
+        setLegendVisible(false);
+      }
+      return;
+    }
+
+    if (getData().isEmpty()) {
+      return;
+    }
+
+    List<XYChart.Data<Number, Number>> visibleData = getData().getFirst().getData();
+    if (visibleData.isEmpty()) {
+      return;
+    }
+
+    int firstDay = visibleData.getFirst().getXValue().intValue();
+    int lastDay = visibleData.getLast().getXValue().intValue();
+    if (day < firstDay || day > lastDay) {
+      return;
+    }
+
+    NumberAxis yAxis = (NumberAxis) getYAxis();
+    double markerLow = yAxis.getLowerBound();
+    double markerHigh = yAxis.getUpperBound();
+
+    XYChart.Series<Number, Number> series = new XYChart.Series<>();
+    series.setName(label);
+    series.getData().add(new XYChart.Data<>(day, markerLow));
+    series.getData().add(new XYChart.Data<>(day, markerHigh));
+
+    getData().add(series);
+    eventMarkers.put(day, series);
+    setLegendVisible(true);
+
+    ChartSeriesStyles.applyStyleClasses(series, "event-marker-line");
+  }
+
+  /**
+   * Removes all event markers from this chart.
+   */
+  public void clearEventMarkers() {
+    if (eventMarkers.isEmpty()) {
+      return;
+    }
+    getData().removeAll(eventMarkers.values());
+    eventMarkers.clear();
+    if (tools.stream().noneMatch(t -> t.activeProperty().get())) {
+      setLegendVisible(false);
+    }
   }
 
   /**
