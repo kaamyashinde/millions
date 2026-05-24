@@ -14,14 +14,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-import model.learning.content.Difficulty;
 import model.learning.content.LearningItem;
 import model.learning.content.LearningResource;
 import model.learning.quiz.Quiz;
 import model.learning.quiz.QuizAttempt;
 import util.ExternalLinkOpener;
 import view.components.learning.LearningResourceCard;
-import view.theme.ThemePalette;
+import view.theme.ThemeManager;
 import view.theme.ThemeStyles;
 
 /**
@@ -78,15 +77,162 @@ public class ItemDetailView extends BorderPane {
 
     ScrollPane scroll = new ScrollPane(content);
     scroll.setFitToWidth(true);
-    scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+    ThemeStyles.addStyleClasses(scroll, "scroll-transparent");
     scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
     setCenter(scroll);
   }
 
   private javafx.scene.Node buildMarkdownView(LearningItem item) {
     String bodyHtml = learningHub.getItemBodyHtml(item);
+    String html = wrapMarkdownHtml(bodyHtml);
 
-    String html = """
+    WebView webView = new WebView();
+    webView.getEngine().setUserStyleSheetLocation(null);
+    webView.getEngine().loadContent(html, "text/html");
+    webView.setPrefHeight(520);
+    webView.setMaxWidth(Double.MAX_VALUE);
+
+    webView.getEngine().locationProperty().addListener((obs, oldLoc, newLoc) -> {
+      if (newLoc != null && !newLoc.isEmpty() && !newLoc.startsWith("about:")) {
+        webView.getEngine().loadContent(html, "text/html");
+        ExternalLinkOpener.open(newLoc);
+      }
+    });
+
+    return webView;
+  }
+
+  private javafx.scene.Node buildResourcesSection(LearningItem item) {
+    List<LearningResource> resources = learningHub.getResourcesForItem(item);
+
+    VBox section = new VBox(10);
+    section.setPadding(new Insets(8, 0, 0, 0));
+
+    Label heading = new Label("Further Reading");
+    ThemeStyles.addStyleClasses(heading, "section-heading");
+    section.getChildren().add(heading);
+
+    if (resources.isEmpty()) {
+      Label fallback = new Label(
+          "Open links in the Further Reading section above to explore more.");
+      ThemeStyles.addStyleClasses(fallback, "text-small-secondary-italic");
+      fallback.setWrapText(true);
+      section.getChildren().add(fallback);
+    } else {
+      for (LearningResource res : resources) {
+        section.getChildren().add(LearningResourceCard.create(res));
+      }
+    }
+
+    return section;
+  }
+
+  private javafx.scene.Node buildRelatedTopicsSection(
+      LearningItem item, Consumer<LearningItem> onItemClicked) {
+    List<LearningItem> related = learningHub.getItemsByIds(item.relatedTopicIds());
+    if (related.isEmpty()) {
+      return new Region();
+    }
+
+    VBox section = new VBox(10);
+    section.setPadding(new Insets(8, 0, 0, 0));
+
+    Label heading = new Label("Suggested Next Topics");
+    ThemeStyles.addStyleClasses(heading, "section-heading");
+    section.getChildren().add(heading);
+
+    for (LearningItem relatedItem : related) {
+      section.getChildren().add(buildRelatedTopicCard(relatedItem, onItemClicked));
+    }
+
+    return section;
+  }
+
+  private static javafx.scene.Node buildRelatedTopicCard(
+      LearningItem item, Consumer<LearningItem> onItemClicked) {
+    Label badge = new Label(item.difficulty().name());
+    ThemeStyles.applyDifficultyBadge(badge, item.difficulty());
+
+    Label title = new Label(item.title());
+    ThemeStyles.addStyleClasses(title, "learning-card-title");
+    title.setWrapText(true);
+
+    Label summary = new Label(item.summary());
+    ThemeStyles.addStyleClasses(summary, "learning-card-summary");
+    summary.setWrapText(true);
+
+    Label category = new Label(item.category().emoji() + "  " + item.category().name());
+    ThemeStyles.addStyleClasses(category, "learning-card-meta");
+
+    VBox card = new VBox(6, badge, title, summary, category);
+    card.setPadding(new Insets(12));
+    card.setMaxWidth(Double.MAX_VALUE);
+    ThemeStyles.addStyleClasses(card, "learning-card-accent");
+    card.setOnMouseClicked(_ -> onItemClicked.accept(item));
+    return card;
+  }
+
+  private javafx.scene.Node buildQuizSection(
+      LearningItem item, Consumer<QuizAttempt> onTakeQuiz) {
+    return quiz.getQuizForItem(item.id())
+        .map(found -> buildQuizSectionContent(found, onTakeQuiz))
+        .orElseGet(Region::new);
+  }
+
+  private static javafx.scene.Node buildQuizSectionContent(
+      Quiz quiz, Consumer<QuizAttempt> onTakeQuiz) {
+    Label heading = new Label("Test Your Knowledge");
+    ThemeStyles.addStyleClasses(heading, "section-heading");
+
+    Button quizBtn = new Button("Take Quiz: " + quiz.title() + "  →");
+    quizBtn.setMaxWidth(Double.MAX_VALUE);
+    quizBtn.setWrapText(true);
+    ThemeStyles.addStyleClasses(quizBtn, "quiz-take-button");
+    quizBtn.setOnAction(_ -> onTakeQuiz.accept(new QuizAttempt(quiz)));
+
+    VBox section = new VBox(8, heading, quizBtn);
+    section.setPadding(new Insets(8, 0, 0, 0));
+    return section;
+  }
+
+  private static String wrapMarkdownHtml(String bodyHtml) {
+    boolean light = ThemeManager.getInstance().getTheme() == ThemeManager.Theme.LIGHT;
+    if (light) {
+      return """
+          <!DOCTYPE html>
+          <html>
+          <head>
+          <meta charset="UTF-8">
+          <style>
+            body {
+              background: #F8FAFC;
+              color: #0F172A;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              font-size: 14px;
+              line-height: 1.7;
+              margin: 0;
+              padding: 8px 4px;
+            }
+            h1, h2, h3 { color: #0F172A; margin-top: 1.2em; margin-bottom: 0.4em; }
+            h2 { font-size: 1.15em; border-bottom: 1px solid #CBD5E1; padding-bottom: 4px; }
+            p { margin: 0.6em 0; }
+            ul, ol { padding-left: 1.4em; margin: 0.6em 0; }
+            li { margin-bottom: 4px; }
+            a { color: #0EA5A4; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+            code { background: #EFF6FF; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+            pre { background: #EFF6FF; padding: 10px; border-radius: 6px; overflow-x: auto; }
+            hr { border: none; border-top: 1px solid #CBD5E1; margin: 1em 0; }
+            strong { color: #0F172A; }
+          </style>
+          </head>
+          <body>
+          """ + bodyHtml + """
+          </body>
+          </html>
+          """;
+    }
+    return """
         <!DOCTYPE html>
         <html>
         <head>
@@ -119,154 +265,5 @@ public class ItemDetailView extends BorderPane {
         </body>
         </html>
         """;
-
-    WebView webView = new WebView();
-    webView.getEngine().setUserStyleSheetLocation(null);
-    webView.getEngine().loadContent(html, "text/html");
-    webView.setPrefHeight(520);
-    webView.setMaxWidth(Double.MAX_VALUE);
-
-    webView.getEngine().locationProperty().addListener((obs, oldLoc, newLoc) -> {
-      if (newLoc != null && !newLoc.isEmpty() && !newLoc.startsWith("about:")) {
-        webView.getEngine().loadContent(html, "text/html");
-        ExternalLinkOpener.open(newLoc);
-      }
-    });
-
-    return webView;
-  }
-
-  private javafx.scene.Node buildResourcesSection(LearningItem item) {
-    List<LearningResource> resources = learningHub.getResourcesForItem(item);
-
-    VBox section = new VBox(10);
-    section.setPadding(new Insets(8, 0, 0, 0));
-
-    Label heading = new Label("Further Reading");
-    heading.setStyle(
-        "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
-            + "-fx-font-weight: bold;"
-            + "-fx-font-size: 13;");
-    section.getChildren().add(heading);
-
-    if (resources.isEmpty()) {
-      Label fallback = new Label(
-          "Open links in the Further Reading section above to explore more.");
-      fallback.setStyle(
-          "-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + ";"
-              + "-fx-font-size: 11;"
-              + "-fx-font-style: italic;");
-      fallback.setWrapText(true);
-      section.getChildren().add(fallback);
-    } else {
-      for (LearningResource res : resources) {
-        section.getChildren().add(LearningResourceCard.create(res));
-      }
-    }
-
-    return section;
-  }
-
-  private javafx.scene.Node buildRelatedTopicsSection(
-      LearningItem item, Consumer<LearningItem> onItemClicked) {
-    List<LearningItem> related = learningHub.getItemsByIds(item.relatedTopicIds());
-    if (related.isEmpty()) {
-      return new Region();
-    }
-
-    VBox section = new VBox(10);
-    section.setPadding(new Insets(8, 0, 0, 0));
-
-    Label heading = new Label("Suggested Next Topics");
-    heading.setStyle(
-        "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
-            + "-fx-font-weight: bold;"
-            + "-fx-font-size: 13;");
-    section.getChildren().add(heading);
-
-    for (LearningItem relatedItem : related) {
-      section.getChildren().add(buildRelatedTopicCard(relatedItem, onItemClicked));
-    }
-
-    return section;
-  }
-
-  private static javafx.scene.Node buildRelatedTopicCard(
-      LearningItem item, Consumer<LearningItem> onItemClicked) {
-    String badgeColor = difficultyColor(item.difficulty());
-
-    Label badge = new Label(item.difficulty().name());
-    badge.setStyle(
-        "-fx-background-color: " + badgeColor + "22;"
-            + "-fx-text-fill: " + badgeColor + ";"
-            + "-fx-background-radius: 4;"
-            + "-fx-padding: 2 6 2 6;"
-            + "-fx-font-size: 10;");
-
-    Label title = new Label(item.title());
-    title.setStyle("-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + "; -fx-font-weight: bold;");
-    title.setWrapText(true);
-
-    Label summary = new Label(item.summary());
-    summary.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 11;");
-    summary.setWrapText(true);
-
-    Label category = new Label(item.category().emoji() + "  " + item.category().name());
-    category.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 10;");
-
-    VBox card = new VBox(6, badge, title, summary, category);
-    card.setPadding(new Insets(12));
-    card.setMaxWidth(Double.MAX_VALUE);
-    card.setStyle(
-        "-fx-background-color: " + ThemePalette.SURFACE + ";"
-            + "-fx-border-color: " + ThemePalette.ACCENT + ";"
-            + "-fx-border-radius: 8;"
-            + "-fx-background-radius: 8;"
-            + "-fx-cursor: hand;");
-    card.setOnMouseClicked(_ -> onItemClicked.accept(item));
-    return card;
-  }
-
-  private javafx.scene.Node buildQuizSection(
-      LearningItem item, Consumer<QuizAttempt> onTakeQuiz) {
-    return quiz.getQuizForItem(item.id())
-        .map(found -> buildQuizSectionContent(found, onTakeQuiz))
-        .orElseGet(Region::new);
-  }
-
-  private static javafx.scene.Node buildQuizSectionContent(
-      Quiz quiz, Consumer<QuizAttempt> onTakeQuiz) {
-    Label heading = new Label("Test Your Knowledge");
-    heading.setStyle(
-        "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";"
-            + "-fx-font-weight: bold;"
-            + "-fx-font-size: 13;");
-
-    Button quizBtn = new Button("Take Quiz: " + quiz.title() + "  →");
-    quizBtn.setMaxWidth(Double.MAX_VALUE);
-    quizBtn.setWrapText(true);
-    quizBtn.setStyle(
-        "-fx-background-color: #0EA5A422;"
-            + "-fx-text-fill: " + ThemePalette.ACCENT + ";"
-            + "-fx-border-color: " + ThemePalette.ACCENT + ";"
-            + "-fx-border-radius: 8;"
-            + "-fx-background-radius: 8;"
-            + "-fx-cursor: hand;"
-            + "-fx-font-size: 13;"
-            + "-fx-font-weight: bold;"
-            + "-fx-padding: 12 16 12 16;");
-    quizBtn.setOnAction(_ -> onTakeQuiz.accept(new QuizAttempt(quiz)));
-
-    VBox section = new VBox(8, heading, quizBtn);
-    section.setPadding(new Insets(8, 0, 0, 0));
-    return section;
-  }
-
-  private static String difficultyColor(Difficulty d) {
-    return switch (d) {
-      case BEGINNER -> ThemePalette.DIFFICULTY_BEGINNER;
-      case INTERMEDIATE -> ThemePalette.DIFFICULTY_INTERMEDIATE;
-      case ADVANCED -> ThemePalette.DIFFICULTY_ADVANCED;
-    };
   }
 }

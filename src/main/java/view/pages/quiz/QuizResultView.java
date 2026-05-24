@@ -16,7 +16,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
 import model.learning.content.LearningItem;
 import model.learning.quiz.QuizAttempt;
 import model.learning.quiz.QuizQuestion;
@@ -33,15 +32,6 @@ import view.theme.ThemeStyles;
  * @since 04-04-2026
  */
 public class QuizResultView extends BorderPane {
-
-  private static final String COLOR_BG = "#0B1220";
-  private static final String COLOR_BG_CARD = "#111827";
-  private static final String COLOR_HEADING = "#F8FAFC";
-  private static final String COLOR_SUBTITLE = "#CBD5E1";
-  private static final String COLOR_CORRECT = "#22C55E";
-  private static final String COLOR_WRONG = "#EF4444";
-  private static final String COLOR_ORANGE = "#F59E0B";
-  private static final String COLOR_BORDER_DEFAULT = "#334155";
 
   private final LearningHubController learningHub;
   private final Consumer<LearningItem> onOpenHubTopic;
@@ -64,7 +54,7 @@ public class QuizResultView extends BorderPane {
     this.learningHub = learningHub;
     this.onOpenHubTopic = onOpenHubTopic;
 
-    setStyle("-fx-background-color: " + COLOR_BG + ";");
+    ThemeStyles.addStyleClasses(this, "quiz-root");
     setPadding(new Insets(16));
 
     Button backToTopicBtn = new Button("← Back to Topic");
@@ -96,17 +86,14 @@ public class QuizResultView extends BorderPane {
 
     ScrollPane scroll = new ScrollPane(content);
     scroll.setFitToWidth(true);
-    scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+    ThemeStyles.addStyleClasses(scroll, "scroll-transparent");
     scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
     setCenter(scroll);
   }
 
   private VBox buildBreakdownSection(QuizAttempt attempt) {
     Label heading = new Label("Question Breakdown");
-    heading.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
-            + "-fx-font-weight: bold;"
-            + "-fx-font-size: 13;");
+    ThemeStyles.addStyleClasses(heading, "quiz-result-heading");
 
     VBox section = new VBox(8, heading);
     List<QuizQuestion> questions = attempt.quiz().questions();
@@ -121,7 +108,6 @@ public class QuizResultView extends BorderPane {
 
   private VBox buildBreakdownRow(
       QuizAttempt attempt, QuizQuestion q, boolean correct, int number) {
-    String badgeColor = correct ? COLOR_CORRECT : COLOR_WRONG;
     String badgeText = correct ? "CORRECT" : "WRONG";
 
     String questionPreview = q.questionText().length() > 65
@@ -129,28 +115,22 @@ public class QuizResultView extends BorderPane {
         : q.questionText();
 
     Label numLabel = new Label("#" + number);
-    numLabel.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    ThemeStyles.addStyleClasses(numLabel, "quiz-result-subtitle");
 
     Label qText = new Label(questionPreview);
     qText.setWrapText(true);
-    qText.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-size: 12;");
+    ThemeStyles.addStyleClasses(qText, "quiz-result-question");
 
     Label badge = new Label(badgeText);
-    badge.setStyle(
-        "-fx-background-color: " + badgeColor + "22;"
-            + "-fx-text-fill: " + badgeColor + ";"
-            + "-fx-background-radius: 4;"
-            + "-fx-padding: 2 6 2 6;"
-            + "-fx-font-size: 10;"
-            + "-fx-font-weight: bold;");
+    ThemeStyles.addStyleClasses(
+        badge, "status-badge", correct ? "status-badge-success" : "status-badge-error");
 
     VBox row = new VBox(4, new HBox(8, numLabel, badge), qText);
 
     if (!correct) {
       Label explanation = new Label(q.explanationText());
       explanation.setWrapText(true);
-      explanation.setStyle(
-          "-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11; -fx-font-style: italic;");
+      ThemeStyles.addStyleClasses(explanation, "text-small-secondary-italic");
       row.getChildren().add(explanation);
 
       VBox linksBox = new VBox(8);
@@ -159,12 +139,8 @@ public class QuizResultView extends BorderPane {
       row.getChildren().add(linksBox);
     }
 
-    row.setPadding(new Insets(10));
-    row.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-            + "-fx-border-color: " + (correct ? COLOR_CORRECT : COLOR_WRONG) + "33;"
-            + "-fx-border-radius: 8;"
-            + "-fx-background-radius: 8;");
+    ThemeStyles.addStyleClasses(
+        row, "quiz-result-row", correct ? "quiz-result-row-correct" : "quiz-result-row-wrong");
     return row;
   }
 
@@ -173,43 +149,32 @@ public class QuizResultView extends BorderPane {
     int total = attempt.totalQuestions();
     double pct = total == 0 ? 0 : (double) correct / total;
 
-    String badgeColor;
+    String badgeClass;
     String badgeText;
     if (pct >= 0.8) {
-      badgeColor = COLOR_CORRECT;
+      badgeClass = "status-badge-success";
       badgeText = "Excellent!";
     } else if (pct >= 0.6) {
-      badgeColor = COLOR_ORANGE;
+      badgeClass = "status-badge-warning";
       badgeText = "Good effort!";
     } else {
-      badgeColor = COLOR_WRONG;
+      badgeClass = "status-badge-error";
       badgeText = "Keep practicing!";
     }
 
     Label quizTitle = new Label(attempt.quiz().title());
-    quizTitle.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 12;");
+    ThemeStyles.addStyleClasses(quizTitle, "quiz-result-subtitle-sm");
 
     Label scoreLabel = new Label(correct + " / " + total + " Correct");
     scoreLabel.setFont(Font.font("System", FontWeight.BOLD, 32));
-    scoreLabel.setStyle("-fx-text-fill: " + COLOR_HEADING + ";");
+    ThemeStyles.addStyleClasses(scoreLabel, "quiz-result-score");
 
     Label badge = new Label(badgeText);
-    badge.setStyle(
-        "-fx-background-color: " + badgeColor + "22;"
-            + "-fx-text-fill: " + badgeColor + ";"
-            + "-fx-background-radius: 6;"
-            + "-fx-padding: 4 12 4 12;"
-            + "-fx-font-weight: bold;"
-            + "-fx-font-size: 13;");
+    ThemeStyles.addStyleClasses(badge, "status-badge-lg", badgeClass);
 
     VBox card = new VBox(8, quizTitle, scoreLabel, badge);
     card.setAlignment(Pos.CENTER_LEFT);
-    card.setPadding(new Insets(20));
-    card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-            + "-fx-border-color: " + COLOR_BORDER_DEFAULT + ";"
-            + "-fx-border-radius: 10;"
-            + "-fx-background-radius: 10;");
+    ThemeStyles.addStyleClasses(card, "quiz-result-card");
     return card;
   }
 
@@ -219,24 +184,16 @@ public class QuizResultView extends BorderPane {
     int quizCount = allAttempts.size();
 
     Label heading = new Label("Session Summary");
-    heading.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
-            + "-fx-font-weight: bold;"
-            + "-fx-font-size: 13;");
+    ThemeStyles.addStyleClasses(heading, "quiz-result-heading");
 
     Label stats = new Label(
         totalCorrect + " correct out of " + totalAnswered
             + " questions across " + quizCount + " quizzes");
     stats.setWrapText(true);
-    stats.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 12;");
+    ThemeStyles.addStyleClasses(stats, "quiz-result-subtitle-sm");
 
     VBox card = new VBox(6, heading, stats);
-    card.setPadding(new Insets(14));
-    card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-            + "-fx-border-color: " + COLOR_BORDER_DEFAULT + ";"
-            + "-fx-border-radius: 8;"
-            + "-fx-background-radius: 8;");
+    ThemeStyles.addStyleClasses(card, "quiz-result-summary-card");
     return card;
   }
 }

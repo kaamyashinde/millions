@@ -211,8 +211,7 @@ public final class SessionService {
     return new LocalLeaderboardService(
         profilePaths,
         jsonStorage,
-        authService.marketDataFileService(),
-        profileService.profileImageService());
+        authService.marketDataFileService());
   }
 
   private ActiveSession requireActiveSession() {

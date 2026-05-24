@@ -4,9 +4,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-import model.learning.content.Difficulty;
 import model.learning.content.LearningItem;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -24,15 +22,8 @@ public final class LearningTopicCard {
    * @return clickable card node
    */
   public static VBox create(LearningItem item, Runnable onOpen) {
-    String badgeColor = difficultyColor(item.difficulty());
-
     Label badge = new Label(item.difficulty().name());
-    badge.setStyle(
-        "-fx-background-color: " + badgeColor + "22;"
-            + "-fx-text-fill: " + badgeColor + ";"
-            + "-fx-background-radius: 4;"
-            + "-fx-padding: 2 6 2 6;"
-            + "-fx-font-size: 10;");
+    ThemeStyles.applyDifficultyBadge(badge, item.difficulty());
 
     Label title = new Label(item.title());
     ThemeStyles.addStyleClasses(title, "learning-card-title");
@@ -43,7 +34,7 @@ public final class LearningTopicCard {
     summary.setWrapText(true);
 
     Label cta = new Label("Read in Learning Hub →");
-    cta.setStyle("-fx-text-fill: " + ThemePalette.ACCENT + "; -fx-font-size: 11;");
+    ThemeStyles.addStyleClasses(cta, "quiz-cta");
 
     VBox card = new VBox(6, badge, title, summary, cta);
     card.setPadding(new Insets(12));
@@ -51,13 +42,5 @@ public final class LearningTopicCard {
     ThemeStyles.addStyleClasses(card, "learning-card-accent");
     card.setOnMouseClicked(_ -> onOpen.run());
     return card;
-  }
-
-  private static String difficultyColor(Difficulty difficulty) {
-    return switch (difficulty) {
-      case BEGINNER -> ThemePalette.DIFFICULTY_BEGINNER;
-      case INTERMEDIATE -> ThemePalette.DIFFICULTY_INTERMEDIATE;
-      case ADVANCED -> ThemePalette.DIFFICULTY_ADVANCED;
-    };
   }
 }

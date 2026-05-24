@@ -6,7 +6,7 @@ import model.core.player.Player;
 import java.math.BigDecimal;
 
 /**
- * Investor level: requires 70 distinct trading days and net worth at least 1.2x starting money;
+ * Investor level: requires 10 distinct trading days and net worth at least 1.2x starting money;
  * trade size capped at 50x starting money.
  *
  * @author kaamyashinde
@@ -37,7 +37,7 @@ public final class InvestorLevel implements PlayerLevel {
 
   @Override
   public boolean qualifies(Player player) {
-    return player.getTransactionArchive().countDistinctDay() >= 70
+    return player.getTransactionArchive().countDistinctDay() >= 10
         && player
             .getNetWorth()
             .compareTo(player.getStartingMoney().multiply(BigDecimal.valueOf(1.20)))

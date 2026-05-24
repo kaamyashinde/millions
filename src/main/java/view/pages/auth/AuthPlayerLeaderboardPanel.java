@@ -182,7 +182,7 @@ public class AuthPlayerLeaderboardPanel extends BorderPane {
     playerColumn.setSortable(false);
 
     table.getColumns().setAll(List.of(rankColumn, playerColumn, netWorthColumn, returnColumn));
-    table.setRowStyleProvider(this::rowStyleFor);
+    table.setRowClassProvider(this::rowClassFor);
     table.setSortPolicy(_ -> {
       syncSortStateFromTable();
       refreshRows();
@@ -221,9 +221,9 @@ public class AuthPlayerLeaderboardPanel extends BorderPane {
     table.refresh();
   }
 
-  private String rowStyleFor(PlayerLeaderboardEntry entry) {
+  private String rowClassFor(PlayerLeaderboardEntry entry) {
     int rank = rankByUsername.getOrDefault(entry.username(), Integer.MAX_VALUE);
-    return ThemeStyles.leaderboardRowStyle(rank);
+    return ThemeStyles.leaderboardRowClass(rank);
   }
 
   private static String formatCurrency(PlayerLeaderboardEntry entry) {

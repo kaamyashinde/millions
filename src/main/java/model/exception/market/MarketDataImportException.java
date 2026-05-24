@@ -13,4 +13,14 @@ public final class MarketDataImportException extends RuntimeException {
   public MarketDataImportException(String message) {
     super(message);
   }
+
+  /**
+   * Creates an exception with a user-facing message and underlying cause.
+   *
+   * @param message description of the import failure
+   * @param cause   the underlying exception that triggered this failure
+   */
+  public MarketDataImportException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

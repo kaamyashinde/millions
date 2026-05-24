@@ -20,7 +20,6 @@ import model.learning.quiz.QuizAnswer;
 import model.learning.quiz.QuizAttempt;
 import model.learning.quiz.QuizQuestion;
 import view.components.learning.QuizWrongAnswerLinks;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -183,7 +182,6 @@ public class QuizView extends BorderPane {
   private void buildFeedbackContent(VBox feedbackPane, QuizQuestion q, boolean correct) {
     feedbackPane.getChildren().clear();
 
-    String resultColor = correct ? ThemePalette.SUCCESS : ThemePalette.ERROR;
     String resultText = correct ? "✓  Correct!" : "✗  Not quite.";
 
     feedbackPane.getStyleClass().removeAll("quiz-feedback-correct", "quiz-feedback-wrong");
@@ -191,14 +189,12 @@ public class QuizView extends BorderPane {
         feedbackPane, correct ? "quiz-feedback-correct" : "quiz-feedback-wrong");
 
     Label resultLabel = new Label(resultText);
-    resultLabel.setStyle(
-        "-fx-text-fill: " + resultColor + ";"
-            + "-fx-font-weight: bold;"
-            + "-fx-font-size: 13;");
+    ThemeStyles.addStyleClasses(
+        resultLabel, correct ? "quiz-feedback-title-correct" : "quiz-feedback-title-wrong");
 
     Label explanation = new Label(q.explanationText());
     explanation.setWrapText(true);
-    explanation.setStyle("-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + "; -fx-font-size: 12;");
+    ThemeStyles.addStyleClasses(explanation, "quiz-feedback-explanation");
 
     feedbackPane.getChildren().addAll(resultLabel, explanation);
 

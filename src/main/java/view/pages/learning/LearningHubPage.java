@@ -16,7 +16,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.learning.content.Difficulty;
 import model.learning.content.LearningCategory;
 import model.learning.content.LearningItem;
 import model.learning.content.LearningResource;
@@ -25,7 +24,6 @@ import view.components.learning.LearningResourceCard;
 import view.layout.ResponsiveLayout;
 import view.pages.quiz.QuizResultView;
 import view.pages.quiz.QuizView;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -136,15 +134,8 @@ public class LearningHubPage extends BorderPane implements ResponsiveLayout {
   }
 
   private javafx.scene.Node buildFeaturedCard(LearningItem item) {
-    String badgeColor = difficultyColor(item.difficulty());
-
     Label badge = new Label(item.difficulty().name());
-    badge.setStyle(
-        "-fx-background-color: " + badgeColor + "22;"
-            + "-fx-text-fill: " + badgeColor + ";"
-            + "-fx-background-radius: 4;"
-            + "-fx-padding: 2 6 2 6;"
-            + "-fx-font-size: 10;");
+    ThemeStyles.applyDifficultyBadge(badge, item.difficulty());
 
     Label title = new Label(item.title());
     ThemeStyles.addStyleClasses(title, "learning-card-title");
@@ -190,14 +181,6 @@ public class LearningHubPage extends BorderPane implements ResponsiveLayout {
     Label heading = new Label(title);
     ThemeStyles.addStyleClasses(heading, "learning-section-title");
     return new VBox(10, heading, content);
-  }
-
-  private static String difficultyColor(Difficulty difficulty) {
-    return switch (difficulty) {
-      case BEGINNER -> ThemePalette.DIFFICULTY_BEGINNER;
-      case INTERMEDIATE -> ThemePalette.DIFFICULTY_INTERMEDIATE;
-      case ADVANCED -> ThemePalette.DIFFICULTY_ADVANCED;
-    };
   }
 
   /**

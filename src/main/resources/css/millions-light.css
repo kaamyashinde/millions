@@ -1,0 +1,22 @@
+/* Light theme token overrides — loaded after millions.css when light mode is active. */
+
+.root {
+    -millions-bg: #F8FAFC;
+    -millions-surface: #FFFFFF;
+    -millions-data-surface: #EFF6FF;
+    -millions-surface-light: #DBEAFE;
+    -millions-surface-strong: #BFDBFE;
+    -millions-border: #CBD5E1;
+    -millions-text-primary: #0F172A;
+    -millions-text-secondary: #334155;
+    -millions-text-muted: #64748B;
+    -millions-input-bg: #FFFFFF;
+    -millions-input-border: #CBD5E1;
+    -millions-top-one: #F59E0B33;
+    -millions-top-two: #0EA5A422;
+    -millions-top-three: #CBD5E133;
+    -millions-table-row-odd: #E2E8F0;
+    -millions-table-cell-border: #CBD5E1;
+    -fx-background-color: -millions-bg;
+    -fx-text-fill: -millions-text-primary;
+}

@@ -38,7 +38,7 @@ public class AuthLayout extends HBox implements ResponsiveLayout {
    * @param navLinkAction callback invoked when the navigation link is clicked
    */
   public AuthLayout(Node formContent, String navLinkText, Runnable navLinkAction) {
-    this(formContent, navLinkText, navLinkAction, null, null, false, null);
+    this(formContent, navLinkText, navLinkAction, null, false, null);
   }
 
   /**
@@ -48,7 +48,6 @@ public class AuthLayout extends HBox implements ResponsiveLayout {
    * @param navLinkText navigation link label in the top-right corner
    * @param navLinkAction invoked when the navigation link is clicked
    * @param sidePanel optional panel displayed beside the form
-   * @param helpAction optional help handler; {@code null} hides the help action
    * @param showReturnToSession whether to show the return-to-session button
    * @param returnAction invoked when return-to-session is clicked
    */
@@ -57,7 +56,6 @@ public class AuthLayout extends HBox implements ResponsiveLayout {
       String navLinkText,
       Runnable navLinkAction,
       Node sidePanel,
-      Runnable helpAction,
       boolean showReturnToSession,
       Runnable returnAction) {
     ThemeStyles.addStyleClasses(this, "auth-root");
@@ -82,15 +80,7 @@ public class AuthLayout extends HBox implements ResponsiveLayout {
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
 
-    Button helpButton = new Button("Help");
-    ThemeStyles.styleButton(helpButton);
-    helpButton.setVisible(helpAction != null);
-    helpButton.setManaged(helpAction != null);
-    if (helpAction != null) {
-      helpButton.setOnAction(_ -> helpAction.run());
-    }
-
-    HBox bottom = new HBox(12, statusLabel, spacer, helpButton, returnButton);
+    HBox bottom = new HBox(12, statusLabel, spacer, returnButton);
     bottom.setAlignment(Pos.CENTER_LEFT);
     bottom.setPadding(new Insets(16, 32, 24, 32));
     right.setBottom(bottom);

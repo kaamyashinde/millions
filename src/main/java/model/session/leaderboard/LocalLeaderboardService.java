@@ -2,7 +2,6 @@ package model.session.leaderboard;
 
 
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -10,7 +9,6 @@ import model.core.player.Player;
 import model.persistence.ProfileFile;
 import model.persistence.io.JsonStorage;
 import model.persistence.market.MarketDataFileService;
-import model.persistence.profile.ProfileImageService;
 import model.persistence.profile.ProfilePaths;
 
 /**
@@ -22,23 +20,20 @@ public final class LocalLeaderboardService {
       String normalizedUsername,
       String displayName,
       BigDecimal netWorth,
-      boolean hasAvatar) {
+      String level) {
   }
 
   private final ProfilePaths profilePaths;
   private final JsonStorage jsonStorage;
   private final MarketDataFileService marketDataFileService;
-  private final ProfileImageService profileImageService;
 
   public LocalLeaderboardService(
       ProfilePaths profilePaths,
       JsonStorage jsonStorage,
-      MarketDataFileService marketDataFileService,
-      ProfileImageService profileImageService) {
+      MarketDataFileService marketDataFileService) {
     this.profilePaths = profilePaths;
     this.jsonStorage = jsonStorage;
     this.marketDataFileService = marketDataFileService;
-    this.profileImageService = profileImageService;
   }
 
   public List<LeaderboardRow> loadRows() {
@@ -51,9 +46,8 @@ public final class LocalLeaderboardService {
       String label = profile.displayName() != null && !profile.displayName().isBlank()
           ? profile.displayName().trim()
           : profile.username();
-      boolean hasAvatar = Files.isRegularFile(
-          profileImageService.avatarPath(profile.normalizedUsername()));
-      rows.add(new LeaderboardRow(profile.normalizedUsername(), label, player.getNetWorth(), hasAvatar));
+      String level = player.getPlayerLevel().displayName();
+      rows.add(new LeaderboardRow(profile.normalizedUsername(), label, player.getNetWorth(), level));
     }
     rows.sort(Comparator.comparing(LeaderboardRow::netWorth).reversed());
     return rows;
