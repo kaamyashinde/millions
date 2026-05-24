@@ -29,7 +29,6 @@ public class WorkspaceController {
   private final ActiveSession session;
   private final SessionService sessionService;
   private final NotificationService notifications;
-  private final NotificationsController notificationsTab;
   private final PortfolioController portfolio;
   private final StocksController stocks;
   private final StockDetailController stockDetail;
@@ -54,7 +53,6 @@ public class WorkspaceController {
     this.session = session;
     this.sessionService = sessionService;
     this.notifications = new NotificationService();
-    this.notificationsTab = new NotificationsController(notifications);
     Path avatarPath = sessionService.avatarPath(session.normalizedUsername());
     this.portfolio = new PortfolioController(session.exchange(), session.player(), avatarPath);
     this.stocks = new StocksController(session.exchange());
@@ -83,10 +81,6 @@ public class WorkspaceController {
 
   public NotificationService getNotifications() {
     return notifications;
-  }
-
-  public NotificationsController getNotificationsTab() {
-    return notificationsTab;
   }
 
   public PortfolioController getPortfolio() {

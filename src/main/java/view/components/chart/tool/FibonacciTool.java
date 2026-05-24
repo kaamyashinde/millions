@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import view.theme.ThemeStyles;
 import model.analysis.tools.FibonacciRetracement;
 
 /**

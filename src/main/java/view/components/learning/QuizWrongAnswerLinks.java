@@ -7,7 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import model.learning.content.LearningItem;
 import model.learning.quiz.QuizQuestion;
-import view.theme.ThemePalette;
+import view.theme.ThemeStyles;
 
 /**
  * Builds in-app topic and external resource links shown after a wrong quiz answer.
@@ -49,7 +49,7 @@ public final class QuizWrongAnswerLinks {
 
   private static Label sectionLabel(String text) {
     Label label = new Label(text);
-    label.setStyle("-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + "; -fx-font-size: 11;");
+    ThemeStyles.addStyleClasses(label, "text-small-secondary");
     return label;
   }
 }

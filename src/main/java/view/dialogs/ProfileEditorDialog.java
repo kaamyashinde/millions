@@ -22,7 +22,6 @@ import model.session.ActiveSession;
 import model.session.SessionService;
 import util.I18n;
 import view.components.image.ImageLoader;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -79,7 +78,7 @@ public final class ProfileEditorDialog {
     preview.setFitHeight(96);
     preview.setPreserveRatio(true);
     preview.setSmooth(true);
-    preview.setStyle("-fx-border-color: " + ThemePalette.BORDER + "; -fx-border-radius: 8;");
+    ThemeStyles.addStyleClasses(preview, "avatar-preview");
 
     Path[] pendingImage = {null};
     boolean[] removeAvatar = {false};
@@ -103,7 +102,7 @@ public final class ProfileEditorDialog {
     reloadPreview.run();
 
     Label status = new Label();
-    status.setStyle("-fx-text-fill: " + ThemePalette.ERROR + ";");
+    ThemeStyles.addStyleClasses(status, "text-error");
 
     Button chooseImage = new Button("Choose image…");
     chooseImage.setOnAction(_ -> {
@@ -153,14 +152,14 @@ public final class ProfileEditorDialog {
     cancel.setOnAction(_ -> stage.close());
 
     Label danger = new Label(I18n.get("exitGame.pin.confirm"));
-    danger.setStyle("-fx-font-weight: bold;");
+    ThemeStyles.addStyleClasses(danger, "font-bold");
 
     Label dangerHint = new Label(I18n.get("exitGame.confirm.body"));
     dangerHint.setWrapText(true);
     ThemeStyles.addStyleClasses(dangerHint, "text-secondary");
 
     Button exitGameButton = new Button(I18n.get("exitGame.pin.confirm"));
-    exitGameButton.setStyle("-fx-text-fill: " + ThemePalette.ERROR + ";");
+    ThemeStyles.addStyleClasses(exitGameButton, "text-error");
     exitGameButton.setOnAction(_ -> {
       stage.close();
       ExitGameDialog.show(stage.getOwner(), exitGame, onAccountDeleted);

@@ -2,6 +2,8 @@ package view.pages.auth;
 
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Function;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -9,12 +11,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import view.layout.AuthLayout;
 import view.theme.ThemeStyles;
+import view.validation.AuthFormValidation;
 
 /**
  * Registration page for the authentication flow.
@@ -33,14 +37,13 @@ public class RegisterPage extends AuthLayout {
    * @param toLogin navigate to login
    */
   public RegisterPage(RegisterAction registerAction, Runnable toLogin) {
-    this(registerAction, toLogin, null, null, false, null);
+    this(registerAction, toLogin, null, false, null);
   }
 
   /**
    * @param registerAction registration submit handler
    * @param toLogin navigate to login
    * @param sidePanel optional leaderboard panel
-   * @param helpAction optional help handler
    * @param showReturnToSession show return button
    * @param returnAction return to active session
    */
@@ -48,10 +51,9 @@ public class RegisterPage extends AuthLayout {
       RegisterAction registerAction,
       Runnable toLogin,
       Node sidePanel,
-      Runnable helpAction,
       boolean showReturnToSession,
       Runnable returnAction) {
-    super(buildFormShell(), "Login", toLogin, sidePanel, helpAction, showReturnToSession, returnAction);
+    super(buildFormShell(), "Login", toLogin, sidePanel, showReturnToSession, returnAction);
     VBox form = (VBox) getContentSlot().getChildren().get(0);
     wireForm(form, registerAction);
   }
@@ -78,6 +80,15 @@ public class RegisterPage extends AuthLayout {
     usernameField.setMaxWidth(Double.MAX_VALUE);
     pinField.setMaxWidth(Double.MAX_VALUE);
     startingMoneyField.setMaxWidth(Double.MAX_VALUE);
+    AuthFormValidation.restrictPinInput(pinField);
+
+    Label usernameErrorLabel = createFieldErrorLabel();
+    Label pinErrorLabel = createFieldErrorLabel();
+    Label startingMoneyErrorLabel = createFieldErrorLabel();
+    wireLiveValidation(usernameField, usernameErrorLabel, AuthFormValidation::usernameError);
+    wireLiveValidation(pinField, pinErrorLabel, AuthFormValidation::pinError);
+    wireLiveValidation(
+        startingMoneyField, startingMoneyErrorLabel, AuthFormValidation::startingMoneyError);
 
     marketDataFileNameLabel.setWrapText(true);
     ThemeStyles.addStyleClasses(marketDataFileNameLabel, "text-subheading");
@@ -115,8 +126,22 @@ public class RegisterPage extends AuthLayout {
                 pinField.getText(),
                 startingMoneyField.getText(),
                 Optional.ofNullable(selectedMarketDataFile)));
+    registerButton.disableProperty().bind(
+        Bindings.createBooleanBinding(
+            () -> AuthFormValidation.usernameError(usernameField.getText()).isPresent()
+                || AuthFormValidation.pinError(pinField.getText()).isPresent()
+                || AuthFormValidation.startingMoneyError(startingMoneyField.getText()).isPresent()
+                || usernameField.getText().isBlank()
+                || pinField.getText().isBlank()
+                || startingMoneyField.getText().isBlank(),
+            usernameField.textProperty(),
+            pinField.textProperty(),
+            startingMoneyField.textProperty()));
 
-    VBox fields = new VBox(10, usernameField, pinField, startingMoneyField, marketDataRow);
+    VBox usernameRow = new VBox(4, usernameField, usernameErrorLabel);
+    VBox pinRow = new VBox(4, pinField, pinErrorLabel);
+    VBox startingMoneyRow = new VBox(4, startingMoneyField, startingMoneyErrorLabel);
+    VBox fields = new VBox(10, usernameRow, pinRow, startingMoneyRow, marketDataRow);
     fields.setMaxWidth(360);
     ThemeStyles.addStyleClasses(fields, "auth-form-fields");
 
@@ -184,6 +209,44 @@ public class RegisterPage extends AuthLayout {
     startingMoneyField.clear();
     clearMarketDataFile();
     setStatus("");
+  }
+
+  private static Label createFieldErrorLabel() {
+    Label label = new Label();
+    ThemeStyles.addStyleClasses(label, "auth-field-error");
+    label.setWrapText(true);
+    label.setVisible(false);
+    label.setManaged(false);
+    return label;
+  }
+
+  private static void wireLiveValidation(
+      TextInputControl field,
+      Label errorLabel,
+      Function<String, Optional<String>> validator) {
+    field.textProperty().addListener((obs, oldText, text) -> {
+      if (text.isBlank()) {
+        errorLabel.setText("");
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
+        field.getStyleClass().remove("field-invalid");
+        return;
+      }
+      Optional<String> error = validator.apply(text);
+      if (error.isPresent()) {
+        errorLabel.setText(error.get());
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);
+        if (!field.getStyleClass().contains("field-invalid")) {
+          field.getStyleClass().add("field-invalid");
+        }
+      } else {
+        errorLabel.setText("");
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
+        field.getStyleClass().remove("field-invalid");
+      }
+    });
   }
 
   @FunctionalInterface

@@ -5,6 +5,7 @@ import java.util.Map;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import model.analysis.tools.MoonPhaseCalculator;
+import view.theme.ThemeStyles;
 
 /**
  * Chart tool that auto-draws vertical markers for new-moon and full-moon days.

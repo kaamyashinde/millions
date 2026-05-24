@@ -50,7 +50,6 @@ class LoginPageAuthTest {
                     (username, pin) -> {},
                     () -> {},
                     leaderboard,
-                    () -> {},
                     true,
                     () -> returned.set(true)));
 

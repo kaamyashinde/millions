@@ -25,7 +25,7 @@ public enum ToastMode {
         hex.getPoints().addAll(r * Math.cos(angle), r * Math.sin(angle));
       }
       hex.setFill(Color.TRANSPARENT);
-      hex.setStroke(DEFAULT_STROKE);
+      hex.setStroke(strokeColor());
       hex.setStrokeWidth(STROKE);
       return hex;
     }
@@ -41,7 +41,7 @@ public enum ToastMode {
           -h, h
       );
       triangle.setFill(Color.TRANSPARENT);
-      triangle.setStroke(DEFAULT_STROKE);
+      triangle.setStroke(strokeColor());
       triangle.setStrokeWidth(STROKE);
       return triangle;
     }
@@ -54,7 +54,7 @@ public enum ToastMode {
       rect.setArcWidth(6);
       rect.setArcHeight(6);
       rect.setFill(Color.TRANSPARENT);
-      rect.setStroke(DEFAULT_STROKE);
+      rect.setStroke(strokeColor());
       rect.setStrokeWidth(STROKE);
       return rect;
     }
@@ -65,7 +65,7 @@ public enum ToastMode {
     public Shape createShape() {
       Circle circle = new Circle(ICON_SIZE / 2.0);
       circle.setFill(Color.TRANSPARENT);
-      circle.setStroke(DEFAULT_STROKE);
+      circle.setStroke(strokeColor());
       circle.setStrokeWidth(STROKE);
       return circle;
     }
@@ -73,7 +73,6 @@ public enum ToastMode {
 
   static final double ICON_SIZE = 40;
   static final double STROKE = 2;
-  private static final Color DEFAULT_STROKE = Color.web("#F8FAFC");
 
   private final String colorHex;
   private final String symbol;
@@ -81,6 +80,10 @@ public enum ToastMode {
   ToastMode(String colorHex, String symbol) {
     this.colorHex = colorHex;
     this.symbol = symbol;
+  }
+
+  Color strokeColor() {
+    return Color.web(colorHex);
   }
 
   /**

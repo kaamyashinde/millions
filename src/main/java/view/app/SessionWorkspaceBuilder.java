@@ -20,7 +20,6 @@ import view.layout.WorkspaceLayout;
 import view.pages.funds.FundsPage;
 import view.pages.leaderboard.LeaderboardPage;
 import view.pages.learning.LearningHubPage;
-import view.pages.notifications.NotificationsPage;
 import view.pages.portfolio.PlayerPortfolioPage;
 import view.pages.quiz.QuizLauncherPage;
 import view.pages.savings.SavingsPage;
@@ -39,21 +38,19 @@ public final class SessionWorkspaceBuilder {
    *
    * @param session active session
    * @param sessionService session service
-   * @param helpAction opens help / welcome
    * @param logoutAction logs out
-   * @param switchUserAction begins switch-user flow
    * @param persistAction persists session after mutations
    * @param onProfileDeleted invoked when profile is deleted from editor
+   * @param onThemeToggle switches between dark and light themes
    * @return workspace layout ready to set as scene root
    */
   public static WorkspaceLayout build(
       ActiveSession session,
       SessionService sessionService,
-      Runnable helpAction,
       Runnable logoutAction,
-      Runnable switchUserAction,
       Runnable persistAction,
-      Runnable onProfileDeleted) {
+      Runnable onProfileDeleted,
+      Runnable onThemeToggle) {
     WorkspaceController workspaceController = new WorkspaceController(session, sessionService);
     WorkspaceEventBus events = new WorkspaceEventBus();
 
@@ -74,8 +71,6 @@ public final class SessionWorkspaceBuilder {
       events.publish(PROFILE_CHANGED, LEADERBOARD_CHANGED);
     };
 
-    NotificationsPage notificationsPage =
-        new NotificationsPage(workspaceController.getNotificationsTab());
     PlayerPortfolioPage portfolioPage =
         new PlayerPortfolioPage(
             workspaceController.getPortfolio(),
@@ -99,7 +94,6 @@ public final class SessionWorkspaceBuilder {
     LearningHubPage learningHubPage =
         new LearningHubPage(workspaceController.getLearningHub(), workspaceController.getQuiz());
 
-    Tab notificationsTab = new Tab("Notifications", notificationsPage);
     Tab playerTab = new Tab("Player", portfolioPage);
     Tab stocksTab = new Tab("Stocks", stocksPage);
     Tab fundsTab = new Tab("Funds", fundsPage);
@@ -111,7 +105,6 @@ public final class SessionWorkspaceBuilder {
 
     for (Tab tab :
         new Tab[] {
-          notificationsTab,
           playerTab,
           stocksTab,
           fundsTab,
@@ -166,7 +159,6 @@ public final class SessionWorkspaceBuilder {
 
     TabPane tabPane =
         new TabPane(
-            notificationsTab,
             playerTab,
             stocksTab,
             fundsTab,
@@ -203,9 +195,8 @@ public final class SessionWorkspaceBuilder {
                   onProfileSaved,
                   onProfileDeleted);
             },
-            helpAction,
-            switchUserAction,
             logoutAction,
+            onThemeToggle,
             days -> {
               workspaceController.advanceTradingDays(String.valueOf(days));
               persistAction.run();

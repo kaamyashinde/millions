@@ -32,7 +32,7 @@ class PlayerLevelTest {
     assertFalse(PlayerLevels.INVESTOR.qualifies(player));
     assertFalse(PlayerLevels.SPECULATOR.qualifies(player));
 
-    addDistinctTradingDays(1, 70);
+    addDistinctTradingDays(1, 10);
 
     assertFalse(PlayerLevels.INVESTOR.qualifies(player));
 
@@ -40,7 +40,7 @@ class PlayerLevelTest {
     assertTrue(PlayerLevels.INVESTOR.qualifies(player));
     assertFalse(PlayerLevels.SPECULATOR.qualifies(player));
 
-    addDistinctTradingDays(71, 140);
+    addDistinctTradingDays(11, 20);
 
     assertFalse(PlayerLevels.SPECULATOR.qualifies(player));
 
@@ -52,7 +52,7 @@ class PlayerLevelTest {
   void levelAutoUpdates_toInvestor_whenThresholdMet() {
     assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
 
-    addDistinctTradingDays(1, 70);
+    addDistinctTradingDays(1, 10);
     player.addMoney(new BigDecimal("200.00"));
 
     assertEquals(PlayerLevels.INVESTOR, player.getPlayerLevel());
@@ -60,7 +60,7 @@ class PlayerLevelTest {
 
   @Test
   void levelAutoUpdates_toSpeculator_whenThresholdMet() {
-    addDistinctTradingDays(1, 140);
+    addDistinctTradingDays(1, 20);
     player.addMoney(new BigDecimal("1000.00"));
 
     assertEquals(PlayerLevels.SPECULATOR, player.getPlayerLevel());
@@ -68,7 +68,7 @@ class PlayerLevelTest {
 
   @Test
   void levelRemainsNovice_whenOnlyDaysMetButNotNetWorth() {
-    addDistinctTradingDays(1, 70);
+    addDistinctTradingDays(1, 10);
     player.recalculateLevel();
 
     assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());

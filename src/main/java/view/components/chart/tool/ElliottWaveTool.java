@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import view.theme.ThemeStyles;
 
 /**
  * Nine-click chart tool that labels and draws Elliott Wave impulse and corrective segments.

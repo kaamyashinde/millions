@@ -30,10 +30,6 @@ import view.theme.ThemeStyles;
  */
 public class CategoryView extends BorderPane {
 
-  private static final String COLOR_DIFFICULTY_BEGINNER = "#22C55E";
-  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#F59E0B";
-  private static final String COLOR_DIFFICULTY_ADVANCED = "#EF4444";
-
   private final VBox content = new VBox(12);
   private List<LearningItem> items;
   private Consumer<LearningItem> onItemClicked;
@@ -127,15 +123,8 @@ public class CategoryView extends BorderPane {
   }
 
   private static javafx.scene.Node buildItemCard(LearningItem item, Consumer<LearningItem> onItemClicked) {
-    String badgeColor = difficultyColor(item.difficulty());
-
     Label badge = new Label(item.difficulty().name());
-    badge.setStyle(
-        "-fx-background-color: " + badgeColor + "22;"
-            + "-fx-text-fill: " + badgeColor + ";"
-            + "-fx-background-radius: 4;"
-            + "-fx-padding: 2 6 2 6;"
-            + "-fx-font-size: 10;");
+    ThemeStyles.applyDifficultyBadge(badge, item.difficulty());
 
     Label title = new Label(item.title());
     ThemeStyles.addStyleClasses(title, "learning-card-title");
@@ -152,13 +141,5 @@ public class CategoryView extends BorderPane {
 
     card.setOnMouseClicked(_ -> onItemClicked.accept(item));
     return card;
-  }
-
-  private static String difficultyColor(Difficulty difficulty) {
-    return switch (difficulty) {
-      case BEGINNER -> COLOR_DIFFICULTY_BEGINNER;
-      case INTERMEDIATE -> COLOR_DIFFICULTY_INTERMEDIATE;
-      case ADVANCED -> COLOR_DIFFICULTY_ADVANCED;
-    };
   }
 }

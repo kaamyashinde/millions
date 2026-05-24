@@ -18,7 +18,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -223,7 +222,7 @@ public final class TradeDialog {
   private static Label createErrorLabel() {
     Label errorLabel = new Label();
     errorLabel.setWrapText(true);
-    errorLabel.setStyle("-fx-text-fill: " + ThemePalette.ERROR + ";");
+    ThemeStyles.addStyleClasses(errorLabel, "text-error");
     return errorLabel;
   }
 

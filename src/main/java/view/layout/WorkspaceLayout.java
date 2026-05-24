@@ -3,10 +3,12 @@ package view.layout;
 import controller.WorkspaceController;
 import java.nio.file.Path;
 import java.util.function.IntConsumer;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
@@ -22,14 +24,16 @@ import util.Validator;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
 import view.components.toast.ToastMode;
+import view.theme.ThemeManager;
 import view.theme.ThemeStyles;
 
 /**
  * Logged-in workspace shell: header bar, tabbed content, and floating toast overlay.
  */
-public class WorkspaceLayout extends StackPane {
+public class WorkspaceLayout extends StackPane implements ResponsiveLayout {
 
   private final Label sessionSummaryLabel = new Label();
+  private final TabPane tabs;
   private final ImageView headerAvatar = new ImageView();
   private final ImageLoader avatarLoader = ImageLoader.defaultLoader();
   private final NotificationService notifications;
@@ -40,20 +44,19 @@ public class WorkspaceLayout extends StackPane {
    * @param notifications session-scoped notification service for the toast tray
    * @param tabs tab pane content (non-closable tabs supplied by caller)
    * @param onProfile opens the profile editor
-   * @param onHelp opens help / welcome content
-   * @param onSwitchUser begins the compare / switch-user flow
    * @param onLogout logs out the current user
+   * @param onThemeToggle switches between dark and light themes
    * @param onSkipTradingDays advances the exchange by the validated number of trading days
    */
   public WorkspaceLayout(
       NotificationService notifications,
       TabPane tabs,
       Runnable onProfile,
-      Runnable onHelp,
-      Runnable onSwitchUser,
       Runnable onLogout,
+      Runnable onThemeToggle,
       IntConsumer onSkipTradingDays) {
     this.notifications = notifications;
+    this.tabs = tabs;
     ThemeStyles.addStyleClasses(this, "workspace-root");
 
     BorderPane content = new BorderPane();
@@ -72,18 +75,22 @@ public class WorkspaceLayout extends StackPane {
     ThemeStyles.addStyleClasses(sessionSummaryLabel, "muted-text");
 
     Button profileButton = new Button("Profile");
-    Button helpButton = new Button("Help");
-    Button switchUserButton = new Button("Compare / Switch User");
     Button logoutButton = new Button("Log Out");
     ThemeStyles.styleButton(profileButton);
-    ThemeStyles.styleButton(helpButton);
-    ThemeStyles.styleButton(switchUserButton);
     ThemeStyles.styleButton(logoutButton);
 
     profileButton.setOnAction(_ -> onProfile.run());
-    helpButton.setOnAction(_ -> onHelp.run());
-    switchUserButton.setOnAction(_ -> onSwitchUser.run());
     logoutButton.setOnAction(_ -> onLogout.run());
+
+    Button themeToggleButton = new Button();
+    themeToggleButton.setOnAction(_ -> onThemeToggle.run());
+    themeToggleButton.textProperty().bind(
+        Bindings.createStringBinding(
+            () -> ThemeManager.getInstance().getTheme() == ThemeManager.Theme.DARK
+                ? "Light Mode"
+                : "Dark Mode",
+            ThemeManager.getInstance().themeProperty()));
+    ThemeStyles.styleButton(themeToggleButton);
 
     Label daysLabel = new Label("Days:");
     ThemeStyles.addStyleClasses(daysLabel, "muted-text");
@@ -110,7 +117,7 @@ public class WorkspaceLayout extends StackPane {
     ThemeStyles.addStyleClasses(skipDaysBox, "workspace-skip-days");
 
     HBox actions =
-        new HBox(10, profileButton, helpButton, switchUserButton, logoutButton);
+        new HBox(10, profileButton, themeToggleButton, logoutButton);
     actions.setAlignment(Pos.CENTER_RIGHT);
     ThemeStyles.addStyleClasses(actions, "workspace-actions");
 
@@ -165,5 +172,17 @@ public class WorkspaceLayout extends StackPane {
    */
   public void dispose() {
     notifications.clear();
+  }
+
+  @Override
+  public void onWindowResized(double width, double height) {
+    boolean showSummary = width >= 950;
+    sessionSummaryLabel.setVisible(showSummary);
+    sessionSummaryLabel.setManaged(showSummary);
+    for (Tab tab : tabs.getTabs()) {
+      if (tab.getContent() instanceof ResponsiveLayout layout) {
+        layout.onWindowResized(width, height);
+      }
+    }
   }
 }

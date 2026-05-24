@@ -9,7 +9,9 @@ import static view.app.events.WorkspaceEventType.TRANSACTIONS_CHANGED;
 
 import java.math.BigDecimal;
 import javafx.application.Application;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.layout.Region;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
@@ -24,19 +26,21 @@ import model.session.SessionServiceFactory;
 import controller.WorkspaceController;
 import view.app.events.WorkspaceEventBus;
 import view.dialogs.ProfileEditorDialog;
+import view.layout.ResponsiveLayout;
 import view.layout.WorkspaceLayout;
 import view.pages.auth.LoginPage;
 import view.pages.auth.RegisterPage;
 import view.pages.funds.FundsPage;
 import view.pages.leaderboard.LeaderboardPage;
 import view.pages.learning.LearningHubPage;
-import view.pages.notifications.NotificationsPage;
 import view.pages.portfolio.PlayerPortfolioPage;
 import view.pages.quiz.QuizLauncherPage;
 import view.pages.savings.SavingsPage;
 import view.pages.stocks.StocksPage;
 import view.pages.transactions.TransactionHistoryPage;
+import view.theme.ThemeManager;
 import view.theme.ThemeStyles;
+import view.validation.AuthFormValidation;
 
 /**
  * JavaFX entry point for the Millions application.
@@ -65,6 +69,8 @@ public class MillionsApp extends Application {
     this.sessionService = createSessionService();
 
     LoginPage loginPage = buildLoginPage();
+    loginPage.setMinWidth(MIN_WINDOW_WIDTH);
+    loginPage.setMinHeight(MIN_WINDOW_HEIGHT);
     scene = new Scene(loginPage, WINDOW_WIDTH, WINDOW_HEIGHT);
     ThemeStyles.install(scene);
 
@@ -72,8 +78,21 @@ public class MillionsApp extends Application {
     stage.setMinWidth(MIN_WINDOW_WIDTH);
     stage.setMinHeight(MIN_WINDOW_HEIGHT);
     stage.setTitle("Millions");
+    stage.setMinWidth(MIN_WINDOW_WIDTH);
+    stage.setMinHeight(MIN_WINDOW_HEIGHT);
     stage.setOnCloseRequest(_ -> sessionService.saveActiveSession());
     stage.show();
+
+    Runnable notifyResize = () -> {
+      Node root = scene.getRoot();
+      if (root instanceof ResponsiveLayout responsive) {
+        responsive.onWindowResized(scene.getWidth(), scene.getHeight());
+      }
+    };
+    scene.widthProperty().addListener((obs, oldWidth, newWidth) -> notifyResize.run());
+    scene.heightProperty().addListener((obs, oldHeight, newHeight) -> notifyResize.run());
+    scene.rootProperty().addListener((obs, oldRoot, newRoot) -> notifyResize.run());
+    notifyResize.run();
   }
 
   /**
@@ -88,15 +107,21 @@ public class MillionsApp extends Application {
   private LoginPage buildLoginPage() {
     LoginPage loginPage = new LoginPage(
         this::handleLogin,
-        () -> scene.setRoot(buildRegisterPage()));
+        () -> setSceneRoot(buildRegisterPage()));
     return loginPage;
   }
 
   private RegisterPage buildRegisterPage() {
     RegisterPage registerPage = new RegisterPage(
         this::handleRegistration,
-        () -> scene.setRoot(buildLoginPage()));
+        () -> setSceneRoot(buildLoginPage()));
     return registerPage;
+  }
+
+  private void setSceneRoot(Region root) {
+    root.setMinWidth(MIN_WINDOW_WIDTH);
+    root.setMinHeight(MIN_WINDOW_HEIGHT);
+    scene.setRoot(root);
   }
 
   private void handleLogin(String username, String pin) {
@@ -110,6 +135,8 @@ public class MillionsApp extends Application {
       loginPage.setStatus("Profile data could not be read. Reset this profile or restore a backup.");
     } catch (IllegalArgumentException e) {
       loginPage.setStatus(mapValidationMessage(e.getMessage()));
+    } catch (RuntimeException e) {
+      loginPage.setStatus("Could not load profile. Please try again.");
     }
   }
 
@@ -141,7 +168,7 @@ public class MillionsApp extends Application {
     }
     currentWorkspace = new WorkspaceController(session, sessionService);
     WorkspaceLayout workspace = buildWorkspace(currentWorkspace);
-    scene.setRoot(workspace);
+    setSceneRoot(workspace);
     primaryStage.setTitle("Millions — " + session.username());
   }
 
@@ -166,9 +193,8 @@ public class MillionsApp extends Application {
               onProfileSaved,
               onProfileDeleted);
         },
-        () -> { /* help: placeholder */ },
-        () -> switchUser(ctrl, ref[0]),
         () -> logout(ctrl),
+        () -> ThemeManager.getInstance().toggle(scene),
         days -> {
           ctrl.advanceTradingDays(String.valueOf(days));
           sessionService.saveActiveSession();
@@ -189,7 +215,7 @@ public class MillionsApp extends Application {
   private void onProfileDeleted(WorkspaceController ctrl) {
     ctrl.dispose();
     currentWorkspace = null;
-    scene.setRoot(buildLoginPage());
+    setSceneRoot(buildLoginPage());
     primaryStage.setTitle("Millions");
   }
 
@@ -228,7 +254,6 @@ public class MillionsApp extends Application {
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
     LearningHubPage learningHubPage =
         new LearningHubPage(ctrl.getLearningHub(), ctrl.getQuiz());
-    NotificationsPage notificationsPage = new NotificationsPage(ctrl.getNotificationsTab());
 
     Tab portfolioTab = makeTab("Portfolio", portfolioPage);
     Tab stocksTab = makeTab("Stocks", stocksPage);
@@ -270,11 +295,10 @@ public class MillionsApp extends Application {
     Tab learningTab = makeTab("Learning Hub", learningHubPage);
     Tab quizTab = new Tab("Quiz");
     quizTab.setClosable(false);
-    Tab notificationsTab = makeTab("Notifications", notificationsPage);
 
     TabPane tabs = new TabPane(
         portfolioTab, stocksTab, fundsTab, savingsTab, transactionsTab,
-        leaderboardTab, learningTab, quizTab, notificationsTab);
+        leaderboardTab, learningTab, quizTab);
     tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
     java.util.function.Consumer<model.learning.content.LearningItem> openTopicInHub =
@@ -350,18 +374,7 @@ public class MillionsApp extends Application {
     ctrl.dispose();
     sessionService.logout();
     currentWorkspace = null;
-    scene.setRoot(buildLoginPage());
-    primaryStage.setTitle("Millions");
-  }
-
-  private void switchUser(WorkspaceController ctrl, WorkspaceLayout currentView) {
-    sessionService.saveActiveSession();
-    LoginPage loginPage = new LoginPage(
-        this::handleLogin,
-        () -> scene.setRoot(buildRegisterPage()),
-        null, null, true,
-        () -> scene.setRoot(currentView));
-    scene.setRoot(loginPage);
+    setSceneRoot(buildLoginPage());
     primaryStage.setTitle("Millions");
   }
 
@@ -374,15 +387,6 @@ public class MillionsApp extends Application {
   }
 
   private static String mapValidationMessage(String message) {
-    if (message == null) {
-      return "Invalid input.";
-    }
-    return switch (message) {
-      case "Username must be 3-32 characters using letters, numbers, underscores, or hyphens." ->
-          "Username must be 3-32 characters (letters, numbers, _ or -).";
-      case "PIN must be 4 to 8 digits." -> "PIN must be 4 to 8 digits.";
-      case "Starting money must be non-negative." -> "Starting money must be non-negative.";
-      default -> "Invalid input.";
-    };
+    return AuthFormValidation.mapValidationMessage(message);
   }
 }

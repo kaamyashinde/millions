@@ -25,7 +25,6 @@ import controller.PortfolioController;
 import controller.TradingController;
 import util.I18n;
 import view.dialogs.ExitGameDialog;
-import view.theme.ThemePalette;
 import model.analysis.performance.PerformanceComparison;
 import view.components.image.ImageLoader;
 import view.dialogs.TradeDialog;
@@ -116,7 +115,7 @@ public class PlayerPortfolioPage extends BorderPane {
 
     VBox metricsBox = buildMetricsBox();
     Button exitGameButton = new Button(I18n.get("exitGame.pin.confirm"));
-    exitGameButton.setStyle("-fx-text-fill: " + ThemePalette.ERROR + ";");
+    ThemeStyles.addStyleClasses(exitGameButton, "text-error");
     ThemeStyles.styleButton(exitGameButton);
     exitGameButton.setOnAction(_ -> {
       if (getScene() != null) {
@@ -133,8 +132,7 @@ public class PlayerPortfolioPage extends BorderPane {
 
   private Label createHeaderLabel(String text) {
     Label label = new Label(text);
-    ThemeStyles.addStyleClasses(label, "text-secondary");
-    label.setStyle("-fx-font-weight: bold;");
+    ThemeStyles.addStyleClasses(label, "text-secondary", "font-bold");
     return label;
   }
 
