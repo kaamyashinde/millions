@@ -27,6 +27,8 @@ public final class SellByQuantityCommand implements TradeCommand {
   private final BigDecimal quantity;
 
   /**
+   * Creates a quantity-based sell command.
+   *
    * @param exchange exchange providing day for each sale
    * @param symbol   asset symbol to sell
    * @param quantity total shares to sell (positive)

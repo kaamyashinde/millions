@@ -18,6 +18,8 @@ public final class SellAllHoldingsCommand implements TradeCommand {
   private final Exchange exchange;
 
   /**
+   * Creates a command that sells every held symbol.
+   *
    * @param exchange exchange providing day for each sale
    */
   public SellAllHoldingsCommand(Exchange exchange) {
