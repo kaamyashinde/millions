@@ -7,7 +7,7 @@ import model.core.asset.Stock;
 /**
  * Describes which stocks are affected by a market event.
  *
- * @author OpenAI
+ * @author kevindmazali
  * @version 1.0.0
  * @since 2026-04-04
  */

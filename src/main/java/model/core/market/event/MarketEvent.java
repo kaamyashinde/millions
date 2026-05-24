@@ -10,7 +10,7 @@ import model.core.asset.Stock;
 /**
  * Immutable description of a rare market event and the price shock it applies.
  *
- * @author OpenAI
+ * @author kevindmazali
  * @version 1.0.0
  * @since 2026-04-04
  * @param day trading day on which the event occurred

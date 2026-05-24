@@ -16,17 +16,37 @@ import model.core.asset.Stock;
 import model.core.market.event.MarketEvent;
 import model.core.market.event.SymbolMarketEventTarget;
 
-/** Decides whether a rare market event should occur on a given trading day. */
+/**
+ * Decides whether a rare market event should occur on a given trading day.
+ *
+ * @author kevindmazali
+ * @version 1.0.0
+ * @since 2026-04-04
+ */
 public interface MarketEventStrategy {
 
+  /** Default probability of producing a market event on each trading day. */
   double DEFAULT_EVENT_PROBABILITY = 0.18;
+
+  /** Classpath resource containing default event templates. */
   String DEFAULT_TEMPLATE_RESOURCE = "data/market-event-templates.json";
 
-  /** Creates the standard random event strategy using templates stored in application resources. */
+  /**
+   * Creates the standard random event strategy using templates stored in application resources.
+   *
+   * @return default resource-backed random event strategy
+   */
   static MarketEventStrategy randomFromResources() {
     return randomFromResources(DEFAULT_EVENT_PROBABILITY, DEFAULT_TEMPLATE_RESOURCE);
   }
 
+  /**
+   * Creates a random event strategy from a template resource.
+   *
+   * @param eventProbability probability of producing an event on each trading day
+   * @param templateResource classpath resource containing event templates
+   * @return resource-backed random event strategy
+   */
   static MarketEventStrategy randomFromResources(double eventProbability, String templateResource) {
     List<EventTemplate> templates = loadTemplates(templateResource);
     return (listedStocks, tradingDay, random) -> {
@@ -49,6 +69,14 @@ public interface MarketEventStrategy {
     };
   }
 
+  /**
+   * Attempts to create a market event for the given trading day.
+   *
+   * @param listedStocks stocks listed on the exchange
+   * @param tradingDay trading day being generated
+   * @param random random source for stochastic strategies
+   * @return generated event, or {@link Optional#empty()} when no event occurs
+   */
   Optional<MarketEvent> maybeCreateEvent(List<Stock> listedStocks, int tradingDay, Random random);
 
   private static List<EventTemplate> loadTemplates(String resourceName) {
@@ -69,6 +97,14 @@ public interface MarketEventStrategy {
     }
   }
 
+  /**
+   * Resource-backed market event template.
+   *
+   * @param title short event title
+   * @param descriptionTemplate formatted description with company and symbol placeholders
+   * @param minFactor minimum sampled price factor
+   * @param maxFactor maximum sampled price factor
+   */
   record EventTemplate(
       String title,
       String descriptionTemplate,
@@ -76,6 +112,9 @@ public interface MarketEventStrategy {
       double maxFactor
   ) {
 
+    /**
+     * Validates required template text.
+     */
     public EventTemplate {
       checkNotNull(title, "Title");
       checkNotNull(descriptionTemplate, "Description template");
