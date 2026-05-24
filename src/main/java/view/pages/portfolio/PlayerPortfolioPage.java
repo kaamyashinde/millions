@@ -2,6 +2,7 @@ package view.pages.portfolio;
 
 import static util.Validator.checkNotNull;
 
+import java.math.RoundingMode;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -148,7 +149,12 @@ public class PlayerPortfolioPage extends BorderPane {
 
     TableColumn<HoldingSummary, String> quantityColumn = new TableColumn<>("Quantity");
     quantityColumn.setCellValueFactory(
-        c -> new SimpleStringProperty(c.getValue().totalQuantity().toPlainString()));
+        c ->
+            new SimpleStringProperty(
+                c.getValue()
+                    .totalQuantity()
+                    .setScale(2, RoundingMode.HALF_UP)
+                    .toPlainString()));
 
     TableColumn<HoldingSummary, String> purchasePriceColumn = new TableColumn<>("Avg. Purchase Price");
     purchasePriceColumn.setCellValueFactory(
