@@ -3,9 +3,11 @@ package model.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import model.core.asset.Stock;
@@ -93,6 +95,39 @@ class ProfileFileTest {
     ProfileFile loaded = storage.read(file, ProfileFile.class);
     assertEquals("Alice", loaded.username());
     assertEquals("NYSE", loaded.exchangeName());
+  }
+
+  @Test
+  void jsonRead_defaultsMissingSavedRunsToEmptyList() throws Exception {
+    JsonStorage storage = new JsonStorage();
+    Path file = tempDir.resolve("legacy-profile.json");
+    Files.writeString(
+        file,
+        """
+        {
+          "username": "Alice",
+          "normalizedUsername": "alice",
+          "pinHash": "hash",
+          "displayName": null,
+          "hasSeenWelcome": false,
+          "playerName": "Alice",
+          "startingMoney": 1000,
+          "cash": 1000,
+          "holdings": [],
+          "transactions": [],
+          "savings": [],
+          "exchangeName": "NYSE",
+          "day": 1,
+          "stockPrices": [],
+          "events": [],
+          "lastEvent": null
+        }
+        """);
+
+    ProfileFile loaded = storage.read(file, ProfileFile.class);
+
+    assertNotNull(loaded.savedRuns());
+    assertTrue(loaded.savedRuns().isEmpty());
   }
 
   private static MarketData sampleMarketData() {

@@ -54,6 +54,15 @@ public record ProfileFile(
     List<SavedRunRow> savedRuns
 ) {
 
+  public ProfileFile {
+    holdings = emptyIfNull(holdings);
+    transactions = emptyIfNull(transactions);
+    savings = emptyIfNull(savings);
+    stockPrices = emptyIfNull(stockPrices);
+    events = emptyIfNull(events);
+    savedRuns = emptyIfNull(savedRuns);
+  }
+
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record HoldingRow(String symbol, BigDecimal quantity, BigDecimal purchasePrice) {}
 
@@ -160,7 +169,7 @@ public record ProfileFile(
             .map(ProfileFile::toEventRow)
             .toList(),
         exchange.getLastMarketEvent().map(ProfileFile::toEventRow).orElse(null),
-        savedRuns == null ? List.of() : List.copyOf(savedRuns));
+        List.copyOf(emptyIfNull(savedRuns)));
   }
 
   public RestoredSession restore(MarketData marketData) {
@@ -253,6 +262,10 @@ public record ProfileFile(
         username, normalizedUsername, pinHash, displayName, true,
         playerName, startingMoney, cash, holdings, transactions, savings,
         exchangeName, day, stockPrices, events, lastEvent, savedRuns);
+  }
+
+  private static <T> List<T> emptyIfNull(List<T> list) {
+    return list == null ? List.of() : list;
   }
 
   private ProfileFile copyWithSavedRuns(List<SavedRunRow> runs) {
