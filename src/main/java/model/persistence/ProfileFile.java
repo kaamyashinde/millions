@@ -119,7 +119,7 @@ public record ProfileFile(
             .toList(),
         player.getTransactionArchive().getAllTransactions().stream()
             .map(tx -> {
-              String type = tx instanceof Purchase ? "PURCHASE" : "SALE";
+              String type = tx.getTypeName().toUpperCase();
               return new TxRow(
                   type,
                   tx.getShare().getAsset().getSymbol(),

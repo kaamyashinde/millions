@@ -28,6 +28,11 @@ public class Purchase extends Transaction {
     this.purchaseCalc = (PurchaseCalculator) this.getCalculator();
   }
 
+  @Override
+  public String getTypeName() {
+    return "Purchase";
+  }
+
   /**
    * Checks that the player has enough money to cover the purchase total.
    *

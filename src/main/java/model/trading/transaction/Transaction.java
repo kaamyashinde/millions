@@ -73,6 +73,13 @@ public abstract class Transaction {
   }
 
   /**
+   * Returns the human-readable transaction type name (e.g. {@code "Purchase"} or {@code "Sale"}).
+   *
+   * @return type label for this transaction
+   */
+  public abstract String getTypeName();
+
+  /**
    * Commits the transaction to a player. This template method enforces the
    * commit lifecycle: guard against double-commit, validate preconditions,
    * execute the domain action, archive the transaction, and mark it committed.
