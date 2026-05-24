@@ -17,6 +17,7 @@ import model.exception.market.MarketDataImportException;
 import model.session.SessionService;
 import model.session.SessionServiceFactory;
 import controller.WorkspaceController;
+import view.dialogs.WelcomeDialog;
 import view.layout.WorkspaceLayout;
 import view.pages.auth.LoginPage;
 import view.pages.auth.RegisterPage;
@@ -144,7 +145,7 @@ public class MillionsApp extends Application {
         tabs,
         () -> { /* profile editor: placeholder */ },
         ctrl::refreshAll,
-        () -> { /* help: placeholder */ },
+        () -> WelcomeDialog.show(primaryStage),
         () -> switchUser(ctrl, ref[0]),
         () -> logout(ctrl));
     ref[0] = workspace;
