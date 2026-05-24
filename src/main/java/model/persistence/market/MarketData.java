@@ -7,6 +7,16 @@ import model.core.asset.fund.Fund;
 
 /**
  * Immutable persisted market payload containing all loaded stocks and funds.
+ *
+ * <p>{@link MarketDataFileService} and {@link MarketDataLoader} pass this value object between
+ * CSV parsing, validation, and exchange construction.
+ *
+ * @param stocks loaded stock definitions
+ * @param funds loaded fund definitions
+ *
+ * @author kevindmazali
+ * @version 1.0.0
+ * @since 2026-04-04
  */
 public record MarketData(List<Stock> stocks, List<Fund> funds) {
 

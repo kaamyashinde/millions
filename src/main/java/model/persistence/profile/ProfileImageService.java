@@ -16,15 +16,29 @@ import javax.imageio.ImageIO;
  */
 public final class ProfileImageService {
 
+  /** Maximum avatar upload size in bytes. */
   public static final long MAX_FILE_BYTES = 2 * 1024 * 1024;
+
+  /** Maximum stored avatar width or height in pixels. */
   public static final int MAX_DIMENSION = 512;
 
   private final ProfilePaths profilePaths;
 
+  /**
+   * Creates a profile image service.
+   *
+   * @param profilePaths profile path resolver
+   */
   public ProfileImageService(ProfilePaths profilePaths) {
     this.profilePaths = profilePaths;
   }
 
+  /**
+   * Validates, scales, and stores an avatar image as PNG.
+   *
+   * @param sourceImage source image chosen by the user
+   * @param normalizedUsername normalized profile username
+   */
   public void saveAvatarFromFile(Path sourceImage, String normalizedUsername) {
     if (sourceImage == null || !Files.isRegularFile(sourceImage)) {
       throw new IllegalArgumentException("Image file not found.");
@@ -59,6 +73,11 @@ public final class ProfileImageService {
     }
   }
 
+  /**
+   * Deletes the saved avatar for a profile.
+   *
+   * @param normalizedUsername normalized profile username
+   */
   public void deleteAvatar(String normalizedUsername) {
     Path dest = profilePaths.avatarFile(normalizedUsername);
     try {
@@ -68,6 +87,12 @@ public final class ProfileImageService {
     }
   }
 
+  /**
+   * Resolves the avatar path for a profile.
+   *
+   * @param normalizedUsername normalized profile username
+   * @return path where the profile avatar is stored
+   */
   public Path avatarPath(String normalizedUsername) {
     return profilePaths.avatarFile(normalizedUsername);
   }

@@ -17,6 +17,7 @@ import model.persistence.profile.ProfilePaths;
  */
 public final class MarketDataFileService {
 
+  /** Maximum accepted market-data upload size in bytes. */
   public static final long MAX_FILE_BYTES = 1024 * 1024;
 
   private final ProfilePaths profilePaths;
@@ -24,6 +25,8 @@ public final class MarketDataFileService {
   private final String defaultResourcePath;
 
   /**
+   * Creates a market-data file service.
+   *
    * @param profilePaths          profile path resolver
    * @param defaultResourceAnchor class used to load the bundled default CSV
    * @param defaultResourcePath   classpath resource path for the default CSV
@@ -94,6 +97,8 @@ public final class MarketDataFileService {
   }
 
   /**
+   * Resolves the market-data CSV path for a profile.
+   *
    * @param normalizedUsername canonical profile key
    * @return path to the profile's market-data CSV
    */
