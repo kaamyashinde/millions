@@ -14,13 +14,15 @@ import java.util.Map;
  *
  * @author kaamyashinde
  * @version 0.1.0
- * @since 30-03-2026
+ * @since 2026-03-30
  */
 public class MoonPhaseCalculator {
 
   /** Lunar phases tracked by this calculator. */
   public enum Phase {
+    /** Approximate new moon. */
     NEW_MOON,
+    /** Approximate full moon. */
     FULL_MOON
   }
 

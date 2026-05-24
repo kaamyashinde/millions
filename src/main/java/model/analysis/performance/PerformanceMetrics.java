@@ -5,6 +5,17 @@ import static util.Validator.checkNotNull;
 
 /**
  * Groups the displayed metrics for one portfolio or benchmark.
+ *
+ * <p>Each metric is represented by a {@link MetricValue} so unavailable states can be rendered
+ * without throwing away the rest of the comparison.
+ *
+ * @param returnPercent total return metric
+ * @param volatility simplified volatility metric
+ * @param sharpeRatio Sharpe ratio metric
+ *
+ * @author kevindmazali
+ * @version 1.0.0
+ * @since 2026-04-04
  */
 public record PerformanceMetrics(
     MetricValue returnPercent,
