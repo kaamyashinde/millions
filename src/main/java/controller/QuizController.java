@@ -10,10 +10,26 @@ import model.learning.store.QuizContentStore;
 
 /**
  * Manages quiz content access and attempt lifecycle.
+ *
+ * <p>Quiz definitions come from {@link QuizContentStore}; completed attempts are stored in
+ * {@link QuizSession} for the current JVM session.
+ *
+ * @author kaamyashinde
+ * @contributor kevindmazali
+ * @version 1.0.0
+ * @since 2026-05-03
  */
 public class QuizController {
 
   /**
+   * Creates a quiz controller.
+   */
+  public QuizController() {
+  }
+
+  /**
+   * Returns all available quizzes.
+   *
    * @return all available quizzes
    */
   public List<Quiz> getAllQuizzes() {
@@ -21,6 +37,8 @@ public class QuizController {
   }
 
   /**
+   * Finds the quiz linked to a learning item.
+   *
    * @param itemId linked learning item identifier
    * @return quiz for that topic, if present
    */
@@ -38,6 +56,8 @@ public class QuizController {
   }
 
   /**
+   * Returns completed attempts from this JVM session.
+   *
    * @return all quiz attempts recorded in this JVM session
    */
   public List<QuizAttempt> getSessionAttempts() {

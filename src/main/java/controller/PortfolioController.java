@@ -20,6 +20,14 @@ import model.core.asset.Share;
 
 /**
  * Supplies portfolio summary, holdings, and performance metrics for the player tab.
+ *
+ * <p>The controller converts {@link Player} portfolio lots into {@link HoldingSummary} rows and
+ * compares the player against the market through {@link PortfolioPerformanceService}.
+ *
+ * @author kevindmazali
+ * @contributor kaamyashinde
+ * @version 1.0.0
+ * @since 2026-04-30
  */
 public class PortfolioController {
 
@@ -31,8 +39,10 @@ public class PortfolioController {
   private PerformanceComparison lastComparison;
 
   /**
+   * Creates a portfolio controller and loads the initial summary state.
+   *
    * @param exchange exchange supplying trading-day state
-   * @param player active player
+   * @param player active player whose portfolio is displayed
    * @param avatarPath profile avatar path on disk
    */
   public PortfolioController(Exchange exchange, Player player, Path avatarPath) {
@@ -45,42 +55,94 @@ public class PortfolioController {
     refresh();
   }
 
+  /**
+   * Exposes the exchange used for prices and benchmark comparison.
+   *
+   * @return exchange used for current prices and benchmark comparison
+   */
   public Exchange getExchange() {
     return exchange;
   }
 
+  /**
+   * Exposes the active player represented by this controller.
+   *
+   * @return active player represented by this controller
+   */
   public Player getPlayer() {
     return player;
   }
 
+  /**
+   * Returns the active profile avatar path.
+   *
+   * @return avatar image path for the active profile
+   */
   public Path getAvatarPath() {
     return avatarPath;
   }
 
+  /**
+   * Exposes holdings summarized for the portfolio table.
+   *
+   * @return observable holding rows for the portfolio table
+   */
   public ObservableList<HoldingSummary> getHoldings() {
     return holdings;
   }
 
+  /**
+   * Returns the latest cached portfolio comparison.
+   *
+   * @return most recent portfolio-versus-market comparison
+   */
   public PerformanceComparison getLastComparison() {
     return lastComparison;
   }
 
+  /**
+   * Returns the active player's display name.
+   *
+   * @return display name of the active player
+   */
   public String getPlayerName() {
     return player.getName();
   }
 
+  /**
+   * Returns the current exchange trading day.
+   *
+   * @return current exchange trading day
+   */
   public int getTradingDay() {
     return exchange.getDay();
   }
 
+  /**
+   * Formats the active player's cash balance.
+   *
+   * @return cash balance formatted with two decimal places
+   */
   public String getFormattedBalance() {
     return player.getMoney().setScale(2, RoundingMode.HALF_UP).toPlainString();
   }
 
+  /**
+   * Formats the active player's net worth.
+   *
+   * @return net worth formatted with two decimal places
+   */
   public String getFormattedNetWorth() {
     return player.getNetWorth().setScale(2, RoundingMode.HALF_UP).toPlainString();
   }
 
+  /**
+   * Formats a portfolio metric for display.
+   *
+   * @param metric metric value and availability status
+   * @param percentDisplay true when the value should be rendered as a percentage
+   * @return formatted metric text or a status-specific unavailable message
+   */
   public static String formatMetricValue(MetricValue metric, boolean percentDisplay) {
     if (!metric.isAvailable()) {
       return switch (metric.status()) {
