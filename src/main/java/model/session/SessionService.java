@@ -25,6 +25,11 @@ import model.persistence.profile.ProfilePaths;
 
 /**
  * Coordinates authentication, profile management, and persistence for the active session.
+ *
+ * @author kevindmazali
+ * @contributor kaamyashinde
+ * @version 1.0.0
+ * @since 2026-04-04
  */
 public final class SessionService {
 
@@ -35,6 +40,14 @@ public final class SessionService {
 
   private ActiveSession activeSession;
 
+  /**
+   * Creates a session service from authentication, profile, and storage collaborators.
+   *
+   * @param authService authentication service
+   * @param profileService profile metadata service
+   * @param profilePaths profile path resolver
+   * @param jsonStorage profile JSON storage
+   */
   public SessionService(
       AuthService authService,
       ProfileService profileService,
@@ -46,10 +59,27 @@ public final class SessionService {
     this.jsonStorage = jsonStorage;
   }
 
+  /**
+   * Registers a profile using default market data.
+   *
+   * @param username username entered by the player
+   * @param pin PIN entered by the player
+   * @param startingMoney starting cash balance
+   * @return active session for the new profile
+   */
   public ActiveSession register(String username, char[] pin, BigDecimal startingMoney) {
     return register(username, pin, startingMoney, Optional.empty());
   }
 
+  /**
+   * Registers a profile using optional custom market data.
+   *
+   * @param username username entered by the player
+   * @param pin PIN entered by the player
+   * @param startingMoney starting cash balance
+   * @param marketDataSource optional custom market-data CSV source
+   * @return active session for the new profile
+   */
   public ActiveSession register(
       String username,
       char[] pin,
@@ -60,6 +90,13 @@ public final class SessionService {
     return activeSession;
   }
 
+  /**
+   * Logs in to an existing profile.
+   *
+   * @param username username entered by the player
+   * @param pin PIN entered by the player
+   * @return active session for the restored profile
+   */
   public ActiveSession login(String username, char[] pin) {
     ActiveSession newSession = authService.login(username, pin);
     if (activeSession != null
@@ -70,6 +107,11 @@ public final class SessionService {
     return activeSession;
   }
 
+  /**
+   * Saves and clears the active session.
+   *
+   * @return {@code true} when a session was logged out
+   */
   public boolean logout() {
     if (activeSession == null) {
       return false;
@@ -79,6 +121,9 @@ public final class SessionService {
     return true;
   }
 
+  /**
+   * Persists the active session if one is loaded.
+   */
   public void saveActiveSession() {
     if (activeSession == null) {
       return;
@@ -96,18 +141,38 @@ public final class SessionService {
     jsonStorage.write(path, updated);
   }
 
+  /**
+   * Returns whether a session is currently active.
+   *
+   * @return {@code true} when a profile is logged in
+   */
   public boolean hasActiveSession() {
     return activeSession != null;
   }
 
+  /**
+   * Returns the active session, if any.
+   *
+   * @return optional active session
+   */
   public Optional<ActiveSession> getActiveSession() {
     return Optional.ofNullable(activeSession);
   }
 
+  /**
+   * Lists registered local users.
+   *
+   * @return registered usernames
+   */
   public List<String> listRegisteredUsers() {
     return authService.listRegisteredUsers();
   }
 
+  /**
+   * Lists leaderboard entries for saved profiles.
+   *
+   * @return entries sorted by net worth descending
+   */
   public List<PlayerLeaderboardEntry> listLeaderboardEntries() {
     List<PlayerLeaderboardEntry> entries = new ArrayList<>();
     for (String username : authService.listRegisteredUsers()) {
@@ -134,6 +199,11 @@ public final class SessionService {
         .toList();
   }
 
+  /**
+   * Returns whether the active profile has seen the welcome screen.
+   *
+   * @return {@code true} when welcome has already been acknowledged
+   */
   public boolean hasSeenWelcome() {
     ProfileFile profile = jsonStorage.read(
         profilePaths.profileFile(requireActiveSession().normalizedUsername()),
@@ -141,6 +211,9 @@ public final class SessionService {
     return profile.hasSeenWelcome();
   }
 
+  /**
+   * Marks the active profile as having seen the welcome screen.
+   */
   public void markWelcomeSeen() {
     saveActiveSession();
     ActiveSession session = requireActiveSession();
@@ -151,19 +224,37 @@ public final class SessionService {
         existing.withWelcomeSeen());
   }
 
+  /**
+   * Updates the active profile display name.
+   *
+   * @param displayName new display name
+   */
   public void updateDisplayName(String displayName) {
     ActiveSession session = requireActiveSession();
     profileService.updateDisplayName(session, displayName);
   }
 
+  /**
+   * Saves a new avatar for the active profile.
+   *
+   * @param sourceImage source image chosen by the user
+   */
   public void saveAvatarFromFile(Path sourceImage) {
     profileService.saveAvatarFromFile(sourceImage, requireActiveSession().normalizedUsername());
   }
 
+  /**
+   * Removes the active profile avatar.
+   */
   public void clearAvatar() {
     profileService.clearAvatar(requireActiveSession().normalizedUsername());
   }
 
+  /**
+   * Deletes the active profile after PIN verification.
+   *
+   * @param pin PIN entered by the user
+   */
   public void deleteActiveProfile(char[] pin) {
     ActiveSession session = requireActiveSession();
     String username = session.username();
@@ -195,6 +286,12 @@ public final class SessionService {
     return new ExitGameResult(symbolsSold, transactions.size(), finalCash);
   }
 
+  /**
+   * Deletes an inactive profile after credential verification.
+   *
+   * @param username profile username
+   * @param pin PIN entered by the user
+   */
   public void deleteProfile(String username, char[] pin) {
     String normalized = ProfilePaths.normalizeUsername(username);
     if (activeSession != null && activeSession.normalizedUsername().equals(normalized)) {
@@ -203,10 +300,21 @@ public final class SessionService {
     profileService.deleteOtherProfile(username, pin);
   }
 
+  /**
+   * Resolves a profile avatar path.
+   *
+   * @param normalizedUsername normalized profile username
+   * @return avatar path for the profile
+   */
   public Path avatarPath(String normalizedUsername) {
     return profileService.avatarPath(normalizedUsername);
   }
 
+  /**
+   * Creates a leaderboard service over the same profile storage.
+   *
+   * @return local leaderboard service
+   */
   public LocalLeaderboardService leaderboardService() {
     return new LocalLeaderboardService(
         profilePaths,
