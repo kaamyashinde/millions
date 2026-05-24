@@ -6,7 +6,7 @@ import model.core.player.Player;
 import java.math.BigDecimal;
 
 /**
- * Speculator level: requires 140 distinct trading days and net worth at least 2x starting money;
+ * Speculator level: requires 20 distinct trading days and net worth at least 2x starting money;
  * effectively uncapped trade size.
  *
  * @author kaamyashinde
@@ -40,7 +40,7 @@ public final class SpeculatorLevel implements PlayerLevel {
 
   @Override
   public boolean qualifies(Player player) {
-    return player.getTransactionArchive().countDistinctDay() >= 140
+    return player.getTransactionArchive().countDistinctDay() >= 20
         && player.getNetWorth().compareTo(player.getStartingMoney().multiply(BigDecimal.valueOf(2)))
             >= 0;
   }
