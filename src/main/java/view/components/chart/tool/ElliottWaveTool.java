@@ -5,6 +5,7 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import view.theme.ThemeStyles;
 
 /**
  * Nine-click chart tool that labels and draws Elliott Wave impulse and corrective segments.
@@ -161,9 +162,8 @@ public class ElliottWaveTool extends AbstractChartTool {
       Platform.runLater(
           () -> {
             if (series.getNode() != null) {
-              series
-                  .getNode()
-                  .setStyle("-fx-stroke: " + color + "; " + "-fx-stroke-width: 2.0;");
+              ThemeStyles.addStyleClasses(series.getNode(), "chart-overlay-line");
+              series.getNode().setStyle("-fx-stroke: " + color + ";");
             }
           });
     }

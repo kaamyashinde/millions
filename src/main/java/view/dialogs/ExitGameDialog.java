@@ -16,7 +16,6 @@ import controller.ExitGameController;
 import model.exception.auth.AuthenticationException;
 import model.exception.auth.RegistrationValidationException;
 import util.I18n;
-import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
 /**
@@ -62,11 +61,11 @@ public final class ExitGameDialog {
     pinField.setPromptText(I18n.get("exitGame.pin.prompt"));
 
     Label status = new Label();
-    status.setStyle("-fx-text-fill: " + ThemePalette.ERROR + ";");
+    ThemeStyles.addStyleClasses(status, "text-error");
 
     Button confirm = new Button(I18n.get("exitGame.pin.confirm"));
     confirm.setDefaultButton(true);
-    confirm.setStyle("-fx-text-fill: " + ThemePalette.ERROR + ";");
+    ThemeStyles.addStyleClasses(confirm, "text-error");
     confirm.setOnAction(_ -> {
       status.setText("");
       char[] pin = pinField.getText().toCharArray();

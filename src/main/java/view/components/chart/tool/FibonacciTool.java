@@ -5,6 +5,7 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import view.theme.ThemeStyles;
 import model.analysis.tools.FibonacciRetracement;
 
 /**
@@ -124,14 +125,8 @@ public class FibonacciTool extends AbstractChartTool {
       Platform.runLater(
           () -> {
             if (series.getNode() != null) {
-              series
-                  .getNode()
-                  .setStyle(
-                      "-fx-stroke: "
-                          + color
-                          + "; "
-                          + "-fx-stroke-width: 1.5; "
-                          + "-fx-stroke-dash-array: 6 4;");
+              ThemeStyles.addStyleClasses(series.getNode(), "chart-overlay-line-dashed");
+              series.getNode().setStyle("-fx-stroke: " + color + ";");
             }
           });
     }

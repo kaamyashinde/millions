@@ -26,7 +26,6 @@ import model.session.SessionServiceFactory;
 import controller.WorkspaceController;
 import view.app.events.WorkspaceEventBus;
 import view.dialogs.ProfileEditorDialog;
-import view.dialogs.WelcomeDialog;
 import view.layout.ResponsiveLayout;
 import view.layout.WorkspaceLayout;
 import view.pages.auth.LoginPage;
@@ -34,12 +33,12 @@ import view.pages.auth.RegisterPage;
 import view.pages.funds.FundsPage;
 import view.pages.leaderboard.LeaderboardPage;
 import view.pages.learning.LearningHubPage;
-import view.pages.notifications.NotificationsPage;
 import view.pages.portfolio.PlayerPortfolioPage;
 import view.pages.quiz.QuizLauncherPage;
 import view.pages.savings.SavingsPage;
 import view.pages.stocks.StocksPage;
 import view.pages.transactions.TransactionHistoryPage;
+import view.theme.ThemeManager;
 import view.theme.ThemeStyles;
 import view.validation.AuthFormValidation;
 
@@ -192,10 +191,8 @@ public class MillionsApp extends Application {
               onProfileSaved,
               onProfileDeleted);
         },
-        ctrl::refreshAll,
-        () -> WelcomeDialog.show(primaryStage),
-        () -> switchUser(ctrl, ref[0]),
         () -> logout(ctrl),
+        () -> ThemeManager.getInstance().toggle(scene),
         days -> {
           ctrl.advanceTradingDays(String.valueOf(days));
           sessionService.saveActiveSession();
@@ -255,7 +252,6 @@ public class MillionsApp extends Application {
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
     LearningHubPage learningHubPage =
         new LearningHubPage(ctrl.getLearningHub(), ctrl.getQuiz());
-    NotificationsPage notificationsPage = new NotificationsPage(ctrl.getNotificationsTab());
 
     Tab portfolioTab = makeTab("Portfolio", portfolioPage);
     Tab stocksTab = makeTab("Stocks", stocksPage);
@@ -297,11 +293,10 @@ public class MillionsApp extends Application {
     Tab learningTab = makeTab("Learning Hub", learningHubPage);
     Tab quizTab = new Tab("Quiz");
     quizTab.setClosable(false);
-    Tab notificationsTab = makeTab("Notifications", notificationsPage);
 
     TabPane tabs = new TabPane(
         portfolioTab, stocksTab, fundsTab, savingsTab, transactionsTab,
-        leaderboardTab, learningTab, quizTab, notificationsTab);
+        leaderboardTab, learningTab, quizTab);
     tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
     java.util.function.Consumer<model.learning.content.LearningItem> openTopicInHub =
@@ -378,17 +373,6 @@ public class MillionsApp extends Application {
     sessionService.logout();
     currentWorkspace = null;
     setSceneRoot(buildLoginPage());
-    primaryStage.setTitle("Millions");
-  }
-
-  private void switchUser(WorkspaceController ctrl, WorkspaceLayout currentView) {
-    sessionService.saveActiveSession();
-    LoginPage loginPage = new LoginPage(
-        this::handleLogin,
-        () -> setSceneRoot(buildRegisterPage()),
-        null, null, true,
-        () -> setSceneRoot(currentView));
-    setSceneRoot(loginPage);
     primaryStage.setTitle("Millions");
   }
 

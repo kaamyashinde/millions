@@ -37,14 +37,13 @@ public class RegisterPage extends AuthLayout {
    * @param toLogin navigate to login
    */
   public RegisterPage(RegisterAction registerAction, Runnable toLogin) {
-    this(registerAction, toLogin, null, null, false, null);
+    this(registerAction, toLogin, null, false, null);
   }
 
   /**
    * @param registerAction registration submit handler
    * @param toLogin navigate to login
    * @param sidePanel optional leaderboard panel
-   * @param helpAction optional help handler
    * @param showReturnToSession show return button
    * @param returnAction return to active session
    */
@@ -52,10 +51,9 @@ public class RegisterPage extends AuthLayout {
       RegisterAction registerAction,
       Runnable toLogin,
       Node sidePanel,
-      Runnable helpAction,
       boolean showReturnToSession,
       Runnable returnAction) {
-    super(buildFormShell(), "Login", toLogin, sidePanel, helpAction, showReturnToSession, returnAction);
+    super(buildFormShell(), "Login", toLogin, sidePanel, showReturnToSession, returnAction);
     VBox form = (VBox) getContentSlot().getChildren().get(0);
     wireForm(form, registerAction);
   }

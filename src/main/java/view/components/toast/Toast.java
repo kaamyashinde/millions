@@ -76,7 +76,7 @@ public class Toast extends HBox {
     setPrefWidth(TOAST_WIDTH);
     setMaxWidth(TOAST_WIDTH);
     setMinHeight(MIN_TOAST_HEIGHT);
-    ThemeStyles.addStyleClasses(this, "toast");
+    ThemeStyles.addStyleClasses(this, "toast", "toast-" + mode.name().toLowerCase());
 
     StackPane iconPane = buildIconPane(mode);
     VBox textBox = new VBox(4);

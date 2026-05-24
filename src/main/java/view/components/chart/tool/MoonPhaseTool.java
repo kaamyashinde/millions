@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import model.analysis.tools.MoonPhaseCalculator;
+import view.theme.ThemeStyles;
 
 /**
  * Chart tool that auto-draws vertical markers for new-moon and full-moon days.
@@ -93,14 +94,8 @@ public class MoonPhaseTool extends AbstractChartTool {
               Platform.runLater(
                   () -> {
                     if (series.getNode() != null) {
-                      series
-                          .getNode()
-                          .setStyle(
-                              "-fx-stroke: "
-                                  + color
-                                  + "; "
-                                  + "-fx-stroke-width: 1.5; "
-                                  + "-fx-stroke-dash-array: 6 4;");
+                      ThemeStyles.addStyleClasses(series.getNode(), "chart-overlay-line-dashed");
+                      series.getNode().setStyle("-fx-stroke: " + color + ";");
                     }
                   });
             });
