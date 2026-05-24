@@ -147,23 +147,6 @@ class SessionServiceTest {
   }
 
   @Test
-  void saveCurrentRun_persistsSnapshotForActiveUser() {
-    SessionService sessionService = createSessionService();
-    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
-    ActiveSession session = sessionService.getActiveSession().orElseThrow();
-    session.exchange().buy("AAPL", new BigDecimal("1.0"), session.player());
-
-    ProfileFile.SavedRunRow saved = sessionService.saveCurrentRun("strategy-a");
-
-    assertEquals("strategy-a", saved.label());
-    assertEquals(1, sessionService.listSavedRuns().size());
-    assertTrue(sessionService.setRunLeaderboardEligible(saved.id(), true));
-    assertTrue(sessionService.listSavedRuns().getFirst().eligibleForLeaderboard());
-    assertTrue(sessionService.deleteSavedRun(saved.id()));
-    assertTrue(sessionService.listSavedRuns().isEmpty());
-  }
-
-  @Test
   void updateDisplayName_persistsAcrossLogin() {
     SessionService sessionService = createSessionService();
     sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
@@ -185,6 +168,43 @@ class SessionServiceTest {
     assertTrue(Files.isDirectory(profileDir));
     sessionService.deleteActiveProfile("1234".toCharArray());
     assertFalse(Files.exists(profileDir));
+  }
+
+  @Test
+  void exitGameAndDeleteProfile_liquidatesHoldingsAndRemovesFiles() throws Exception {
+    SessionService sessionService = createSessionService();
+    ActiveSession session =
+        sessionService.register("ExitUser", "1234".toCharArray(), new BigDecimal("10000.00"));
+    session.exchange().buy("AAPL", new BigDecimal("2"), session.player());
+    session.player().addRegularSavingsPlan(
+        new model.trading.savings.RegularSavingsPlan(
+            "AAPL",
+            model.trading.savings.SavingsInstallmentMode.FIXED_SHARES,
+            new BigDecimal("1"),
+            7,
+            session.exchange().getDay()));
+    Path profileDir = tempDir.resolve(ProfilePaths.normalizeUsername("ExitUser"));
+    assertTrue(Files.isDirectory(profileDir));
+    assertFalse(session.player().getPortfolio().getShares().isEmpty());
+
+    var result = sessionService.exitGameAndDeleteProfile("1234".toCharArray());
+
+    assertFalse(Files.exists(profileDir));
+    assertFalse(sessionService.hasActiveSession());
+    assertEquals(1, result.symbolsSold());
+    assertTrue(result.transactionCount() >= 1);
+    assertTrue(result.finalCash().compareTo(BigDecimal.ZERO) > 0);
+  }
+
+  @Test
+  void exitGameAndDeleteProfile_rejectsWrongPin() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("PinUser", "1234".toCharArray(), new BigDecimal("1000.00"));
+    assertThrows(
+        AuthenticationException.class,
+        () -> sessionService.exitGameAndDeleteProfile("9999".toCharArray()));
+    assertTrue(sessionService.hasActiveSession());
+    assertTrue(Files.isDirectory(tempDir.resolve(ProfilePaths.normalizeUsername("PinUser"))));
   }
 
   @Test

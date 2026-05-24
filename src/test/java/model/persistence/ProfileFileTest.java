@@ -130,6 +130,24 @@ class ProfileFileTest {
     assertTrue(loaded.savedRuns().isEmpty());
   }
 
+  @Test
+  void listUsernames_ignoresBackupDirectoriesWithInvalidNames() throws Exception {
+    ProfilePaths paths = new ProfilePaths(tempDir);
+    JsonStorage storage = new JsonStorage();
+    MarketData marketData = sampleMarketData();
+    Exchange exchange = ProfileFile.createFreshExchange(marketData, "NYSE");
+    Player player = new Player("Alice", new BigDecimal("500"));
+    ProfileFile original = ProfileFile.capture(
+        player, exchange, "Alice", "alice", "pinhash", null, false, List.of());
+
+    storage.write(paths.profileFile("alice"), original);
+    Path backupProfile = tempDir.resolve("alice.corrupt-backup").resolve("profile.json");
+    Files.createDirectories(backupProfile.getParent());
+    Files.writeString(backupProfile, "{\"stockPrices\":[{\"prices\":[not-json]}]}");
+
+    assertEquals(List.of("Alice"), paths.listUsernames(storage));
+  }
+
   private static MarketData sampleMarketData() {
     Stock apple = new Stock("AAPL", "Apple Inc.");
     apple.addNewSalesPrice(new BigDecimal("150.00"));

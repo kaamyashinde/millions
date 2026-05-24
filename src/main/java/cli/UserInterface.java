@@ -1105,7 +1105,7 @@ public class UserInterface {
     String pinLine = input.nextLine();
     char[] pin = pinLine.toCharArray();
     try {
-      sessionService.deleteActiveProfile(pin);
+      sessionService.exitGameAndDeleteProfile(pin);
       clearActiveSession();
       System.out.println(I18n.get("profile.deleted"));
     } catch (AuthenticationException exception) {

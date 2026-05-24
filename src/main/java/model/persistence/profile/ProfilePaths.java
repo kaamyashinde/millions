@@ -79,6 +79,9 @@ public final class ProfilePaths {
     List<String> names = new ArrayList<>();
     try (Stream<Path> children = Files.list(profilesRoot)) {
       for (Path dir : children.filter(Files::isDirectory).sorted().toList()) {
+        if (!isValidUsername(dir.getFileName().toString())) {
+          continue;
+        }
         Path file = dir.resolve(PROFILE_FILE_NAME);
         if (!Files.exists(file)) {
           continue;

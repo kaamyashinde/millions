@@ -219,6 +219,11 @@ public class Player {
     return true;
   }
 
+  /** Removes all recurring savings plans from this player. */
+  public void clearRegularSavingsPlans() {
+    regularSavingsPlans.clear();
+  }
+
   /**
    * Calculates the net worth of the player by adding the current money and the net worth of the
    * portfolio.

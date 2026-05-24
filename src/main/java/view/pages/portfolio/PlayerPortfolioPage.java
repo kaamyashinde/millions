@@ -19,8 +19,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import controller.ExitGameController;
 import controller.PortfolioController;
 import controller.TradingController;
+import util.I18n;
+import view.dialogs.ExitGameDialog;
+import view.theme.ThemePalette;
 import model.analysis.performance.PerformanceComparison;
 import model.core.asset.Share;
 import view.components.image.FileImageLoader;
@@ -36,7 +40,9 @@ public class PlayerPortfolioPage extends BorderPane {
 
   private final PortfolioController portfolio;
   private final TradingController trading;
+  private final ExitGameController exitGame;
   private final Runnable onTradeComplete;
+  private final Runnable onProfileDeleted;
 
   private final Label playerLabel = new Label();
   private final Label balanceLabel = new Label();
@@ -57,19 +63,26 @@ public class PlayerPortfolioPage extends BorderPane {
   /**
    * @param portfolio portfolio summary and holdings
    * @param trading trading operations for sell dialog
-   * @param refreshAndPersist refreshes workspace controllers and persists session
+   * @param exitGame exit-game flow controller
+   * @param onTradeComplete invoked after a successful trade
+   * @param onProfileDeleted invoked after profile deletion
    */
   public PlayerPortfolioPage(
-      PortfolioController portfolio, TradingController trading, Runnable refreshAndPersist) {
+      PortfolioController portfolio,
+      TradingController trading,
+      ExitGameController exitGame,
+      Runnable onTradeComplete,
+      Runnable onProfileDeleted) {
     checkNotNull(portfolio, "portfolio");
     checkNotNull(trading, "trading");
-    checkNotNull(refreshAndPersist, "refreshAndPersist");
+    checkNotNull(exitGame, "exitGame");
+    checkNotNull(onTradeComplete, "onTradeComplete");
+    checkNotNull(onProfileDeleted, "onProfileDeleted");
     this.portfolio = portfolio;
     this.trading = trading;
-    this.onTradeComplete = () -> {
-      refreshAndPersist.run();
-      refresh();
-    };
+    this.exitGame = exitGame;
+    this.onProfileDeleted = onProfileDeleted;
+    this.onTradeComplete = onTradeComplete;
 
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
@@ -78,16 +91,12 @@ public class PlayerPortfolioPage extends BorderPane {
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
     ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
-    Button refreshButton = new Button("Refresh");
-    refreshButton.setOnAction(_ -> refresh());
-    ThemeStyles.styleButton(refreshButton);
-
     avatarView.setFitWidth(56);
     avatarView.setFitHeight(56);
     avatarView.setPreserveRatio(true);
     avatarView.setSmooth(true);
 
-    HBox topRow = new HBox(16, avatarView, heading, refreshButton);
+    HBox topRow = new HBox(16, avatarView, heading);
     topRow.setAlignment(Pos.CENTER_LEFT);
 
     GridPane summaryGrid = new GridPane();
@@ -108,8 +117,18 @@ public class PlayerPortfolioPage extends BorderPane {
     VBox.setVgrow(holdingsTable, Priority.ALWAYS);
 
     VBox metricsBox = buildMetricsBox();
+    Button exitGameButton = new Button(I18n.get("exitGame.pin.confirm"));
+    exitGameButton.setStyle("-fx-text-fill: " + ThemePalette.ERROR + ";");
+    ThemeStyles.styleButton(exitGameButton);
+    exitGameButton.setOnAction(_ -> {
+      if (getScene() != null) {
+        ExitGameDialog.show(getScene().getWindow(), exitGame, onProfileDeleted);
+      }
+    });
+    VBox bottom = new VBox(12, metricsBox, exitGameButton);
+    bottom.setPadding(new Insets(0, 0, 4, 0));
     setCenter(holdingsTable);
-    setBottom(metricsBox);
+    setBottom(bottom);
 
     refresh();
   }

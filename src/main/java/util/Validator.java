@@ -60,4 +60,30 @@ public final class Validator {
   public static boolean isStrictlyPositive(BigDecimal value) {
     return value != null && value.signum() > 0;
   }
+
+  /**
+   * Parses a trimmed string as a positive integer within an inclusive upper bound.
+   *
+   * @param text user input
+   * @param name friendly name for error messages
+   * @param maxInclusive maximum allowed value
+   * @return parsed positive integer
+   * @throws IllegalArgumentException if blank, not a whole number, not positive, or above the cap
+   */
+  public static int parsePositiveInt(String text, String name, int maxInclusive) {
+    if (text == null || text.trim().isEmpty()) {
+      throw new IllegalArgumentException(name + " must be a whole number");
+    }
+    final int value;
+    try {
+      value = Integer.parseInt(text.trim());
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException(name + " must be a whole number");
+    }
+    requirePositive(value, name);
+    if (value > maxInclusive) {
+      throw new IllegalArgumentException(name + " must not exceed " + maxInclusive);
+    }
+    return value;
+  }
 }
