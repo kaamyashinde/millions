@@ -21,9 +21,7 @@ import controller.ProfileEditorController;
 import model.session.ActiveSession;
 import model.session.SessionService;
 import util.I18n;
-import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
 import view.theme.ThemePalette;
 import view.theme.ThemeStyles;
 
@@ -86,7 +84,7 @@ public final class ProfileEditorDialog {
     Path[] pendingImage = {null};
     boolean[] removeAvatar = {false};
 
-    ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+    ImageLoader avatarLoader = ImageLoader.defaultLoader();
 
     Runnable reloadPreview = () -> {
       if (pendingImage[0] != null) {

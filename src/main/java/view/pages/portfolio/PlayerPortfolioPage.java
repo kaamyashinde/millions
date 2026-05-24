@@ -27,9 +27,7 @@ import util.I18n;
 import view.dialogs.ExitGameDialog;
 import view.theme.ThemePalette;
 import model.analysis.performance.PerformanceComparison;
-import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
 import view.dialogs.TradeDialog;
 import view.theme.ThemeStyles;
 
@@ -58,7 +56,7 @@ public class PlayerPortfolioPage extends BorderPane {
 
   private final TableView<HoldingSummary> holdingsTable = new TableView<>();
   private final ImageView avatarView = new ImageView();
-  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+  private final ImageLoader avatarLoader = ImageLoader.defaultLoader();
 
   /**
    * @param portfolio portfolio summary and holdings

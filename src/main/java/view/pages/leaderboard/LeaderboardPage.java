@@ -1,7 +1,5 @@
 package view.pages.leaderboard;
 
-import model.core.player.Player;
-
 import java.math.RoundingMode;
 import java.util.List;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -10,21 +8,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import model.session.leaderboard.LocalLeaderboardService.LeaderboardRow;
 import model.session.SessionService;
-import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
 
 /**
  * Local leaderboard ranked by net worth with avatars.
@@ -32,19 +24,13 @@ import view.components.image.ValidatingImageLoader;
 public class LeaderboardPage extends BorderPane {
 
   private final SessionService sessionService;
-  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+  private final ImageLoader avatarLoader = ImageLoader.defaultLoader();
   private final TableView<LeaderboardRow> table = new TableView<>();
   private final ObservableList<LeaderboardRow> rows = FXCollections.observableArrayList();
 
   public LeaderboardPage(SessionService sessionService) {
     this.sessionService = sessionService;
     setPadding(new Insets(16));
-
-    Text heading = new Text("Leaderboard");
-    heading.setFont(Font.font("System", FontWeight.BOLD, 22));
-
-    BorderPane.setAlignment(heading, Pos.CENTER_LEFT);
-    setTop(heading);
 
     TableColumn<LeaderboardRow, Integer> rankCol = new TableColumn<>("Rank");
     rankCol.setPrefWidth(56);
