@@ -2,7 +2,6 @@ package view.components.chart.tool;
 
 import java.util.ArrayList;
 import java.util.List;
-import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 
@@ -157,15 +156,7 @@ public class ElliottWaveTool extends AbstractChartTool {
 
       final String color = (i < 5) ? IMPULSE_COLOR : CORRECTIVE_COLOR;
       addSeries(chart, series);
-
-      Platform.runLater(
-          () -> {
-            if (series.getNode() != null) {
-              series
-                  .getNode()
-                  .setStyle("-fx-stroke: " + color + "; " + "-fx-stroke-width: 2.0;");
-            }
-          });
+      styleSeries(series, "-fx-stroke: " + color + "; -fx-stroke-width: 2.0;");
     }
   }
 

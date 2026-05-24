@@ -2,7 +2,6 @@ package view.components.chart.tool;
 
 import java.math.BigDecimal;
 import java.util.List;
-import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import model.analysis.tools.FibonacciRetracement;
@@ -120,41 +119,12 @@ public class FibonacciTool extends AbstractChartTool {
 
       final String color = COLORS[i];
       addSeries(chart, series);
-
-      Platform.runLater(
-          () -> {
-            if (series.getNode() != null) {
-              series
-                  .getNode()
-                  .setStyle(
-                      "-fx-stroke: "
-                          + color
-                          + "; "
-                          + "-fx-stroke-width: 1.5; "
-                          + "-fx-stroke-dash-array: 6 4;");
-            }
-          });
+      styleSeries(
+          series,
+          "-fx-stroke: " + color + "; -fx-stroke-width: 1.5; -fx-stroke-dash-array: 6 4;");
     }
 
     chart.setLegendVisible(true);
-  }
-
-  private static List<XYChart.Data<Number, Number>> visibleData(LineChart<Number, Number> chart) {
-    return chart.getData().getFirst().getData();
-  }
-
-  private static double visibleLow(LineChart<Number, Number> chart) {
-    return visibleData(chart).stream()
-        .mapToDouble(data -> data.getYValue().doubleValue())
-        .min()
-        .orElse(0.0);
-  }
-
-  private static double visibleHigh(LineChart<Number, Number> chart) {
-    return visibleData(chart).stream()
-        .mapToDouble(data -> data.getYValue().doubleValue())
-        .max()
-        .orElse(0.0);
   }
 
   /**
