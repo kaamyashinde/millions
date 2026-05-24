@@ -3,6 +3,7 @@ package model.trading.savings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.util.List;
 import model.core.market.Exchange;
@@ -110,5 +111,29 @@ class RegularSavingsProcessorTest {
 
     assertTrue(skipped.isEmpty());
     assertEquals(new BigDecimal("2"), player.getPortfolio().totalQuantityForSymbol("TECHX"));
+  }
+
+  @Test
+  void run_returnsEmptyForNullPlayerAndSkipsInactivePlans() {
+    RegularSavingsPlan inactive =
+        new RegularSavingsPlan("AAPL", SavingsInstallmentMode.FIXED_SHARES, BigDecimal.ONE,
+            1, exchange.getDay());
+    inactive.setActive(false);
+    player.addRegularSavingsPlan(inactive);
+    int before = exchange.getDay();
+    exchange.advance(1);
+
+    assertTrue(RegularSavingsProcessor.run(exchange, null, before, exchange.getDay()).isEmpty());
+    assertTrue(RegularSavingsProcessor.run(exchange, player, before, exchange.getDay()).isEmpty());
+    assertEquals(0, player.getPortfolio().totalQuantityForSymbol("AAPL").signum());
+  }
+
+  @Test
+  void privateConstructor_isCoveredForUtilityClass() throws Exception {
+    Constructor<RegularSavingsProcessor> constructor =
+        RegularSavingsProcessor.class.getDeclaredConstructor();
+    constructor.setAccessible(true);
+
+    constructor.newInstance();
   }
 }

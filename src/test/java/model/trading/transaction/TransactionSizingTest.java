@@ -5,8 +5,11 @@ import model.core.asset.Share;
 import model.core.asset.Stock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.function.Function;
 import model.trading.calculator.PurchaseCalculator;
 import model.trading.calculator.SaleCalculator;
 import model.trading.transaction.TransactionSizing;
@@ -30,8 +33,18 @@ class TransactionSizingTest {
   void maxQuantityForBudget_zeroForNonPositiveBudget() {
     Stock stock = new Stock("TST", "Test");
     stock.addNewSalesPrice(new BigDecimal("10"));
+    assertEquals(0, TransactionSizing.maxQuantityForBudget(stock, null).signum());
     assertEquals(0, TransactionSizing.maxQuantityForBudget(stock, BigDecimal.ZERO).signum());
     assertEquals(0, TransactionSizing.maxQuantityForBudget(stock, new BigDecimal("-1")).signum());
+    assertThrows(NullPointerException.class, () -> TransactionSizing.maxQuantityForBudget(null, BigDecimal.ONE));
+  }
+
+  @Test
+  void maxQuantityForBudget_zeroWhenAssetPriceIsNonPositiveOrBudgetTooSmall() {
+    Stock free = new Stock("FREE", "Free");
+    free.addNewSalesPrice(BigDecimal.ZERO);
+
+    assertEquals(0, TransactionSizing.maxQuantityForBudget(free, BigDecimal.TEN).signum());
   }
 
   @Test
@@ -55,5 +68,36 @@ class TransactionSizingTest {
     BigDecimal net = new SaleCalculator(slice).calculateTotal();
     assertTrue(net.compareTo(target) <= 0);
     assertTrue(q.signum() > 0);
+  }
+
+  @Test
+  void maxQuantityForTargetNet_zeroForInvalidTargetsAndLots() {
+    Stock stock = new Stock("TST", "Test");
+    stock.addNewSalesPrice(new BigDecimal("100"));
+    Share lot = new Share(stock, new BigDecimal("10"), new BigDecimal("50"));
+    Share emptyLot = new Share(stock, BigDecimal.ZERO, new BigDecimal("50"));
+
+    assertEquals(0, TransactionSizing.maxQuantityForTargetNet(lot, null).signum());
+    assertEquals(0, TransactionSizing.maxQuantityForTargetNet(lot, BigDecimal.ZERO).signum());
+    assertEquals(0, TransactionSizing.maxQuantityForTargetNet(emptyLot, BigDecimal.TEN).signum());
+    assertThrows(NullPointerException.class, () -> TransactionSizing.maxQuantityForTargetNet(null, BigDecimal.ONE));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void refineDownStepsDownUntilMetricFits() throws Exception {
+    Method method = TransactionSizing.class.getDeclaredMethod(
+        "refineDown",
+        BigDecimal.class,
+        BigDecimal.class,
+        Function.class);
+    method.setAccessible(true);
+    Function<BigDecimal, BigDecimal> metric = quantity -> quantity.compareTo(new BigDecimal("0.9999")) > 0
+        ? BigDecimal.TEN
+        : BigDecimal.ZERO;
+
+    BigDecimal refined = (BigDecimal) method.invoke(null, BigDecimal.ONE, BigDecimal.ONE, metric);
+
+    assertEquals(0, refined.compareTo(new BigDecimal("0.9999")));
   }
 }
