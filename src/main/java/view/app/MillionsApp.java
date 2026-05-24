@@ -99,6 +99,8 @@ public class MillionsApp extends Application {
       loginPage.setStatus("Invalid username or PIN.");
     } catch (IllegalArgumentException e) {
       loginPage.setStatus(mapValidationMessage(e.getMessage()));
+    } catch (RuntimeException e) {
+      loginPage.setStatus("Could not load profile. Please try again.");
     }
   }
 
