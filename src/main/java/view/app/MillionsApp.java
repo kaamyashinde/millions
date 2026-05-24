@@ -146,7 +146,7 @@ public class MillionsApp extends Application {
     }
     currentWorkspace = new WorkspaceController(session, sessionService);
     WorkspaceLayout workspace = buildWorkspace(currentWorkspace);
-    scene.setRoot(workspace);
+    setSceneRoot(workspace);
     primaryStage.setTitle("Millions — " + session.username());
   }
 
