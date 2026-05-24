@@ -50,6 +50,23 @@ public final class MarkdownLoader {
     if (markdown.isEmpty()) {
       return "<p style='color:#CBD5E1'>Content not available.</p>";
     }
-    return HTML_RENDERER.render(MD_PARSER.parse(markdown));
+    return HTML_RENDERER.render(MD_PARSER.parse(stripFrontMatter(markdown)));
+  }
+
+  /**
+   * Removes a leading YAML front matter block ({@code --- ... ---}) when present.
+   *
+   * @param markdown raw markdown file content
+   * @return markdown body without front matter
+   */
+  static String stripFrontMatter(String markdown) {
+    if (!markdown.startsWith("---")) {
+      return markdown;
+    }
+    int closing = markdown.indexOf("\n---", 3);
+    if (closing < 0) {
+      return markdown;
+    }
+    return markdown.substring(closing + 4).stripLeading();
   }
 }
