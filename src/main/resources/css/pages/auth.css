@@ -45,3 +45,8 @@
 .auth-leaderboard-subheading {
     -fx-text-fill: -millions-text-secondary;
 }
+
+.auth-field-error {
+    -fx-text-fill: -millions-error;
+    -fx-font-size: 12px;
+}

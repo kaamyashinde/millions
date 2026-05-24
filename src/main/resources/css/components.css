@@ -37,6 +37,10 @@
     -fx-border-color: -millions-accent;
 }
 
+.field.field-invalid {
+    -fx-border-color: -millions-error;
+}
+
 .field .text {
     -fx-fill: -millions-text-primary;
 }
