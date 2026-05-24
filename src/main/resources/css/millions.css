@@ -518,9 +518,9 @@
 }
 
 .analysis-status {
-    -fx-text-fill: -millions-text-muted;
-    -fx-font-size: 11px;
-    -fx-font-style: italic;
+    -fx-text-fill: -millions-accent;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
 }
 
 .chart-range-button {
