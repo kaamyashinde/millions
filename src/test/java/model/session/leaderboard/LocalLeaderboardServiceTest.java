@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import model.persistence.io.JsonStorage;
 import model.persistence.market.MarketDataFileService;
-import model.persistence.profile.ProfileImageService;
 import model.persistence.profile.ProfilePaths;
 import model.session.SessionService;
 import model.session.SessionServiceFactory;
@@ -45,8 +44,7 @@ class LocalLeaderboardServiceTest {
     LocalLeaderboardService leaderboardService = new LocalLeaderboardService(
         profilePaths,
         jsonStorage,
-        marketDataFileService,
-        new ProfileImageService(profilePaths));
+        marketDataFileService);
 
     var rows = leaderboardService.loadRows();
 
