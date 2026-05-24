@@ -24,7 +24,7 @@ import view.theme.ThemeStyles;
  *
  * @author kaamyashinde
  * @version 2.0.0
- * @since 04-04-2026
+ * @since 2026-04-04
  */
 public class QuizLauncherPage extends BorderPane {
 

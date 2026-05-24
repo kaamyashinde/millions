@@ -13,7 +13,9 @@ public final class ThemeManager {
 
   /** Available UI color themes. */
   public enum Theme {
+    /** Dark theme. */
     DARK,
+    /** Light theme. */
     LIGHT
   }
 
