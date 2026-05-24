@@ -69,6 +69,10 @@ public class FundDetailView extends BorderPane {
 
   /**
    * Configures buy action shown when a fund is selected.
+   *
+   * @param trading controller used to execute buy actions
+   * @param dialogOwnerSupplier supplies the owner window for trade dialogs
+   * @param onTradeComplete callback invoked after a completed trade
    */
   public void setTradeHandlers(
       TradingController trading,

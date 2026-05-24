@@ -55,6 +55,8 @@ public class StocksPage extends BorderPane {
   private StockChart currentChart;
 
   /**
+   * Creates the stocks page.
+   *
    * @param stocks stocks list and selection state
    * @param stockDetail fundamentals and market events for the detail pane
    * @param trading trading operations for buy dialog
@@ -172,6 +174,8 @@ public class StocksPage extends BorderPane {
   }
 
   /**
+   * Returns the embedded stock detail view.
+   *
    * @return embedded stock detail view
    */
   public StockDetailView getDetailView() {
