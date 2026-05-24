@@ -3,6 +3,7 @@ package model.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -79,6 +80,36 @@ class ProfileFileTest {
     ProfileFile loaded = storage.read(file, ProfileFile.class);
     assertEquals("Alice", loaded.username());
     assertEquals("NYSE", loaded.exchangeName());
+  }
+
+  @Test
+  void jsonRead_defaultsMissingListsToEmpty() throws Exception {
+    JsonStorage storage = new JsonStorage();
+    Path file = tempDir.resolve("legacy-profile.json");
+    Files.writeString(
+        file,
+        """
+        {
+          "username": "Alice",
+          "normalizedUsername": "alice",
+          "pinHash": "hash",
+          "displayName": null,
+          "hasSeenWelcome": false,
+          "playerName": "Alice",
+          "startingMoney": 1000,
+          "cash": 1000,
+          "exchangeName": "NYSE",
+          "day": 1,
+          "lastEvent": null
+        }
+        """);
+
+    ProfileFile loaded = storage.read(file, ProfileFile.class);
+
+    assertNotNull(loaded.holdings());
+    assertTrue(loaded.holdings().isEmpty());
+    assertNotNull(loaded.transactions());
+    assertTrue(loaded.transactions().isEmpty());
   }
 
   @Test

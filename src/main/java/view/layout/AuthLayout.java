@@ -23,9 +23,10 @@ import view.theme.ThemeStyles;
  * <p>This class holds no authentication logic. Login and Register pages each construct
  * their own {@code AuthLayout}, supplying their form content and a nav-link callback.
  */
-public class AuthLayout extends HBox {
+public class AuthLayout extends HBox implements ResponsiveLayout {
 
   private final StackPane contentSlot;
+  private final VBox leftPanel;
   private final Label statusLabel = new Label();
   private final Button returnButton = new Button("Back to current session");
 
@@ -64,6 +65,7 @@ public class AuthLayout extends HBox {
     contentSlot.setAlignment(Pos.CENTER);
 
     VBox left = buildLeftPanel();
+    this.leftPanel = left;
     BorderPane right = buildRightPanel(navLinkText, navLinkAction, sidePanel);
 
     returnButton.setVisible(showReturnToSession);
@@ -130,6 +132,13 @@ public class AuthLayout extends HBox {
     if (returnButton.isManaged()) {
       returnButton.fire();
     }
+  }
+
+  @Override
+  public void onWindowResized(double width, double height) {
+    boolean showLeft = width >= 800;
+    leftPanel.setVisible(showLeft);
+    leftPanel.setManaged(showLeft);
   }
 
   private VBox buildLeftPanel() {

@@ -22,6 +22,7 @@ import model.learning.content.LearningItem;
 import model.learning.content.LearningResource;
 import model.learning.quiz.QuizAttempt;
 import view.components.learning.LearningResourceCard;
+import view.layout.ResponsiveLayout;
 import view.pages.quiz.QuizResultView;
 import view.pages.quiz.QuizView;
 import view.theme.ThemePalette;
@@ -35,10 +36,12 @@ import view.theme.ThemeStyles;
  * @version 2.0.0
  * @since 04-04-2026
  */
-public class LearningHubPage extends BorderPane {
+public class LearningHubPage extends BorderPane implements ResponsiveLayout {
 
   private final LearningHubController learningHub;
   private final QuizController quiz;
+  private final List<LearningCategory> categories;
+  private final VBox categorySection;
   private javafx.scene.Node landingView;
 
   /**
@@ -50,6 +53,7 @@ public class LearningHubPage extends BorderPane {
   public LearningHubPage(LearningHubController learningHub, QuizController quiz) {
     this.learningHub = learningHub;
     this.quiz = quiz;
+    this.categories = learningHub.getCategories();
 
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "learning-root", "learning-hub-root");
@@ -67,9 +71,10 @@ public class LearningHubPage extends BorderPane {
 
     VBox content = new VBox(28);
     content.setPadding(new Insets(4, 0, 16, 0));
+    categorySection = buildCategorySection();
     content.getChildren().addAll(
         buildFeaturedSection(),
-        buildCategorySection(),
+        categorySection,
         buildStartHereSection());
 
     ScrollPane scroll = new ScrollPane(content);
@@ -92,24 +97,37 @@ public class LearningHubPage extends BorderPane {
   }
 
   private VBox buildCategorySection() {
-    List<LearningCategory> categories = learningHub.getCategories();
+    return buildSection("Browse by Category", buildCategoryGrid(columnCountForWidth(getWidth())));
+  }
 
+  private GridPane buildCategoryGrid(int columns) {
     GridPane grid = new GridPane();
     grid.setHgap(12);
     grid.setVgap(12);
 
-    for (int i = 0; i < 3; i++) {
+    double percentWidth = 100.0 / columns;
+    for (int i = 0; i < columns; i++) {
       ColumnConstraints col = new ColumnConstraints();
       col.setHgrow(Priority.ALWAYS);
-      col.setPercentWidth(33.33);
+      col.setPercentWidth(percentWidth);
       grid.getColumnConstraints().add(col);
     }
 
     for (int i = 0; i < categories.size(); i++) {
-      grid.add(buildCategoryCard(categories.get(i)), i % 3, i / 3);
+      grid.add(buildCategoryCard(categories.get(i)), i % columns, i / columns);
     }
 
-    return buildSection("Browse by Category", grid);
+    return grid;
+  }
+
+  private static int columnCountForWidth(double width) {
+    if (width < 700) {
+      return 1;
+    }
+    if (width < 1000) {
+      return 2;
+    }
+    return 3;
   }
 
   private VBox buildStartHereSection() {
@@ -189,6 +207,15 @@ public class LearningHubPage extends BorderPane {
    */
   public void openTopic(String itemId) {
     learningHub.getItemById(itemId).ifPresent(this::onItemCardClicked);
+  }
+
+  @Override
+  public void onWindowResized(double width, double height) {
+    if (getCenter() != landingView) {
+      return;
+    }
+    int columns = columnCountForWidth(width);
+    categorySection.getChildren().set(1, buildCategoryGrid(columns));
   }
 
   private void showLanding() {

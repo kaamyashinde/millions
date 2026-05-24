@@ -18,6 +18,11 @@
     -fx-alignment: center-right;
 }
 
+.workspace-menu-bar {
+    -fx-background-color: -millions-surface;
+    -fx-padding: 0 0 4 0;
+}
+
 .workspace-skip-days {
     -fx-spacing: 8;
     -fx-alignment: center-left;

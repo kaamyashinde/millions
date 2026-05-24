@@ -51,6 +51,14 @@ public record ProfileFile(
     EventRow lastEvent
 ) {
 
+  public ProfileFile {
+    holdings = emptyIfNull(holdings);
+    transactions = emptyIfNull(transactions);
+    savings = emptyIfNull(savings);
+    stockPrices = emptyIfNull(stockPrices);
+    events = emptyIfNull(events);
+  }
+
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record HoldingRow(String symbol, BigDecimal quantity, BigDecimal purchasePrice) {}
 
@@ -204,6 +212,10 @@ public record ProfileFile(
         username, normalizedUsername, pinHash, displayName, true,
         playerName, startingMoney, cash, holdings, transactions, savings,
         exchangeName, day, stockPrices, events, lastEvent);
+  }
+
+  private static <T> List<T> emptyIfNull(List<T> list) {
+    return list == null ? List.of() : list;
   }
 
   private static EventRow toEventRow(MarketEvent event) {

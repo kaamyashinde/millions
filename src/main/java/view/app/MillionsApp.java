@@ -9,7 +9,9 @@ import static view.app.events.WorkspaceEventType.TRANSACTIONS_CHANGED;
 
 import java.math.BigDecimal;
 import javafx.application.Application;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.layout.Region;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
@@ -24,6 +26,8 @@ import model.session.SessionServiceFactory;
 import controller.WorkspaceController;
 import view.app.events.WorkspaceEventBus;
 import view.dialogs.ProfileEditorDialog;
+import view.dialogs.WelcomeDialog;
+import view.layout.ResponsiveLayout;
 import view.layout.WorkspaceLayout;
 import view.pages.auth.LoginPage;
 import view.pages.auth.RegisterPage;
@@ -37,6 +41,7 @@ import view.pages.savings.SavingsPage;
 import view.pages.stocks.StocksPage;
 import view.pages.transactions.TransactionHistoryPage;
 import view.theme.ThemeStyles;
+import view.validation.AuthFormValidation;
 
 /**
  * JavaFX entry point for the Millions application.
@@ -51,6 +56,8 @@ public class MillionsApp extends Application {
   private static final String MARKET_DATA_RESOURCE = "/data/demo-stocks.csv";
   private static final int WINDOW_WIDTH = 1100;
   private static final int WINDOW_HEIGHT = 720;
+  private static final int MIN_WINDOW_WIDTH = 800;
+  private static final int MIN_WINDOW_HEIGHT = 600;
 
   private SessionService sessionService;
   private Stage primaryStage;
@@ -63,13 +70,28 @@ public class MillionsApp extends Application {
     this.sessionService = createSessionService();
 
     LoginPage loginPage = buildLoginPage();
+    loginPage.setMinWidth(MIN_WINDOW_WIDTH);
+    loginPage.setMinHeight(MIN_WINDOW_HEIGHT);
     scene = new Scene(loginPage, WINDOW_WIDTH, WINDOW_HEIGHT);
     ThemeStyles.install(scene);
 
     stage.setScene(scene);
     stage.setTitle("Millions");
+    stage.setMinWidth(MIN_WINDOW_WIDTH);
+    stage.setMinHeight(MIN_WINDOW_HEIGHT);
     stage.setOnCloseRequest(_ -> sessionService.saveActiveSession());
     stage.show();
+
+    Runnable notifyResize = () -> {
+      Node root = scene.getRoot();
+      if (root instanceof ResponsiveLayout responsive) {
+        responsive.onWindowResized(scene.getWidth(), scene.getHeight());
+      }
+    };
+    scene.widthProperty().addListener((obs, oldWidth, newWidth) -> notifyResize.run());
+    scene.heightProperty().addListener((obs, oldHeight, newHeight) -> notifyResize.run());
+    scene.rootProperty().addListener((obs, oldRoot, newRoot) -> notifyResize.run());
+    notifyResize.run();
   }
 
   /**
@@ -84,15 +106,21 @@ public class MillionsApp extends Application {
   private LoginPage buildLoginPage() {
     LoginPage loginPage = new LoginPage(
         this::handleLogin,
-        () -> scene.setRoot(buildRegisterPage()));
+        () -> setSceneRoot(buildRegisterPage()));
     return loginPage;
   }
 
   private RegisterPage buildRegisterPage() {
     RegisterPage registerPage = new RegisterPage(
         this::handleRegistration,
-        () -> scene.setRoot(buildLoginPage()));
+        () -> setSceneRoot(buildLoginPage()));
     return registerPage;
+  }
+
+  private void setSceneRoot(Region root) {
+    root.setMinWidth(MIN_WINDOW_WIDTH);
+    root.setMinHeight(MIN_WINDOW_HEIGHT);
+    scene.setRoot(root);
   }
 
   private void handleLogin(String username, String pin) {
@@ -106,6 +134,8 @@ public class MillionsApp extends Application {
       loginPage.setStatus("Profile data could not be read. Reset this profile or restore a backup.");
     } catch (IllegalArgumentException e) {
       loginPage.setStatus(mapValidationMessage(e.getMessage()));
+    } catch (RuntimeException e) {
+      loginPage.setStatus("Could not load profile. Please try again.");
     }
   }
 
@@ -137,7 +167,7 @@ public class MillionsApp extends Application {
     }
     currentWorkspace = new WorkspaceController(session, sessionService);
     WorkspaceLayout workspace = buildWorkspace(currentWorkspace);
-    scene.setRoot(workspace);
+    setSceneRoot(workspace);
     primaryStage.setTitle("Millions — " + session.username());
   }
 
@@ -162,7 +192,8 @@ public class MillionsApp extends Application {
               onProfileSaved,
               onProfileDeleted);
         },
-        () -> { /* help: placeholder */ },
+        ctrl::refreshAll,
+        () -> WelcomeDialog.show(primaryStage),
         () -> switchUser(ctrl, ref[0]),
         () -> logout(ctrl),
         days -> {
@@ -185,7 +216,7 @@ public class MillionsApp extends Application {
   private void onProfileDeleted(WorkspaceController ctrl) {
     ctrl.dispose();
     currentWorkspace = null;
-    scene.setRoot(buildLoginPage());
+    setSceneRoot(buildLoginPage());
     primaryStage.setTitle("Millions");
   }
 
@@ -346,7 +377,7 @@ public class MillionsApp extends Application {
     ctrl.dispose();
     sessionService.logout();
     currentWorkspace = null;
-    scene.setRoot(buildLoginPage());
+    setSceneRoot(buildLoginPage());
     primaryStage.setTitle("Millions");
   }
 
@@ -354,10 +385,10 @@ public class MillionsApp extends Application {
     sessionService.saveActiveSession();
     LoginPage loginPage = new LoginPage(
         this::handleLogin,
-        () -> scene.setRoot(buildRegisterPage()),
+        () -> setSceneRoot(buildRegisterPage()),
         null, null, true,
-        () -> scene.setRoot(currentView));
-    scene.setRoot(loginPage);
+        () -> setSceneRoot(currentView));
+    setSceneRoot(loginPage);
     primaryStage.setTitle("Millions");
   }
 
@@ -370,15 +401,6 @@ public class MillionsApp extends Application {
   }
 
   private static String mapValidationMessage(String message) {
-    if (message == null) {
-      return "Invalid input.";
-    }
-    return switch (message) {
-      case "Username must be 3-32 characters using letters, numbers, underscores, or hyphens." ->
-          "Username must be 3-32 characters (letters, numbers, _ or -).";
-      case "PIN must be 4 to 8 digits." -> "PIN must be 4 to 8 digits.";
-      case "Starting money must be non-negative." -> "Starting money must be non-negative.";
-      default -> "Invalid input.";
-    };
+    return AuthFormValidation.mapValidationMessage(message);
   }
 }

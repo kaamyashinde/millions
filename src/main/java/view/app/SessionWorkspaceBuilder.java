@@ -203,6 +203,7 @@ public final class SessionWorkspaceBuilder {
                   onProfileSaved,
                   onProfileDeleted);
             },
+            workspaceController::refreshAll,
             helpAction,
             switchUserAction,
             logoutAction,
