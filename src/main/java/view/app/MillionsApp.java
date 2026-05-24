@@ -6,6 +6,7 @@ import model.learning.quiz.Quiz;
 import java.math.BigDecimal;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.layout.Region;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
@@ -86,15 +87,21 @@ public class MillionsApp extends Application {
   private LoginPage buildLoginPage() {
     LoginPage loginPage = new LoginPage(
         this::handleLogin,
-        () -> scene.setRoot(buildRegisterPage()));
+        () -> setSceneRoot(buildRegisterPage()));
     return loginPage;
   }
 
   private RegisterPage buildRegisterPage() {
     RegisterPage registerPage = new RegisterPage(
         this::handleRegistration,
-        () -> scene.setRoot(buildLoginPage()));
+        () -> setSceneRoot(buildLoginPage()));
     return registerPage;
+  }
+
+  private void setSceneRoot(Region root) {
+    root.setMinWidth(MIN_WINDOW_WIDTH);
+    root.setMinHeight(MIN_WINDOW_HEIGHT);
+    scene.setRoot(root);
   }
 
   private void handleLogin(String username, String pin) {
