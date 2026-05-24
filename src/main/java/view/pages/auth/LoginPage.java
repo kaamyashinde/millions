@@ -25,6 +25,8 @@ public class LoginPage extends AuthLayout {
   private final PasswordField pinField = new PasswordField();
 
   /**
+   * Creates a login page without a side panel.
+   *
    * @param loginAction login submit handler
    * @param toRegister navigate to register
    */
@@ -33,6 +35,8 @@ public class LoginPage extends AuthLayout {
   }
 
   /**
+   * Creates a login page with optional side content and return action.
+   *
    * @param loginAction login submit handler
    * @param toRegister navigate to register
    * @param sidePanel optional leaderboard panel
@@ -117,10 +121,21 @@ public class LoginPage extends AuthLayout {
     super.setStatus(message);
   }
 
+  /**
+   * Returns the current footer status text.
+   *
+   * @return current status text
+   */
   public String getStatus() {
     return super.getStatus();
   }
 
+  /**
+   * Sets form field values, primarily for tests.
+   *
+   * @param username username field value
+   * @param pin PIN field value
+   */
   public void setValues(String username, String pin) {
     usernameField.setText(username);
     pinField.setText(pin);
@@ -164,8 +179,18 @@ public class LoginPage extends AuthLayout {
     });
   }
 
+  /**
+   * Callback invoked when the login form is submitted.
+   */
   @FunctionalInterface
   public interface LoginAction {
+
+    /**
+     * Runs the login action.
+     *
+     * @param username username field value
+     * @param pin PIN field value
+     */
     void run(String username, String pin);
   }
 }
