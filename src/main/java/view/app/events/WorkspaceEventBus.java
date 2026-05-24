@@ -16,6 +16,12 @@ public class WorkspaceEventBus {
       new EnumMap<>(WorkspaceEventType.class);
 
   /**
+   * Creates a workspace event bus.
+   */
+  public WorkspaceEventBus() {
+  }
+
+  /**
    * Registers a handler for one event type.
    *
    * @param eventType event to observe

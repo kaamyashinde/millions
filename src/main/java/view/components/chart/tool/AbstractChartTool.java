@@ -19,18 +19,22 @@ import javafx.scene.chart.XYChart;
  *
  * @author kaamyashinde
  * @version 0.1.0
- * @since 30-03-2026
+ * @since 2026-03-30
  */
 public abstract class AbstractChartTool implements ChartTool {
 
   /** Series added by this tool; tracked so they can be removed cleanly on deactivation. */
   protected final List<XYChart.Series<Number, Number>> ownedSeries = new ArrayList<>();
 
-  /** Whether this tool is currently active. */
-  protected final SimpleBooleanProperty active = new SimpleBooleanProperty(false);
+  final SimpleBooleanProperty active = new SimpleBooleanProperty(false);
 
-  /** Current user-facing status prompt (e.g. "Select LOW pivot"). */
-  protected final SimpleStringProperty status = new SimpleStringProperty("");
+  final SimpleStringProperty status = new SimpleStringProperty("");
+
+  /**
+   * Creates a chart tool base instance.
+   */
+  protected AbstractChartTool() {
+  }
 
   /**
    * Returns the observable boolean flag that tracks whether this tool is currently activated.

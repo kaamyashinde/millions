@@ -21,7 +21,7 @@ import view.components.chart.tool.ChartTool;
  *
  * @author kaamyashinde
  * @version 0.6.0
- * @since 29-03-2026
+ * @since 2026-03-29
  */
 public class StockChart extends LineChart<Number, Number> {
 
