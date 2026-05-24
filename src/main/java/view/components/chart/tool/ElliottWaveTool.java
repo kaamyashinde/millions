@@ -2,7 +2,6 @@ package view.components.chart.tool;
 
 import java.util.ArrayList;
 import java.util.List;
-import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import view.theme.ThemeStyles;
@@ -43,12 +42,6 @@ public class ElliottWaveTool extends AbstractChartTool {
   private static final String[] WAVE_NAMES = {
     "Wave 1", "Wave 2", "Wave 3", "Wave 4", "Wave 5", "Wave A", "Wave B", "Wave C"
   };
-
-  /** Amber hex colour applied to impulse waves 1–5. */
-  private static final String IMPULSE_COLOR = "#F59E0B";
-
-  /** Controlled red applied to corrective waves A–C (not dominant brand color). */
-  private static final String CORRECTIVE_COLOR = "#EF4444";
 
   /** Collected click points; each entry is {@code [dayIndex, price]}. */
   private final List<double[]> points = new ArrayList<>();
@@ -156,16 +149,8 @@ public class ElliottWaveTool extends AbstractChartTool {
       series.getData().add(new XYChart.Data<>(from[0], from[1]));
       series.getData().add(new XYChart.Data<>(to[0], to[1]));
 
-      final String color = (i < 5) ? IMPULSE_COLOR : CORRECTIVE_COLOR;
       addSeries(chart, series);
-
-      Platform.runLater(
-          () -> {
-            if (series.getNode() != null) {
-              ThemeStyles.addStyleClasses(series.getNode(), "chart-overlay-line");
-              series.getNode().setStyle("-fx-stroke: " + color + ";");
-            }
-          });
+      applyStyleClasses(series, "chart-overlay-solid-thick");
     }
   }
 

@@ -17,7 +17,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.core.market.Exchange;
 import model.core.player.Player;
-import model.trading.transaction.Purchase;
 import model.trading.transaction.Transaction;
 import view.components.table.AppTableView;
 import view.theme.ThemeStyles;
@@ -126,7 +125,7 @@ public class TransactionHistoryPage extends BorderPane {
       BigDecimal total) {
 
     static TransactionRow from(Transaction transaction) {
-      String type = transaction instanceof Purchase ? "Purchase" : "Sale";
+      String type = transaction.getTypeName();
       return new TransactionRow(
           transaction.getDay(),
           type,

@@ -12,6 +12,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -47,6 +48,7 @@ public class SavingsPage extends BorderPane {
   private final TextField editInterval = new TextField();
   private final TextField editNextDue = new TextField();
   private final CheckBox editActive = new CheckBox("Active");
+  private final GridPane editGrid = new GridPane();
   private final Label status = new Label();
 
   /**
@@ -99,7 +101,6 @@ public class SavingsPage extends BorderPane {
     applyBtn.setOnAction(_ -> applyEdit());
     removeBtn.setOnAction(_ -> removeSelected());
 
-    GridPane editGrid = new GridPane();
     editGrid.setHgap(8);
     editGrid.setVgap(8);
     editGrid.addRow(
@@ -112,6 +113,8 @@ public class SavingsPage extends BorderPane {
         editActive,
         applyBtn,
         removeBtn);
+    editGrid.setVisible(false);
+    editGrid.setManaged(false);
 
     table.getSelectionModel().selectedItemProperty().addListener((obs, prev, sel) -> {
       if (sel != null) {
@@ -145,7 +148,37 @@ public class SavingsPage extends BorderPane {
         c -> new SimpleStringProperty(Integer.toString(c.getValue().getNextDueDay())));
     TableColumn<RegularSavingsPlan, Boolean> colAct = new TableColumn<>("Active");
     colAct.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().isActive()));
-    table.getColumns().setAll(colSym, colMode, colAmt, colInt, colDue, colAct);
+    TableColumn<RegularSavingsPlan, Void> colEdit = new TableColumn<>("Edit");
+    colEdit.setCellFactory(
+        _ ->
+            new TableCell<>() {
+              private final Button editBtn = new Button("Edit");
+
+              {
+                ThemeStyles.styleButton(editBtn);
+                editBtn.setOnAction(
+                    _ -> {
+                      int index = getIndex();
+                      if (index >= 0 && !isEmpty()) {
+                        table.getSelectionModel().select(index);
+                        editGrid.setVisible(true);
+                        editGrid.setManaged(true);
+                        editMode.requestFocus();
+                      }
+                    });
+              }
+
+              @Override
+              protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                  setGraphic(null);
+                } else {
+                  setGraphic(editBtn);
+                }
+              }
+            });
+    table.getColumns().setAll(colSym, colMode, colAmt, colInt, colDue, colAct, colEdit);
   }
 
   /** Refreshes the trading-day label from the current exchange state. */
@@ -181,8 +214,8 @@ public class SavingsPage extends BorderPane {
           editInterval.getText(),
           editNextDue.getText(),
           editActive.isSelected());
-      table.getSelectionModel().select(plan);
       afterModelChange.run();
+      hideEditForm();
     } catch (RuntimeException ex) {
       status.setText("Invalid edit: check numbers and positive values.");
     }
@@ -197,7 +230,14 @@ public class SavingsPage extends BorderPane {
     }
     if (controller.removePlanAt(idx)) {
       afterModelChange.run();
+      hideEditForm();
     }
+  }
+
+  private void hideEditForm() {
+    editGrid.setVisible(false);
+    editGrid.setManaged(false);
+    table.getSelectionModel().clearSelection();
   }
 
   private void updateDayLabel() {

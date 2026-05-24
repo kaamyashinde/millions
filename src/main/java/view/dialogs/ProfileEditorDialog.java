@@ -21,9 +21,7 @@ import controller.ProfileEditorController;
 import model.session.ActiveSession;
 import model.session.SessionService;
 import util.I18n;
-import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
 import view.theme.ThemeStyles;
 
 /**
@@ -85,7 +83,7 @@ public final class ProfileEditorDialog {
     Path[] pendingImage = {null};
     boolean[] removeAvatar = {false};
 
-    ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+    ImageLoader avatarLoader = ImageLoader.defaultLoader();
 
     Runnable reloadPreview = () -> {
       if (pendingImage[0] != null) {
@@ -185,7 +183,10 @@ public final class ProfileEditorDialog {
     root.setPadding(new Insets(16));
     root.setAlignment(Pos.TOP_LEFT);
 
-    Scene scene = new Scene(root, 420, 460);
+    Scene scene = new Scene(
+        root,
+        ThemeStyles.dialogDimension(owner, 0.40, 400, 520),
+        ThemeStyles.dialogDimension(owner, 0.65, 440, 560));
     ThemeStyles.install(scene);
     ThemeStyles.addStyleClasses(root, "dialog-root");
     ThemeStyles.styleField(nameField);

@@ -20,15 +20,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import controller.ExitGameController;
+import controller.HoldingSummary;
 import controller.PortfolioController;
 import controller.TradingController;
 import util.I18n;
 import view.dialogs.ExitGameDialog;
 import model.analysis.performance.PerformanceComparison;
-import model.core.asset.Share;
-import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
 import view.dialogs.TradeDialog;
 import view.theme.ThemeStyles;
 
@@ -55,9 +53,9 @@ public class PlayerPortfolioPage extends BorderPane {
   private final Label benchmarkVolatilityValueLabel = new Label();
   private final Label benchmarkSharpeValueLabel = new Label();
 
-  private final TableView<Share> holdingsTable = new TableView<>();
+  private final TableView<HoldingSummary> holdingsTable = new TableView<>();
   private final ImageView avatarView = new ImageView();
-  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+  private final ImageLoader avatarLoader = ImageLoader.defaultLoader();
 
   /**
    * @param portfolio portfolio summary and holdings
@@ -139,28 +137,28 @@ public class PlayerPortfolioPage extends BorderPane {
   }
 
   private void buildHoldingsTable() {
-    TableColumn<Share, String> symbolColumn = new TableColumn<>("Symbol");
-    symbolColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAsset().getSymbol()));
+    TableColumn<HoldingSummary, String> symbolColumn = new TableColumn<>("Symbol");
+    symbolColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().symbol()));
 
-    TableColumn<Share, String> nameColumn = new TableColumn<>("Name");
-    nameColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAsset().getDisplayName()));
+    TableColumn<HoldingSummary, String> nameColumn = new TableColumn<>("Name");
+    nameColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().displayName()));
 
-    TableColumn<Share, String> typeColumn = new TableColumn<>("Type");
-    typeColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAsset().getAssetType()));
+    TableColumn<HoldingSummary, String> typeColumn = new TableColumn<>("Type");
+    typeColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().assetType()));
 
-    TableColumn<Share, String> quantityColumn = new TableColumn<>("Quantity");
+    TableColumn<HoldingSummary, String> quantityColumn = new TableColumn<>("Quantity");
     quantityColumn.setCellValueFactory(
-        c -> new SimpleStringProperty(c.getValue().getQuantity().toPlainString()));
+        c -> new SimpleStringProperty(c.getValue().totalQuantity().toPlainString()));
 
-    TableColumn<Share, String> purchasePriceColumn = new TableColumn<>("Purchase Price");
+    TableColumn<HoldingSummary, String> purchasePriceColumn = new TableColumn<>("Avg. Purchase Price");
     purchasePriceColumn.setCellValueFactory(
-        c -> new SimpleStringProperty(c.getValue().getPurchasePrice().toPlainString()));
+        c -> new SimpleStringProperty(c.getValue().avgPurchasePrice().toPlainString()));
 
-    TableColumn<Share, String> currentPriceColumn = new TableColumn<>("Current Price");
+    TableColumn<HoldingSummary, String> currentPriceColumn = new TableColumn<>("Current Price");
     currentPriceColumn.setCellValueFactory(
-        c -> new SimpleStringProperty(c.getValue().getAsset().getSalesPrice().toPlainString()));
+        c -> new SimpleStringProperty(c.getValue().currentPrice().toPlainString()));
 
-    TableColumn<Share, Void> actionsColumn = new TableColumn<>("Actions");
+    TableColumn<HoldingSummary, Void> actionsColumn = new TableColumn<>("Actions");
     actionsColumn.setPrefWidth(90);
     actionsColumn.setCellFactory(_ -> new TableCell<>() {
       private final Button sellButton = new Button("Sell");
@@ -168,12 +166,12 @@ public class PlayerPortfolioPage extends BorderPane {
       {
         ThemeStyles.styleButton(sellButton);
         sellButton.setOnAction(_ -> {
-          Share share = getTableRow() != null ? getTableRow().getItem() : null;
-          if (share != null && getScene() != null) {
+          HoldingSummary holding = getTableRow() != null ? getTableRow().getItem() : null;
+          if (holding != null && getScene() != null) {
             TradeDialog.showSell(
                 getScene().getWindow(),
                 trading,
-                share.getAsset().getSymbol(),
+                holding.symbol(),
                 onTradeComplete);
           }
         });

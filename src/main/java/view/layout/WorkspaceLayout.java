@@ -19,9 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
 import util.Validator;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
@@ -37,7 +35,7 @@ public class WorkspaceLayout extends StackPane implements ResponsiveLayout {
   private final Label sessionSummaryLabel = new Label();
   private final TabPane tabs;
   private final ImageView headerAvatar = new ImageView();
-  private final ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+  private final ImageLoader avatarLoader = ImageLoader.defaultLoader();
   private final NotificationService notifications;
 
   /**

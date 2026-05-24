@@ -55,7 +55,7 @@ public class MillionsApp extends Application {
   private static final String MARKET_DATA_RESOURCE = "/data/demo-stocks.csv";
   private static final int WINDOW_WIDTH = 1100;
   private static final int WINDOW_HEIGHT = 720;
-  private static final int MIN_WINDOW_WIDTH = 800;
+  private static final int MIN_WINDOW_WIDTH = 900;
   private static final int MIN_WINDOW_HEIGHT = 600;
 
   private SessionService sessionService;
@@ -75,6 +75,8 @@ public class MillionsApp extends Application {
     ThemeStyles.install(scene);
 
     stage.setScene(scene);
+    stage.setMinWidth(MIN_WINDOW_WIDTH);
+    stage.setMinHeight(MIN_WINDOW_HEIGHT);
     stage.setTitle("Millions");
     stage.setMinWidth(MIN_WINDOW_WIDTH);
     stage.setMinHeight(MIN_WINDOW_HEIGHT);

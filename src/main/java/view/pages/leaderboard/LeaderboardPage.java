@@ -7,14 +7,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import model.session.leaderboard.LocalLeaderboardService.LeaderboardRow;
 import model.session.SessionService;
 
@@ -30,12 +26,6 @@ public class LeaderboardPage extends BorderPane {
   public LeaderboardPage(SessionService sessionService) {
     this.sessionService = sessionService;
     setPadding(new Insets(16));
-
-    Text heading = new Text("Leaderboard");
-    heading.setFont(Font.font("System", FontWeight.BOLD, 22));
-
-    BorderPane.setAlignment(heading, Pos.CENTER_LEFT);
-    setTop(heading);
 
     TableColumn<LeaderboardRow, Integer> rankCol = new TableColumn<>("Rank");
     rankCol.setPrefWidth(56);

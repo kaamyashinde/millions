@@ -75,6 +75,25 @@ class PlayerPortfolioPageTest {
     assertTrue(panel.getBenchmarkReturnText().endsWith("%"));
   }
 
+  @Test
+  void multiplePurchasesOfSameSymbolShowAsSingleHolding() throws Exception {
+    Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
+    Exchange exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
+    Player player = new Player("k", new BigDecimal("5000.00"));
+    PlayerPortfolioPage panel = runOnFxThread(() -> createPage(exchange, player));
+
+    exchange.buy("AAPL", BigDecimal.ONE, player);
+    exchange.buy("AAPL", BigDecimal.ONE, player);
+    exchange.buy("AAPL", BigDecimal.ONE, player);
+    runOnFxThread(
+        () -> {
+          panel.refresh();
+          return panel;
+        });
+
+    assertEquals(1, panel.getHoldingCount());
+  }
+
   private static PlayerPortfolioPage createPage(Exchange exchange, Player player) throws Exception {
     Path avatarPath = Path.of("/no/avatar.png");
     PortfolioController portfolio = new PortfolioController(exchange, player, avatarPath);

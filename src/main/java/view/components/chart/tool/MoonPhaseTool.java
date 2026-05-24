@@ -2,7 +2,6 @@ package view.components.chart.tool;
 
 import java.time.LocalDate;
 import java.util.Map;
-import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import model.analysis.tools.MoonPhaseCalculator;
@@ -19,12 +18,6 @@ import view.theme.ThemeStyles;
  * @since 30-03-2026
  */
 public class MoonPhaseTool extends AbstractChartTool {
-
-  /** Grey hex colour used for vertical dashed lines marking new-moon days. */
-  private static final String NEW_MOON_COLOR = "#94A3B8";
-
-  /** Gold hex colour used for vertical dashed lines marking full-moon days. */
-  private static final String FULL_MOON_COLOR = "#F59E0B";
 
   /** Calendar date corresponding to day index 1 on the chart's x-axis. */
   private final LocalDate startDate;
@@ -82,7 +75,7 @@ public class MoonPhaseTool extends AbstractChartTool {
               MoonPhaseCalculator.Phase phase = entry.getValue();
               boolean isNewMoon = phase == MoonPhaseCalculator.Phase.NEW_MOON;
               String seriesName = (isNewMoon ? "New Moon" : "Full Moon") + " (Day " + day + ")";
-              String color = isNewMoon ? NEW_MOON_COLOR : FULL_MOON_COLOR;
+              String phaseClass = isNewMoon ? "moon-phase-new" : "moon-phase-full";
 
               XYChart.Series<Number, Number> series = new XYChart.Series<>();
               series.setName(seriesName);
@@ -90,31 +83,10 @@ public class MoonPhaseTool extends AbstractChartTool {
               series.getData().add(new XYChart.Data<>(day, markerHigh));
 
               addSeries(chart, series);
-
-              Platform.runLater(
-                  () -> {
-                    if (series.getNode() != null) {
-                      ThemeStyles.addStyleClasses(series.getNode(), "chart-overlay-line-dashed");
-                      series.getNode().setStyle("-fx-stroke: " + color + ";");
-                    }
-                  });
+              applyStyleClasses(series, "event-marker-line", phaseClass);
             });
 
     status.set(ownedSeries.isEmpty() ? "No moon phases in this range" : "");
-  }
-
-  private static double visibleLow(LineChart<Number, Number> chart) {
-    return chart.getData().getFirst().getData().stream()
-        .mapToDouble(data -> data.getYValue().doubleValue())
-        .min()
-        .orElse(0.0);
-  }
-
-  private static double visibleHigh(LineChart<Number, Number> chart) {
-    return chart.getData().getFirst().getData().stream()
-        .mapToDouble(data -> data.getYValue().doubleValue())
-        .max()
-        .orElse(0.0);
   }
 
   /** No-op: this tool draws automatically on activation and requires no click interaction. */

@@ -52,6 +52,7 @@ public class StocksPage extends BorderPane {
   private final StockDetailView detailView = new StockDetailView();
   private ChartRange selectedChartRange = ChartRange.ALL;
   private ChartToolSelection selectedChartTool = ChartToolSelection.NONE;
+  private StockChart currentChart;
 
   /**
    * @param stocks stocks list and selection state
@@ -104,6 +105,12 @@ public class StocksPage extends BorderPane {
 
     detailView.setTradeHandlers(
         trading, () -> getScene() != null ? getScene().getWindow() : null, onTradeComplete);
+    detailView.setOnEventClicked(
+        event -> {
+          if (currentChart != null) {
+            currentChart.toggleEventMarker(event.day(), event.title());
+          }
+        });
 
     chartPlaceholder.setWrapText(true);
     ThemeStyles.addStyleClasses(chartPlaceholder, "empty-state");
@@ -188,6 +195,7 @@ public class StocksPage extends BorderPane {
    * @param selected selected stock, or {@code null} when no stock is available
    */
   private void updateChart(Stock selected) {
+    currentChart = null;
     if (selected == null) {
       chartPlaceholder.setText("Select a stock to view its price chart.");
       chartPanel.setCenter(chartPlaceholder);
@@ -202,9 +210,10 @@ public class StocksPage extends BorderPane {
     }
 
     StockChart chart = new StockChart(selected, selectedChartRange);
+    currentChart = chart;
     registerAnalysisTools(chart);
-    chart.setMinHeight(360);
-    chart.setPrefHeight(520);
+    chart.setMinHeight(250);
+    chart.prefHeightProperty().bind(chartPanel.heightProperty().multiply(0.85));
     chartPanel.setCenter(chart);
     chartPanel.setBottom(buildChartControls(selected, chart));
   }

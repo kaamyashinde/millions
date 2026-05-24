@@ -3,7 +3,9 @@ package view.components.chart;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -24,10 +26,11 @@ import view.components.chart.tool.ChartTool;
 public class StockChart extends LineChart<Number, Number> {
 
   private static final double AXIS_PADDING_RATIO = 0.10;
-  private static final int TARGET_Y_AXIS_TICKS = 5;
+  private static final int TARGET_AXIS_TICKS = 5;
   private static final double FALLBACK_AXIS_PADDING = 1.0;
 
   private final List<ChartTool> tools = new ArrayList<>();
+  private final Map<Integer, XYChart.Series<Number, Number>> eventMarkers = new HashMap<>();
 
   /**
    * Creates a chart pre-populated with the price history of {@code stock}.
@@ -57,6 +60,7 @@ public class StockChart extends LineChart<Number, Number> {
     setAnimated(false);
 
     configureYAxis((NumberAxis) getYAxis(), visiblePrices);
+    configureXAxis((NumberAxis) getXAxis(), startIndex, visiblePrices);
     getData().add(buildSeries(visiblePrices, startIndex));
 
     setOnMouseClicked(
@@ -112,6 +116,67 @@ public class StockChart extends LineChart<Number, Number> {
   }
 
   /**
+   * Toggles a vertical marker at the given trading day. A second call for the same day removes it.
+   *
+   * @param day   1-based trading day on the X axis
+   * @param label series name shown in the chart legend
+   */
+  public void toggleEventMarker(int day, String label) {
+    if (eventMarkers.containsKey(day)) {
+      XYChart.Series<Number, Number> existing = eventMarkers.remove(day);
+      getData().remove(existing);
+      if (eventMarkers.isEmpty() && tools.stream().noneMatch(t -> t.activeProperty().get())) {
+        setLegendVisible(false);
+      }
+      return;
+    }
+
+    if (getData().isEmpty()) {
+      return;
+    }
+
+    List<XYChart.Data<Number, Number>> visibleData = getData().getFirst().getData();
+    if (visibleData.isEmpty()) {
+      return;
+    }
+
+    int firstDay = visibleData.getFirst().getXValue().intValue();
+    int lastDay = visibleData.getLast().getXValue().intValue();
+    if (day < firstDay || day > lastDay) {
+      return;
+    }
+
+    NumberAxis yAxis = (NumberAxis) getYAxis();
+    double markerLow = yAxis.getLowerBound();
+    double markerHigh = yAxis.getUpperBound();
+
+    XYChart.Series<Number, Number> series = new XYChart.Series<>();
+    series.setName(label);
+    series.getData().add(new XYChart.Data<>(day, markerLow));
+    series.getData().add(new XYChart.Data<>(day, markerHigh));
+
+    getData().add(series);
+    eventMarkers.put(day, series);
+    setLegendVisible(true);
+
+    ChartSeriesStyles.applyStyleClasses(series, "event-marker-line");
+  }
+
+  /**
+   * Removes all event markers from this chart.
+   */
+  public void clearEventMarkers() {
+    if (eventMarkers.isEmpty()) {
+      return;
+    }
+    getData().removeAll(eventMarkers.values());
+    eventMarkers.clear();
+    if (tools.stream().noneMatch(t -> t.activeProperty().get())) {
+      setLegendVisible(false);
+    }
+  }
+
+  /**
    * Builds the X axis labelled "Day" with minor ticks hidden.
    *
    * @return a configured {@link NumberAxis} for the horizontal axis
@@ -120,6 +185,7 @@ public class StockChart extends LineChart<Number, Number> {
     NumberAxis axis = new NumberAxis();
     axis.setLabel("Day");
     axis.setMinorTickVisible(false);
+    axis.setAutoRanging(false);
     return axis;
   }
 
@@ -154,6 +220,39 @@ public class StockChart extends LineChart<Number, Number> {
   }
 
   /**
+   * Applies a fixed X-axis range around the visible trading-day window.
+   *
+   * @param axis axis to update
+   * @param startIndex zero-based index of the first visible price in the full history
+   * @param visiblePrices prices currently shown by the chart
+   */
+  private static void configureXAxis(
+      NumberAxis axis, int startIndex, List<BigDecimal> visiblePrices) {
+    if (visiblePrices.isEmpty()) {
+      return;
+    }
+
+    int firstDay = startIndex + 1;
+    int lastDay = startIndex + visiblePrices.size();
+    AxisBounds bounds = calculateXAxisBounds(firstDay, lastDay);
+    axis.setLowerBound(bounds.lowerBound());
+    axis.setUpperBound(bounds.upperBound());
+    axis.setTickUnit(calculateTickUnit(bounds));
+  }
+
+  /**
+   * Calculates the padded X-axis bounds for the visible day range.
+   *
+   * @param firstDay first 1-based trading day shown
+   * @param lastDay last 1-based trading day shown
+   * @return lower and upper axis bounds with dynamic padding
+   */
+  private static AxisBounds calculateXAxisBounds(int firstDay, int lastDay) {
+    double padding = calculateAxisPadding(firstDay, lastDay);
+    return new AxisBounds(firstDay - padding, lastDay + padding);
+  }
+
+  /**
    * Applies a fixed Y-axis range around the visible price data.
    *
    * @param axis axis to update
@@ -184,11 +283,11 @@ public class StockChart extends LineChart<Number, Number> {
   }
 
   /**
-   * Calculates the Y-axis padding around the visible minimum and maximum.
+   * Calculates axis padding around the visible minimum and maximum.
    *
-   * @param min lowest visible price
-   * @param max highest visible price
-   * @return padding to apply above and below the data range
+   * @param min lowest visible value on the axis
+   * @param max highest visible value on the axis
+   * @return padding to apply below and above the data range
    */
   private static double calculateAxisPadding(double min, double max) {
     double spread = max - min;
@@ -201,13 +300,13 @@ public class StockChart extends LineChart<Number, Number> {
   }
 
   /**
-   * Calculates a readable Y-axis tick interval from the rendered axis span.
+   * Calculates a readable axis tick interval from the rendered axis span.
    *
    * @param bounds rendered axis bounds
-   * @return tick unit for the Y-axis
+   * @return tick unit for the axis
    */
   private static double calculateTickUnit(AxisBounds bounds) {
-    return (bounds.upperBound() - bounds.lowerBound()) / TARGET_Y_AXIS_TICKS;
+    return (bounds.upperBound() - bounds.lowerBound()) / TARGET_AXIS_TICKS;
   }
 
   /**

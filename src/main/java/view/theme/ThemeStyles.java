@@ -9,6 +9,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.stage.Window;
 import model.learning.content.Difficulty;
 
 /**
@@ -78,6 +79,23 @@ public final class ThemeStyles {
         .filter(styleClass -> styleClass != null && !styleClass.isBlank())
         .filter(styleClass -> !node.getStyleClass().contains(styleClass))
         .forEach(styleClass -> node.getStyleClass().add(styleClass));
+  }
+
+  /**
+   * Computes a dialog dimension as a fraction of the owner window, clamped to min/max.
+   *
+   * @param owner parent window; uses {@code min} when null
+   * @param fraction fraction of the larger owner dimension
+   * @param min minimum size
+   * @param max maximum size
+   * @return clamped dialog dimension
+   */
+  public static double dialogDimension(Window owner, double fraction, double min, double max) {
+    if (owner == null) {
+      return min;
+    }
+    double base = Math.max(owner.getWidth(), owner.getHeight()) * fraction;
+    return Math.max(min, Math.min(max, base));
   }
 
   /**

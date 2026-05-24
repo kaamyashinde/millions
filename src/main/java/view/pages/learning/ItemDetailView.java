@@ -6,13 +6,17 @@ import java.util.function.Consumer;
 import controller.LearningHubController;
 import controller.QuizController;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.web.WebView;
 import model.learning.content.LearningItem;
 import model.learning.content.LearningResource;
@@ -58,12 +62,13 @@ public class ItemDetailView extends BorderPane {
     this.quiz = quiz;
 
     setPadding(new Insets(16));
+    ThemeStyles.addStyleClasses(this, "learning-root");
 
     Button backBtn = new Button("← Back");
     ThemeStyles.styleButton(backBtn);
     backBtn.setOnAction(_ -> onBack.run());
 
-    HBox topBar = new HBox(backBtn);
+    VBox topBar = new VBox(12, backBtn, buildArticleHeader(item));
     topBar.setPadding(new Insets(0, 0, 8, 0));
     setTop(topBar);
 
@@ -82,8 +87,31 @@ public class ItemDetailView extends BorderPane {
     setCenter(scroll);
   }
 
+  private static VBox buildArticleHeader(LearningItem item) {
+    Label difficultyBadge = new Label(item.difficulty().name());
+    ThemeStyles.applyDifficultyBadge(difficultyBadge, item.difficulty());
+    ThemeStyles.addStyleClasses(difficultyBadge, "learning-article-badge-difficulty");
+
+    Label categoryBadge =
+        new Label(item.category().emoji() + "  " + item.category().name());
+    ThemeStyles.addStyleClasses(categoryBadge, "learning-article-badge-category");
+
+    HBox badges = new HBox(8, difficultyBadge, categoryBadge);
+    badges.setAlignment(Pos.CENTER_LEFT);
+    ThemeStyles.addStyleClasses(badges, "learning-article-badges");
+
+    Label title = new Label(item.title());
+    title.setFont(Font.font("System", FontWeight.BOLD, 26));
+    title.setWrapText(true);
+    ThemeStyles.addStyleClasses(title, "learning-article-title");
+
+    VBox header = new VBox(10, badges, title);
+    ThemeStyles.addStyleClasses(header, "learning-article-header");
+    return header;
+  }
+
   private javafx.scene.Node buildMarkdownView(LearningItem item) {
-    String bodyHtml = learningHub.getItemBodyHtml(item);
+    String bodyHtml = wrapExampleCallout(learningHub.getItemBodyHtml(item));
     String html = wrapMarkdownHtml(bodyHtml);
 
     WebView webView = new WebView();
@@ -240,24 +268,47 @@ public class ItemDetailView extends BorderPane {
         <style>
           body {
             background: #0B1220;
-            color: #F8FAFC;
+            color: #CBD5E1;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-size: 14px;
-            line-height: 1.7;
+            line-height: 1.75;
             margin: 0;
-            padding: 8px 4px;
+            padding: 4px 4px 8px;
           }
-          h1, h2, h3 { color: #F8FAFC; margin-top: 1.2em; margin-bottom: 0.4em; }
-          h2 { font-size: 1.15em; border-bottom: 1px solid #334155; padding-bottom: 4px; }
-          p { margin: 0.6em 0; }
+          h1 { display: none; }
+          h2 {
+            color: #F8FAFC;
+            font-size: 1.05em;
+            font-weight: 700;
+            margin: 1.5em 0 0.5em;
+            border: none;
+            padding: 0;
+          }
+          h2:first-of-type { margin-top: 0; }
+          h3 { color: #F8FAFC; margin-top: 1.2em; margin-bottom: 0.4em; }
+          p { margin: 0.65em 0; color: #CBD5E1; }
           ul, ol { padding-left: 1.4em; margin: 0.6em 0; }
-          li { margin-bottom: 4px; }
+          li { margin-bottom: 6px; color: #CBD5E1; }
+          li strong { color: #F8FAFC; }
           a { color: #0EA5A4; text-decoration: none; }
           a:hover { text-decoration: underline; }
           code { background: #111827; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
           pre { background: #111827; padding: 10px; border-radius: 6px; overflow-x: auto; }
           hr { border: none; border-top: 1px solid #334155; margin: 1em 0; }
-          strong { color: #F8FAFC; }
+          strong { color: #F8FAFC; font-weight: 600; }
+          .callout {
+            background: #111827;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin: 1.25em 0;
+          }
+          .callout h2 {
+            margin-top: 0;
+            font-size: 1em;
+            margin-bottom: 0.5em;
+          }
+          .callout p { margin: 0; }
         </style>
         </head>
         <body>
@@ -265,5 +316,27 @@ public class ItemDetailView extends BorderPane {
         </body>
         </html>
         """;
+  }
+
+  /**
+   * Wraps the Example section in a styled callout container for card-like presentation.
+   *
+   * @param html rendered markdown body HTML
+   * @return HTML with the Example block wrapped in {@code div.callout}
+   */
+  static String wrapExampleCallout(String html) {
+    if (html == null) {
+      return null;
+    }
+    String marker = "<h2>Example</h2>";
+    int start = html.indexOf(marker);
+    if (start < 0) {
+      return html;
+    }
+    int nextHeading = html.indexOf("<h2>", start + marker.length());
+    String exampleBlock =
+        nextHeading >= 0 ? html.substring(start, nextHeading) : html.substring(start);
+    String wrapped = "<div class=\"callout\">" + exampleBlock + "</div>";
+    return html.substring(0, start) + wrapped + (nextHeading >= 0 ? html.substring(nextHeading) : "");
   }
 }

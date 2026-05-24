@@ -30,7 +30,6 @@ import model.exception.auth.RegistrationValidationException;
 import model.session.SessionService;
 import model.session.SessionServiceFactory;
 import model.session.validation.ValidationError;
-import model.trading.transaction.Purchase;
 import model.trading.transaction.Transaction;
 import util.I18n;
 import java.nio.file.Path;
@@ -1011,7 +1010,7 @@ public class UserInterface {
     }
     System.out.println(I18n.format("transactions.header", day));
     transactions.forEach(t -> {
-      String type = t instanceof Purchase ? I18n.get("tx.type.purchase") : I18n.get("tx.type.sale");
+      String type = I18n.get("tx.type." + t.getTypeName().toLowerCase());
       String sym = t.getShare().getAsset().getSymbol();
       String qty = t.getShare().getQuantity().toString();
       System.out.println(I18n.format("transaction.line", t.getDay(), type, sym, qty));

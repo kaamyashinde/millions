@@ -29,6 +29,11 @@ public class Sale extends Transaction {
     this.saleCalc = (SaleCalculator) this.getCalculator();
   }
 
+  @Override
+  public String getTypeName() {
+    return "Sale";
+  }
+
   /**
    * No separate precondition check needed; the share removal in
    * {@link #execute(Player)} is atomic (validates and removes in one step).

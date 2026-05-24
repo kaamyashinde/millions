@@ -2,7 +2,6 @@ package view.components.chart.tool;
 
 import java.math.BigDecimal;
 import java.util.List;
-import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import view.theme.ThemeStyles;
@@ -29,13 +28,6 @@ public class FibonacciTool extends AbstractChartTool {
     IDLE,
     AWAITING_SECOND
   }
-
-  /**
-   * Seven hex colour strings mapped to Fibonacci retracement levels in order (0 % through 100 %).
-   */
-  private static final String[] COLORS = {
-    "#F8FAFC", "#F59E0B", "#EF4444", "#14B8A6", "#0EA5A4", "#22C55E", "#94A3B8"
-  };
 
   /** Current interaction state of the two-click workflow. */
   private State state = State.IDLE;
@@ -119,37 +111,11 @@ public class FibonacciTool extends AbstractChartTool {
       series.getData().add(new XYChart.Data<>(firstDay, levelPrice));
       series.getData().add(new XYChart.Data<>(lastDay, levelPrice));
 
-      final String color = COLORS[i];
       addSeries(chart, series);
-
-      Platform.runLater(
-          () -> {
-            if (series.getNode() != null) {
-              ThemeStyles.addStyleClasses(series.getNode(), "chart-overlay-line-dashed");
-              series.getNode().setStyle("-fx-stroke: " + color + ";");
-            }
-          });
+      applyStyleClasses(series, "chart-overlay-dashed");
     }
 
     chart.setLegendVisible(true);
-  }
-
-  private static List<XYChart.Data<Number, Number>> visibleData(LineChart<Number, Number> chart) {
-    return chart.getData().getFirst().getData();
-  }
-
-  private static double visibleLow(LineChart<Number, Number> chart) {
-    return visibleData(chart).stream()
-        .mapToDouble(data -> data.getYValue().doubleValue())
-        .min()
-        .orElse(0.0);
-  }
-
-  private static double visibleHigh(LineChart<Number, Number> chart) {
-    return visibleData(chart).stream()
-        .mapToDouble(data -> data.getYValue().doubleValue())
-        .max()
-        .orElse(0.0);
   }
 
   /**

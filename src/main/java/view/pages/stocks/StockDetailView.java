@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -63,7 +64,7 @@ public class StockDetailView extends BorderPane {
       new StockRecommendationLabel(StockRecommendation.HOLD);
   private final Label placeholderLabel =
       new Label("Choose a stock from the list to view chart and recommendation details.");
-  private final ListView<String> marketHistoryList = new ListView<>();
+  private final ListView<MarketEvent> marketHistoryList = new ListView<>();
   private final VBox recommendationBox;
   private final VBox content = new VBox(16);
 
@@ -78,6 +79,7 @@ public class StockDetailView extends BorderPane {
   private TradingController tradingController;
   private Supplier<Window> dialogOwnerSupplier;
   private Runnable onTradeComplete;
+  private Consumer<MarketEvent> onEventClicked;
 
   /**
    * Builds an initially empty stock detail view.
@@ -93,8 +95,27 @@ public class StockDetailView extends BorderPane {
     basisLabel.setWrapText(true);
     placeholderLabel.setWrapText(true);
     marketHistoryList.setPlaceholder(new Label("No past events for this stock yet."));
-    marketHistoryList.setFocusTraversable(false);
-    marketHistoryList.setMouseTransparent(true);
+    marketHistoryList.setCellFactory(_ -> new javafx.scene.control.ListCell<>() {
+      @Override
+      protected void updateItem(MarketEvent event, boolean empty) {
+        super.updateItem(event, empty);
+        if (empty || event == null) {
+          setText(null);
+        } else {
+          setText(formatMarketHistoryItem(event));
+        }
+      }
+    });
+    marketHistoryList.setOnMouseClicked(
+        event -> {
+          if (event.getClickCount() != 1) {
+            return;
+          }
+          MarketEvent selected = marketHistoryList.getSelectionModel().getSelectedItem();
+          if (selected != null && onEventClicked != null) {
+            onEventClicked.accept(selected);
+          }
+        });
     marketHistoryList.setMaxHeight(140);
 
     fundamentalsHeading.setFont(Font.font("System", FontWeight.BOLD, 14));
@@ -153,13 +174,14 @@ public class StockDetailView extends BorderPane {
   }
 
   /**
-   * Displays details for the selected stock together with the latest and past market events.
+   * Registers a callback invoked when the user clicks a past market event in the list.
    *
-   * @param stock selected stock, or {@code null} to show the empty state
-   * @param tradingDay current exchange trading day
-   * @param marketEvent latest market event, if one occurred on the current day
-   * @param marketHistory past market events relevant to the selected stock
+   * @param onEventClicked consumer receiving the clicked event, or {@code null} to clear
    */
+  public void setOnEventClicked(Consumer<MarketEvent> onEventClicked) {
+    this.onEventClicked = onEventClicked;
+  }
+
   /**
    * Configures buy/sell actions shown when a stock is selected.
    *
@@ -220,7 +242,7 @@ public class StockDetailView extends BorderPane {
     latestPriceLabel.setText("Latest price: " + formatLatestPrice(stock));
     marketEventLabel.setText(buildMarketEventText(stock, marketEvent));
     applyFundamentalsLabels(stock);
-    marketHistoryList.setItems(FXCollections.observableArrayList(buildMarketHistoryItems(marketHistory)));
+    marketHistoryList.setItems(FXCollections.observableArrayList(buildMarketHistoryList(marketHistory)));
     recommendationLabel.setRecommendation(resolveRecommendation(stock));
     updateTradeActions(stock);
 
@@ -354,7 +376,7 @@ public class StockDetailView extends BorderPane {
    * @return immutable copy of the current past-event rows
    */
   public List<String> getDisplayedMarketHistory() {
-    return List.copyOf(marketHistoryList.getItems());
+    return marketHistoryList.getItems().stream().map(StockDetailView::formatMarketHistoryItem).toList();
   }
 
   /**
@@ -446,11 +468,13 @@ public class StockDetailView extends BorderPane {
    * @param marketHistory past events relevant to the selected stock
    * @return rendered rows for the list view
    */
-  private static List<String> buildMarketHistoryItems(List<MarketEvent> marketHistory) {
+  private static List<MarketEvent> buildMarketHistoryList(List<MarketEvent> marketHistory) {
     List<MarketEvent> reversedHistory = new ArrayList<>(marketHistory);
     Collections.reverse(reversedHistory);
-    return reversedHistory.stream()
-        .map(event -> "Day " + event.day() + " - " + event.title() + ": " + event.description())
-        .toList();
+    return reversedHistory;
+  }
+
+  private static String formatMarketHistoryItem(MarketEvent event) {
+    return "Day " + event.day() + " - " + event.title() + ": " + event.description();
   }
 }
