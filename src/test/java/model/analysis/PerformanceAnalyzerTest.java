@@ -2,11 +2,13 @@ package model.analysis;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import model.analysis.performance.MetricStatus;
+import model.analysis.performance.MetricValue;
 import model.analysis.performance.PerformanceAnalyzer;
 import model.analysis.performance.PerformanceMetrics;
 
@@ -53,5 +55,19 @@ class PerformanceAnalyzerTest {
     assertEquals(MetricStatus.AVAILABLE, metrics.volatility().status());
     assertEquals(0, BigDecimal.ZERO.compareTo(metrics.volatility().value()));
     assertEquals(MetricStatus.ZERO_VOLATILITY, metrics.sharpeRatio().status());
+  }
+
+  @Test
+  void calculateMetrics_rejectsZeroStartingValue() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> PerformanceAnalyzer.calculateMetrics(List.of(BigDecimal.ZERO, BigDecimal.ONE)));
+  }
+
+  @Test
+  void unavailableMetricRejectsAvailableStatus() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> MetricValue.unavailable(MetricStatus.AVAILABLE));
   }
 }
