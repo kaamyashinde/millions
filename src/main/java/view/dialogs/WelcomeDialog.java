@@ -76,7 +76,10 @@ public final class WelcomeDialog {
     if (owner != null) {
       stage.initOwner(owner);
     }
-    Scene scene = new Scene(root, 560, 480);
+    Scene scene = new Scene(
+        root,
+        ThemeStyles.dialogDimension(owner, 0.50, 480, 640),
+        ThemeStyles.dialogDimension(owner, 0.65, 400, 560));
     ThemeStyles.install(scene);
     stage.setScene(scene);
     close.setOnAction(_ -> stage.close());

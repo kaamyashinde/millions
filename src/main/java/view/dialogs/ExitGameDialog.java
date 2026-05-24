@@ -96,7 +96,10 @@ public final class ExitGameDialog {
     root.setPadding(new Insets(16));
     root.setAlignment(Pos.TOP_LEFT);
 
-    Scene scene = new Scene(root, 400, 200);
+    Scene scene = new Scene(
+        root,
+        ThemeStyles.dialogDimension(owner, 0.40, 380, 480),
+        ThemeStyles.dialogDimension(owner, 0.35, 190, 260));
     ThemeStyles.install(scene);
     ThemeStyles.addStyleClasses(root, "dialog-root");
     ThemeStyles.styleField(pinField);

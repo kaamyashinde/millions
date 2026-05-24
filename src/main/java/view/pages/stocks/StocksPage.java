@@ -203,8 +203,8 @@ public class StocksPage extends BorderPane {
 
     StockChart chart = new StockChart(selected, selectedChartRange);
     registerAnalysisTools(chart);
-    chart.setMinHeight(360);
-    chart.setPrefHeight(520);
+    chart.setMinHeight(250);
+    chart.prefHeightProperty().bind(chartPanel.heightProperty().multiply(0.85));
     chartPanel.setCenter(chart);
     chartPanel.setBottom(buildChartControls(selected, chart));
   }

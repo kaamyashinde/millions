@@ -186,7 +186,10 @@ public final class ProfileEditorDialog {
     root.setPadding(new Insets(16));
     root.setAlignment(Pos.TOP_LEFT);
 
-    Scene scene = new Scene(root, 420, 460);
+    Scene scene = new Scene(
+        root,
+        ThemeStyles.dialogDimension(owner, 0.40, 400, 520),
+        ThemeStyles.dialogDimension(owner, 0.65, 440, 560));
     ThemeStyles.install(scene);
     ThemeStyles.addStyleClasses(root, "dialog-root");
     ThemeStyles.styleField(nameField);

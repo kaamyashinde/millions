@@ -242,7 +242,10 @@ public final class TradeDialog {
       TextField secondaryField,
       Button confirm,
       Button cancel) {
-    Scene scene = new Scene(root, 420, 320);
+    Scene scene = new Scene(
+        root,
+        ThemeStyles.dialogDimension(stage.getOwner(), 0.40, 380, 500),
+        ThemeStyles.dialogDimension(stage.getOwner(), 0.50, 300, 420));
     ThemeStyles.install(scene);
     ThemeStyles.addStyleClasses(root, "dialog-root");
     ThemeStyles.styleField(primaryField);
