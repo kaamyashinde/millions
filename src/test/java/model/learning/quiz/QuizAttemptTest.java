@@ -93,4 +93,18 @@ class QuizAttemptTest {
     List<String> snapshot = attempt.givenAnswerIds();
     assertThrows(UnsupportedOperationException.class, () -> snapshot.add("x"));
   }
+
+  @Test
+  void quizReturnsOriginalQuiz() {
+    QuizAttempt attempt = new QuizAttempt(quiz);
+
+    assertEquals(quiz, attempt.quiz());
+  }
+
+  @Test
+  void quizRejectsEmptyQuestions() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Quiz("empty", "topic", "Empty", List.of()));
+  }
 }
