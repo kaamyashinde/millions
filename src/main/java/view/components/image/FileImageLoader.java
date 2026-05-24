@@ -15,6 +15,12 @@ import javafx.scene.image.Image;
 public final class FileImageLoader implements ImageLoader {
 
   /**
+   * Creates a file-backed image loader.
+   */
+  public FileImageLoader() {
+  }
+
+  /**
    * Opens the path and builds a square, smoothed {@link Image}, or returns {@code null} on error.
    *
    * @param imagePath file to read (caller should ensure it exists)

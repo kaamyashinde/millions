@@ -36,7 +36,8 @@ public final class ProfileEditorDialog {
    * Shows the profile editor for the active session.
    *
    * @param owner parent window
-   * @param sessionService session service
+   * @param controller profile editor controller
+   * @param exitGame exit-game controller for profile deletion
    * @param onSaved invoked after a successful save (e.g. refresh UI)
    * @param onAccountDeleted invoked after the current profile was deleted
    */
