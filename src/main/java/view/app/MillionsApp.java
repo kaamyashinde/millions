@@ -31,6 +31,7 @@ import view.pages.savings.SavingsPage;
 import view.pages.stocks.StocksPage;
 import view.pages.transactions.TransactionHistoryPage;
 import view.theme.ThemeStyles;
+import view.validation.AuthFormValidation;
 
 /**
  * JavaFX entry point for the Millions application.
@@ -256,15 +257,6 @@ public class MillionsApp extends Application {
   }
 
   private static String mapValidationMessage(String message) {
-    if (message == null) {
-      return "Invalid input.";
-    }
-    return switch (message) {
-      case "Username must be 3-32 characters using letters, numbers, underscores, or hyphens." ->
-          "Username must be 3-32 characters (letters, numbers, _ or -).";
-      case "PIN must be 4 to 8 digits." -> "PIN must be 4 to 8 digits.";
-      case "Starting money must be non-negative." -> "Starting money must be non-negative.";
-      default -> "Invalid input.";
-    };
+    return AuthFormValidation.mapValidationMessage(message);
   }
 }
