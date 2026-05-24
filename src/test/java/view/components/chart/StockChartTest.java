@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests price-axis behaviour for stock charts.
+ * Tests axis behaviour for stock charts.
  */
 class StockChartTest {
 
@@ -72,6 +72,44 @@ class StockChartTest {
 
     assertEquals(90.00, bounds.lowerBound(), AXIS_DELTA);
     assertEquals(110.00, bounds.upperBound(), AXIS_DELTA);
+  }
+
+  @Test
+  void xAxisUsesSelectedChartRange() throws Exception {
+    AxisBounds bounds =
+        runOnFxThread(
+            () ->
+                xAxisBoundsFor(
+                    stockWithPrices(
+                        "RNG", "Range Filter", "10", "20", "30", "40", "50", "60"),
+                    ChartRange.FIVE_DAYS));
+
+    assertEquals(1.60, bounds.lowerBound(), AXIS_DELTA);
+    assertEquals(6.40, bounds.upperBound(), AXIS_DELTA);
+  }
+
+  @Test
+  void xAxisUsesFallbackPaddingForSingleDay() throws Exception {
+    AxisBounds bounds =
+        runOnFxThread(
+            () ->
+                xAxisBoundsFor(
+                    stockWithPrices("ONE", "One Day", "10", "11", "12"), ChartRange.ONE_DAY));
+
+    assertEquals(2.70, bounds.lowerBound(), AXIS_DELTA);
+    assertEquals(3.30, bounds.upperBound(), AXIS_DELTA);
+  }
+
+  @Test
+  void xAxisUsesFullHistoryForAllRange() throws Exception {
+    AxisBounds bounds =
+        runOnFxThread(
+            () ->
+                xAxisBoundsFor(
+                    stockWithPrices("FULL", "Full Range", "10", "11", "12"), ChartRange.ALL));
+
+    assertEquals(0.80, bounds.lowerBound(), AXIS_DELTA);
+    assertEquals(3.20, bounds.upperBound(), AXIS_DELTA);
   }
 
   @Test
@@ -145,6 +183,14 @@ class StockChartTest {
 
     NumberAxis yAxis = (NumberAxis) chart.getYAxis();
     return new AxisBounds(yAxis.getLowerBound(), yAxis.getUpperBound());
+  }
+
+  private static AxisBounds xAxisBoundsFor(Stock stock, ChartRange range) {
+    StockChart chart = new StockChart(stock, range);
+    layout(chart);
+
+    NumberAxis xAxis = (NumberAxis) chart.getXAxis();
+    return new AxisBounds(xAxis.getLowerBound(), xAxis.getUpperBound());
   }
 
   private static void layout(StockChart chart) {
