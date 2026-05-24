@@ -23,6 +23,11 @@ public class LeaderboardPage extends BorderPane {
   private final TableView<LeaderboardRow> table = new TableView<>();
   private final ObservableList<LeaderboardRow> rows = FXCollections.observableArrayList();
 
+  /**
+   * Creates a leaderboard page backed by the session service.
+   *
+   * @param sessionService session service that loads local leaderboard rows
+   */
   public LeaderboardPage(SessionService sessionService) {
     this.sessionService = sessionService;
     setPadding(new Insets(16));
