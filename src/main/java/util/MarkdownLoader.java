@@ -3,14 +3,20 @@ package util;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
+
 /**
  * Loads markdown content files from the classpath.
  *
  * @author kaamyashinde
- * @version 1.0.0
+ * @version 1.1.0
  * @since 04-04-2026
  */
 public final class MarkdownLoader {
+
+  private static final Parser MD_PARSER = Parser.builder().build();
+  private static final HtmlRenderer HTML_RENDERER = HtmlRenderer.builder().build();
 
   private MarkdownLoader() {
   }
@@ -31,5 +37,36 @@ public final class MarkdownLoader {
     } catch (Exception e) {
       return "";
     }
+  }
+
+  /**
+   * Loads a markdown resource and converts it to an HTML body fragment.
+   *
+   * @param resourcePath classpath-relative path to the markdown file
+   * @return rendered HTML body, or a fallback paragraph when content is missing
+   */
+  public static String toHtml(String resourcePath) {
+    String markdown = load(resourcePath);
+    if (markdown.isEmpty()) {
+      return "<p style='color:#CBD5E1'>Content not available.</p>";
+    }
+    return HTML_RENDERER.render(MD_PARSER.parse(stripFrontMatter(markdown)));
+  }
+
+  /**
+   * Removes a leading YAML front matter block ({@code --- ... ---}) when present.
+   *
+   * @param markdown raw markdown file content
+   * @return markdown body without front matter
+   */
+  static String stripFrontMatter(String markdown) {
+    if (!markdown.startsWith("---")) {
+      return markdown;
+    }
+    int closing = markdown.indexOf("\n---", 3);
+    if (closing < 0) {
+      return markdown;
+    }
+    return markdown.substring(closing + 4).stripLeading();
   }
 }

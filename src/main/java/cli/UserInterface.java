@@ -5,45 +5,32 @@ import java.math.RoundingMode;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-import model.Exchange;
-import model.Player;
-import model.Stock;
-import model.Share;
-import model.analysis.MetricStatus;
-import model.analysis.MetricValue;
-import model.analysis.PerformanceComparison;
-import model.analysis.PortfolioPerformanceService;
-import model.exception.InsufficientFundsException;
-import model.exception.InsufficientSharesException;
-import model.exception.ShareNotFoundException;
-import model.fund.Fund;
-import model.fund.FundComponent;
-import model.persistence.GameStateMapper;
-import model.persistence.GameStateRepository;
-import model.persistence.MarketData;
-import model.persistence.MarketDataLoader;
-import model.persistence.PinHashingService;
-import model.persistence.ProfileImageService;
-import model.persistence.ProfilePreferencesRepository;
-import model.persistence.SavedRunMapper;
-import model.persistence.SavedRunRepository;
-import model.persistence.UserAccountRepository;
-import model.savings.RegularSavingsPlan;
-import model.savings.RegularSavingsProcessor;
-import model.savings.SavingsInstallmentMode;
+import model.core.market.Exchange;
+import model.core.player.Player;
+import model.core.asset.Stock;
+import model.analysis.performance.MetricStatus;
+import model.analysis.performance.MetricValue;
+import model.analysis.performance.PerformanceComparison;
+import model.analysis.performance.PortfolioPerformanceService;
+import model.core.asset.Share;
+import model.exception.trading.InsufficientFundsException;
+import model.exception.trading.InsufficientSharesException;
+import model.exception.trading.ShareNotFoundException;
+import model.core.asset.fund.Fund;
+import model.core.asset.fund.FundComponent;
+import model.exception.market.MarketDataImportException;
+import java.util.Optional;
+import model.trading.savings.RegularSavingsPlan;
+import model.trading.savings.RegularSavingsProcessor;
+import model.trading.savings.SavingsInstallmentMode;
 import model.session.ActiveSession;
-import model.session.AuthService;
-import model.session.AuthenticationException;
-import model.session.DuplicateUsernameException;
-import model.session.GamePersistenceService;
-import model.session.ProfilePreferencesService;
-import model.session.ProfileService;
-import model.session.RegistrationValidationException;
-import model.session.SavedRunService;
+import model.exception.auth.AuthenticationException;
+import model.exception.auth.DuplicateUsernameException;
+import model.exception.auth.RegistrationValidationException;
 import model.session.SessionService;
+import model.session.SessionServiceFactory;
 import model.session.validation.ValidationError;
-import model.transaction.Purchase;
-import model.transaction.Transaction;
+import model.trading.transaction.Transaction;
 import util.I18n;
 import java.nio.file.Path;
 
@@ -111,35 +98,11 @@ public class UserInterface {
    * Initialises the session layer and starts with no active user.
    */
   private static void init() {
-    UserAccountRepository userAccountRepository = new UserAccountRepository(PROFILES_ROOT);
-    PinHashingService pinHashingService = new PinHashingService();
-
-    GamePersistenceService gamePersistenceService = new GamePersistenceService(
-        new GameStateRepository(PROFILES_ROOT),
-        new GameStateMapper(EXCHANGE_NAME),
-        UserInterface::loadMarketData);
-
-    AuthService authService = new AuthService(
-        userAccountRepository, pinHashingService, gamePersistenceService);
-
-    ProfileService profileService = new ProfileService(
-        userAccountRepository,
-        new ProfileImageService(PROFILES_ROOT),
-        pinHashingService,
-        PROFILES_ROOT);
-
-    SavedRunService savedRunService = new SavedRunService(
-        new SavedRunRepository(PROFILES_ROOT), new SavedRunMapper());
-
-    ProfilePreferencesService profilePreferencesService = new ProfilePreferencesService(
-        new ProfilePreferencesRepository(PROFILES_ROOT));
-
-    sessionService = new SessionService(
-        authService,
-        profileService,
-        gamePersistenceService,
-        savedRunService,
-        profilePreferencesService);
+    sessionService = SessionServiceFactory.createLocalProfileSessionService(
+        PROFILES_ROOT,
+        DEMO_MARKET_DATA_RESOURCE,
+        UserInterface.class,
+        EXCHANGE_NAME);
     player = null;
     exchange = null;
   }
@@ -265,13 +228,21 @@ public class UserInterface {
     System.out.println(I18n.get("prompt.startingMoney"));
     try {
       BigDecimal startingMoney = new BigDecimal(input.nextLine().trim());
-      ActiveSession session = sessionService.register(username, pin, startingMoney);
+      System.out.println("Market data file path (leave blank for default):");
+      String marketDataPath = input.nextLine().trim();
+      Optional<Path> marketDataSource = marketDataPath.isEmpty()
+          ? Optional.empty()
+          : Optional.of(Path.of(marketDataPath));
+      ActiveSession session = sessionService.register(
+          username, pin, startingMoney, marketDataSource);
       applyActiveSession(session);
       System.out.println(I18n.format("auth.registered", session.username(), startingMoney));
     } catch (NumberFormatException e) {
       System.out.println(I18n.get("invalid.input"));
     } catch (DuplicateUsernameException e) {
       System.out.println(I18n.get("auth.duplicateUsername"));
+    } catch (MarketDataImportException e) {
+      System.out.println(e.getMessage());
     } catch (RegistrationValidationException e) {
       System.out.println(registrationValidationMessage(e.error()));
     }
@@ -1039,27 +1010,11 @@ public class UserInterface {
     }
     System.out.println(I18n.format("transactions.header", day));
     transactions.forEach(t -> {
-      String type = t instanceof Purchase ? I18n.get("tx.type.purchase") : I18n.get("tx.type.sale");
+      String type = I18n.get("tx.type." + t.getTypeName().toLowerCase());
       String sym = t.getShare().getAsset().getSymbol();
       String qty = t.getShare().getQuantity().toString();
       System.out.println(I18n.format("transaction.line", t.getDay(), type, sym, qty));
     });
-  }
-
-  /**
-   * Loads the bundled market data used to create fresh per-user exchanges.
-   *
-   * @return bundled market-data payload
-   */
-  private static MarketData loadMarketData() {
-    MarketData marketData = MarketDataLoader.loadFromResource(
-        UserInterface.class,
-        DEMO_MARKET_DATA_RESOURCE);
-    if (marketData.stocks().isEmpty()) {
-      throw new IllegalStateException("Could not load demo market data from "
-          + DEMO_MARKET_DATA_RESOURCE);
-    }
-    return marketData;
   }
 
   /**
@@ -1149,7 +1104,7 @@ public class UserInterface {
     String pinLine = input.nextLine();
     char[] pin = pinLine.toCharArray();
     try {
-      sessionService.deleteActiveProfile(pin);
+      sessionService.exitGameAndDeleteProfile(pin);
       clearActiveSession();
       System.out.println(I18n.get("profile.deleted"));
     } catch (AuthenticationException exception) {

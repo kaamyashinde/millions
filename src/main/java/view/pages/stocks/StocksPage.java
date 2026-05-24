@@ -1,18 +1,18 @@
 package view.pages.stocks;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import static util.Validator.checkNotNull;
+
+import java.time.LocalDate;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -20,73 +20,113 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.Exchange;
-import model.Stock;
-import model.stockinfo.StockFinancialInfoProvider;
-import model.marketevent.MarketEvent;
+import controller.StockDetailController;
+import controller.StocksController;
+import controller.TradingController;
+import model.core.asset.Stock;
+import model.core.asset.info.StockFinancialInfo;
+import view.components.chart.AnalysisToolbar;
+import view.components.chart.ChartRange;
+import view.components.chart.ChartToolSelection;
+import view.components.chart.StockChart;
+import view.components.chart.tool.ElliottWaveTool;
+import view.components.chart.tool.FibonacciTool;
+import view.components.chart.tool.MoonPhaseTool;
 import view.theme.ThemeStyles;
 
 /**
- * JavaFX panel listing all stocks on an {@link Exchange}: symbol, company, latest price, mock
- * revenue, and health indicator.
- * Prices reflect the same {@link Stock} instances as the rest of the demo; use {@link #refresh()}
- * after trading days advance so the table re-renders updated values.
- *
- * @author kevindmazali
- * @version 1.0.0
- * @since 30-03-2026
+ * JavaFX panel listing stocks with a detail pane and buy actions.
  */
 public class StocksPage extends BorderPane {
 
-  private final Exchange exchange;
-  private final StockFinancialInfoProvider financialInfoProvider = new StockFinancialInfoProvider();
+  private static final LocalDate SIMULATION_START_DATE = LocalDate.of(2024, 1, 11);
+
+  private final StocksController stocks;
+  private final StockDetailController stockDetail;
+  private final Runnable onTradeComplete;
+
   private final Label metaLabel = new Label();
+  private final BorderPane chartPanel = new BorderPane();
+  private final Label chartPlaceholder = new Label("Select a stock to view its price chart.");
   private final TableView<Stock> table = new TableView<>();
-  private final ObservableList<Stock> rows = FXCollections.observableArrayList();
   private final StockDetailView detailView = new StockDetailView();
+  private ChartRange selectedChartRange = ChartRange.ALL;
+  private ChartToolSelection selectedChartTool = ChartToolSelection.NONE;
+  private StockChart currentChart;
 
   /**
-   * Builds a read-only listing for the given exchange.
-   *
-   * @param exchange exchange whose listed stocks are shown (via {@link Exchange#findStocks(String)})
+   * @param stocks stocks list and selection state
+   * @param stockDetail fundamentals and market events for the detail pane
+   * @param trading trading operations for buy dialog
+   * @param onTradeComplete invoked after a successful trade
    */
-  public StocksPage(Exchange exchange) {
-    this.exchange = exchange;
+  public StocksPage(
+      StocksController stocks,
+      StockDetailController stockDetail,
+      TradingController trading,
+      Runnable onTradeComplete) {
+    checkNotNull(stocks, "stocks");
+    checkNotNull(stockDetail, "stockDetail");
+    checkNotNull(trading, "trading");
+    checkNotNull(onTradeComplete, "onTradeComplete");
+    this.stocks = stocks;
+    this.stockDetail = stockDetail;
+    this.onTradeComplete = onTradeComplete;
 
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
 
-    Text heading = new Text("Available stocks");
+    Text heading = new Text("Available Stocks");
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
     ThemeStyles.addStyleClasses(heading, "finance-page-title");
 
     metaLabel.setWrapText(true);
     ThemeStyles.addStyleClasses(metaLabel, "finance-meta");
+    VBox.setMargin(metaLabel, new Insets(0, 0, 8, 0));
 
-    Button refreshBtn = new Button("Refresh");
-    styleButton(refreshBtn);
-    refreshBtn.setOnAction(_ -> refresh());
-
-    HBox topRow = new HBox(16, heading, refreshBtn);
+    HBox topRow = new HBox(16, heading);
     topRow.setAlignment(Pos.CENTER_LEFT);
 
-    VBox top = new VBox(8, topRow, metaLabel);
+    VBox top = new VBox(4, topRow, metaLabel);
     setTop(top);
 
     buildTable();
-    table.setItems(rows);
+    table.setItems(stocks.getStocks());
     table.setPlaceholder(new Label("No stocks available."));
     table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+    table.setMinHeight(220);
+    table.setPrefHeight(320);
     VBox.setVgrow(table, Priority.ALWAYS);
-    table.getSelectionModel().selectedItemProperty().addListener((obs, previous, selected) ->
-        detailView.showStock(
-            selected,
-            exchange.getDay(),
-            exchange.getLastMarketEvent(),
-            getMarketHistoryForStock(selected)));
 
-    SplitPane splitPane = new SplitPane(table, detailView);
-    splitPane.setDividerPositions(0.46);
+    table.getSelectionModel().selectedItemProperty().addListener((obs, previous, selected) -> {
+      stocks.setSelectedStock(selected);
+      updateDetail(selected);
+    });
+
+    detailView.setTradeHandlers(
+        trading, () -> getScene() != null ? getScene().getWindow() : null, onTradeComplete);
+    detailView.setOnEventClicked(
+        event -> {
+          if (currentChart != null) {
+            currentChart.toggleEventMarker(event.day(), event.title());
+          }
+        });
+
+    chartPlaceholder.setWrapText(true);
+    ThemeStyles.addStyleClasses(chartPlaceholder, "empty-state");
+    chartPanel.setPadding(new Insets(16));
+    chartPanel.setMinWidth(360);
+    ThemeStyles.addStyleClasses(chartPanel, "finance-panel");
+
+    VBox rightColumn = new VBox(12, table, detailView);
+    rightColumn.setFillWidth(true);
+    ScrollPane rightScroll = new ScrollPane(rightColumn);
+    rightScroll.setFitToWidth(true);
+    rightScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+    rightScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+    SplitPane splitPane = new SplitPane(chartPanel, rightScroll);
+    splitPane.setDividerPositions(0.58);
     setCenter(splitPane);
 
     refresh();
@@ -99,96 +139,129 @@ public class StocksPage extends BorderPane {
     TableColumn<Stock, String> colCompany = new TableColumn<>("Company");
     colCompany.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCompany()));
 
-    TableColumn<Stock, String> colPrice = new TableColumn<>("Latest price");
+    TableColumn<Stock, String> colPrice = new TableColumn<>("Latest Price");
     colPrice.setCellValueFactory(
         c -> new SimpleStringProperty(c.getValue().getSalesPrice().toPlainString()));
 
-    TableColumn<Stock, String> colRevenue = new TableColumn<>("Revenue (mock)");
+    TableColumn<Stock, String> colRevenue = new TableColumn<>("Revenue (Mock)");
     colRevenue.setCellValueFactory(
-        c ->
-            new SimpleStringProperty(
-                financialInfoProvider.formatMoney(
-                    financialInfoProvider.forStock(c.getValue()).revenue())));
+        c -> {
+          StockFinancialInfo fin = stockDetail.financialInfo(c.getValue());
+          return new SimpleStringProperty(stockDetail.formatMoney(fin.revenue()));
+        });
 
     TableColumn<Stock, String> colHealth = new TableColumn<>("Health");
     colHealth.setCellValueFactory(
-        c ->
-            new SimpleStringProperty(
-                financialInfoProvider.forStock(c.getValue()).health().displayLabel()));
+        c -> new SimpleStringProperty(stockDetail.financialInfo(c.getValue()).health().displayLabel()));
 
-    table.getColumns().setAll(List.of(colSym, colCompany, colPrice, colRevenue, colHealth));
+    table.getColumns().setAll(colSym, colCompany, colPrice, colRevenue, colHealth);
   }
 
   /**
-   * Reloads row order from the exchange, updates the day label, and forces the table to redraw
-   * prices (needed after another tab advances the trading day).
+   * Reloads list metadata and the detail pane for the current selection.
    */
   public void refresh() {
-    metaLabel.setText(
-        exchange.getName()
-            + " · trading day "
-            + exchange.getDay()
-            + " · "
-            + exchange.findStocks("").size()
-            + " listing(s)");
-    List<Stock> sorted = new ArrayList<>(exchange.findStocks(""));
-    sorted.sort(Comparator.comparing(Stock::getSymbol));
-    Stock previousSelection = table.getSelectionModel().getSelectedItem();
-    rows.setAll(sorted);
-    restoreSelection(previousSelection, sorted);
-    if (table.getSelectionModel().getSelectedItem() == null && !sorted.isEmpty()) {
-      table.getSelectionModel().selectFirst();
+    metaLabel.setText(stocks.getMetaText());
+    stocks.refresh();
+    Stock selected = stocks.getSelectedStock();
+    if (selected != null) {
+      table.getSelectionModel().select(selected);
     }
     table.refresh();
-    detailView.refresh(
-        exchange.getDay(),
-        exchange.getLastMarketEvent(),
-        getMarketHistoryForStock(detailView.getSelectedStock()));
+    updateDetail(stocks.getSelectedStock());
   }
 
   /**
-   * Returns the embedded stock detail view used by this list panel.
-   *
-   * @return detail view bound to the current table selection
+   * @return embedded stock detail view
    */
   public StockDetailView getDetailView() {
     return detailView;
   }
 
+  private void updateDetail(Stock selected) {
+    int day = stocks.getExchange().getDay();
+    updateChart(selected);
+    detailView.showStock(
+        selected,
+        day,
+        stockDetail.getLastMarketEvent(),
+        stockDetail.getMarketHistory(selected),
+        stockDetail);
+  }
+
   /**
-   * Restores the previous stock selection after the backing rows are rebuilt.
+   * Refreshes the primary chart panel for the selected stock.
    *
-   * @param previousSelection previously selected stock, possibly null
-   * @param sorted current sorted table rows
+   * @param selected selected stock, or {@code null} when no stock is available
    */
-  private void restoreSelection(Stock previousSelection, List<Stock> sorted) {
-    if (previousSelection == null) {
-      table.getSelectionModel().clearSelection();
+  private void updateChart(Stock selected) {
+    currentChart = null;
+    if (selected == null) {
+      chartPlaceholder.setText("Select a stock to view its price chart.");
+      chartPanel.setCenter(chartPlaceholder);
+      chartPanel.setBottom(null);
       return;
     }
-    for (Stock stock : sorted) {
-      if (stock.getSymbol().equals(previousSelection.getSymbol())) {
-        table.getSelectionModel().select(stock);
-        return;
-      }
+    if (selected.getHistoricalPrices().isEmpty()) {
+      chartPlaceholder.setText("No price history is available for " + selected.getSymbol() + " yet.");
+      chartPanel.setCenter(chartPlaceholder);
+      chartPanel.setBottom(null);
+      return;
     }
-    table.getSelectionModel().clearSelection();
+
+    StockChart chart = new StockChart(selected, selectedChartRange);
+    currentChart = chart;
+    registerAnalysisTools(chart);
+    chart.setMinHeight(250);
+    chart.prefHeightProperty().bind(chartPanel.heightProperty().multiply(0.85));
+    chartPanel.setCenter(chart);
+    chartPanel.setBottom(buildChartControls(selected, chart));
   }
 
-  /**
-   * Returns the market-event history relevant to the given stock.
-   *
-   * @param stock selected stock, or {@code null} when no row is selected
-   * @return immutable list of relevant market events
-   */
-  private List<MarketEvent> getMarketHistoryForStock(Stock stock) {
-    if (stock == null) {
-      return List.of();
-    }
-    return exchange.getMarketEventsForStock(stock.getSymbol());
+  private void registerAnalysisTools(StockChart chart) {
+    chart.registerTool(new FibonacciTool());
+    chart.registerTool(new ElliottWaveTool());
+    chart.registerTool(new MoonPhaseTool(SIMULATION_START_DATE));
   }
 
-  private static void styleButton(Button b) {
-    ThemeStyles.styleButton(b);
+  private VBox buildChartControls(Stock selected, StockChart chart) {
+    AnalysisToolbar analysisToolbar =
+        new AnalysisToolbar(
+            chart.getTools(),
+            chart,
+            selectedChartTool,
+            selection -> selectedChartTool = selection);
+    VBox controls = new VBox(6, analysisToolbar, buildChartRangeBar(selected));
+    ThemeStyles.addStyleClasses(controls, "chart-control-stack");
+    return controls;
+  }
+
+  private HBox buildChartRangeBar(Stock selected) {
+    HBox rangeBar = new HBox(4);
+    ToggleGroup chartRangeGroup = new ToggleGroup();
+    ThemeStyles.addStyleClasses(rangeBar, "chart-range-bar");
+
+    for (ChartRange range : ChartRange.values()) {
+      ToggleButton button = new ToggleButton(range.getLabel());
+      button.setToggleGroup(chartRangeGroup);
+      button.setUserData(range);
+      button.setFocusTraversable(false);
+      ThemeStyles.addStyleClasses(button, "chart-range-button");
+      button.setSelected(range == selectedChartRange);
+      button.selectedProperty()
+          .addListener(
+              (obs, wasSelected, isSelected) -> {
+                if (isSelected) {
+                  selectedChartRange = range;
+                  updateChart(selected);
+                }
+                if (!isSelected && chartRangeGroup.getSelectedToggle() == null) {
+                  button.setSelected(true);
+                }
+              });
+      rangeBar.getChildren().add(button);
+    }
+
+    return rangeBar;
   }
 }

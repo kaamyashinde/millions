@@ -1,32 +1,31 @@
 package view.pages.learning;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
+import controller.LearningHubController;
+import controller.QuizController;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.web.WebView;
-
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
-
-import model.learninghub.Difficulty;
-import model.learninghub.LearningContentStore;
-import model.learninghub.LearningItem;
-import model.learninghub.LearningResource;
-import model.learninghub.Quiz;
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizContentStore;
-import util.MarkdownLoader;
+import model.learning.content.LearningItem;
+import model.learning.content.LearningResource;
+import model.learning.quiz.Quiz;
+import model.learning.quiz.QuizAttempt;
+import util.ExternalLinkOpener;
+import view.components.learning.LearningResourceCard;
+import view.theme.ThemeManager;
+import view.theme.ThemeStyles;
 
 /**
  * Detail view for a single {@link LearningItem}. Renders the item's markdown content file in a
@@ -34,48 +33,45 @@ import util.MarkdownLoader;
  * topics.
  *
  * @author kaamyashinde
- * @version 1.2.0
+ * @version 2.0.0
  * @since 04-04-2026
  */
 public class ItemDetailView extends BorderPane {
 
-  private static final String COLOR_BG_CARD = "#1e1e1e";
-  private static final String COLOR_BORDER_ACCENT = "#2196F3";
-  private static final String COLOR_BORDER_RESOURCE = "#4CAF50";
-  private static final String COLOR_HEADING = "#e0e0e0";
-  private static final String COLOR_SUBTITLE = "#9e9e9e";
-  private static final String COLOR_DIFFICULTY_BEGINNER = "#4CAF50";
-  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#FFA500";
-  private static final String COLOR_DIFFICULTY_ADVANCED = "#FF4444";
-
-  private static final Parser MD_PARSER = Parser.builder().build();
-  private static final HtmlRenderer HTML_RENDERER = HtmlRenderer.builder().build();
+  private final LearningHubController learningHub;
+  private final QuizController quiz;
 
   /**
    * Builds the detail view for the given item.
    *
+   * @param learningHub   supplies catalog and rendered article content
+   * @param quiz          supplies linked quiz content
    * @param item          the learning item to display
    * @param onBack        called when the back button is clicked
    * @param onItemClicked called when a related topic card is clicked
    * @param onTakeQuiz    called with a fresh {@link QuizAttempt} when the player starts the quiz
    */
   public ItemDetailView(
+      LearningHubController learningHub,
+      QuizController quiz,
       LearningItem item,
       Runnable onBack,
       Consumer<LearningItem> onItemClicked,
       Consumer<QuizAttempt> onTakeQuiz) {
-    setPadding(new Insets(16));
+    this.learningHub = learningHub;
+    this.quiz = quiz;
 
-    // ── TOP: back button ─────────────────────────────────────────────────────
+    setPadding(new Insets(16));
+    ThemeStyles.addStyleClasses(this, "learning-root");
+
     Button backBtn = new Button("← Back");
-    backBtn.setStyle("-fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;");
+    ThemeStyles.styleButton(backBtn);
     backBtn.setOnAction(_ -> onBack.run());
 
-    HBox topBar = new HBox(backBtn);
+    VBox topBar = new VBox(12, backBtn, buildArticleHeader(item));
     topBar.setPadding(new Insets(0, 0, 8, 0));
     setTop(topBar);
 
-    // ── CENTER: WebView for markdown + resource cards + related topics + quiz ──
     VBox content = new VBox(16);
     content.setPadding(new Insets(0, 0, 16, 0));
 
@@ -86,50 +82,37 @@ public class ItemDetailView extends BorderPane {
 
     ScrollPane scroll = new ScrollPane(content);
     scroll.setFitToWidth(true);
-    scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+    ThemeStyles.addStyleClasses(scroll, "scroll-transparent");
     scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
     setCenter(scroll);
   }
 
-  private static javafx.scene.Node buildMarkdownView(LearningItem item) {
-    String markdown = MarkdownLoader.load(item.contentFile());
-    String bodyHtml = markdown.isEmpty()
-        ? "<p style='color:#9e9e9e'>Content not available.</p>"
-        : HTML_RENDERER.render(MD_PARSER.parse(markdown));
+  private static VBox buildArticleHeader(LearningItem item) {
+    Label difficultyBadge = new Label(item.difficulty().name());
+    ThemeStyles.applyDifficultyBadge(difficultyBadge, item.difficulty());
+    ThemeStyles.addStyleClasses(difficultyBadge, "learning-article-badge-difficulty");
 
-    String html = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <meta charset="UTF-8">
-        <style>
-          body {
-            background: #121212;
-            color: #e0e0e0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            font-size: 14px;
-            line-height: 1.7;
-            margin: 0;
-            padding: 8px 4px;
-          }
-          h1, h2, h3 { color: #ffffff; margin-top: 1.2em; margin-bottom: 0.4em; }
-          h2 { font-size: 1.15em; border-bottom: 1px solid #2a2a2a; padding-bottom: 4px; }
-          p { margin: 0.6em 0; }
-          ul, ol { padding-left: 1.4em; margin: 0.6em 0; }
-          li { margin-bottom: 4px; }
-          a { color: #64b5f6; text-decoration: none; }
-          a:hover { text-decoration: underline; }
-          code { background: #1e1e1e; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
-          pre { background: #1e1e1e; padding: 10px; border-radius: 6px; overflow-x: auto; }
-          hr { border: none; border-top: 1px solid #2a2a2a; margin: 1em 0; }
-          strong { color: #ffffff; }
-        </style>
-        </head>
-        <body>
-        """ + bodyHtml + """
-        </body>
-        </html>
-        """;
+    Label categoryBadge =
+        new Label(item.category().emoji() + "  " + item.category().name());
+    ThemeStyles.addStyleClasses(categoryBadge, "learning-article-badge-category");
+
+    HBox badges = new HBox(8, difficultyBadge, categoryBadge);
+    badges.setAlignment(Pos.CENTER_LEFT);
+    ThemeStyles.addStyleClasses(badges, "learning-article-badges");
+
+    Label title = new Label(item.title());
+    title.setFont(Font.font("System", FontWeight.BOLD, 26));
+    title.setWrapText(true);
+    ThemeStyles.addStyleClasses(title, "learning-article-title");
+
+    VBox header = new VBox(10, badges, title);
+    ThemeStyles.addStyleClasses(header, "learning-article-header");
+    return header;
+  }
+
+  private javafx.scene.Node buildMarkdownView(LearningItem item) {
+    String bodyHtml = wrapExampleCallout(learningHub.getItemBodyHtml(item));
+    String html = wrapMarkdownHtml(bodyHtml);
 
     WebView webView = new WebView();
     webView.getEngine().setUserStyleSheetLocation(null);
@@ -137,86 +120,44 @@ public class ItemDetailView extends BorderPane {
     webView.setPrefHeight(520);
     webView.setMaxWidth(Double.MAX_VALUE);
 
-    // Open clicked links in the system browser instead of inside the WebView
     webView.getEngine().locationProperty().addListener((obs, oldLoc, newLoc) -> {
       if (newLoc != null && !newLoc.isEmpty() && !newLoc.startsWith("about:")) {
         webView.getEngine().loadContent(html, "text/html");
-        openUrl(newLoc);
+        ExternalLinkOpener.open(newLoc);
       }
     });
 
     return webView;
   }
 
-  private static javafx.scene.Node buildResourcesSection(LearningItem item) {
-    List<LearningResource> resources = LearningContentStore.getResourcesForItem(item);
+  private javafx.scene.Node buildResourcesSection(LearningItem item) {
+    List<LearningResource> resources = learningHub.getResourcesForItem(item);
 
     VBox section = new VBox(10);
     section.setPadding(new Insets(8, 0, 0, 0));
 
     Label heading = new Label("Further Reading");
-    heading.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+    ThemeStyles.addStyleClasses(heading, "section-heading");
     section.getChildren().add(heading);
 
     if (resources.isEmpty()) {
       Label fallback = new Label(
           "Open links in the Further Reading section above to explore more.");
-      fallback.setStyle(
-          "-fx-text-fill: " + COLOR_SUBTITLE + ";"
-          + "-fx-font-size: 11;"
-          + "-fx-font-style: italic;");
+      ThemeStyles.addStyleClasses(fallback, "text-small-secondary-italic");
       fallback.setWrapText(true);
       section.getChildren().add(fallback);
     } else {
       for (LearningResource res : resources) {
-        section.getChildren().add(buildResourceCard(res));
+        section.getChildren().add(LearningResourceCard.create(res));
       }
     }
 
     return section;
   }
 
-  private static javafx.scene.Node buildResourceCard(LearningResource resource) {
-    Label sourceLabel = new Label(resource.sourceLabel());
-    sourceLabel.setStyle(
-        "-fx-background-color: " + COLOR_BORDER_RESOURCE + "22;"
-        + "-fx-text-fill: " + COLOR_BORDER_RESOURCE + ";"
-        + "-fx-background-radius: 4;"
-        + "-fx-padding: 2 6 2 6;"
-        + "-fx-font-size: 10;");
-
-    Label title = new Label(resource.title());
-    title.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
-
-    Label desc = new Label(resource.description());
-    desc.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
-    desc.setWrapText(true);
-
-    Label cta = new Label("Open →");
-    cta.setStyle("-fx-text-fill: " + COLOR_BORDER_RESOURCE + "; -fx-font-size: 11;");
-
-    VBox card = new VBox(6, sourceLabel, title, desc, cta);
-    card.setPadding(new Insets(12));
-    card.setMaxWidth(Double.MAX_VALUE);
-    card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_BORDER_RESOURCE + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;");
-    card.setOnMouseClicked(_ -> openUrl(resource.url()));
-    return card;
-  }
-
-  private static javafx.scene.Node buildRelatedTopicsSection(
+  private javafx.scene.Node buildRelatedTopicsSection(
       LearningItem item, Consumer<LearningItem> onItemClicked) {
-    List<LearningItem> related = LearningContentStore.getItemsByIds(item.relatedTopicIds());
+    List<LearningItem> related = learningHub.getItemsByIds(item.relatedTopicIds());
     if (related.isEmpty()) {
       return new Region();
     }
@@ -225,10 +166,7 @@ public class ItemDetailView extends BorderPane {
     section.setPadding(new Insets(8, 0, 0, 0));
 
     Label heading = new Label("Suggested Next Topics");
-    heading.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+    ThemeStyles.addStyleClasses(heading, "section-heading");
     section.getChildren().add(heading);
 
     for (LearningItem relatedItem : related) {
@@ -240,86 +178,165 @@ public class ItemDetailView extends BorderPane {
 
   private static javafx.scene.Node buildRelatedTopicCard(
       LearningItem item, Consumer<LearningItem> onItemClicked) {
-    String badgeColor = difficultyColor(item.difficulty());
-
     Label badge = new Label(item.difficulty().name());
-    badge.setStyle(
-        "-fx-background-color: " + badgeColor + "22;"
-        + "-fx-text-fill: " + badgeColor + ";"
-        + "-fx-background-radius: 4;"
-        + "-fx-padding: 2 6 2 6;"
-        + "-fx-font-size: 10;");
+    ThemeStyles.applyDifficultyBadge(badge, item.difficulty());
 
     Label title = new Label(item.title());
-    title.setStyle("-fx-text-fill: " + COLOR_HEADING + "; -fx-font-weight: bold;");
+    ThemeStyles.addStyleClasses(title, "learning-card-title");
     title.setWrapText(true);
 
     Label summary = new Label(item.summary());
-    summary.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 11;");
+    ThemeStyles.addStyleClasses(summary, "learning-card-summary");
     summary.setWrapText(true);
 
     Label category = new Label(item.category().emoji() + "  " + item.category().name());
-    category.setStyle("-fx-text-fill: " + COLOR_SUBTITLE + "; -fx-font-size: 10;");
+    ThemeStyles.addStyleClasses(category, "learning-card-meta");
 
     VBox card = new VBox(6, badge, title, summary, category);
     card.setPadding(new Insets(12));
     card.setMaxWidth(Double.MAX_VALUE);
-    card.setStyle(
-        "-fx-background-color: " + COLOR_BG_CARD + ";"
-        + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;");
+    ThemeStyles.addStyleClasses(card, "learning-card-accent");
     card.setOnMouseClicked(_ -> onItemClicked.accept(item));
     return card;
   }
 
-  private static javafx.scene.Node buildQuizSection(
+  private javafx.scene.Node buildQuizSection(
       LearningItem item, Consumer<QuizAttempt> onTakeQuiz) {
-    Optional<Quiz> quiz = QuizContentStore.getQuizForItem(item.id());
-    if (quiz.isEmpty()) {
-      return new Region();
-    }
+    return quiz.getQuizForItem(item.id())
+        .map(found -> buildQuizSectionContent(found, onTakeQuiz))
+        .orElseGet(Region::new);
+  }
 
+  private static javafx.scene.Node buildQuizSectionContent(
+      Quiz quiz, Consumer<QuizAttempt> onTakeQuiz) {
     Label heading = new Label("Test Your Knowledge");
-    heading.setStyle(
-        "-fx-text-fill: " + COLOR_HEADING + ";"
-        + "-fx-font-weight: bold;"
-        + "-fx-font-size: 13;");
+    ThemeStyles.addStyleClasses(heading, "section-heading");
 
-    Button quizBtn = new Button("Take Quiz: " + quiz.get().title() + "  →");
+    Button quizBtn = new Button("Take Quiz: " + quiz.title() + "  →");
     quizBtn.setMaxWidth(Double.MAX_VALUE);
     quizBtn.setWrapText(true);
-    quizBtn.setStyle(
-        "-fx-background-color: #2196F322;"
-        + "-fx-text-fill: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-border-color: " + COLOR_BORDER_ACCENT + ";"
-        + "-fx-border-radius: 8;"
-        + "-fx-background-radius: 8;"
-        + "-fx-cursor: hand;"
-        + "-fx-font-size: 13;"
-        + "-fx-font-weight: bold;"
-        + "-fx-padding: 12 16 12 16;");
-    quizBtn.setOnAction(_ -> onTakeQuiz.accept(new QuizAttempt(quiz.get())));
+    ThemeStyles.addStyleClasses(quizBtn, "quiz-take-button");
+    quizBtn.setOnAction(_ -> onTakeQuiz.accept(new QuizAttempt(quiz)));
 
     VBox section = new VBox(8, heading, quizBtn);
     section.setPadding(new Insets(8, 0, 0, 0));
     return section;
   }
 
-  private static String difficultyColor(Difficulty d) {
-    return switch (d) {
-      case BEGINNER -> COLOR_DIFFICULTY_BEGINNER;
-      case INTERMEDIATE -> COLOR_DIFFICULTY_INTERMEDIATE;
-      case ADVANCED -> COLOR_DIFFICULTY_ADVANCED;
-    };
+  private static String wrapMarkdownHtml(String bodyHtml) {
+    boolean light = ThemeManager.getInstance().getTheme() == ThemeManager.Theme.LIGHT;
+    if (light) {
+      return """
+          <!DOCTYPE html>
+          <html>
+          <head>
+          <meta charset="UTF-8">
+          <style>
+            body {
+              background: #F8FAFC;
+              color: #0F172A;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              font-size: 14px;
+              line-height: 1.7;
+              margin: 0;
+              padding: 8px 4px;
+            }
+            h1, h2, h3 { color: #0F172A; margin-top: 1.2em; margin-bottom: 0.4em; }
+            h2 { font-size: 1.15em; border-bottom: 1px solid #CBD5E1; padding-bottom: 4px; }
+            p { margin: 0.6em 0; }
+            ul, ol { padding-left: 1.4em; margin: 0.6em 0; }
+            li { margin-bottom: 4px; }
+            a { color: #0EA5A4; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+            code { background: #EFF6FF; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+            pre { background: #EFF6FF; padding: 10px; border-radius: 6px; overflow-x: auto; }
+            hr { border: none; border-top: 1px solid #CBD5E1; margin: 1em 0; }
+            strong { color: #0F172A; }
+          </style>
+          </head>
+          <body>
+          """ + bodyHtml + """
+          </body>
+          </html>
+          """;
+    }
+    return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            background: #0B1220;
+            color: #CBD5E1;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 14px;
+            line-height: 1.75;
+            margin: 0;
+            padding: 4px 4px 8px;
+          }
+          h1 { display: none; }
+          h2 {
+            color: #F8FAFC;
+            font-size: 1.05em;
+            font-weight: 700;
+            margin: 1.5em 0 0.5em;
+            border: none;
+            padding: 0;
+          }
+          h2:first-of-type { margin-top: 0; }
+          h3 { color: #F8FAFC; margin-top: 1.2em; margin-bottom: 0.4em; }
+          p { margin: 0.65em 0; color: #CBD5E1; }
+          ul, ol { padding-left: 1.4em; margin: 0.6em 0; }
+          li { margin-bottom: 6px; color: #CBD5E1; }
+          li strong { color: #F8FAFC; }
+          a { color: #0EA5A4; text-decoration: none; }
+          a:hover { text-decoration: underline; }
+          code { background: #111827; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+          pre { background: #111827; padding: 10px; border-radius: 6px; overflow-x: auto; }
+          hr { border: none; border-top: 1px solid #334155; margin: 1em 0; }
+          strong { color: #F8FAFC; font-weight: 600; }
+          .callout {
+            background: #111827;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin: 1.25em 0;
+          }
+          .callout h2 {
+            margin-top: 0;
+            font-size: 1em;
+            margin-bottom: 0.5em;
+          }
+          .callout p { margin: 0; }
+        </style>
+        </head>
+        <body>
+        """ + bodyHtml + """
+        </body>
+        </html>
+        """;
   }
 
-  private static void openUrl(String url) {
-    try {
-      Desktop.getDesktop().browse(URI.create(url));
-    } catch (Exception ignored) {
-      // Silent fail — desktop browsing may be unavailable in some environments
+  /**
+   * Wraps the Example section in a styled callout container for card-like presentation.
+   *
+   * @param html rendered markdown body HTML
+   * @return HTML with the Example block wrapped in {@code div.callout}
+   */
+  static String wrapExampleCallout(String html) {
+    if (html == null) {
+      return null;
     }
+    String marker = "<h2>Example</h2>";
+    int start = html.indexOf(marker);
+    if (start < 0) {
+      return html;
+    }
+    int nextHeading = html.indexOf("<h2>", start + marker.length());
+    String exampleBlock =
+        nextHeading >= 0 ? html.substring(start, nextHeading) : html.substring(start);
+    String wrapped = "<div class=\"callout\">" + exampleBlock + "</div>";
+    return html.substring(0, start) + wrapped + (nextHeading >= 0 ? html.substring(nextHeading) : "");
   }
 }

@@ -1,5 +1,7 @@
 package view.pages.auth;
 
+import model.core.player.Player;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -18,9 +20,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.session.PlayerLeaderboardEntry;
-import model.session.PlayerLeaderboardMetric;
-import model.session.PlayerLeaderboardRanking;
+import model.session.leaderboard.PlayerLeaderboardEntry;
+import model.session.leaderboard.PlayerLeaderboardMetric;
+import model.session.leaderboard.PlayerLeaderboardRanking;
 import view.components.table.AppTableView;
 import view.theme.ThemeStyles;
 
@@ -180,7 +182,7 @@ public class AuthPlayerLeaderboardPanel extends BorderPane {
     playerColumn.setSortable(false);
 
     table.getColumns().setAll(List.of(rankColumn, playerColumn, netWorthColumn, returnColumn));
-    table.setRowStyleProvider(this::rowStyleFor);
+    table.setRowClassProvider(this::rowClassFor);
     table.setSortPolicy(_ -> {
       syncSortStateFromTable();
       refreshRows();
@@ -219,9 +221,9 @@ public class AuthPlayerLeaderboardPanel extends BorderPane {
     table.refresh();
   }
 
-  private String rowStyleFor(PlayerLeaderboardEntry entry) {
+  private String rowClassFor(PlayerLeaderboardEntry entry) {
     int rank = rankByUsername.getOrDefault(entry.username(), Integer.MAX_VALUE);
-    return ThemeStyles.leaderboardRowStyle(rank);
+    return ThemeStyles.leaderboardRowClass(rank);
   }
 
   private static String formatCurrency(PlayerLeaderboardEntry entry) {

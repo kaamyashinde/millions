@@ -5,27 +5,35 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
+import javafx.stage.Window;
+import controller.StockDetailController;
+import controller.TradingController;
+import view.dialogs.TradeDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.Stock;
-import model.marketevent.MarketEvent;
-import model.recommendation.StockRecommendation;
-import model.recommendation.StockRecommendationService;
-import model.stockinfo.StockFinancialInfo;
-import model.stockinfo.StockFinancialInfoProvider;
-import view.components.chart.StockChart;
+import model.core.asset.Stock;
+import model.core.market.event.MarketEvent;
+import model.analysis.recommendation.StockRecommendation;
+import model.analysis.recommendation.StockRecommendationService;
+import model.core.asset.info.StockFinancialInfo;
+import model.core.asset.info.StockFinancialInfoProvider;
 import view.components.recommendation.StockRecommendationLabel;
+import view.theme.ThemeStyles;
 
 /**
  * Dedicated stock detail view showing summary data, mock company fundamentals, trend-based
- * recommendation, and price history.
+ * recommendation, and market event context.
  *
  * <p>The recommendation is computed through {@link StockRecommendationService}, keeping expert
  * advice presentation separate from the stock's actual price-update logic. Mock revenue and profit
@@ -56,13 +64,22 @@ public class StockDetailView extends BorderPane {
       new StockRecommendationLabel(StockRecommendation.HOLD);
   private final Label placeholderLabel =
       new Label("Choose a stock from the list to view chart and recommendation details.");
-  private final ListView<String> marketHistoryList = new ListView<>();
+  private final ListView<MarketEvent> marketHistoryList = new ListView<>();
   private final VBox recommendationBox;
   private final VBox content = new VBox(16);
+
+  private final HBox tradeActionsBox = new HBox(10);
+  private final Button buyButton = new Button("Buy");
+  private final Button sellButton = new Button("Sell");
 
   private Stock selectedStock;
   private Optional<MarketEvent> selectedMarketEvent = Optional.empty();
   private List<MarketEvent> selectedMarketHistory = List.of();
+  private StockDetailController stockDetailController;
+  private TradingController tradingController;
+  private Supplier<Window> dialogOwnerSupplier;
+  private Runnable onTradeComplete;
+  private Consumer<MarketEvent> onEventClicked;
 
   /**
    * Builds an initially empty stock detail view.
@@ -78,8 +95,27 @@ public class StockDetailView extends BorderPane {
     basisLabel.setWrapText(true);
     placeholderLabel.setWrapText(true);
     marketHistoryList.setPlaceholder(new Label("No past events for this stock yet."));
-    marketHistoryList.setFocusTraversable(false);
-    marketHistoryList.setMouseTransparent(true);
+    marketHistoryList.setCellFactory(_ -> new javafx.scene.control.ListCell<>() {
+      @Override
+      protected void updateItem(MarketEvent event, boolean empty) {
+        super.updateItem(event, empty);
+        if (empty || event == null) {
+          setText(null);
+        } else {
+          setText(formatMarketHistoryItem(event));
+        }
+      }
+    });
+    marketHistoryList.setOnMouseClicked(
+        event -> {
+          if (event.getClickCount() != 1) {
+            return;
+          }
+          MarketEvent selected = marketHistoryList.getSelectionModel().getSelectedItem();
+          if (selected != null && onEventClicked != null) {
+            onEventClicked.accept(selected);
+          }
+        });
     marketHistoryList.setMaxHeight(140);
 
     fundamentalsHeading.setFont(Font.font("System", FontWeight.BOLD, 14));
@@ -88,12 +124,7 @@ public class StockDetailView extends BorderPane {
     healthLabel.setWrapText(true);
     fundamentalsBox =
         new VBox(4, fundamentalsHeading, revenueLabel, profitLabel, healthLabel);
-    fundamentalsBox.setStyle(
-        "-fx-background-color: #f9fafc;"
-            + "-fx-border-color: #e2e6ee;"
-            + "-fx-background-radius: 10;"
-            + "-fx-border-radius: 10;"
-            + "-fx-padding: 12;");
+    ThemeStyles.addStyleClasses(fundamentalsBox, "card");
 
     VBox header =
         new VBox(
@@ -105,14 +136,15 @@ public class StockDetailView extends BorderPane {
             marketEventLabel,
             fundamentalsBox);
     recommendationBox = new VBox(8, new Label("Recommendation"), recommendationLabel, basisLabel);
-    recommendationBox.setStyle(
-        "-fx-background-color: #f6f7fb;"
-            + "-fx-border-color: #d7dce5;"
-            + "-fx-background-radius: 12;"
-            + "-fx-border-radius: 12;"
-            + "-fx-padding: 14;");
+    ThemeStyles.addStyleClasses(recommendationBox, "finance-summary-card");
 
-    content.getChildren().addAll(recommendationBox, placeholderLabel);
+    ThemeStyles.styleAccentButton(buyButton);
+    ThemeStyles.styleButton(sellButton);
+    tradeActionsBox.getChildren().addAll(buyButton, sellButton);
+    tradeActionsBox.setVisible(false);
+    tradeActionsBox.setManaged(false);
+
+    content.getChildren().addAll(tradeActionsBox, recommendationBox, placeholderLabel);
     VBox.setVgrow(content, Priority.ALWAYS);
 
     setTop(header);
@@ -121,7 +153,7 @@ public class StockDetailView extends BorderPane {
   }
 
   /**
-   * Displays details for the selected stock and refreshes the recommendation and chart.
+   * Displays details for the selected stock and refreshes the recommendation.
    *
    * @param stock selected stock, or {@code null} to show the empty state
    * @param tradingDay current exchange trading day
@@ -142,18 +174,50 @@ public class StockDetailView extends BorderPane {
   }
 
   /**
-   * Displays details for the selected stock together with the latest and past market events.
+   * Registers a callback invoked when the user clicks a past market event in the list.
    *
-   * @param stock selected stock, or {@code null} to show the empty state
-   * @param tradingDay current exchange trading day
-   * @param marketEvent latest market event, if one occurred on the current day
-   * @param marketHistory past market events relevant to the selected stock
+   * @param onEventClicked consumer receiving the clicked event, or {@code null} to clear
    */
+  public void setOnEventClicked(Consumer<MarketEvent> onEventClicked) {
+    this.onEventClicked = onEventClicked;
+  }
+
+  /**
+   * Configures buy/sell actions shown when a stock is selected.
+   *
+   * @param trading trading controller
+   * @param dialogOwnerSupplier supplies the modal owner window
+   * @param onTradeComplete invoked after a successful trade
+   */
+  public void setTradeHandlers(
+      TradingController trading,
+      Supplier<Window> dialogOwnerSupplier,
+      Runnable onTradeComplete) {
+    this.tradingController = trading;
+    this.dialogOwnerSupplier = dialogOwnerSupplier;
+    this.onTradeComplete = onTradeComplete;
+    wireTradeButtons();
+    updateTradeActions(selectedStock);
+  }
+
   public void showStock(
       Stock stock,
       int tradingDay,
       Optional<MarketEvent> marketEvent,
       List<MarketEvent> marketHistory) {
+    showStock(stock, tradingDay, marketEvent, marketHistory, null);
+  }
+
+  /**
+   * Displays stock details using an optional {@link StockDetailController} for fundamentals.
+   */
+  public void showStock(
+      Stock stock,
+      int tradingDay,
+      Optional<MarketEvent> marketEvent,
+      List<MarketEvent> marketHistory,
+      StockDetailController stockDetail) {
+    stockDetailController = stockDetail;
     selectedStock = stock;
     selectedMarketEvent = marketEvent;
     selectedMarketHistory = List.copyOf(marketHistory);
@@ -168,7 +232,8 @@ public class StockDetailView extends BorderPane {
       marketHistoryList.setItems(FXCollections.observableArrayList());
       recommendationLabel.setRecommendation(StockRecommendation.HOLD);
       placeholderLabel.setText("Choose a stock from the list to view chart and recommendation details.");
-      content.getChildren().setAll(recommendationBox, placeholderLabel);
+      content.getChildren().setAll(tradeActionsBox, recommendationBox, placeholderLabel);
+      updateTradeActions(null);
       return;
     }
 
@@ -177,19 +242,66 @@ public class StockDetailView extends BorderPane {
     latestPriceLabel.setText("Latest price: " + formatLatestPrice(stock));
     marketEventLabel.setText(buildMarketEventText(stock, marketEvent));
     applyFundamentalsLabels(stock);
-    marketHistoryList.setItems(FXCollections.observableArrayList(buildMarketHistoryItems(marketHistory)));
-    recommendationLabel.setRecommendation(recommendationService.recommend(stock));
+    marketHistoryList.setItems(FXCollections.observableArrayList(buildMarketHistoryList(marketHistory)));
+    recommendationLabel.setRecommendation(resolveRecommendation(stock));
+    updateTradeActions(stock);
 
     if (stock.getHistoricalPrices().isEmpty()) {
       placeholderLabel.setText("No price history is available for this stock yet.");
-      content.getChildren().setAll(recommendationBox, marketHistoryHeading, marketHistoryList, placeholderLabel);
+      content.getChildren().setAll(
+          tradeActionsBox, recommendationBox, marketHistoryHeading, marketHistoryList, placeholderLabel);
       return;
     }
 
-    StockChart chart = new StockChart(stock);
-    chart.setMinHeight(280);
-    VBox.setVgrow(chart, Priority.ALWAYS);
-    content.getChildren().setAll(recommendationBox, marketHistoryHeading, marketHistoryList, chart);
+    content.getChildren().setAll(
+        tradeActionsBox, recommendationBox, marketHistoryHeading, marketHistoryList);
+  }
+
+  private StockRecommendation resolveRecommendation(Stock stock) {
+    if (stockDetailController != null) {
+      return stockDetailController.recommend(stock);
+    }
+    return recommendationService.recommend(stock);
+  }
+
+  private void wireTradeButtons() {
+    buyButton.setOnAction(_ -> {
+      if (selectedStock == null || tradingController == null || dialogOwnerSupplier == null) {
+        return;
+      }
+      TradeDialog.showBuy(
+          dialogOwnerSupplier.get(),
+          tradingController,
+          selectedStock.getSymbol(),
+          onTradeComplete);
+    });
+    sellButton.setOnAction(_ -> {
+      if (selectedStock == null || tradingController == null || dialogOwnerSupplier == null) {
+        return;
+      }
+      TradeDialog.showSell(
+          dialogOwnerSupplier.get(),
+          tradingController,
+          selectedStock.getSymbol(),
+          onTradeComplete);
+    });
+  }
+
+  private void updateTradeActions(Stock stock) {
+    if (tradingController == null || stock == null) {
+      tradeActionsBox.setVisible(false);
+      tradeActionsBox.setManaged(false);
+      return;
+    }
+    tradeActionsBox.setVisible(true);
+    tradeActionsBox.setManaged(true);
+    buyButton.setText("Buy " + stock.getSymbol());
+    boolean hasShares = tradingController.getOwnedQuantity(stock.getSymbol()).signum() > 0;
+    sellButton.setVisible(hasShares);
+    sellButton.setManaged(hasShares);
+    if (hasShares) {
+      sellButton.setText("Sell " + stock.getSymbol());
+    }
   }
 
   /**
@@ -264,7 +376,7 @@ public class StockDetailView extends BorderPane {
    * @return immutable copy of the current past-event rows
    */
   public List<String> getDisplayedMarketHistory() {
-    return List.copyOf(marketHistoryList.getItems());
+    return marketHistoryList.getItems().stream().map(StockDetailView::formatMarketHistoryItem).toList();
   }
 
   /**
@@ -307,9 +419,20 @@ public class StockDetailView extends BorderPane {
   }
 
   private void applyFundamentalsLabels(Stock stock) {
-    StockFinancialInfo fin = financialInfoProvider.forStock(stock);
-    revenueLabel.setText("Revenue: " + financialInfoProvider.formatMoney(fin.revenue()));
-    profitLabel.setText("Profit: " + financialInfoProvider.formatMoney(fin.profit()));
+    StockFinancialInfo fin =
+        stockDetailController != null
+            ? stockDetailController.financialInfo(stock)
+            : financialInfoProvider.forStock(stock);
+    revenueLabel.setText(
+        "Revenue: "
+            + (stockDetailController != null
+                ? stockDetailController.formatMoney(fin.revenue())
+                : financialInfoProvider.formatMoney(fin.revenue())));
+    profitLabel.setText(
+        "Profit: "
+            + (stockDetailController != null
+                ? stockDetailController.formatMoney(fin.profit())
+                : financialInfoProvider.formatMoney(fin.profit())));
     healthLabel.setText("Health: " + fin.health().displayLabel());
   }
 
@@ -345,11 +468,13 @@ public class StockDetailView extends BorderPane {
    * @param marketHistory past events relevant to the selected stock
    * @return rendered rows for the list view
    */
-  private static List<String> buildMarketHistoryItems(List<MarketEvent> marketHistory) {
+  private static List<MarketEvent> buildMarketHistoryList(List<MarketEvent> marketHistory) {
     List<MarketEvent> reversedHistory = new ArrayList<>(marketHistory);
     Collections.reverse(reversedHistory);
-    return reversedHistory.stream()
-        .map(event -> "Day " + event.day() + " - " + event.title() + ": " + event.description())
-        .toList();
+    return reversedHistory;
+  }
+
+  private static String formatMarketHistoryItem(MarketEvent event) {
+    return "Day " + event.day() + " - " + event.title() + ": " + event.description();
   }
 }

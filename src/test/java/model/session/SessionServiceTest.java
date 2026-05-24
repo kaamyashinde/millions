@@ -1,7 +1,13 @@
 package model.session;
 
+
+import model.exception.auth.AuthenticationException;
+import model.exception.auth.DuplicateUsernameException;
+import model.exception.auth.RegistrationValidationException;
+import model.exception.profile.ProfileInUseException;
+import model.session.leaderboard.PlayerLeaderboardEntry;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,22 +17,10 @@ import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.UUID;
-import model.Stock;
-import model.fund.Fund;
-import model.fund.FundComponent;
-import model.persistence.GameStateMapper;
-import model.persistence.GameStateRepository;
-import model.persistence.MarketData;
-import model.persistence.PinHashingService;
-import model.persistence.ProfileImageService;
-import model.persistence.ProfilePreferencesRepository;
-import model.persistence.SavedRunMapper;
-import model.persistence.SavedRunRecord;
-import model.persistence.SavedRunRepository;
-import model.persistence.ProfileDirectories;
-import model.persistence.UserAccountRepository;
-import model.persistence.UserAccountRecord;
+import java.util.Optional;
+import model.persistence.ProfileFile;
+import model.persistence.io.JsonStorage;
+import model.persistence.profile.ProfilePaths;
 import model.session.validation.ValidationError;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -153,26 +147,6 @@ class SessionServiceTest {
   }
 
   @Test
-  void saveCurrentRun_persistsSnapshotForActiveUser() {
-    SessionService sessionService = createSessionService();
-    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
-    ActiveSession session = sessionService.getActiveSession().orElseThrow();
-    session.exchange().buy("AAPL", new BigDecimal("1.0"), session.player());
-
-    SavedRunRecord saved = sessionService.saveCurrentRun("strategy-a");
-
-    assertEquals("strategy-a", saved.label());
-    assertEquals(1, saved.holdings().size());
-    assertEquals("AAPL", saved.holdings().getFirst().symbol());
-    assertEquals(1, sessionService.listSavedRuns().size());
-    UUID runId = UUID.fromString(saved.runId());
-    assertTrue(sessionService.setRunLeaderboardEligible(runId, true));
-    assertTrue(sessionService.listSavedRuns().getFirst().eligibleForLeaderboard());
-    assertTrue(sessionService.deleteSavedRun(runId));
-    assertTrue(sessionService.listSavedRuns().isEmpty());
-  }
-
-  @Test
   void updateDisplayName_persistsAcrossLogin() {
     SessionService sessionService = createSessionService();
     sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
@@ -181,18 +155,56 @@ class SessionServiceTest {
 
     ActiveSession back = sessionService.login("Alice", "1234".toCharArray());
     assertEquals("Allie", back.player().getName());
-    UserAccountRecord account = new UserAccountRepository(tempDir).findByUsername("Alice").orElseThrow();
-    assertEquals("Allie", account.displayName());
+    ProfilePaths paths = new ProfilePaths(tempDir);
+    ProfileFile profile = new JsonStorage().read(paths.profileFile("Alice"), ProfileFile.class);
+    assertEquals("Allie", profile.displayName());
   }
 
   @Test
   void deleteActiveProfile_removesFiles() throws Exception {
     SessionService sessionService = createSessionService();
     sessionService.register("Zed", "1234".toCharArray(), new BigDecimal("100.00"));
-    Path profileDir = tempDir.resolve(ProfileDirectories.normalizeUsername("Zed"));
+    Path profileDir = tempDir.resolve(ProfilePaths.normalizeUsername("Zed"));
     assertTrue(Files.isDirectory(profileDir));
     sessionService.deleteActiveProfile("1234".toCharArray());
     assertFalse(Files.exists(profileDir));
+  }
+
+  @Test
+  void exitGameAndDeleteProfile_liquidatesHoldingsAndRemovesFiles() throws Exception {
+    SessionService sessionService = createSessionService();
+    ActiveSession session =
+        sessionService.register("ExitUser", "1234".toCharArray(), new BigDecimal("10000.00"));
+    session.exchange().buy("AAPL", new BigDecimal("2"), session.player());
+    session.player().addRegularSavingsPlan(
+        new model.trading.savings.RegularSavingsPlan(
+            "AAPL",
+            model.trading.savings.SavingsInstallmentMode.FIXED_SHARES,
+            new BigDecimal("1"),
+            7,
+            session.exchange().getDay()));
+    Path profileDir = tempDir.resolve(ProfilePaths.normalizeUsername("ExitUser"));
+    assertTrue(Files.isDirectory(profileDir));
+    assertFalse(session.player().getPortfolio().getShares().isEmpty());
+
+    var result = sessionService.exitGameAndDeleteProfile("1234".toCharArray());
+
+    assertFalse(Files.exists(profileDir));
+    assertFalse(sessionService.hasActiveSession());
+    assertEquals(1, result.symbolsSold());
+    assertTrue(result.transactionCount() >= 1);
+    assertTrue(result.finalCash().compareTo(BigDecimal.ZERO) > 0);
+  }
+
+  @Test
+  void exitGameAndDeleteProfile_rejectsWrongPin() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("PinUser", "1234".toCharArray(), new BigDecimal("1000.00"));
+    assertThrows(
+        AuthenticationException.class,
+        () -> sessionService.exitGameAndDeleteProfile("9999".toCharArray()));
+    assertTrue(sessionService.hasActiveSession());
+    assertTrue(Files.isDirectory(tempDir.resolve(ProfilePaths.normalizeUsername("PinUser"))));
   }
 
   @Test
@@ -204,52 +216,38 @@ class SessionServiceTest {
         () -> sessionService.deleteProfile("Alice", "1234".toCharArray()));
   }
 
-  private SessionService createSessionService() {
-    UserAccountRepository userAccountRepository = new UserAccountRepository(tempDir);
-    PinHashingService pinHashingService = new PinHashingService();
+  @Test
+  void register_withCustomMarketDataFile_usesUploadedSymbols() throws Exception {
+    SessionService sessionService = createSessionService();
+    Path customCsv = tempDir.resolve("upload.csv");
+    Files.writeString(customCsv, "STOCK,CUSTOM,Custom Inc,99.00\n");
 
-    GamePersistenceService gamePersistenceService = new GamePersistenceService(
-        new GameStateRepository(tempDir),
-        new GameStateMapper("NYSE"),
-        SessionServiceTest::sampleMarketData);
+    ActiveSession session = sessionService.register(
+        "Trader", "1234".toCharArray(), new BigDecimal("500.00"), Optional.of(customCsv));
 
-    AuthService authService = new AuthService(
-        userAccountRepository, pinHashingService, gamePersistenceService);
-
-    ProfileService profileService = new ProfileService(
-        userAccountRepository,
-        new ProfileImageService(tempDir),
-        pinHashingService,
-        tempDir);
-
-    SavedRunService savedRunService = new SavedRunService(
-        new SavedRunRepository(tempDir), new SavedRunMapper());
-
-    ProfilePreferencesService profilePreferencesService = new ProfilePreferencesService(
-        new ProfilePreferencesRepository(tempDir));
-
-    return new SessionService(
-        authService,
-        profileService,
-        gamePersistenceService,
-        savedRunService,
-        profilePreferencesService);
+    assertEquals("CUSTOM", session.exchange().getStocks().getFirst().getSymbol());
+    assertTrue(Files.isRegularFile(tempDir.resolve("trader").resolve("market-data.csv")));
   }
 
-  private static MarketData sampleMarketData() {
-    Stock apple = new Stock("AAPL", "Apple Inc.");
-    apple.addNewSalesPrice(new BigDecimal("150.00"));
+  @Test
+  void login_restoresUsingProfileMarketDataFile() throws Exception {
+    SessionService sessionService = createSessionService();
+    Path customCsv = tempDir.resolve("only.csv");
+    Files.writeString(customCsv, "STOCK,ONLY,Only Inc,12.00\n");
+    sessionService.register(
+        "Solo", "1234".toCharArray(), new BigDecimal("100.00"), Optional.of(customCsv));
+    sessionService.logout();
 
-    Stock microsoft = new Stock("MSFT", "Microsoft Corp.");
-    microsoft.addNewSalesPrice(new BigDecimal("300.00"));
+    ActiveSession restored = sessionService.login("Solo", "1234".toCharArray());
 
-    Fund blend = new Fund(
-        "BLEND",
-        "Blend Fund",
-        List.of(
-            new FundComponent(apple, new BigDecimal("0.60")),
-            new FundComponent(microsoft, new BigDecimal("0.40"))));
+    assertEquals("ONLY", restored.exchange().getStocks().getFirst().getSymbol());
+  }
 
-    return new MarketData(List.of(apple, microsoft), List.of(blend));
+  private SessionService createSessionService() {
+    return SessionServiceFactory.createLocalProfileSessionService(
+        tempDir,
+        "/data/demo-stocks.csv",
+        SessionServiceTest.class,
+        "NYSE");
   }
 }

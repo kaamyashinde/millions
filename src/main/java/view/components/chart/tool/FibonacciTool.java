@@ -2,10 +2,10 @@ package view.components.chart.tool;
 
 import java.math.BigDecimal;
 import java.util.List;
-import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
-import model.analysis.FibonacciRetracement;
+import view.theme.ThemeStyles;
+import model.analysis.tools.FibonacciRetracement;
 
 /**
  * Two-click chart tool that draws seven horizontal Fibonacci retracement lines.
@@ -28,13 +28,6 @@ public class FibonacciTool extends AbstractChartTool {
     IDLE,
     AWAITING_SECOND
   }
-
-  /**
-   * Seven hex colour strings mapped to Fibonacci retracement levels in order (0 % through 100 %).
-   */
-  private static final String[] COLORS = {
-    "#ffffff", "#ffd700", "#ff6b6b", "#ff8c00", "#00bfff", "#98fb98", "#dddddd"
-  };
 
   /** Current interaction state of the two-click workflow. */
   private State state = State.IDLE;
@@ -63,7 +56,12 @@ public class FibonacciTool extends AbstractChartTool {
     state = State.AWAITING_SECOND;
     firstPrice = null;
     active.set(true);
-    status.set("Select LOW pivot");
+    if (visibleData(chart).size() < 2) {
+      status.set("Fibonacci needs at least 2 price points");
+      return;
+    }
+    drawRetracement(chart, visibleLow(chart), visibleHigh(chart));
+    status.set("Click LOW pivot to redraw Fibonacci");
   }
 
   /**
@@ -82,48 +80,42 @@ public class FibonacciTool extends AbstractChartTool {
     }
 
     if (firstPrice == null) {
+      clearAll(chart);
+      chart.setLegendVisible(false);
       firstPrice = price;
       status.set("Select HIGH pivot");
     } else {
       double low = Math.min(firstPrice, price);
       double high = Math.max(firstPrice, price);
 
-      int totalDays = chart.getData().get(0).getData().size();
-      List<FibonacciRetracement.Level> levels =
-          FibonacciRetracement.compute(BigDecimal.valueOf(high), BigDecimal.valueOf(low));
-
-      for (int i = 0; i < levels.size(); i++) {
-        FibonacciRetracement.Level level = levels.get(i);
-        double levelPrice = level.price().doubleValue();
-        String seriesName = level.name() + " \u2014 $" + level.price().toPlainString();
-
-        XYChart.Series<Number, Number> series = new XYChart.Series<>();
-        series.setName(seriesName);
-        series.getData().add(new XYChart.Data<>(1, levelPrice));
-        series.getData().add(new XYChart.Data<>(totalDays, levelPrice));
-
-        final String color = COLORS[i];
-        addSeries(chart, series);
-
-        Platform.runLater(
-            () -> {
-              if (series.getNode() != null) {
-                series
-                    .getNode()
-                    .setStyle(
-                        "-fx-stroke: "
-                            + color
-                            + "; "
-                            + "-fx-stroke-width: 1.5; "
-                            + "-fx-stroke-dash-array: 6 4;");
-              }
-            });
-      }
-
-      chart.setLegendVisible(true);
+      drawRetracement(chart, low, high);
       state = State.IDLE;
       status.set("");
     }
+  }
+
+  private void drawRetracement(LineChart<Number, Number> chart, double low, double high) {
+    List<XYChart.Data<Number, Number>> visibleData = visibleData(chart);
+    int firstDay = visibleData.getFirst().getXValue().intValue();
+    int lastDay = visibleData.getLast().getXValue().intValue();
+    List<FibonacciRetracement.Level> levels =
+        FibonacciRetracement.compute(BigDecimal.valueOf(high), BigDecimal.valueOf(low));
+
+    for (int i = 0; i < levels.size(); i++) {
+      FibonacciRetracement.Level level = levels.get(i);
+      double levelPrice = level.price().doubleValue();
+      String seriesName = level.name() + " \u2014 $" + level.price().toPlainString();
+
+      XYChart.Series<Number, Number> series = new XYChart.Series<>();
+      series.setName(seriesName);
+      series.getData().add(new XYChart.Data<>(firstDay, levelPrice));
+      series.getData().add(new XYChart.Data<>(lastDay, levelPrice));
+
+      addSeries(chart, series);
+      applyStyleClasses(series, "chart-overlay-dashed");
+    }
+
+    chart.setLegendVisible(true);
   }
 
   /**

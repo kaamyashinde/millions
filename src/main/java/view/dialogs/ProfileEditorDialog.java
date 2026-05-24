@@ -16,13 +16,13 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import controller.ExitGameController;
 import controller.ProfileEditorController;
 import model.session.ActiveSession;
-import model.session.AuthenticationException;
 import model.session.SessionService;
-import view.components.image.FileImageLoader;
+import util.I18n;
 import view.components.image.ImageLoader;
-import view.components.image.ValidatingImageLoader;
+import view.theme.ThemeStyles;
 
 /**
  * Modal editor for display name, avatar image, and profile deletion.
@@ -43,9 +43,10 @@ public final class ProfileEditorDialog {
   public static void show(
       Window owner,
       ProfileEditorController controller,
+      ExitGameController exitGame,
       Runnable onSaved,
       Runnable onAccountDeleted) {
-    show(owner, controller.getSessionService(), onSaved, onAccountDeleted);
+    show(owner, controller.getSessionService(), exitGame, onSaved, onAccountDeleted);
   }
 
   /**
@@ -53,12 +54,14 @@ public final class ProfileEditorDialog {
    *
    * @param owner parent window
    * @param sessionService session service
+   * @param exitGame exit-game controller for profile deletion
    * @param onSaved invoked after a successful save
    * @param onAccountDeleted invoked after the current profile was deleted
    */
   public static void show(
       Window owner,
       SessionService sessionService,
+      ExitGameController exitGame,
       Runnable onSaved,
       Runnable onAccountDeleted) {
     ActiveSession session = sessionService.getActiveSession().orElseThrow();
@@ -75,12 +78,12 @@ public final class ProfileEditorDialog {
     preview.setFitHeight(96);
     preview.setPreserveRatio(true);
     preview.setSmooth(true);
-    preview.setStyle("-fx-border-color: #d7dce5; -fx-border-radius: 8;");
+    ThemeStyles.addStyleClasses(preview, "avatar-preview");
 
     Path[] pendingImage = {null};
     boolean[] removeAvatar = {false};
 
-    ImageLoader avatarLoader = new ValidatingImageLoader(new FileImageLoader());
+    ImageLoader avatarLoader = ImageLoader.defaultLoader();
 
     Runnable reloadPreview = () -> {
       if (pendingImage[0] != null) {
@@ -99,7 +102,7 @@ public final class ProfileEditorDialog {
     reloadPreview.run();
 
     Label status = new Label();
-    status.setStyle("-fx-text-fill: #c62828;");
+    ThemeStyles.addStyleClasses(status, "text-error");
 
     Button chooseImage = new Button("Choose image…");
     chooseImage.setOnAction(_ -> {
@@ -148,30 +151,18 @@ public final class ProfileEditorDialog {
     cancel.setCancelButton(true);
     cancel.setOnAction(_ -> stage.close());
 
-    Label danger = new Label("Delete this profile");
-    danger.setStyle("-fx-font-weight: bold;");
+    Label danger = new Label(I18n.get("exitGame.pin.confirm"));
+    ThemeStyles.addStyleClasses(danger, "font-bold");
 
-    PasswordField deletePin = new PasswordField();
-    deletePin.setPromptText("PIN to confirm delete");
+    Label dangerHint = new Label(I18n.get("exitGame.confirm.body"));
+    dangerHint.setWrapText(true);
+    ThemeStyles.addStyleClasses(dangerHint, "text-secondary");
 
-    Button delete = new Button("Delete profile");
-    delete.setStyle("-fx-text-fill: #b71c1c;");
-    delete.setOnAction(_ -> {
-      status.setText("");
-      char[] pin = deletePin.getText().toCharArray();
-      try {
-        sessionService.deleteActiveProfile(pin);
-        java.util.Arrays.fill(pin, '0');
-        stage.close();
-        onAccountDeleted.run();
-      } catch (AuthenticationException exception) {
-        java.util.Arrays.fill(pin, '0');
-        status.setText("Invalid PIN.");
-      } catch (RuntimeException exception) {
-        java.util.Arrays.fill(pin, '0');
-        status.setText(
-            exception.getMessage() != null ? exception.getMessage() : "Could not delete profile.");
-      }
+    Button exitGameButton = new Button(I18n.get("exitGame.pin.confirm"));
+    ThemeStyles.addStyleClasses(exitGameButton, "text-error");
+    exitGameButton.setOnAction(_ -> {
+      stage.close();
+      ExitGameDialog.show(stage.getOwner(), exitGame, onAccountDeleted);
     });
 
     GridPane form = new GridPane();
@@ -187,12 +178,24 @@ public final class ProfileEditorDialog {
         status,
         new HBox(10, save, cancel),
         danger,
-        deletePin,
-        delete);
+        dangerHint,
+        exitGameButton);
     root.setPadding(new Insets(16));
     root.setAlignment(Pos.TOP_LEFT);
 
-    stage.setScene(new Scene(root, 420, 460));
+    Scene scene = new Scene(
+        root,
+        ThemeStyles.dialogDimension(owner, 0.40, 400, 520),
+        ThemeStyles.dialogDimension(owner, 0.65, 440, 560));
+    ThemeStyles.install(scene);
+    ThemeStyles.addStyleClasses(root, "dialog-root");
+    ThemeStyles.styleField(nameField);
+    ThemeStyles.styleButton(chooseImage);
+    ThemeStyles.styleButton(removeImage);
+    ThemeStyles.styleAccentButton(save);
+    ThemeStyles.styleButton(cancel);
+    ThemeStyles.styleButton(exitGameButton);
+    stage.setScene(scene);
     stage.showAndWait();
   }
 }

@@ -1,13 +1,17 @@
 package controller;
 
-import static model.utils.Validator.checkNotNull;
+import model.core.player.Player;
+
+import static util.Validator.checkNotNull;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import model.Stock;
+import model.core.asset.Stock;
 import model.session.ActiveSession;
 import model.session.SessionService;
+import model.trading.savings.RegularSavingsProcessor;
+import util.Validator;
 import view.components.notification.LevelUpNotificationObserver;
 import view.components.notification.NotificationService;
 import view.components.toast.ToastMode;
@@ -17,19 +21,22 @@ import view.components.toast.ToastMode;
  */
 public class WorkspaceController {
 
+  /** Maximum trading days that can be skipped in one action from the workspace header. */
+  public static final int MAX_SKIP_TRADING_DAYS = 30;
+
   private static final int TICKER_PREVIEW_MAX = 8;
 
   private final ActiveSession session;
   private final SessionService sessionService;
   private final NotificationService notifications;
-  private final NotificationsController notificationsTab;
   private final PortfolioController portfolio;
   private final StocksController stocks;
   private final StockDetailController stockDetail;
   private final FundsController funds;
   private final FundDetailController fundDetail;
   private final SavingsController savings;
-  private final SavedRunsController savedRuns;
+  private final TradingController trading;
+  private final ExitGameController exitGame;
   private final LeaderboardController leaderboard;
   private final LearningHubController learningHub;
   private final QuizController quiz;
@@ -46,16 +53,16 @@ public class WorkspaceController {
     this.session = session;
     this.sessionService = sessionService;
     this.notifications = new NotificationService();
-    this.notificationsTab = new NotificationsController(notifications);
     Path avatarPath = sessionService.avatarPath(session.normalizedUsername());
     this.portfolio = new PortfolioController(session.exchange(), session.player(), avatarPath);
     this.stocks = new StocksController(session.exchange());
     this.stockDetail = new StockDetailController(session.exchange());
     this.funds = new FundsController(session.exchange());
     this.fundDetail = new FundDetailController();
-    this.savings =
-        new SavingsController(session.exchange(), session.player(), notifications);
-    this.savedRuns = new SavedRunsController(sessionService);
+    this.savings = new SavingsController(session.exchange(), session.player());
+    this.trading =
+        new TradingController(session.exchange(), session.player(), notifications);
+    this.exitGame = new ExitGameController(sessionService);
     this.leaderboard = new LeaderboardController(sessionService);
     this.learningHub = new LearningHubController();
     this.quiz = new QuizController();
@@ -74,10 +81,6 @@ public class WorkspaceController {
 
   public NotificationService getNotifications() {
     return notifications;
-  }
-
-  public NotificationsController getNotificationsTab() {
-    return notificationsTab;
   }
 
   public PortfolioController getPortfolio() {
@@ -104,8 +107,12 @@ public class WorkspaceController {
     return savings;
   }
 
-  public SavedRunsController getSavedRuns() {
-    return savedRuns;
+  public TradingController getTrading() {
+    return trading;
+  }
+
+  public ExitGameController getExitGame() {
+    return exitGame;
   }
 
   public LeaderboardController getLeaderboard() {
@@ -135,6 +142,37 @@ public class WorkspaceController {
 
   public Path getAvatarPath() {
     return sessionService.avatarPath(session.normalizedUsername());
+  }
+
+  /**
+   * Advances the exchange by the requested number of trading days, processes installments, and
+   * surfaces notifications.
+   *
+   * @param daysText number of days to skip (validated 1–{@link #MAX_SKIP_TRADING_DAYS})
+   * @return comma-separated symbols skipped for insufficient funds, or empty
+   * @throws IllegalArgumentException when {@code daysText} is invalid
+   */
+  public String advanceTradingDays(String daysText) {
+    int days =
+        Validator.parsePositiveInt(daysText, "trading days", MAX_SKIP_TRADING_DAYS);
+    var exchange = session.exchange();
+    var player = session.player();
+    int before = exchange.getDay();
+    exchange.advance(days);
+    List<String> skipped =
+        RegularSavingsProcessor.run(exchange, player, before, exchange.getDay());
+    savings.refreshPlans();
+    exchange.getLastMarketEvent().ifPresent(event -> notifications.show(
+        ToastMode.INFO,
+        event.title(),
+        event.description()));
+    for (String sym : skipped) {
+      notifications.show(
+          ToastMode.WARNING,
+          "Regular savings skipped",
+          "Insufficient funds for " + sym + ".");
+    }
+    return String.join(", ", skipped);
   }
 
   /**

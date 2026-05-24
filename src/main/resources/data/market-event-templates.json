@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Earnings beat expectations",
+    "descriptionTemplate": "%s reported stronger earnings than expected, lifting sentiment around %s.",
+    "minFactor": 1.08,
+    "maxFactor": 1.18
+  },
+  {
+    "title": "Product launch gains traction",
+    "descriptionTemplate": "%s announced strong demand for a new release, boosting confidence in %s.",
+    "minFactor": 1.07,
+    "maxFactor": 1.14
+  },
+  {
+    "title": "Regulatory setback",
+    "descriptionTemplate": "%s faces a regulatory setback that raises fresh uncertainty around %s.",
+    "minFactor": 0.82,
+    "maxFactor": 0.93
+  },
+  {
+    "title": "Guidance cut rattles investors",
+    "descriptionTemplate": "%s lowered guidance, causing a sharp repricing in %s.",
+    "minFactor": 0.84,
+    "maxFactor": 0.94
+  }
+]

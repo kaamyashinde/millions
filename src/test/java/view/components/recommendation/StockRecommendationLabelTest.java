@@ -12,7 +12,7 @@ import view.components.recommendation.StockRecommendationLabel;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import model.recommendation.StockRecommendation;
+import model.analysis.recommendation.StockRecommendation;
 
 /**
  * Tests for the stock recommendation badge component.

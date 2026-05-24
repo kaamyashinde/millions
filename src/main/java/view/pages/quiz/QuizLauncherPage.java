@@ -1,7 +1,10 @@
 package view.pages.quiz;
 
 import java.util.List;
+import java.util.function.Consumer;
 
+import controller.LearningHubController;
+import controller.QuizController;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -10,11 +13,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-
-import model.learninghub.Quiz;
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizContentStore;
-import model.learninghub.QuizSession;
+import model.learning.content.LearningItem;
+import model.learning.quiz.Quiz;
+import model.learning.quiz.QuizAttempt;
 import view.theme.ThemeStyles;
 
 /**
@@ -22,20 +23,31 @@ import view.theme.ThemeStyles;
  * handles the full quiz-play flow (quiz → result → back to launcher).
  *
  * @author kaamyashinde
- * @version 1.0.0
+ * @version 2.0.0
  * @since 04-04-2026
  */
 public class QuizLauncherPage extends BorderPane {
 
-  private static final String COLOR_BG_CARD = "#1e1e1e";
-  private static final String COLOR_BORDER_ACCENT = "#2196F3";
-  private static final String COLOR_HEADING = "#e0e0e0";
-  private static final String COLOR_SUBTITLE = "#9e9e9e";
-
+  private final QuizController quiz;
+  private final LearningHubController learningHub;
+  private final Consumer<LearningItem> onOpenHubTopic;
   private javafx.scene.Node launcherView;
 
-  /** Builds the panel and shows the quiz list. */
-  public QuizLauncherPage() {
+  /**
+   * Builds the panel and shows the quiz list.
+   *
+   * @param quiz           supplies quiz content and session recording
+   * @param learningHub    supplies linked topic lookups
+   * @param onOpenHubTopic called when the player opens a linked hub topic from quiz feedback
+   */
+  public QuizLauncherPage(
+      QuizController quiz,
+      LearningHubController learningHub,
+      Consumer<LearningItem> onOpenHubTopic) {
+    this.quiz = quiz;
+    this.learningHub = learningHub;
+    this.onOpenHubTopic = onOpenHubTopic;
+
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "quiz-root");
 
@@ -51,9 +63,9 @@ public class QuizLauncherPage extends BorderPane {
     setTop(top);
 
     VBox list = new VBox(10);
-    List<Quiz> quizzes = QuizContentStore.getAllQuizzesPublic();
-    for (Quiz quiz : quizzes) {
-      list.getChildren().add(buildQuizCard(quiz));
+    List<Quiz> quizzes = quiz.getAllQuizzes();
+    for (Quiz found : quizzes) {
+      list.getChildren().add(buildQuizCard(found));
     }
 
     ScrollPane scroll = new ScrollPane(list);
@@ -64,12 +76,12 @@ public class QuizLauncherPage extends BorderPane {
     setCenter(launcherView);
   }
 
-  private javafx.scene.Node buildQuizCard(Quiz quiz) {
-    Label title = new Label(quiz.title());
+  private javafx.scene.Node buildQuizCard(Quiz quizItem) {
+    Label title = new Label(quizItem.title());
     ThemeStyles.addStyleClasses(title, "quiz-card-title");
     title.setWrapText(true);
 
-    Label meta = new Label(quiz.questions().size() + " questions");
+    Label meta = new Label(quizItem.questions().size() + " questions");
     ThemeStyles.addStyleClasses(meta, "quiz-meta");
 
     Label cta = new Label("Start →");
@@ -80,22 +92,25 @@ public class QuizLauncherPage extends BorderPane {
     card.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.addStyleClasses(card, "quiz-card");
 
-    card.setOnMouseClicked(_ -> startQuiz(quiz));
+    card.setOnMouseClicked(_ -> startQuiz(quizItem));
     return card;
   }
 
-  private void startQuiz(Quiz quiz) {
-    QuizAttempt attempt = new QuizAttempt(quiz);
+  private void startQuiz(Quiz quizItem) {
+    QuizAttempt attempt = new QuizAttempt(quizItem);
     Runnable backToLauncher = this::showLauncher;
     setCenter(new QuizView(
         attempt,
         backToLauncher,
-        () -> showResult(attempt, backToLauncher)));
+        () -> showResult(attempt, backToLauncher),
+        learningHub,
+        onOpenHubTopic));
   }
 
   private void showResult(QuizAttempt attempt, Runnable onBackToTopic) {
-    QuizSession.record(attempt);
-    setCenter(new QuizResultView(attempt, onBackToTopic, this::showLauncher));
+    quiz.recordAttempt(attempt);
+    setCenter(new QuizResultView(
+        attempt, onBackToTopic, this::showLauncher, learningHub, onOpenHubTopic));
   }
 
   private void showLauncher() {

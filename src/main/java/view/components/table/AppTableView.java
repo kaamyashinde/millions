@@ -1,6 +1,7 @@
 package view.components.table;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -18,8 +19,11 @@ import javafx.scene.control.TableView;
  */
 public class AppTableView<T> extends TableView<T> {
 
+  private static final Set<String> LEADERBOARD_ROW_CLASSES =
+      Set.of("leaderboard-top-one", "leaderboard-top-two", "leaderboard-top-three");
+
   private final Label placeholderLabel = new Label();
-  private Function<T, String> rowStyleProvider = item -> "";
+  private Function<T, String> rowClassProvider = item -> "";
 
   /**
    * Creates a table with the supplied empty-state placeholder.
@@ -34,11 +38,14 @@ public class AppTableView<T> extends TableView<T> {
       @Override
       protected void updateItem(T item, boolean empty) {
         super.updateItem(item, empty);
+        getStyleClass().removeAll(LEADERBOARD_ROW_CLASSES);
         if (empty || item == null) {
-          setStyle("");
           return;
         }
-        setStyle(rowStyleProvider.apply(item));
+        String rowClass = rowClassProvider.apply(item);
+        if (rowClass != null && !rowClass.isBlank()) {
+          getStyleClass().add(rowClass);
+        }
       }
     });
   }
@@ -53,12 +60,12 @@ public class AppTableView<T> extends TableView<T> {
   }
 
   /**
-   * Supplies inline row styles for the current item.
+   * Supplies CSS row classes for the current item.
    *
-   * @param rowStyleProvider function returning a style string
+   * @param rowClassProvider function returning a style class name
    */
-  public void setRowStyleProvider(Function<T, String> rowStyleProvider) {
-    this.rowStyleProvider = Objects.requireNonNullElse(rowStyleProvider, item -> "");
+  public void setRowClassProvider(Function<T, String> rowClassProvider) {
+    this.rowClassProvider = Objects.requireNonNullElse(rowClassProvider, item -> "");
     refresh();
   }
 

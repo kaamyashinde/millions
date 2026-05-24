@@ -5,27 +5,24 @@ import java.util.Arrays;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.stage.Window;
+import model.learning.content.Difficulty;
 
 /**
  * Reusable JavaFX stylesheet and style-class helpers.
  */
 public final class ThemeStyles {
 
-  private static final String[] STYLESHEETS = {
-      "/css/base.css",
-      "/css/components.css",
-      "/css/layouts.css",
-      "/css/pages/auth.css",
-      "/css/pages/finance.css",
-      "/css/pages/learning.css",
-      "/css/pages/quiz.css"
-  };
+  private static final String BASE_STYLESHEET = "/css/millions.css";
 
   private ThemeStyles() {}
 
   /**
-   * Installs the app's stylesheets on a scene in dependency order.
+   * Installs the app's stylesheet on a scene and applies any saved theme preference.
    *
    * @param scene scene that should receive the Millions CSS stack
    */
@@ -33,15 +30,38 @@ public final class ThemeStyles {
     if (scene == null) {
       return;
     }
-    for (String stylesheet : STYLESHEETS) {
-      URL resource = ThemeStyles.class.getResource(stylesheet);
-      if (resource == null) {
-        throw new IllegalStateException("Missing stylesheet resource: " + stylesheet);
-      }
-      String externalForm = resource.toExternalForm();
-      if (!scene.getStylesheets().contains(externalForm)) {
-        scene.getStylesheets().add(externalForm);
-      }
+    URL resource = ThemeStyles.class.getResource(BASE_STYLESHEET);
+    if (resource == null) {
+      throw new IllegalStateException("Missing stylesheet resource: " + BASE_STYLESHEET);
+    }
+    String externalForm = resource.toExternalForm();
+    if (!scene.getStylesheets().contains(externalForm)) {
+      scene.getStylesheets().add(externalForm);
+    }
+    ThemeManager.getInstance().restorePreference(scene);
+  }
+
+  /**
+   * Applies the Millions theme to a modal {@link Dialog} when its scene is created.
+   *
+   * @param dialog dialog whose pane should receive the stylesheet stack
+   */
+  public static void installOnDialog(Dialog<?> dialog) {
+    if (dialog == null) {
+      return;
+    }
+    DialogPane pane = dialog.getDialogPane();
+    addStyleClasses(pane, "dialog-root");
+    pane.sceneProperty()
+        .addListener(
+            (obs, oldScene, scene) -> {
+              if (scene != null) {
+                install(scene);
+              }
+            });
+    Scene existing = pane.getScene();
+    if (existing != null) {
+      install(existing);
     }
   }
 
@@ -62,32 +82,20 @@ public final class ThemeStyles {
   }
 
   /**
-   * Returns the legacy inline card style for code that has not moved to CSS classes yet.
+   * Computes a dialog dimension as a fraction of the owner window, clamped to min/max.
    *
-   * @return inline JavaFX card style
+   * @param owner parent window; uses {@code min} when null
+   * @param fraction fraction of the larger owner dimension
+   * @param min minimum size
+   * @param max maximum size
+   * @return clamped dialog dimension
    */
-  public static String cardStyle() {
-    return "-fx-background-color: " + ThemePalette.SURFACE + ";"
-        + "-fx-border-color: " + ThemePalette.BORDER + ";"
-        + "-fx-background-radius: 12;"
-        + "-fx-border-radius: 12;"
-        + "-fx-padding: 14;";
-  }
-
-  /**
-   * Returns the legacy inline field style for code that has not moved to CSS classes yet.
-   *
-   * @return inline JavaFX field style
-   */
-  public static String fieldStyle() {
-    return "-fx-background-color: " + ThemePalette.INPUT_BG + ";"
-        + "-fx-background-radius: 6;"
-        + "-fx-border-radius: 6;"
-        + "-fx-border-color: " + ThemePalette.INPUT_BORDER + ";"
-        + "-fx-border-width: 1;"
-        + "-fx-padding: 8 12;"
-        + "-fx-font-size: 14px;"
-        + "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + ";";
+  public static double dialogDimension(Window owner, double fraction, double min, double max) {
+    if (owner == null) {
+      return min;
+    }
+    double base = Math.max(owner.getWidth(), owner.getHeight()) * fraction;
+    return Math.max(min, Math.min(max, base));
   }
 
   /**
@@ -118,43 +126,32 @@ public final class ThemeStyles {
   }
 
   /**
-   * Returns the legacy inline workspace background style.
+   * Applies the difficulty badge style class for a learning item.
    *
-   * @return inline JavaFX background style
+   * @param badge badge label to style
+   * @param difficulty item difficulty
    */
-  public static String workspaceBackground() {
-    return "-fx-background-color: " + ThemePalette.BACKGROUND + ";";
+  public static void applyDifficultyBadge(Label badge, Difficulty difficulty) {
+    addStyleClasses(
+        badge,
+        switch (difficulty) {
+          case BEGINNER -> "learning-badge-beginner";
+          case INTERMEDIATE -> "learning-badge-intermediate";
+          case ADVANCED -> "learning-badge-advanced";
+        });
   }
 
   /**
-   * Returns the legacy inline heading text style.
-   *
-   * @return inline JavaFX heading style
-   */
-  public static String headingText() {
-    return "-fx-text-fill: " + ThemePalette.TEXT_PRIMARY + "; -fx-font-weight: bold;";
-  }
-
-  /**
-   * Returns the legacy inline muted text style.
-   *
-   * @return inline JavaFX muted text style
-   */
-  public static String mutedText() {
-    return "-fx-text-fill: " + ThemePalette.TEXT_SECONDARY + ";";
-  }
-
-  /**
-   * Returns an inline row highlight style for tables that still style rows programmatically.
+   * Returns the CSS class name for a one-based leaderboard rank highlight.
    *
    * @param rank one-based rank
-   * @return inline JavaFX row style, or empty string when rank has no highlight
+   * @return style class name, or empty string when rank has no highlight
    */
-  public static String leaderboardRowStyle(int rank) {
+  public static String leaderboardRowClass(int rank) {
     return switch (rank) {
-      case 1 -> "-fx-background-color: " + ThemePalette.TOP_ONE + ";-fx-font-weight: bold;";
-      case 2 -> "-fx-background-color: " + ThemePalette.TOP_TWO + ";-fx-font-weight: bold;";
-      case 3 -> "-fx-background-color: " + ThemePalette.TOP_THREE + ";-fx-font-weight: bold;";
+      case 1 -> "leaderboard-top-one";
+      case 2 -> "leaderboard-top-two";
+      case 3 -> "leaderboard-top-three";
       default -> "";
     };
   }

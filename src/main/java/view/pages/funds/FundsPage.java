@@ -8,7 +8,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
@@ -20,8 +19,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.Exchange;
-import model.fund.Fund;
+import controller.TradingController;
+import model.core.market.Exchange;
+import model.core.asset.fund.Fund;
 import view.theme.ThemeStyles;
 
 /**
@@ -36,28 +36,27 @@ public class FundsPage extends BorderPane {
   private final FundDetailView detailView = new FundDetailView();
 
   /**
-   * Builds a read-only fund listing for the given exchange.
+   * Builds a fund listing for the given exchange.
    *
    * @param exchange exchange whose listed funds are shown
+   * @param trading trading controller for buy actions in the detail pane
+   * @param onTradeComplete invoked after a successful trade
    */
-  public FundsPage(Exchange exchange) {
+  public FundsPage(Exchange exchange, TradingController trading, Runnable onTradeComplete) {
     this.exchange = exchange;
 
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
 
-    Text heading = new Text("Available funds");
+    Text heading = new Text("Available Funds");
     heading.setFont(Font.font("System", FontWeight.BOLD, 22));
     ThemeStyles.addStyleClasses(heading, "finance-page-title");
     ThemeStyles.addStyleClasses(metaLabel, "finance-meta");
+    VBox.setMargin(metaLabel, new Insets(0, 0, 8, 0));
 
-    Button refreshBtn = new Button("Refresh");
-    styleButton(refreshBtn);
-    refreshBtn.setOnAction(_ -> refresh());
-
-    HBox topRow = new HBox(16, heading, refreshBtn);
+    HBox topRow = new HBox(16, heading);
     topRow.setAlignment(Pos.CENTER_LEFT);
-    VBox top = new VBox(8, topRow, metaLabel);
+    VBox top = new VBox(4, topRow, metaLabel);
     setTop(top);
 
     buildTable();
@@ -67,6 +66,9 @@ public class FundsPage extends BorderPane {
     VBox.setVgrow(table, Priority.ALWAYS);
     table.getSelectionModel().selectedItemProperty().addListener((obs, oldFund, newFund) ->
         detailView.showFund(newFund));
+
+    detailView.setTradeHandlers(
+        trading, () -> getScene() != null ? getScene().getWindow() : null, onTradeComplete);
 
     SplitPane splitPane = new SplitPane(table, detailView);
     splitPane.setDividerPositions(0.46);
@@ -83,7 +85,7 @@ public class FundsPage extends BorderPane {
         exchange.getName()
             + " · "
             + exchange.getFunds().size()
-            + " fund listing(s)");
+            + " Fund Listing(s)");
     List<Fund> sorted = new ArrayList<>(exchange.findFunds(""));
     sorted.sort(Comparator.comparing(Fund::getSymbol));
     Fund previousSelection = table.getSelectionModel().getSelectedItem();
@@ -104,7 +106,7 @@ public class FundsPage extends BorderPane {
     nameColumn.setCellValueFactory(
         cell -> new SimpleStringProperty(cell.getValue().getDisplayName()));
 
-    TableColumn<Fund, String> priceColumn = new TableColumn<>("Latest price");
+    TableColumn<Fund, String> priceColumn = new TableColumn<>("Latest Price");
     priceColumn.setCellValueFactory(
         cell -> new SimpleStringProperty(cell.getValue().getSalesPrice().toPlainString()));
 
@@ -123,9 +125,5 @@ public class FundsPage extends BorderPane {
       }
     }
     table.getSelectionModel().clearSelection();
-  }
-
-  private static void styleButton(Button button) {
-    ThemeStyles.styleButton(button);
   }
 }

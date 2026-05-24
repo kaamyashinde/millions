@@ -1,5 +1,6 @@
 package model.session.validation;
 
+
 import java.math.BigDecimal;
 
 /**

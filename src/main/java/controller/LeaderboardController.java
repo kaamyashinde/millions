@@ -1,9 +1,9 @@
 package controller;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.util.List;
-import model.session.LocalLeaderboardService.LeaderboardRow;
+import model.session.leaderboard.LocalLeaderboardService.LeaderboardRow;
 import model.session.SessionService;
 
 /**

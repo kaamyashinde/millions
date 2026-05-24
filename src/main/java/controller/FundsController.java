@@ -1,6 +1,6 @@
 package controller;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,8 +9,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.Exchange;
-import model.fund.Fund;
+import model.core.market.Exchange;
+import model.core.asset.fund.Fund;
 
 /**
  * Supplies sorted fund listings and selection state for the funds tab.

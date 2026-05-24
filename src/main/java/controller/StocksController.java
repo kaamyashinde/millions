@@ -1,6 +1,6 @@
 package controller;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,9 +9,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.Exchange;
-import model.Stock;
-import model.marketevent.MarketEvent;
+import model.core.market.Exchange;
+import model.core.asset.Stock;
+import model.core.market.event.MarketEvent;
 
 /**
  * Supplies sorted stock listings and selection state for the stocks tab.
