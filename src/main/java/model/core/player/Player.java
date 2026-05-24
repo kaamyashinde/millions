@@ -257,8 +257,6 @@ public class Player {
    * Notifies all registered observers that this player's state has changed.
    */
   private void notifyObservers() {
-    for (PlayerObserver observer : observers) {
-      observer.onPlayerStateChanged(this);
-    }
+    observers.forEach(observer -> observer.onPlayerStateChanged(this));
   }
 }

@@ -2,6 +2,7 @@ package model.persistence.profile;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import model.persistence.ProfileFile;
 
 /**
@@ -64,10 +65,8 @@ public final class ProfileFileValidator {
   }
 
   private static void rejectNullEntries(List<?> list, String field) {
-    for (Object entry : list) {
-      if (entry == null) {
-        throw new IllegalArgumentException("Null entry in " + field + " list.");
-      }
+    if (list.stream().anyMatch(Objects::isNull)) {
+      throw new IllegalArgumentException("Null entry in " + field + " list.");
     }
   }
 }

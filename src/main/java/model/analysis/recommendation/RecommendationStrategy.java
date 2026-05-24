@@ -90,10 +90,7 @@ public enum RecommendationStrategy {
     int startIndex = recentStartIndex(historicalPrices, LOOKBACK_PRICE_POINTS);
     List<BigDecimal> window = historicalPrices.subList(startIndex, historicalPrices.size());
 
-    BigDecimal sum = BigDecimal.ZERO;
-    for (BigDecimal price : window) {
-      sum = sum.add(price);
-    }
+    BigDecimal sum = window.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     BigDecimal average =
         sum.divide(BigDecimal.valueOf(window.size()), DIVISION_SCALE, RoundingMode.HALF_UP);
     if (average.signum() == 0) {
