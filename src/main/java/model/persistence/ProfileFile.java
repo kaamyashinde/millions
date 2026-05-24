@@ -18,6 +18,7 @@ import model.core.asset.Stock;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import model.core.market.event.MarketEvent;
 import model.core.market.event.SymbolMarketEventTarget;
 import model.core.player.Player;
@@ -249,7 +250,7 @@ public record ProfileFile(
             .toList(),
         exchange.getName(),
         exchange.getDay(),
-        exchange.getStocks().stream()
+        exchange.listings().getStocks().stream()
             .map(stock -> new PriceRow(stock.getSymbol(), List.copyOf(stock.getHistoricalPrices())))
             .toList(),
         exchange.getMarketEventHistory().stream()
@@ -269,7 +270,7 @@ public record ProfileFile(
     List<Fund> funds = rebuildFunds(marketData.funds(), stocksBySymbol);
     List<MarketEvent> history = events.stream().map(ProfileFile::toMarketEvent).toList();
     MarketEvent last = lastEvent == null ? null : toMarketEvent(lastEvent);
-    Exchange exchange = new Exchange.Builder(exchangeName)
+    Exchange exchange = new ExchangeBuilder(exchangeName)
         .stocks(List.copyOf(stocksBySymbol.values()))
         .funds(funds)
         .day(day)
@@ -309,7 +310,7 @@ public record ProfileFile(
             (left, right) -> left,
             LinkedHashMap::new));
     List<Fund> funds = rebuildFunds(marketData.funds(), stocks);
-    return new Exchange.Builder(exchangeName)
+    return new ExchangeBuilder(exchangeName)
         .stocks(List.copyOf(stocks.values()))
         .funds(funds)
         .build();
@@ -399,7 +400,7 @@ public record ProfileFile(
   }
 
   private static Share toShare(HoldingRow row, Exchange exchange) {
-    InvestableAsset asset = exchange.getAsset(row.symbol());
+    InvestableAsset asset = exchange.listings().getAsset(row.symbol());
     if (asset == null) {
       throw new IllegalStateException("Unknown asset in saved profile: " + row.symbol());
     }
