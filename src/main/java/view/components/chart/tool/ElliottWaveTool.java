@@ -43,14 +43,17 @@ public class ElliottWaveTool extends AbstractChartTool {
     "Wave 1", "Wave 2", "Wave 3", "Wave 4", "Wave 5", "Wave A", "Wave B", "Wave C"
   };
 
-  /** Teal hex colour applied to impulse waves 1–5. */
-  private static final String IMPULSE_COLOR = "#0EA5A4";
+  /** Amber hex colour applied to impulse waves 1–5. */
+  private static final String IMPULSE_COLOR = "#F59E0B";
 
   /** Controlled red applied to corrective waves A–C (not dominant brand color). */
   private static final String CORRECTIVE_COLOR = "#EF4444";
 
   /** Collected click points; each entry is {@code [dayIndex, price]}. */
   private final List<double[]> points = new ArrayList<>();
+
+  /** Whether the currently drawn overlay is an automatic preview. */
+  private boolean previewDrawn = false;
 
   /**
    * Returns the display name of this tool.
@@ -72,7 +75,16 @@ public class ElliottWaveTool extends AbstractChartTool {
   public void onActivate(LineChart<Number, Number> chart) {
     active.set(true);
     points.clear();
-    status.set(STATUS_MESSAGES[0]);
+    previewDrawn = false;
+    List<double[]> previewPoints = previewPoints(chart);
+    if (previewPoints.size() < 2) {
+      status.set("Elliott Wave needs at least 2 price points");
+      return;
+    }
+    drawSegments(chart, previewPoints);
+    previewDrawn = true;
+    chart.setLegendVisible(true);
+    status.set("Click wave origin to redraw Elliott Wave");
   }
 
   /**
@@ -90,13 +102,19 @@ public class ElliottWaveTool extends AbstractChartTool {
       return;
     }
 
+    if (previewDrawn) {
+      clearAll(chart);
+      chart.setLegendVisible(false);
+      previewDrawn = false;
+    }
+
     points.add(new double[] {dayIndex, price});
     int clickCount = points.size();
 
     if (clickCount < 9) {
       status.set(STATUS_MESSAGES[clickCount]);
     } else {
-      drawAllSegments(chart);
+      drawSegments(chart, points);
       chart.setLegendVisible(true);
       status.set("");
     }
@@ -113,21 +131,24 @@ public class ElliottWaveTool extends AbstractChartTool {
     clearAll(chart);
     chart.setLegendVisible(false);
     points.clear();
+    previewDrawn = false;
     active.set(false);
     status.set("");
   }
 
   /**
-   * Iterates over the eight consecutive point-to-point segments stored in {@code points}, assigns
+   * Iterates over consecutive point-to-point segments, assigns
    * {@link #IMPULSE_COLOR} to the first five (waves 1–5) and {@link #CORRECTIVE_COLOR} to the
    * remaining three (waves A–C), and adds and styles each series via {@code Platform.runLater}.
    *
    * @param chart the chart on which the wave segments are drawn
+   * @param segmentPoints ordered points to connect
    */
-  private void drawAllSegments(LineChart<Number, Number> chart) {
-    for (int i = 0; i < 8; i++) {
-      double[] from = points.get(i);
-      double[] to = points.get(i + 1);
+  private void drawSegments(LineChart<Number, Number> chart, List<double[]> segmentPoints) {
+    int segmentCount = Math.min(segmentPoints.size() - 1, WAVE_NAMES.length);
+    for (int i = 0; i < segmentCount; i++) {
+      double[] from = segmentPoints.get(i);
+      double[] to = segmentPoints.get(i + 1);
 
       XYChart.Series<Number, Number> series = new XYChart.Series<>();
       series.setName(WAVE_NAMES[i]);
@@ -146,5 +167,28 @@ public class ElliottWaveTool extends AbstractChartTool {
             }
           });
     }
+  }
+
+  /**
+   * Picks up to nine evenly spaced price points for the automatic Elliott Wave preview.
+   *
+   * @param chart the chart on which the wave segments are drawn
+   * @return ordered preview points
+   */
+  private static List<double[]> previewPoints(LineChart<Number, Number> chart) {
+    List<XYChart.Data<Number, Number>> data = chart.getData().getFirst().getData();
+    if (data.size() <= 9) {
+      return data.stream()
+          .map(point -> new double[] {point.getXValue().doubleValue(), point.getYValue().doubleValue()})
+          .toList();
+    }
+    List<double[]> selected = new ArrayList<>();
+    int maxIndex = data.size() - 1;
+    for (int i = 0; i < 9; i++) {
+      int index = (int) Math.round(i * maxIndex / 8.0);
+      XYChart.Data<Number, Number> point = data.get(index);
+      selected.add(new double[] {point.getXValue().doubleValue(), point.getYValue().doubleValue()});
+    }
+    return selected;
   }
 }
