@@ -3,6 +3,7 @@ package view.pages.stocks;
 import static util.Validator.checkNotNull;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -241,7 +242,7 @@ public class StocksPage extends BorderPane {
     ToggleGroup chartRangeGroup = new ToggleGroup();
     ThemeStyles.addStyleClasses(rangeBar, "chart-range-bar");
 
-    for (ChartRange range : ChartRange.values()) {
+    Arrays.stream(ChartRange.values()).forEach(range -> {
       ToggleButton button = new ToggleButton(range.getLabel());
       button.setToggleGroup(chartRangeGroup);
       button.setUserData(range);
@@ -260,7 +261,7 @@ public class StocksPage extends BorderPane {
                 }
               });
       rangeBar.getChildren().add(button);
-    }
+    });
 
     return rangeBar;
   }

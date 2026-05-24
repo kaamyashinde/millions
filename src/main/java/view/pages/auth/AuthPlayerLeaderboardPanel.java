@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -211,9 +212,8 @@ public class AuthPlayerLeaderboardPanel extends BorderPane {
     List<PlayerLeaderboardEntry> ranked = new ArrayList<>(sourceEntries);
     ranked.sort(PlayerLeaderboardRanking.bestFirstComparator(activeMetric));
     rankByUsername.clear();
-    for (int index = 0; index < ranked.size(); index++) {
-      rankByUsername.put(ranked.get(index).username(), index + 1);
-    }
+    IntStream.range(0, ranked.size())
+        .forEach(index -> rankByUsername.put(ranked.get(index).username(), index + 1));
 
     List<PlayerLeaderboardEntry> displayOrder = new ArrayList<>(sourceEntries);
     displayOrder.sort(PlayerLeaderboardRanking.displayComparator(activeMetric, ascending));
