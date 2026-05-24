@@ -5,6 +5,7 @@ import model.learning.quiz.Quiz;
 
 import java.math.BigDecimal;
 import javafx.application.Application;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.Region;
 import javafx.scene.control.Tab;
@@ -19,6 +20,7 @@ import model.session.SessionService;
 import model.session.SessionServiceFactory;
 import controller.WorkspaceController;
 import view.dialogs.WelcomeDialog;
+import view.layout.ResponsiveLayout;
 import view.layout.WorkspaceLayout;
 import view.pages.auth.LoginPage;
 import view.pages.auth.RegisterPage;
@@ -73,6 +75,17 @@ public class MillionsApp extends Application {
     stage.setMinHeight(MIN_WINDOW_HEIGHT);
     stage.setOnCloseRequest(_ -> sessionService.saveActiveSession());
     stage.show();
+
+    Runnable notifyResize = () -> {
+      Node root = scene.getRoot();
+      if (root instanceof ResponsiveLayout responsive) {
+        responsive.onWindowResized(scene.getWidth(), scene.getHeight());
+      }
+    };
+    scene.widthProperty().addListener((obs, oldWidth, newWidth) -> notifyResize.run());
+    scene.heightProperty().addListener((obs, oldHeight, newHeight) -> notifyResize.run());
+    scene.rootProperty().addListener((obs, oldRoot, newRoot) -> notifyResize.run());
+    notifyResize.run();
   }
 
   /**
