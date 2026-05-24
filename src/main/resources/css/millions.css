@@ -3,31 +3,36 @@
 /* === TOKENS === */
 
 .root {
-    -millions-accent: #0EA5A4;
-    -millions-accent-light: #0EA5A420;
-    -millions-primary-hover: #14B8A6;
-    -millions-bg: #0B1220;
-    -millions-surface: #111827;
-    -millions-data-surface: #0F2D35;
-    -millions-surface-light: #16434D;
-    -millions-surface-strong: #16434D;
-    -millions-border: #2A6F73;
+    /* WCAG AA-oriented dark navy palette.
+       Use -millions-accent for accent text/borders and -millions-accent-bg for filled controls.
+       A single teal cannot contrast well against both white text and a dark navy background. */
+    -millions-accent: #5EEAD4;
+    -millions-accent-bg: #0F766E;
+    -millions-accent-bg-hover: #115E59;
+    -millions-accent-light: #5EEAD426;
+    -millions-primary-hover: #2DD4BF;
+    -millions-bg: #08111F;
+    -millions-surface: #111C2E;
+    -millions-data-surface: #0E2733;
+    -millions-surface-light: #1D4E5F;
+    -millions-surface-strong: #1D4E5F;
+    -millions-border: #64748B;
     -millions-text-primary: #F8FAFC;
-    -millions-text-secondary: #CBD5E1;
-    -millions-text-muted: #94A3B8;
-    -millions-error: #EF4444;
-    -millions-success: #22C55E;
-    -millions-positive: #22C55E;
-    -millions-negative: #EF4444;
-    -millions-warning: #F59E0B;
-    -millions-info: #0EA5A4;
-    -millions-input-bg: #1E293B;
-    -millions-input-border: #334155;
-    -millions-top-one: #F59E0B33;
-    -millions-top-two: #0EA5A422;
-    -millions-top-three: #CBD5E133;
-    -millions-table-row-odd: #123943;
-    -millions-table-cell-border: #1D5660;
+    -millions-text-secondary: #E2E8F0;
+    -millions-text-muted: #A7B6CA;
+    -millions-error: #F87171;
+    -millions-success: #4ADE80;
+    -millions-positive: #4ADE80;
+    -millions-negative: #F87171;
+    -millions-warning: #FBBF24;
+    -millions-info: #38BDF8;
+    -millions-input-bg: #162238;
+    -millions-input-border: #64748B;
+    -millions-top-one: #FBBF2433;
+    -millions-top-two: #5EEAD433;
+    -millions-top-three: #E2E8F033;
+    -millions-table-row-odd: #123241;
+    -millions-table-cell-border: #47677A;
     -fx-background-color: -millions-bg;
     -fx-font-family: "System";
     -fx-text-fill: -millions-text-primary;
@@ -102,8 +107,8 @@
 }
 
 .tab-pane .tab:selected {
-    -fx-background-color: -millions-accent;
-    -fx-border-color: -millions-accent;
+    -fx-background-color: -millions-accent-bg;
+    -fx-border-color: -millions-accent-bg;
 }
 
 .tab-pane .tab .tab-label {
@@ -322,8 +327,8 @@
 }
 
 .check-box:selected .box {
-    -fx-background-color: -millions-accent;
-    -fx-border-color: -millions-accent;
+    -fx-background-color: -millions-accent-bg;
+    -fx-border-color: -millions-accent-bg;
 }
 
 .check-box:selected .mark {
@@ -393,17 +398,34 @@
 
 .btn-primary,
 .btn-accent {
-    -fx-background-color: -millions-accent;
+    -fx-background-color: -millions-accent-bg;
     -fx-text-fill: #ffffff;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-padding: 10 16;
 }
 
+.btn-primary:hover,
+.btn-accent:hover {
+    -fx-background-color: -millions-accent-bg-hover;
+}
+
+.btn:focused,
+.field:focused,
+.combo-box:focused,
+.check-box:focused .box,
+.tab-pane .tab:focused,
+.quiz-answer-button:focused,
+.chart-range-button:focused,
+.analysis-button:focused {
+    -fx-border-color: -millions-accent;
+    -fx-border-width: 2;
+}
+
 .btn-danger {
-    -fx-background-color: #EF444422;
-    -fx-text-fill: #EF4444;
-    -fx-border-color: #EF4444;
+    -fx-background-color: #F8717126;
+    -fx-text-fill: #F87171;
+    -fx-border-color: #F87171;
     -fx-border-width: 1;
 }
 
@@ -435,21 +457,21 @@
 }
 
 .recommendation-buy {
-    -fx-background-color: #22C55E22;
-    -fx-border-color: #22C55E;
-    -fx-text-fill: #22C55E;
+    -fx-background-color: #4ADE8026;
+    -fx-border-color: #4ADE80;
+    -fx-text-fill: #4ADE80;
 }
 
 .recommendation-hold {
-    -fx-background-color: #F59E0B22;
-    -fx-border-color: #F59E0B;
-    -fx-text-fill: #F59E0B;
+    -fx-background-color: #FBBF2426;
+    -fx-border-color: #FBBF24;
+    -fx-text-fill: #FBBF24;
 }
 
 .recommendation-sell {
-    -fx-background-color: #EF444422;
-    -fx-border-color: #EF4444;
-    -fx-text-fill: #EF4444;
+    -fx-background-color: #F8717126;
+    -fx-border-color: #F87171;
+    -fx-text-fill: #F87171;
 }
 
 .chart-range-bar {
@@ -490,7 +512,7 @@
 }
 
 .analysis-button:selected {
-    -fx-background-color: -millions-accent;
+    -fx-background-color: -millions-accent-bg;
     -fx-text-fill: #ffffff;
     -fx-font-weight: bold;
 }
@@ -518,38 +540,23 @@
 }
 
 .chart-range-button:selected {
-    -fx-background-color: -millions-accent;
+    -fx-background-color: -millions-accent-bg;
     -fx-text-fill: #ffffff;
     -fx-font-weight: bold;
 }
 
 .toast {
-    -fx-background-color: -millions-data-surface;
+    -fx-background-color: -millions-surface;
     -fx-background-radius: 8;
     -fx-border-color: -millions-border;
     -fx-border-radius: 8;
     -fx-border-width: 1.5;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 18, 0.22, 0, 6);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 12, 0.18, 0, 4);
 }
 
-.toast-error {
-    -fx-border-color: -millions-error;
-    -fx-border-width: 1.5 1.5 1.5 3;
-}
-
-.toast-warning {
-    -fx-border-color: -millions-warning;
-    -fx-border-width: 1.5 1.5 1.5 3;
-}
-
-.toast-info {
-    -fx-border-color: -millions-info;
-    -fx-border-width: 1.5 1.5 1.5 3;
-}
-
-.toast-success {
-    -fx-border-color: -millions-success;
-    -fx-border-width: 1.5 1.5 1.5 3;
+.toast-icon-symbol {
+    -fx-fill: -millions-text-primary;
+    -fx-font-weight: bold;
 }
 
 .leaderboard-top-one {
@@ -699,17 +706,17 @@
 }
 
 .status-badge-success {
-    -fx-background-color: #22C55E22;
+    -fx-background-color: #4ADE8026;
     -fx-text-fill: -millions-success;
 }
 
 .status-badge-error {
-    -fx-background-color: #EF444422;
+    -fx-background-color: #F8717126;
     -fx-text-fill: -millions-error;
 }
 
 .status-badge-warning {
-    -fx-background-color: #F59E0B22;
+    -fx-background-color: #FBBF2426;
     -fx-text-fill: -millions-warning;
 }
 
@@ -780,7 +787,7 @@
 }
 
 .auth-brand-icon {
-    -fx-background-color: -millions-accent;
+    -fx-background-color: -millions-accent-bg;
     -fx-background-radius: 8;
 }
 
@@ -892,6 +899,11 @@
     -fx-alignment: center-left;
 }
 
+.finance-notification-actions {
+    -fx-spacing: 14;
+    -fx-alignment: center;
+}
+
 .finance-status {
     -fx-text-fill: -millions-text-secondary;
 }
@@ -971,8 +983,8 @@
 
 .learning-badge-beginner,
 .learning-hub-badge-beginner {
-    -fx-background-color: #22C55E22;
-    -fx-text-fill: #22C55E;
+    -fx-background-color: #4ADE8026;
+    -fx-text-fill: #4ADE80;
     -fx-background-radius: 4;
     -fx-padding: 2 6;
     -fx-font-size: 10px;
@@ -980,8 +992,8 @@
 
 .learning-badge-intermediate,
 .learning-hub-badge-intermediate {
-    -fx-background-color: #F59E0B22;
-    -fx-text-fill: #F59E0B;
+    -fx-background-color: #FBBF2426;
+    -fx-text-fill: #FBBF24;
     -fx-background-radius: 4;
     -fx-padding: 2 6;
     -fx-font-size: 10px;
@@ -989,8 +1001,8 @@
 
 .learning-badge-advanced,
 .learning-hub-badge-advanced {
-    -fx-background-color: #EF444422;
-    -fx-text-fill: #EF4444;
+    -fx-background-color: #F8717126;
+    -fx-text-fill: #F87171;
     -fx-background-radius: 4;
     -fx-padding: 2 6;
     -fx-font-size: 10px;
@@ -998,8 +1010,8 @@
 
 .learning-source-badge,
 .learning-hub-source-badge {
-    -fx-background-color: #22C55E22;
-    -fx-text-fill: #22C55E;
+    -fx-background-color: #4ADE8026;
+    -fx-text-fill: #4ADE80;
     -fx-background-radius: 4;
     -fx-padding: 2 6;
     -fx-font-size: 10px;
@@ -1071,12 +1083,12 @@
 
 .quiz-answer-correct {
     -fx-border-color: -millions-success;
-    -fx-background-color: #22C55E22;
+    -fx-background-color: #4ADE8026;
 }
 
 .quiz-answer-wrong {
     -fx-border-color: -millions-error;
-    -fx-background-color: #EF444422;
+    -fx-background-color: #F8717126;
 }
 
 .quiz-feedback-correct {
