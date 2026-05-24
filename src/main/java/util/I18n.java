@@ -41,6 +41,8 @@ public final class I18n {
   }
 
   /**
+   * Returns the locale used for message bundle lookups.
+   *
    * @return the locale currently used for lookups
    */
   public static Locale getLocale() {
