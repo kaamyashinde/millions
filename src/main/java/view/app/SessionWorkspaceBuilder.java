@@ -8,6 +8,7 @@ import static view.app.events.WorkspaceEventType.SAVINGS_CHANGED;
 import static view.app.events.WorkspaceEventType.TRANSACTIONS_CHANGED;
 
 import controller.WorkspaceController;
+import java.util.List;
 import java.util.function.Consumer;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -103,19 +104,16 @@ public final class SessionWorkspaceBuilder {
     Tab learningTab = new Tab("Learning", learningHubPage);
     Tab quizTab = new Tab("Quizzes");
 
-    for (Tab tab :
-        new Tab[] {
-          playerTab,
-          stocksTab,
-          fundsTab,
-          savingsTab,
-          transactionsTab,
-          leaderboardTab,
-          learningTab,
-          quizTab
-        }) {
-      tab.setClosable(false);
-    }
+    List.of(
+        playerTab,
+        stocksTab,
+        fundsTab,
+        savingsTab,
+        transactionsTab,
+        leaderboardTab,
+        learningTab,
+        quizTab)
+        .forEach(tab -> tab.setClosable(false));
 
     registerPageObservers(
         events,

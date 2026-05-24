@@ -147,9 +147,7 @@ public class NotificationService {
    * Removes all notifications and cancels all pending auto-dismiss timers.
    */
   public void clear() {
-    for (PauseTransition pause : pendingDismiss.values()) {
-      pause.stop();
-    }
+    pendingDismiss.values().forEach(PauseTransition::stop);
     pendingDismiss.clear();
     items.clear();
   }
