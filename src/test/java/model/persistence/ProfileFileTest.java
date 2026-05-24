@@ -40,7 +40,7 @@ class ProfileFileTest {
     ProfileFile profile = new ProfileFile(
         "Alice", "alice", ProfileFile.hashPin("alice", "1234".toCharArray()),
         null, false, "Alice", new BigDecimal("1000"), new BigDecimal("1000"),
-        List.of(), List.of(), List.of(), "NYSE", 1, List.of(), List.of(), null, List.of());
+        List.of(), List.of(), List.of(), "NYSE", 1, List.of(), List.of(), null);
     assertTrue(profile.matchesPin("1234".toCharArray()));
     assertFalse(profile.matchesPin("9999".toCharArray()));
   }
@@ -56,28 +56,13 @@ class ProfileFileTest {
     ProfileFile saved = ProfileFile.capture(
         player, exchange, "Alice", "alice",
         ProfileFile.hashPin("alice", "1234".toCharArray()),
-        null, false, List.of());
+        null, false);
 
     ProfileFile.RestoredSession restored = saved.restore(marketData);
     assertEquals(2, restored.exchange().getDay());
     assertEquals(1, restored.player().getPortfolio().getShares().size());
     assertEquals("AAPL",
         restored.player().getPortfolio().getShares().getFirst().getAsset().getSymbol());
-  }
-
-  @Test
-  void savedRunList_addAndRemove() {
-    MarketData marketData = sampleMarketData();
-    Exchange exchange = ProfileFile.createFreshExchange(marketData, "NYSE");
-    Player player = new Player("Alice", new BigDecimal("1000"));
-
-    ProfileFile profile = ProfileFile.capture(
-        player, exchange, "Alice", "alice", "hash", null, false, List.of());
-    ProfileFile.SavedRunRow run = profile.newSavedRun(player, exchange, "test");
-    ProfileFile withRun = profile.withSavedRun(run);
-    assertEquals(1, withRun.savedRuns().size());
-    ProfileFile without = withRun.withoutSavedRun(run.id());
-    assertTrue(without.savedRuns().isEmpty());
   }
 
   @Test
@@ -89,7 +74,7 @@ class ProfileFileTest {
     Player player = new Player("Alice", new BigDecimal("500"));
 
     ProfileFile original = ProfileFile.capture(
-        player, exchange, "Alice", "alice", "pinhash", null, false, List.of());
+        player, exchange, "Alice", "alice", "pinhash", null, false);
     Path file = paths.profileFile("alice");
     storage.write(file, original);
     ProfileFile loaded = storage.read(file, ProfileFile.class);
@@ -98,7 +83,7 @@ class ProfileFileTest {
   }
 
   @Test
-  void jsonRead_defaultsMissingSavedRunsToEmptyList() throws Exception {
+  void jsonRead_defaultsMissingListsToEmpty() throws Exception {
     JsonStorage storage = new JsonStorage();
     Path file = tempDir.resolve("legacy-profile.json");
     Files.writeString(
@@ -113,21 +98,18 @@ class ProfileFileTest {
           "playerName": "Alice",
           "startingMoney": 1000,
           "cash": 1000,
-          "holdings": [],
-          "transactions": [],
-          "savings": [],
           "exchangeName": "NYSE",
           "day": 1,
-          "stockPrices": [],
-          "events": [],
           "lastEvent": null
         }
         """);
 
     ProfileFile loaded = storage.read(file, ProfileFile.class);
 
-    assertNotNull(loaded.savedRuns());
-    assertTrue(loaded.savedRuns().isEmpty());
+    assertNotNull(loaded.holdings());
+    assertTrue(loaded.holdings().isEmpty());
+    assertNotNull(loaded.transactions());
+    assertTrue(loaded.transactions().isEmpty());
   }
 
   @Test
@@ -138,7 +120,7 @@ class ProfileFileTest {
     Exchange exchange = ProfileFile.createFreshExchange(marketData, "NYSE");
     Player player = new Player("Alice", new BigDecimal("500"));
     ProfileFile original = ProfileFile.capture(
-        player, exchange, "Alice", "alice", "pinhash", null, false, List.of());
+        player, exchange, "Alice", "alice", "pinhash", null, false);
 
     storage.write(paths.profileFile("alice"), original);
     Path backupProfile = tempDir.resolve("alice.corrupt-backup").resolve("profile.json");

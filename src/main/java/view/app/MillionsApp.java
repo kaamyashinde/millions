@@ -37,7 +37,6 @@ import view.pages.learning.LearningHubPage;
 import view.pages.notifications.NotificationsPage;
 import view.pages.portfolio.PlayerPortfolioPage;
 import view.pages.quiz.QuizLauncherPage;
-import view.pages.saved.SavedRunsPage;
 import view.pages.savings.SavingsPage;
 import view.pages.stocks.StocksPage;
 import view.pages.transactions.TransactionHistoryPage;
@@ -253,7 +252,6 @@ public class MillionsApp extends Application {
     SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), onSavingsChanged);
     TransactionHistoryPage transactionsPage =
         new TransactionHistoryPage(session.exchange(), session.player());
-    SavedRunsPage savedRunsPage = new SavedRunsPage(svc, ctrl::refreshAll);
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
     LearningHubPage learningHubPage =
         new LearningHubPage(ctrl.getLearningHub(), ctrl.getQuiz());
@@ -290,7 +288,6 @@ public class MillionsApp extends Application {
         savingsPage.refresh();
       }
     });
-    Tab savedRunsTab = makeTab("Saved Runs", savedRunsPage);
     Tab leaderboardTab = makeTab("Leaderboard", leaderboardPage);
     leaderboardTab.selectedProperty().addListener((obs, oldVal, sel) -> {
       if (Boolean.TRUE.equals(sel)) {
@@ -304,7 +301,7 @@ public class MillionsApp extends Application {
 
     TabPane tabs = new TabPane(
         portfolioTab, stocksTab, fundsTab, savingsTab, transactionsTab,
-        savedRunsTab, leaderboardTab, learningTab, quizTab, notificationsTab);
+        leaderboardTab, learningTab, quizTab, notificationsTab);
     tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
     java.util.function.Consumer<model.learning.content.LearningItem> openTopicInHub =
