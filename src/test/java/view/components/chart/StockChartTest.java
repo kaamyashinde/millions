@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Test;
  */
 class StockChartTest {
 
+  private static final double AXIS_DELTA = 0.000001;
+
   @BeforeAll
   static void initJavaFx() throws InterruptedException {
     try {
@@ -32,18 +34,54 @@ class StockChartTest {
   }
 
   @Test
-  void yAxisAutoRangesToPriceHistory() throws Exception {
+  void yAxisUsesTenPercentPaddingAroundVisiblePriceHistory() throws Exception {
     AxisBounds lowPriceBounds =
         runOnFxThread(() -> axisBoundsFor(stockWithPrices("LOW", "Low Range", "10.00", "12.00")));
     AxisBounds highPriceBounds =
         runOnFxThread(
             () -> axisBoundsFor(stockWithPrices("HIGH", "High Range", "900.00", "1200.00")));
 
-    assertTrue(lowPriceBounds.lowerBound() <= 10.00);
-    assertTrue(lowPriceBounds.upperBound() >= 12.00);
-    assertTrue(highPriceBounds.lowerBound() <= 900.00);
-    assertTrue(highPriceBounds.upperBound() >= 1200.00);
-    assertTrue(highPriceBounds.upperBound() > lowPriceBounds.upperBound());
+    assertEquals(9.80, lowPriceBounds.lowerBound(), AXIS_DELTA);
+    assertEquals(12.20, lowPriceBounds.upperBound(), AXIS_DELTA);
+    assertEquals(870.00, highPriceBounds.lowerBound(), AXIS_DELTA);
+    assertEquals(1230.00, highPriceBounds.upperBound(), AXIS_DELTA);
+  }
+
+  @Test
+  void yAxisUsesOnlySelectedChartRange() throws Exception {
+    AxisBounds bounds =
+        runOnFxThread(
+            () ->
+                axisBoundsFor(
+                    stockWithPrices(
+                        "RNG", "Range Filter", "10", "20", "30", "40", "50", "60"),
+                    ChartRange.FIVE_DAYS));
+
+    assertEquals(16.00, bounds.lowerBound(), AXIS_DELTA);
+    assertEquals(64.00, bounds.upperBound(), AXIS_DELTA);
+  }
+
+  @Test
+  void yAxisUsesTenPercentOfPriceForFlatVisibleData() throws Exception {
+    AxisBounds bounds =
+        runOnFxThread(
+            () ->
+                axisBoundsFor(
+                    stockWithPrices("FLT", "Flat Range", "100", "100", "100"),
+                    ChartRange.ONE_DAY));
+
+    assertEquals(90.00, bounds.lowerBound(), AXIS_DELTA);
+    assertEquals(110.00, bounds.upperBound(), AXIS_DELTA);
+  }
+
+  @Test
+  void yAxisLowerBoundCanBeNegativeAfterPadding() throws Exception {
+    AxisBounds bounds =
+        runOnFxThread(
+            () -> axisBoundsFor(stockWithPrices("LOW", "Low Price", "0.01", "0.20")));
+
+    assertEquals(-0.009, bounds.lowerBound(), AXIS_DELTA);
+    assertEquals(0.219, bounds.upperBound(), AXIS_DELTA);
   }
 
   @Test
@@ -98,7 +136,11 @@ class StockChartTest {
   }
 
   private static AxisBounds axisBoundsFor(Stock stock) {
-    StockChart chart = new StockChart(stock);
+    return axisBoundsFor(stock, ChartRange.ALL);
+  }
+
+  private static AxisBounds axisBoundsFor(Stock stock, ChartRange range) {
+    StockChart chart = new StockChart(stock, range);
     layout(chart);
 
     NumberAxis yAxis = (NumberAxis) chart.getYAxis();
