@@ -249,7 +249,7 @@ public class MillionsApp extends Application {
     ctrl.dispose();
     sessionService.logout();
     currentWorkspace = null;
-    scene.setRoot(buildLoginPage());
+    setSceneRoot(buildLoginPage());
     primaryStage.setTitle("Millions");
   }
 
@@ -257,10 +257,10 @@ public class MillionsApp extends Application {
     sessionService.saveActiveSession();
     LoginPage loginPage = new LoginPage(
         this::handleLogin,
-        () -> scene.setRoot(buildRegisterPage()),
+        () -> setSceneRoot(buildRegisterPage()),
         null, null, true,
-        () -> scene.setRoot(currentView));
-    scene.setRoot(loginPage);
+        () -> setSceneRoot(currentView));
+    setSceneRoot(loginPage);
     primaryStage.setTitle("Millions");
   }
 
