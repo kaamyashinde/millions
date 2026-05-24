@@ -59,6 +59,8 @@ public class PlayerPortfolioPage extends BorderPane {
   private final ImageLoader avatarLoader = ImageLoader.defaultLoader();
 
   /**
+   * Creates a portfolio page for the active session.
+   *
    * @param portfolio portfolio summary and holdings
    * @param trading trading operations for sell dialog
    * @param exitGame exit-game flow controller
@@ -256,6 +258,8 @@ public class PlayerPortfolioPage extends BorderPane {
   }
 
   /**
+   * Returns the visible player label text.
+   *
    * @return visible player label text
    */
   public String getDisplayedPlayerName() {
@@ -263,6 +267,8 @@ public class PlayerPortfolioPage extends BorderPane {
   }
 
   /**
+   * Returns the visible balance label text.
+   *
    * @return visible balance label text
    */
   public String getDisplayedBalance() {
@@ -270,6 +276,8 @@ public class PlayerPortfolioPage extends BorderPane {
   }
 
   /**
+   * Returns the visible portfolio return value.
+   *
    * @return visible portfolio return text
    */
   public String getPortfolioReturnText() {
@@ -277,6 +285,8 @@ public class PlayerPortfolioPage extends BorderPane {
   }
 
   /**
+   * Returns the visible benchmark return value.
+   *
    * @return visible benchmark return text
    */
   public String getBenchmarkReturnText() {
@@ -284,6 +294,8 @@ public class PlayerPortfolioPage extends BorderPane {
   }
 
   /**
+   * Returns the current number of holding rows.
+   *
    * @return current holdings row count
    */
   public int getHoldingCount() {

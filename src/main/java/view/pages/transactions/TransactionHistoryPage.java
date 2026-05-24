@@ -31,6 +31,12 @@ public class TransactionHistoryPage extends BorderPane {
   private final AppTableView<TransactionRow> table =
       new AppTableView<>("No transactions yet.");
 
+  /**
+   * Creates a transaction history page.
+   *
+   * @param exchange exchange supplying current day context
+   * @param player player whose transaction archive is displayed
+   */
   public TransactionHistoryPage(Exchange exchange, Player player) {
     checkNotNull(exchange, "Exchange");
     checkNotNull(player, "Player");
