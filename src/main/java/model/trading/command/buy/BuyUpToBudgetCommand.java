@@ -25,6 +25,8 @@ public final class BuyUpToBudgetCommand implements TradeCommand {
   private final BigDecimal maxSpend;
 
   /**
+   * Creates a budget-capped buy command.
+   *
    * @param exchange exchange providing asset lookup
    * @param symbol   stock or fund symbol
    * @param maxSpend upper bound on total purchase cost (gross + commission); must be positive
