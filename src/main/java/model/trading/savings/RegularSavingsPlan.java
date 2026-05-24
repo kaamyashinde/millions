@@ -17,7 +17,7 @@ import util.Validator;
  *
  * @author kevindmazali
  * @version 1.1.0
- * @since 29-03-2026
+ * @since 2026-03-29
  */
 public class RegularSavingsPlan {
 
@@ -40,6 +40,8 @@ public class RegularSavingsPlan {
   private boolean active;
 
   /**
+   * Creates a recurring savings plan.
+   *
    * @param symbol        stock symbol
    * @param mode          fixed shares or budget
    * @param amount        share quantity or max spend per period
@@ -61,6 +63,8 @@ public class RegularSavingsPlan {
   }
 
   /**
+   * Returns the target stock symbol.
+   *
    * @return uppercase stock symbol
    */
   public String getSymbol() {
@@ -68,6 +72,8 @@ public class RegularSavingsPlan {
   }
 
   /**
+   * Returns the installment sizing mode.
+   *
    * @return how each installment is sized
    */
   public SavingsInstallmentMode getMode() {
@@ -86,6 +92,8 @@ public class RegularSavingsPlan {
   }
 
   /**
+   * Returns the per-installment amount.
+   *
    * @return share quantity or budget amount depending on {@link #getMode()}
    */
   public BigDecimal getAmount() {
@@ -103,6 +111,8 @@ public class RegularSavingsPlan {
   }
 
   /**
+   * Returns the installment interval.
+   *
    * @return trading days between installments
    */
   public int getIntervalDays() {
@@ -122,6 +132,8 @@ public class RegularSavingsPlan {
   }
 
   /**
+   * Returns the next scheduled due day.
+   *
    * @return next trading day when an installment should run
    */
   public int getNextDueDay() {
@@ -129,6 +141,8 @@ public class RegularSavingsPlan {
   }
 
   /**
+   * Sets the next scheduled due day.
+   *
    * @param nextDueDay next scheduled trading day
    */
   public void setNextDueDay(int nextDueDay) {
@@ -136,6 +150,8 @@ public class RegularSavingsPlan {
   }
 
   /**
+   * Returns whether the plan is active.
+   *
    * @return whether installments are still scheduled
    */
   public boolean isActive() {
@@ -143,6 +159,8 @@ public class RegularSavingsPlan {
   }
 
   /**
+   * Sets whether installments should run.
+   *
    * @param active whether installments should run
    */
   public void setActive(boolean active) {

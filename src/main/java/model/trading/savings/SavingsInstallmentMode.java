@@ -8,7 +8,7 @@ import model.core.market.Exchange;
  *
  * @author kevindmazali
  * @version 1.0.0
- * @since 29-03-2026
+ * @since 2026-03-29
  */
 public enum SavingsInstallmentMode {
 
