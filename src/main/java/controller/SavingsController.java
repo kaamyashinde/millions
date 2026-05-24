@@ -14,6 +14,15 @@ import model.trading.savings.SavingsInstallmentMode;
 
 /**
  * Manages regular savings plans for the savings tab.
+ *
+ * <p>The controller combines {@link RegularSavingsPanelController} asset listings with the active
+ * {@link Player}'s {@link RegularSavingsPlan} collection, parsing form text before creating or
+ * editing plans.
+ *
+ * @author kevindmazali
+ * @contributor kaamyashinde
+ * @version 1.0.0
+ * @since 2026-05-01
  */
 public class SavingsController {
 
@@ -23,6 +32,8 @@ public class SavingsController {
   private final ObservableList<RegularSavingsPlan> plans = FXCollections.observableArrayList();
 
   /**
+   * Creates a savings controller and loads the player's current plans.
+   *
    * @param exchange exchange supplying trading-day state for new plans
    * @param player player owning savings plans
    */
@@ -35,26 +46,54 @@ public class SavingsController {
     refreshPlans();
   }
 
+  /**
+   * Exposes the exchange used by the savings page.
+   *
+   * @return exchange used for asset listings and current trading day
+   */
   public Exchange getExchange() {
     return exchange;
   }
 
+  /**
+   * Exposes the player who owns the savings plans.
+   *
+   * @return player who owns the displayed savings plans
+   */
   public Player getPlayer() {
     return player;
   }
 
+  /**
+   * Exposes investable assets for new plan creation.
+   *
+   * @return observable investable assets available for new plans
+   */
   public ObservableList<InvestableAsset> getListedAssets() {
     return assetListing.getListedAssets();
   }
 
+  /**
+   * Exposes the player's savings plans.
+   *
+   * @return observable savings plans owned by the player
+   */
   public ObservableList<RegularSavingsPlan> getPlans() {
     return plans;
   }
 
+  /**
+   * Returns the current exchange trading day.
+   *
+   * @return current exchange trading day
+   */
   public int getTradingDay() {
     return exchange.getDay();
   }
 
+  /**
+   * Refreshes listed assets and savings plans from the current model state.
+   */
   public void refreshPlans() {
     assetListing.refreshListedAssets();
     plans.setAll(player.getRegularSavingsPlans());
