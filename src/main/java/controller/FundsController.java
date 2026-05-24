@@ -5,6 +5,7 @@ import static util.Validator.checkNotNull;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -68,11 +69,12 @@ public class FundsController {
     sorted.sort(Comparator.comparing(Fund::getSymbol));
     funds.setAll(sorted);
     if (previous != null) {
-      for (Fund fund : sorted) {
-        if (fund.getSymbol().equals(previous.getSymbol())) {
-          selectedFund.set(fund);
-          return;
-        }
+      Optional<Fund> restored = sorted.stream()
+          .filter(fund -> fund.getSymbol().equals(previous.getSymbol()))
+          .findFirst();
+      if (restored.isPresent()) {
+        selectedFund.set(restored.get());
+        return;
       }
     }
     if (selectedFund.get() == null && !sorted.isEmpty()) {

@@ -166,12 +166,10 @@ public class WorkspaceController {
         ToastMode.INFO,
         event.title(),
         event.description()));
-    for (String sym : skipped) {
-      notifications.show(
-          ToastMode.WARNING,
-          "Regular savings skipped",
-          "Insufficient funds for " + sym + ".");
-    }
+    skipped.forEach(sym -> notifications.show(
+        ToastMode.WARNING,
+        "Regular savings skipped",
+        "Insufficient funds for " + sym + "."));
     return String.join(", ", skipped);
   }
 

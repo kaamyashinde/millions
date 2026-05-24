@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.session.leaderboard.PlayerLeaderboardEntry;
@@ -64,9 +65,8 @@ public class PlayerLeaderboardController {
     }
     displayedEntries.setAll(sorted);
     rankByUsername.clear();
-    for (int i = 0; i < sorted.size(); i++) {
-      rankByUsername.put(sorted.get(i).username(), i + 1);
-    }
+    IntStream.range(0, sorted.size())
+        .forEach(i -> rankByUsername.put(sorted.get(i).username(), i + 1));
   }
 
   public int getRankFor(String username) {
