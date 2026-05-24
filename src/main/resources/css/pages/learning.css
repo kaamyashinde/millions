@@ -120,3 +120,46 @@
     -fx-text-fill: -millions-success;
     -fx-font-size: 11px;
 }
+
+/* Article detail header */
+.learning-article-header {
+    -fx-spacing: 10;
+}
+
+.learning-article-badges {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+}
+
+.learning-article-title {
+    -fx-text-fill: -millions-text-primary;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}
+
+.learning-article-badge-difficulty {
+    -fx-background-radius: 4;
+    -fx-padding: 3 8;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.learning-article-badge-category {
+    -fx-background-color: #0EA5A422;
+    -fx-text-fill: -millions-accent;
+    -fx-background-radius: 4;
+    -fx-padding: 3 8;
+    -fx-font-size: 10px;
+}
+
+.learning-article-quiz-btn {
+    -fx-background-color: -millions-accent;
+    -fx-text-fill: #0B1220;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 14 20;
+}
