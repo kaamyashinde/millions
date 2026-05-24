@@ -64,9 +64,9 @@ public class QuizLauncherPage extends BorderPane {
 
     VBox list = new VBox(10);
     List<Quiz> quizzes = quiz.getAllQuizzes();
-    for (Quiz found : quizzes) {
-      list.getChildren().add(buildQuizCard(found));
-    }
+    list.getChildren().addAll(quizzes.stream()
+        .map(this::buildQuizCard)
+        .toList());
 
     ScrollPane scroll = new ScrollPane(list);
     scroll.setFitToWidth(true);

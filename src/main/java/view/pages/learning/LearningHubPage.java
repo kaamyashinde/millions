@@ -87,9 +87,9 @@ public class LearningHubPage extends BorderPane implements ResponsiveLayout {
     List<LearningItem> featured = learningHub.getFeaturedItems();
 
     HBox cards = new HBox(12);
-    for (LearningItem item : featured) {
-      cards.getChildren().add(buildFeaturedCard(item));
-    }
+    cards.getChildren().addAll(featured.stream()
+        .map(this::buildFeaturedCard)
+        .toList());
 
     return buildSection("Featured Topics", cards);
   }
