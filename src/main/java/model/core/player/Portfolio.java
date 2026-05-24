@@ -16,7 +16,7 @@ import model.trading.transaction.TransactionSizing;
  *
  * @author kaamyashinde
  * @version 1.0.0
- * @since 31-01-2026
+ * @since 2026-01-31
  */
 public class Portfolio {
 
@@ -99,6 +99,9 @@ public class Portfolio {
 
   /**
    * Total quantity held for the symbol across all lots (FIFO order is list order).
+   *
+   * @param symbol asset symbol to total
+   * @return total quantity held for the symbol
    */
   public BigDecimal totalQuantityForSymbol(String symbol) {
     checkNotNull(symbol, "Symbol");
@@ -112,6 +115,10 @@ public class Portfolio {
    * Describes the next FIFO slice for a sale (does not mutate the portfolio). The caller passes
    * this slice to {@link model.trading.transaction.Sale#commit(Player)}, which removes it via
    * {@link #removeFifoSliceForSale(Share)}.
+   *
+   * @param symbol asset symbol to sell
+   * @param maxQuantity maximum quantity to include in the slice
+   * @return sale slice from the first matching FIFO lot, or {@code null}
    */
   public Share buildNextFifoSaleSlice(String symbol, BigDecimal maxQuantity) {
     checkNotNull(symbol, "Symbol");
@@ -132,6 +139,10 @@ public class Portfolio {
   /**
    * Same as {@link #buildNextFifoSaleSlice(String, BigDecimal)} but quantity is sized from the
    * first matching lot so net proceeds do not exceed {@code targetNet}.
+   *
+   * @param symbol asset symbol to sell
+   * @param targetNet maximum net proceeds to raise
+   * @return sale slice from the first matching FIFO lot, or {@code null}
    */
   public Share buildNextFifoSliceForTargetNet(String symbol, BigDecimal targetNet) {
     checkNotNull(symbol, "Symbol");
@@ -153,6 +164,7 @@ public class Portfolio {
    * Removes {@code slice} from the first FIFO lot with matching symbol, purchase price, and at
    * least {@code slice.getQuantity()} shares, splitting the lot if needed.
    *
+   * @param slice sale slice to remove from FIFO holdings
    * @return true if a matching lot was updated or removed
    */
   public boolean removeFifoSliceForSale(Share slice) {

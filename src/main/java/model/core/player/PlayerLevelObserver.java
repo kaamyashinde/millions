@@ -13,6 +13,12 @@ package model.core.player;
 public class PlayerLevelObserver implements PlayerObserver {
 
   /**
+   * Creates a player level observer.
+   */
+  public PlayerLevelObserver() {
+  }
+
+  /**
    * Triggers a level recalculation on the given player.
    *
    * @param player the player whose level should be re-evaluated
