@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author kaamyashinde
  * @version 1.0.0
- * @since 04-04-2026
+ * @since 2026-04-04
  */
 public final class QuizAttempt {
 
@@ -35,7 +35,11 @@ public final class QuizAttempt {
     this.currentIndex = 0;
   }
 
-  /** Returns the current question, or throws if the quiz is already finished. */
+  /**
+   * Returns the current question.
+   *
+   * @return current question
+   */
   public QuizQuestion currentQuestion() {
     if (isFinished()) {
       throw new IllegalStateException("Quiz is already finished");
@@ -43,17 +47,29 @@ public final class QuizAttempt {
     return quiz.questions().get(currentIndex);
   }
 
-  /** Zero-based index of the current question. */
+  /**
+   * Returns the zero-based index of the current question.
+   *
+   * @return current question index
+   */
   public int currentIndex() {
     return currentIndex;
   }
 
-  /** Total number of questions in the quiz. */
+  /**
+   * Returns the total number of questions in the quiz.
+   *
+   * @return total question count
+   */
   public int totalQuestions() {
     return quiz.questions().size();
   }
 
-  /** Returns {@code true} once all questions have been answered. */
+  /**
+   * Returns whether all questions have been answered.
+   *
+   * @return {@code true} when the quiz is finished
+   */
   public boolean isFinished() {
     return currentIndex >= quiz.questions().size();
   }
@@ -76,12 +92,17 @@ public final class QuizAttempt {
    * Returns {@code true} if the answer submitted at position {@code i} was correct.
    *
    * @param i zero-based question index
+   * @return {@code true} when the submitted answer was correct
    */
   public boolean wasCorrect(int i) {
     return quiz.questions().get(i).correctAnswerId().equals(givenAnswerIds.get(i));
   }
 
-  /** Returns the number of correctly answered questions so far. */
+  /**
+   * Returns the number of correctly answered questions so far.
+   *
+   * @return correct answer count
+   */
   public int correctCount() {
     int count = 0;
     for (int i = 0; i < givenAnswerIds.size(); i++) {
@@ -92,12 +113,20 @@ public final class QuizAttempt {
     return count;
   }
 
-  /** Returns an immutable snapshot of the answer IDs given so far. */
+  /**
+   * Returns an immutable snapshot of the answer IDs given so far.
+   *
+   * @return submitted answer IDs
+   */
   public List<String> givenAnswerIds() {
     return List.copyOf(givenAnswerIds);
   }
 
-  /** Returns the quiz this attempt belongs to. */
+  /**
+   * Returns the quiz this attempt belongs to.
+   *
+   * @return attempted quiz
+   */
   public Quiz quiz() {
     return quiz;
   }

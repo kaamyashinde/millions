@@ -17,7 +17,7 @@ import util.Validator;
  * @param questions    ordered list of questions (minimum 1)
  * @author kaamyashinde
  * @version 1.0.0
- * @since 04-04-2026
+ * @since 2026-04-04
  */
 public record Quiz(
     String id,
@@ -25,6 +25,9 @@ public record Quiz(
     String title,
     List<QuizQuestion> questions) {
 
+  /**
+   * Validates and defensively copies quiz questions.
+   */
   public Quiz {
     Validator.checkNotNull(id, "id");
     Validator.checkNotNull(linkedItemId, "linkedItemId");
