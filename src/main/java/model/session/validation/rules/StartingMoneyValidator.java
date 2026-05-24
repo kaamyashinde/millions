@@ -12,6 +12,12 @@ import java.math.BigDecimal;
  */
 public final class StartingMoneyValidator implements RegistrationValidator {
 
+  /**
+   * Creates a starting-money validator.
+   */
+  public StartingMoneyValidator() {
+  }
+
   @Override
   public ValidationResult validate(String username, char[] pin, BigDecimal startingMoney) {
     if (startingMoney == null || startingMoney.compareTo(BigDecimal.ZERO) < 0) {
