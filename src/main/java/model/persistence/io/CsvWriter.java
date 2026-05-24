@@ -26,6 +26,27 @@ public final class CsvWriter {
   }
 
   /**
+   * Writes mixed market data to the given file path.
+   *
+   * @param path       exact file path to write to
+   * @param marketData stocks and funds to serialize
+   */
+  public static void writeMarketDataToPath(Path path, MarketData marketData) {
+    try (BufferedWriter writer = Files.newBufferedWriter(path)) {
+      for (Stock stock : marketData.stocks()) {
+        writer.write(formatStock(stock));
+        writer.newLine();
+      }
+      for (Fund fund : marketData.funds()) {
+        writer.write(formatFund(fund));
+        writer.newLine();
+      }
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  /**
    * Writes mixed market data to a CSV file.
    *
    * @param directory directory where the CSV file will be saved
