@@ -7,6 +7,16 @@ import util.Validator;
 
 /**
  * Immutable stock allocation inside a fund composite.
+ *
+ * <p>{@link Fund} uses these components to calculate weighted current and historical values from
+ * the underlying {@link Stock}.
+ *
+ * @param stock underlying stock included in the fund
+ * @param weight positive portfolio weight for this stock
+ *
+ * @author kevindmazali
+ * @version 1.0.0
+ * @since 2026-04-04
  */
 public record FundComponent(Stock stock, BigDecimal weight) {
 
