@@ -23,6 +23,10 @@ import view.components.chart.tool.ChartTool;
  */
 public class StockChart extends LineChart<Number, Number> {
 
+  private static final double AXIS_PADDING_RATIO = 0.10;
+  private static final int TARGET_Y_AXIS_TICKS = 5;
+  private static final double FALLBACK_AXIS_PADDING = 1.0;
+
   private final List<ChartTool> tools = new ArrayList<>();
 
   /**
@@ -31,14 +35,29 @@ public class StockChart extends LineChart<Number, Number> {
    * @param stock the stock whose historical prices are displayed
    */
   public StockChart(Stock stock) {
+    this(stock, ChartRange.ALL);
+  }
+
+  /**
+   * Creates a chart pre-populated with the selected range of {@code stock}'s price history.
+   *
+   * @param stock the stock whose historical prices are displayed
+   * @param range selected chart range
+   */
+  public StockChart(Stock stock, ChartRange range) {
     super(buildXAxis(), buildYAxis());
 
+    List<BigDecimal> prices = stock.getHistoricalPrices();
+    int startIndex = rangeStartIndex(prices, range);
+    List<BigDecimal> visiblePrices = prices.subList(startIndex, prices.size());
+
     setTitle(stock.getSymbol() + " \u2014 " + stock.getCompany());
-    setCreateSymbols(false);
+    setCreateSymbols(visiblePrices.size() == 1);
     setLegendVisible(false);
     setAnimated(false);
 
-    getData().add(buildSeries(stock.getHistoricalPrices()));
+    configureYAxis((NumberAxis) getYAxis(), visiblePrices);
+    getData().add(buildSeries(visiblePrices, startIndex));
 
     setOnMouseClicked(
         event -> {
@@ -56,8 +75,13 @@ public class StockChart extends LineChart<Number, Number> {
                           .getValueForDisplay(
                               xAxis.sceneToLocal(event.getSceneX(), event.getSceneY()).getX())
                           .doubleValue());
-          int totalDays = getData().get(0).getData().size();
-          dayIndex = Math.max(1, Math.min(totalDays, dayIndex));
+          List<XYChart.Data<Number, Number>> visibleData = getData().getFirst().getData();
+          if (visibleData.isEmpty()) {
+            return;
+          }
+          int firstDay = visibleData.getFirst().getXValue().intValue();
+          int lastDay = visibleData.getLast().getXValue().intValue();
+          dayIndex = Math.max(firstDay, Math.min(lastDay, dayIndex));
           final int clampedDay = dayIndex;
           tools.forEach(
               t -> {
@@ -107,20 +131,96 @@ public class StockChart extends LineChart<Number, Number> {
   private static NumberAxis buildYAxis() {
     NumberAxis axis = new NumberAxis();
     axis.setLabel("Price ($)");
+    axis.setAutoRanging(false);
     return axis;
   }
 
   /**
    * Converts a list of closing prices into a chart series using 1-based day indices on the X axis.
    *
-   * @param prices the ordered list of daily closing prices
+   * @param visiblePrices visible daily closing prices for the selected range
+   * @param startIndex zero-based index of the first visible price in the full history
    * @return a {@link XYChart.Series} ready to be added to the chart
    */
-  private static XYChart.Series<Number, Number> buildSeries(List<BigDecimal> prices) {
+  private static XYChart.Series<Number, Number> buildSeries(
+      List<BigDecimal> visiblePrices, int startIndex) {
     XYChart.Series<Number, Number> series = new XYChart.Series<>();
-    for (int i = 0; i < prices.size(); i++) {
-      series.getData().add(new XYChart.Data<>(i + 1, prices.get(i).doubleValue()));
+    for (int i = 0; i < visiblePrices.size(); i++) {
+      series
+          .getData()
+          .add(new XYChart.Data<>(startIndex + i + 1, visiblePrices.get(i).doubleValue()));
     }
     return series;
   }
+
+  /**
+   * Applies a fixed Y-axis range around the visible price data.
+   *
+   * @param axis axis to update
+   * @param visiblePrices prices currently shown by the chart
+   */
+  private static void configureYAxis(NumberAxis axis, List<BigDecimal> visiblePrices) {
+    if (visiblePrices.isEmpty()) {
+      return;
+    }
+
+    AxisBounds bounds = calculateYAxisBounds(visiblePrices);
+    axis.setLowerBound(bounds.lowerBound());
+    axis.setUpperBound(bounds.upperBound());
+    axis.setTickUnit(calculateTickUnit(bounds));
+  }
+
+  /**
+   * Calculates the padded Y-axis bounds for the visible price range.
+   *
+   * @param visiblePrices prices currently shown by the chart
+   * @return lower and upper axis bounds with dynamic padding
+   */
+  private static AxisBounds calculateYAxisBounds(List<BigDecimal> visiblePrices) {
+    double min = visiblePrices.stream().mapToDouble(BigDecimal::doubleValue).min().orElse(0.0);
+    double max = visiblePrices.stream().mapToDouble(BigDecimal::doubleValue).max().orElse(0.0);
+    double padding = calculateAxisPadding(min, max);
+    return new AxisBounds(min - padding, max + padding);
+  }
+
+  /**
+   * Calculates the Y-axis padding around the visible minimum and maximum.
+   *
+   * @param min lowest visible price
+   * @param max highest visible price
+   * @return padding to apply above and below the data range
+   */
+  private static double calculateAxisPadding(double min, double max) {
+    double spread = max - min;
+    if (spread > 0) {
+      return spread * AXIS_PADDING_RATIO;
+    }
+
+    double flatPricePadding = Math.abs(max) * AXIS_PADDING_RATIO;
+    return flatPricePadding > 0 ? flatPricePadding : FALLBACK_AXIS_PADDING;
+  }
+
+  /**
+   * Calculates a readable Y-axis tick interval from the rendered axis span.
+   *
+   * @param bounds rendered axis bounds
+   * @return tick unit for the Y-axis
+   */
+  private static double calculateTickUnit(AxisBounds bounds) {
+    return (bounds.upperBound() - bounds.lowerBound()) / TARGET_Y_AXIS_TICKS;
+  }
+
+  /**
+   * Finds the first price index included in a chart range.
+   *
+   * @param prices complete ordered price history
+   * @param range selected chart range
+   * @return zero-based index for the first visible price
+   */
+  private static int rangeStartIndex(List<BigDecimal> prices, ChartRange range) {
+    int visibleDays = range.getDayWindow().orElse(prices.size());
+    return Math.max(0, prices.size() - visibleDays);
+  }
+
+  private record AxisBounds(double lowerBound, double upperBound) {}
 }

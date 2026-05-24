@@ -277,6 +277,22 @@ class ExchangeTest {
   }
 
   @Test
+  void advance_roundsGeneratedPricesToCents() {
+    Exchange preciseExchange =
+        new Exchange.Builder("NYSE")
+            .stocks(List.of(appleStock))
+            .dailyPriceMoveStrategy(
+                (stock, random) ->
+                    stock.getSalesPrice().multiply(new BigDecimal("1.234567890123456789")))
+            .marketEventStrategy((stocks, tradingDay, random) -> Optional.empty())
+            .build();
+
+    preciseExchange.advance();
+
+    assertEquals(new BigDecimal("185.19"), appleStock.getSalesPrice());
+  }
+
+  @Test
   void buyAfterAdvance_usesCurrentDay() {
     exchange.advance(2);
 
@@ -409,7 +425,7 @@ class ExchangeTest {
             .stocks(List.of(appleStock, googleStock, microsoftStock))
             .random(new Random(3))
             .dailyPriceMoveStrategy(
-                (stock, random) -> stock.getSalesPrice().multiply(new BigDecimal("1.01")))
+                (stock, random) -> stock.getSalesPrice().multiply(new BigDecimal("1.015")))
             .marketEventStrategy(
                 (stocks, tradingDay, random) -> Optional.of(
                     new MarketEvent(
@@ -417,7 +433,7 @@ class ExchangeTest {
                         "AAPL: Earnings beat expectations",
                         "Apple Inc. reported stronger earnings than expected.",
                         new SymbolMarketEventTarget(Set.of("AAPL")),
-                        new BigDecimal("1.20"))))
+                        new BigDecimal("1.015"))))
             .build();
 
     BigDecimal initialApplePrice = appleStock.getSalesPrice();
@@ -429,12 +445,8 @@ class ExchangeTest {
     assertEquals("AAPL: Earnings beat expectations", eventExchange.getLastMarketEvent().get().title());
     assertEquals(1, eventExchange.getMarketEventHistory().size());
     assertEquals("AAPL: Earnings beat expectations", eventExchange.getMarketEventHistory().getFirst().title());
-    assertEquals(0,
-        appleStock.getSalesPrice().compareTo(initialApplePrice
-            .multiply(new BigDecimal("1.01"))
-            .multiply(new BigDecimal("1.20"))));
-    assertEquals(0,
-        googleStock.getSalesPrice().compareTo(initialGooglePrice.multiply(new BigDecimal("1.01"))));
+    assertEquals(new BigDecimal("154.53"), appleStock.getSalesPrice());
+    assertEquals(new BigDecimal("2842.00"), googleStock.getSalesPrice());
 
     double dailySigma = 0.05 / Math.sqrt(7);
     BigDecimal normalUpperBound = initialApplePrice.multiply(BigDecimal.valueOf(1 + dailySigma));

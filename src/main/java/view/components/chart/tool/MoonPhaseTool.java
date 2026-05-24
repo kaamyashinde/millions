@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Map;
 import javafx.application.Platform;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import model.analysis.tools.MoonPhaseCalculator;
 
@@ -59,43 +58,68 @@ public class MoonPhaseTool extends AbstractChartTool {
   public void onActivate(LineChart<Number, Number> chart) {
     active.set(true);
 
-    int totalDays = chart.getData().get(0).getData().size();
+    int firstDay = chart.getData().getFirst().getData().getFirst().getXValue().intValue();
+    int lastDay = chart.getData().getFirst().getData().getLast().getXValue().intValue();
     Map<Integer, MoonPhaseCalculator.Phase> phases =
-        MoonPhaseCalculator.compute(startDate, totalDays);
+        MoonPhaseCalculator.compute(startDate, lastDay);
 
-    NumberAxis yAxis = (NumberAxis) chart.getYAxis();
-    double low = yAxis.getLowerBound();
-    double high = yAxis.getUpperBound();
+    double low = visibleLow(chart);
+    double high = visibleHigh(chart);
+    if (Double.compare(low, high) == 0) {
+      double padding = Math.max(Math.abs(low) * 0.01, 1.0);
+      low -= padding;
+      high += padding;
+    }
+    final double markerLow = low;
+    final double markerHigh = high;
 
-    phases.forEach(
-        (day, phase) -> {
-          boolean isNewMoon = phase == MoonPhaseCalculator.Phase.NEW_MOON;
-          String seriesName = (isNewMoon ? "New Moon" : "Full Moon") + " (Day " + day + ")";
-          String color = isNewMoon ? NEW_MOON_COLOR : FULL_MOON_COLOR;
+    phases.entrySet().stream()
+        .filter(entry -> entry.getKey() >= firstDay && entry.getKey() <= lastDay)
+        .forEach(
+            entry -> {
+              int day = entry.getKey();
+              MoonPhaseCalculator.Phase phase = entry.getValue();
+              boolean isNewMoon = phase == MoonPhaseCalculator.Phase.NEW_MOON;
+              String seriesName = (isNewMoon ? "New Moon" : "Full Moon") + " (Day " + day + ")";
+              String color = isNewMoon ? NEW_MOON_COLOR : FULL_MOON_COLOR;
 
-          XYChart.Series<Number, Number> series = new XYChart.Series<>();
-          series.setName(seriesName);
-          series.getData().add(new XYChart.Data<>(day, low));
-          series.getData().add(new XYChart.Data<>(day, high));
+              XYChart.Series<Number, Number> series = new XYChart.Series<>();
+              series.setName(seriesName);
+              series.getData().add(new XYChart.Data<>(day, markerLow));
+              series.getData().add(new XYChart.Data<>(day, markerHigh));
 
-          addSeries(chart, series);
+              addSeries(chart, series);
 
-          Platform.runLater(
-              () -> {
-                if (series.getNode() != null) {
-                  series
-                      .getNode()
-                      .setStyle(
-                          "-fx-stroke: "
-                              + color
-                              + "; "
-                              + "-fx-stroke-width: 1.5; "
-                              + "-fx-stroke-dash-array: 6 4;");
-                }
-              });
-        });
+              Platform.runLater(
+                  () -> {
+                    if (series.getNode() != null) {
+                      series
+                          .getNode()
+                          .setStyle(
+                              "-fx-stroke: "
+                                  + color
+                                  + "; "
+                                  + "-fx-stroke-width: 1.5; "
+                                  + "-fx-stroke-dash-array: 6 4;");
+                    }
+                  });
+            });
 
-    status.set("");
+    status.set(ownedSeries.isEmpty() ? "No moon phases in this range" : "");
+  }
+
+  private static double visibleLow(LineChart<Number, Number> chart) {
+    return chart.getData().getFirst().getData().stream()
+        .mapToDouble(data -> data.getYValue().doubleValue())
+        .min()
+        .orElse(0.0);
+  }
+
+  private static double visibleHigh(LineChart<Number, Number> chart) {
+    return chart.getData().getFirst().getData().stream()
+        .mapToDouble(data -> data.getYValue().doubleValue())
+        .max()
+        .orElse(0.0);
   }
 
   /** No-op: this tool draws automatically on activation and requires no click interaction. */

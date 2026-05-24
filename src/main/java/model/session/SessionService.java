@@ -12,11 +12,14 @@ import model.session.profile.ProfileService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import model.core.player.Player;
 import model.persistence.ProfileFile;
+import model.trading.transaction.Transaction;
 import model.persistence.io.JsonStorage;
 import model.persistence.profile.ProfilePaths;
 
@@ -89,8 +92,7 @@ public final class SessionService {
         existing.normalizedUsername(),
         existing.pinHash(),
         existing.displayName(),
-        existing.hasSeenWelcome(),
-        existing.savedRuns());
+        existing.hasSeenWelcome());
     jsonStorage.write(path, updated);
   }
 
@@ -132,54 +134,6 @@ public final class SessionService {
         .toList();
   }
 
-  public ProfileFile.SavedRunRow saveCurrentRun(String label) {
-    ActiveSession session = requireActiveSession();
-    saveActiveSession();
-    ProfileFile existing = jsonStorage.read(
-        profilePaths.profileFile(session.normalizedUsername()), ProfileFile.class);
-    ProfileFile.SavedRunRow run = existing.newSavedRun(session.player(), session.exchange(), label);
-    ProfileFile updated = existing.withSavedRun(run);
-    jsonStorage.write(profilePaths.profileFile(session.normalizedUsername()), updated);
-    return run;
-  }
-
-  public List<ProfileFile.SavedRunRow> listSavedRuns() {
-    ProfileFile profile = jsonStorage.read(
-        profilePaths.profileFile(requireActiveSession().normalizedUsername()),
-        ProfileFile.class);
-    return profile.savedRuns().stream()
-        .sorted((a, b) -> b.savedAt().compareTo(a.savedAt()))
-        .toList();
-  }
-
-  public boolean deleteSavedRun(String runId) {
-    ActiveSession session = requireActiveSession();
-    ProfileFile existing = jsonStorage.read(
-        profilePaths.profileFile(session.normalizedUsername()), ProfileFile.class);
-    boolean removed = existing.savedRuns().stream().anyMatch(row -> row.id().equals(runId));
-    if (!removed) {
-      return false;
-    }
-    jsonStorage.write(
-        profilePaths.profileFile(session.normalizedUsername()),
-        existing.withoutSavedRun(runId));
-    return true;
-  }
-
-  public boolean setRunLeaderboardEligible(String runId, boolean eligibleForLeaderboard) {
-    ActiveSession session = requireActiveSession();
-    ProfileFile existing = jsonStorage.read(
-        profilePaths.profileFile(session.normalizedUsername()), ProfileFile.class);
-    boolean found = existing.savedRuns().stream().anyMatch(row -> row.id().equals(runId));
-    if (!found) {
-      return false;
-    }
-    jsonStorage.write(
-        profilePaths.profileFile(session.normalizedUsername()),
-        existing.withRunLeaderboardFlag(runId, eligibleForLeaderboard));
-    return true;
-  }
-
   public boolean hasSeenWelcome() {
     ProfileFile profile = jsonStorage.read(
         profilePaths.profileFile(requireActiveSession().normalizedUsername()),
@@ -215,6 +169,30 @@ public final class SessionService {
     String username = session.username();
     activeSession = null;
     profileService.deleteActiveProfile(username, pin);
+  }
+
+  /**
+   * Liquidates all holdings, clears savings plans, deletes the active profile, and ends the session.
+   *
+   * @param pin PIN confirming the action
+   * @return summary of liquidation before profile removal
+   */
+  public ExitGameResult exitGameAndDeleteProfile(char[] pin) {
+    ActiveSession session = requireActiveSession();
+    String username = session.username();
+    Player player = session.player();
+    Set<String> symbols = new LinkedHashSet<>();
+    player.getPortfolio().getShares().stream()
+        .map(share -> share.getAsset().getSymbol())
+        .forEach(symbols::add);
+    int symbolsSold = symbols.size();
+    profileService.verifyDeletionPin(username, pin);
+    List<Transaction> transactions = session.exchange().sellAllHoldings(player);
+    player.clearRegularSavingsPlans();
+    BigDecimal finalCash = player.getMoney();
+    activeSession = null;
+    profileService.deleteProfileDirectory(username);
+    return new ExitGameResult(symbolsSold, transactions.size(), finalCash);
   }
 
   public void deleteProfile(String username, char[] pin) {

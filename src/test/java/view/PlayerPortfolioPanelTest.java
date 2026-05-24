@@ -3,8 +3,11 @@ package view;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import controller.ExitGameController;
 import controller.PortfolioController;
 import controller.TradingController;
+import model.session.SessionService;
+import model.session.SessionServiceFactory;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
@@ -72,12 +75,19 @@ class PlayerPortfolioPageTest {
     assertTrue(panel.getBenchmarkReturnText().endsWith("%"));
   }
 
-  private static PlayerPortfolioPage createPage(Exchange exchange, Player player) {
+  private static PlayerPortfolioPage createPage(Exchange exchange, Player player) throws Exception {
     Path avatarPath = Path.of("/no/avatar.png");
     PortfolioController portfolio = new PortfolioController(exchange, player, avatarPath);
     TradingController trading =
         new TradingController(exchange, player, new NotificationService());
-    return new PlayerPortfolioPage(portfolio, trading, () -> {});
+    Path profilesRoot = java.nio.file.Files.createTempDirectory("millions-portfolio-test");
+    SessionService sessionService = SessionServiceFactory.createLocalProfileSessionService(
+        profilesRoot,
+        "/data/demo-stocks.csv",
+        PlayerPortfolioPageTest.class,
+        "NYSE");
+    ExitGameController exitGame = new ExitGameController(sessionService);
+    return new PlayerPortfolioPage(portfolio, trading, exitGame, () -> {}, () -> {});
   }
 
   /**

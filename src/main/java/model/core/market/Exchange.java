@@ -11,6 +11,7 @@ import model.trading.transaction.Purchase;
 import model.trading.transaction.Sale;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import model.core.market.event.MarketEvent;
 import model.core.market.pricing.MarketEventStrategy;
 import model.trading.command.buy.BuyCommand;
 import model.trading.command.buy.BuyUpToBudgetCommand;
+import model.trading.command.sell.SellAllHoldingsCommand;
 import model.trading.command.sell.SellByQuantityCommand;
 import model.trading.command.sell.SellCommand;
 import model.trading.command.sell.SellUpToTargetNetCommand;
@@ -41,6 +43,8 @@ import model.trading.transaction.Transaction;
 public class Exchange {
 
   private static final double DAILY_SIGMA = 0.05 / Math.sqrt(7);
+  private static final int PRICE_SCALE = 2;
+  private static final RoundingMode PRICE_ROUNDING = RoundingMode.HALF_UP;
   private final String name;
   private final Map<String, InvestableAsset> assetMap;
   private final Map<String, Stock> stockMap;
@@ -398,6 +402,16 @@ public class Exchange {
   }
 
   /**
+   * Sells every symbol held in the player's portfolio using FIFO lots.
+   *
+   * @param player the player
+   * @return all sale transactions (empty when the portfolio has no holdings)
+   */
+  public List<Transaction> sellAllHoldings(Player player) {
+    return new SellAllHoldingsCommand(this).execute(player);
+  }
+
+  /**
    * Advances the exchange to the next trading day and updates stock prices. Daily moves use a band
    * scaled from the former weekly ±5% by 1/√7 so seven independent days have comparable volatility
    * to one former weekly step.
@@ -435,8 +449,18 @@ public class Exchange {
       if (lastMarketEvent.isPresent() && lastMarketEvent.get().affects(stock)) {
         nextPrice = lastMarketEvent.get().applyTo(nextPrice);
       }
-      stock.addNewSalesPrice(nextPrice);
+      stock.addNewSalesPrice(normalizePrice(nextPrice));
     });
+  }
+
+  /**
+   * Rounds simulated market prices to currency precision before storing them in price history.
+   *
+   * @param price computed market price
+   * @return price rounded to cents
+   */
+  private static BigDecimal normalizePrice(BigDecimal price) {
+    return price.setScale(PRICE_SCALE, PRICE_ROUNDING);
   }
 
   /**

@@ -1,16 +1,17 @@
 package view.layout;
 
+import controller.WorkspaceController;
 import java.nio.file.Path;
+import java.util.function.IntConsumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -19,8 +20,10 @@ import javafx.scene.text.Text;
 import view.components.image.FileImageLoader;
 import view.components.image.ImageLoader;
 import view.components.image.ValidatingImageLoader;
+import util.Validator;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
+import view.components.toast.ToastMode;
 import view.theme.ThemeStyles;
 
 /**
@@ -39,19 +42,19 @@ public class WorkspaceLayout extends StackPane {
    * @param notifications session-scoped notification service for the toast tray
    * @param tabs tab pane content (non-closable tabs supplied by caller)
    * @param onProfile opens the profile editor
-   * @param onRefresh refreshes all session-bound panels
    * @param onHelp opens help / welcome content
    * @param onSwitchUser begins the compare / switch-user flow
    * @param onLogout logs out the current user
+   * @param onSkipTradingDays advances the exchange by the validated number of trading days
    */
   public WorkspaceLayout(
       NotificationService notifications,
       TabPane tabs,
       Runnable onProfile,
-      Runnable onRefresh,
       Runnable onHelp,
       Runnable onSwitchUser,
-      Runnable onLogout) {
+      Runnable onLogout,
+      IntConsumer onSkipTradingDays) {
     this.notifications = notifications;
     ThemeStyles.addStyleClasses(this, "workspace-root");
 
@@ -71,28 +74,50 @@ public class WorkspaceLayout extends StackPane {
     ThemeStyles.addStyleClasses(sessionSummaryLabel, "muted-text");
 
     Button profileButton = new Button("Profile");
-    Button refreshButton = new Button("Refresh All");
     Button helpButton = new Button("Help");
     Button switchUserButton = new Button("Compare / Switch User");
     Button logoutButton = new Button("Log Out");
     ThemeStyles.styleButton(profileButton);
-    ThemeStyles.styleButton(refreshButton);
     ThemeStyles.styleButton(helpButton);
     ThemeStyles.styleButton(switchUserButton);
     ThemeStyles.styleButton(logoutButton);
 
     profileButton.setOnAction(_ -> onProfile.run());
-    refreshButton.setOnAction(_ -> onRefresh.run());
     helpButton.setOnAction(_ -> onHelp.run());
     switchUserButton.setOnAction(_ -> onSwitchUser.run());
     logoutButton.setOnAction(_ -> onLogout.run());
 
+    Label daysLabel = new Label("Days:");
+    ThemeStyles.addStyleClasses(daysLabel, "muted-text");
+    TextField daysField = new TextField("1");
+    daysField.setPromptText("1");
+    daysField.setPrefWidth(60);
+    ThemeStyles.styleField(daysField);
+    Button skipDaysButton = new Button("Skip trading days");
+    ThemeStyles.styleButton(skipDaysButton);
+    skipDaysButton.setOnAction(_ -> {
+      try {
+        int days =
+            Validator.parsePositiveInt(
+                daysField.getText(),
+                "trading days",
+                WorkspaceController.MAX_SKIP_TRADING_DAYS);
+        onSkipTradingDays.accept(days);
+      } catch (IllegalArgumentException ex) {
+        notifications.show(ToastMode.WARNING, "Invalid days", ex.getMessage());
+      }
+    });
+    HBox skipDaysBox = new HBox(8, daysLabel, daysField, skipDaysButton);
+    skipDaysBox.setAlignment(Pos.CENTER_LEFT);
+    ThemeStyles.addStyleClasses(skipDaysBox, "workspace-skip-days");
+
     HBox actions =
-        new HBox(10, profileButton, refreshButton, helpButton, switchUserButton, logoutButton);
+        new HBox(10, profileButton, helpButton, switchUserButton, logoutButton);
     actions.setAlignment(Pos.CENTER_RIGHT);
     ThemeStyles.addStyleClasses(actions, "workspace-actions");
 
-    HBox topRow = new HBox(16, heading, headerAvatar, sessionSummaryLabel, actions);
+    HBox topRow =
+        new HBox(16, heading, headerAvatar, sessionSummaryLabel, skipDaysBox, actions);
     topRow.setAlignment(Pos.CENTER_LEFT);
     ThemeStyles.addStyleClasses(topRow, "workspace-header");
     HBox.setMargin(actions, new Insets(0, 0, 0, 16));

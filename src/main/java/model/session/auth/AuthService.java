@@ -80,8 +80,7 @@ public final class AuthService {
         normalizedUsername,
         pinHash,
         null,
-        false,
-        List.of());
+        false);
     jsonStorage.write(profilePaths.profileFile(normalizedUsername), profile);
 
     return new ActiveSession(trimmedUsername, normalizedUsername, player, exchange);

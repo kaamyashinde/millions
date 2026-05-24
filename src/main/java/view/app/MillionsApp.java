@@ -1,7 +1,11 @@
 package view.app;
 
-import model.core.player.Portfolio;
-import model.learning.quiz.Quiz;
+import static view.app.events.WorkspaceEventType.LEADERBOARD_CHANGED;
+import static view.app.events.WorkspaceEventType.MARKET_CHANGED;
+import static view.app.events.WorkspaceEventType.PORTFOLIO_CHANGED;
+import static view.app.events.WorkspaceEventType.PROFILE_CHANGED;
+import static view.app.events.WorkspaceEventType.SAVINGS_CHANGED;
+import static view.app.events.WorkspaceEventType.TRANSACTIONS_CHANGED;
 
 import java.math.BigDecimal;
 import javafx.application.Application;
@@ -14,9 +18,12 @@ import model.session.ActiveSession;
 import model.exception.auth.AuthenticationException;
 import model.exception.auth.DuplicateUsernameException;
 import model.exception.market.MarketDataImportException;
+import model.exception.persistence.PersistenceException;
 import model.session.SessionService;
 import model.session.SessionServiceFactory;
 import controller.WorkspaceController;
+import view.app.events.WorkspaceEventBus;
+import view.dialogs.ProfileEditorDialog;
 import view.layout.WorkspaceLayout;
 import view.pages.auth.LoginPage;
 import view.pages.auth.RegisterPage;
@@ -26,7 +33,6 @@ import view.pages.learning.LearningHubPage;
 import view.pages.notifications.NotificationsPage;
 import view.pages.portfolio.PlayerPortfolioPage;
 import view.pages.quiz.QuizLauncherPage;
-import view.pages.saved.SavedRunsPage;
 import view.pages.savings.SavingsPage;
 import view.pages.stocks.StocksPage;
 import view.pages.transactions.TransactionHistoryPage;
@@ -96,6 +102,8 @@ public class MillionsApp extends Application {
       onSessionStarted(session);
     } catch (AuthenticationException e) {
       loginPage.setStatus("Invalid username or PIN.");
+    } catch (PersistenceException e) {
+      loginPage.setStatus("Profile data could not be read. Reset this profile or restore a backup.");
     } catch (IllegalArgumentException e) {
       loginPage.setStatus(mapValidationMessage(e.getMessage()));
     }
@@ -134,40 +142,85 @@ public class MillionsApp extends Application {
   }
 
   private WorkspaceLayout buildWorkspace(WorkspaceController ctrl) {
-    TabPane tabs = buildWorkspaceTabs(ctrl);
+    Runnable onProfileDeleted = () -> onProfileDeleted(ctrl);
+    WorkspaceEventBus events = new WorkspaceEventBus();
+    TabPane tabs = buildWorkspaceTabs(ctrl, onProfileDeleted, events);
     WorkspaceLayout[] ref = new WorkspaceLayout[1];
+    Runnable onProfileSaved = () -> {
+      sessionService.saveActiveSession();
+      events.publish(PROFILE_CHANGED, LEADERBOARD_CHANGED);
+    };
     WorkspaceLayout workspace = new WorkspaceLayout(
         ctrl.getNotifications(),
         tabs,
-        () -> { /* profile editor: placeholder */ },
-        ctrl::refreshAll,
+        () -> {
+          var window = ref[0].getScene() != null ? ref[0].getScene().getWindow() : null;
+          ProfileEditorDialog.show(
+              window,
+              ctrl.createProfileEditorController(),
+              ctrl.getExitGame(),
+              onProfileSaved,
+              onProfileDeleted);
+        },
         () -> { /* help: placeholder */ },
         () -> switchUser(ctrl, ref[0]),
-        () -> logout(ctrl));
+        () -> logout(ctrl),
+        days -> {
+          ctrl.advanceTradingDays(String.valueOf(days));
+          sessionService.saveActiveSession();
+          events.publish(
+              MARKET_CHANGED,
+              SAVINGS_CHANGED,
+              PORTFOLIO_CHANGED,
+              TRANSACTIONS_CHANGED,
+              LEADERBOARD_CHANGED);
+        });
     ref[0] = workspace;
     workspace.setSessionSummary(ctrl.getSessionSummary());
     workspace.loadHeaderAvatar(ctrl.getAvatarPath());
+    registerHeaderObservers(events, workspace, ctrl);
     return workspace;
   }
 
-  private TabPane buildWorkspaceTabs(WorkspaceController ctrl) {
+  private void onProfileDeleted(WorkspaceController ctrl) {
+    ctrl.dispose();
+    currentWorkspace = null;
+    scene.setRoot(buildLoginPage());
+    primaryStage.setTitle("Millions");
+  }
+
+  private TabPane buildWorkspaceTabs(
+      WorkspaceController ctrl,
+      Runnable onProfileDeleted,
+      WorkspaceEventBus events) {
     ActiveSession session = ctrl.getSession();
     SessionService svc = ctrl.getSessionService();
 
-    Runnable refreshAndPersist = () -> {
-      ctrl.refreshAll();
+    Runnable onTradeComplete = () -> {
       sessionService.saveActiveSession();
+      events.publish(PORTFOLIO_CHANGED, TRANSACTIONS_CHANGED, LEADERBOARD_CHANGED);
+    };
+    Runnable onSavingsChanged = () -> {
+      sessionService.saveActiveSession();
+      events.publish(
+          SAVINGS_CHANGED,
+          PORTFOLIO_CHANGED,
+          TRANSACTIONS_CHANGED,
+          LEADERBOARD_CHANGED);
     };
 
     PlayerPortfolioPage portfolioPage = new PlayerPortfolioPage(
-        ctrl.getPortfolio(), ctrl.getTrading(), refreshAndPersist);
+        ctrl.getPortfolio(),
+        ctrl.getTrading(),
+        ctrl.getExitGame(),
+        onTradeComplete,
+        onProfileDeleted);
     StocksPage stocksPage = new StocksPage(
-        ctrl.getStocks(), ctrl.getStockDetail(), ctrl.getTrading(), refreshAndPersist);
-    FundsPage fundsPage = new FundsPage(session.exchange(), ctrl.getTrading(), refreshAndPersist);
-    SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), refreshAndPersist);
+        ctrl.getStocks(), ctrl.getStockDetail(), ctrl.getTrading(), onTradeComplete);
+    FundsPage fundsPage = new FundsPage(session.exchange(), ctrl.getTrading(), onTradeComplete);
+    SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), onSavingsChanged);
     TransactionHistoryPage transactionsPage =
         new TransactionHistoryPage(session.exchange(), session.player());
-    SavedRunsPage savedRunsPage = new SavedRunsPage(svc, ctrl::refreshAll);
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
     LearningHubPage learningHubPage =
         new LearningHubPage(ctrl.getLearningHub(), ctrl.getQuiz());
@@ -199,8 +252,17 @@ public class MillionsApp extends Application {
         transactionsPage.refresh();
       }
     });
-    Tab savedRunsTab = makeTab("Saved Runs", savedRunsPage);
+    savingsTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        savingsPage.refresh();
+      }
+    });
     Tab leaderboardTab = makeTab("Leaderboard", leaderboardPage);
+    leaderboardTab.selectedProperty().addListener((obs, oldVal, sel) -> {
+      if (Boolean.TRUE.equals(sel)) {
+        leaderboardPage.refresh();
+      }
+    });
     Tab learningTab = makeTab("Learning Hub", learningHubPage);
     Tab quizTab = new Tab("Quiz");
     quizTab.setClosable(false);
@@ -208,7 +270,7 @@ public class MillionsApp extends Application {
 
     TabPane tabs = new TabPane(
         portfolioTab, stocksTab, fundsTab, savingsTab, transactionsTab,
-        savedRunsTab, leaderboardTab, learningTab, quizTab, notificationsTab);
+        leaderboardTab, learningTab, quizTab, notificationsTab);
     tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
     java.util.function.Consumer<model.learning.content.LearningItem> openTopicInHub =
@@ -218,7 +280,59 @@ public class MillionsApp extends Application {
         };
     quizTab.setContent(new QuizLauncherPage(
         ctrl.getQuiz(), ctrl.getLearningHub(), openTopicInHub));
+    registerPageObservers(
+        events,
+        portfolioPage,
+        stocksPage,
+        fundsPage,
+        savingsPage,
+        transactionsPage,
+        leaderboardPage);
     return tabs;
+  }
+
+  private static void registerPageObservers(
+      WorkspaceEventBus events,
+      PlayerPortfolioPage portfolioPage,
+      StocksPage stocksPage,
+      FundsPage fundsPage,
+      SavingsPage savingsPage,
+      TransactionHistoryPage transactionsPage,
+      LeaderboardPage leaderboardPage) {
+    Runnable portfolioRefresh = portfolioPage::refresh;
+    Runnable stocksRefresh = stocksPage::refresh;
+    Runnable fundsRefresh = fundsPage::refresh;
+    Runnable savingsRefresh = savingsPage::refresh;
+    Runnable transactionsRefresh = transactionsPage::refresh;
+    Runnable leaderboardRefresh = leaderboardPage::refresh;
+
+    events.subscribe(PORTFOLIO_CHANGED, portfolioRefresh);
+    events.subscribe(MARKET_CHANGED, portfolioRefresh);
+    events.subscribe(SAVINGS_CHANGED, portfolioRefresh);
+    events.subscribe(PROFILE_CHANGED, portfolioRefresh);
+    events.subscribe(MARKET_CHANGED, stocksRefresh);
+    events.subscribe(PORTFOLIO_CHANGED, stocksRefresh);
+    events.subscribe(MARKET_CHANGED, fundsRefresh);
+    events.subscribe(PORTFOLIO_CHANGED, fundsRefresh);
+    events.subscribe(SAVINGS_CHANGED, savingsRefresh);
+    events.subscribe(MARKET_CHANGED, savingsRefresh);
+    events.subscribe(TRANSACTIONS_CHANGED, transactionsRefresh);
+    events.subscribe(SAVINGS_CHANGED, transactionsRefresh);
+    events.subscribe(LEADERBOARD_CHANGED, leaderboardRefresh);
+    events.subscribe(SAVINGS_CHANGED, leaderboardRefresh);
+    events.subscribe(PROFILE_CHANGED, leaderboardRefresh);
+  }
+
+  private static void registerHeaderObservers(
+      WorkspaceEventBus events,
+      WorkspaceLayout workspace,
+      WorkspaceController ctrl) {
+    Runnable refreshSummary = () -> workspace.setSessionSummary(ctrl.getSessionSummary());
+    Runnable refreshAvatar = () -> workspace.loadHeaderAvatar(ctrl.getAvatarPath());
+
+    events.subscribe(MARKET_CHANGED, refreshSummary);
+    events.subscribe(PROFILE_CHANGED, refreshSummary);
+    events.subscribe(PROFILE_CHANGED, refreshAvatar);
   }
 
   private static Tab makeTab(String label, javafx.scene.Node content) {
