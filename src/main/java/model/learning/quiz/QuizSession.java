@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author kaamyashinde
  * @version 1.0.0
- * @since 04-04-2026
+ * @since 2026-04-04
  */
 public final class QuizSession {
 
@@ -40,17 +40,29 @@ public final class QuizSession {
     completedAttempts.add(attempt);
   }
 
-  /** Returns an immutable snapshot of all completed attempts this session. */
+  /**
+   * Returns an immutable snapshot of all completed attempts this session.
+   *
+   * @return completed attempts
+   */
   public static List<QuizAttempt> getCompletedAttempts() {
     return List.copyOf(completedAttempts);
   }
 
-  /** Total correct answers across all completed quizzes this session. */
+  /**
+   * Returns total correct answers across all completed quizzes this session.
+   *
+   * @return total correct answer count
+   */
   public static int totalCorrectAcrossSession() {
     return completedAttempts.stream().mapToInt(QuizAttempt::correctCount).sum();
   }
 
-  /** Total questions answered across all completed quizzes this session. */
+  /**
+   * Returns total questions answered across all completed quizzes this session.
+   *
+   * @return total answered question count
+   */
   public static int totalAnsweredAcrossSession() {
     return completedAttempts.stream().mapToInt(QuizAttempt::totalQuestions).sum();
   }

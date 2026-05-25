@@ -18,6 +18,14 @@ import view.components.toast.ToastMode;
 
 /**
  * Orchestrates session-scoped workspace state and child page controllers.
+ *
+ * <p>This is the composition root for the authenticated JavaFX workspace: it owns shared services,
+ * creates child controllers, advances trading days, and refreshes session-bound views.
+ *
+ * @author kevindmazali
+ * @contributor kaamyashinde
+ * @version 1.0.0
+ * @since 2026-04-30
  */
 public class WorkspaceController {
 
@@ -71,66 +79,146 @@ public class WorkspaceController {
         new LevelUpNotificationObserver(notifications, session.player().getPlayerLevel()));
   }
 
+  /**
+   * Returns the active session represented by this workspace.
+   *
+   * @return active session
+   */
   public ActiveSession getSession() {
     return session;
   }
 
+  /**
+   * Exposes the session service shared by workspace components.
+   *
+   * @return session service shared by workspace dialogs and controllers
+   */
   public SessionService getSessionService() {
     return sessionService;
   }
 
+  /**
+   * Exposes the workspace notification service.
+   *
+   * @return notification service for workspace toasts
+   */
   public NotificationService getNotifications() {
     return notifications;
   }
 
+  /**
+   * Returns the portfolio page controller.
+   *
+   * @return portfolio page controller
+   */
   public PortfolioController getPortfolio() {
     return portfolio;
   }
 
+  /**
+   * Returns the stocks page controller.
+   *
+   * @return stocks page controller
+   */
   public StocksController getStocks() {
     return stocks;
   }
 
+  /**
+   * Returns the stock detail controller.
+   *
+   * @return stock detail controller
+   */
   public StockDetailController getStockDetail() {
     return stockDetail;
   }
 
+  /**
+   * Returns the funds page controller.
+   *
+   * @return funds page controller
+   */
   public FundsController getFunds() {
     return funds;
   }
 
+  /**
+   * Returns the fund detail controller.
+   *
+   * @return fund detail controller
+   */
   public FundDetailController getFundDetail() {
     return fundDetail;
   }
 
+  /**
+   * Returns the savings page controller.
+   *
+   * @return savings page controller
+   */
   public SavingsController getSavings() {
     return savings;
   }
 
+  /**
+   * Returns the trading controller.
+   *
+   * @return trading controller shared by asset detail views
+   */
   public TradingController getTrading() {
     return trading;
   }
 
+  /**
+   * Returns the exit-game controller.
+   *
+   * @return exit-game controller
+   */
   public ExitGameController getExitGame() {
     return exitGame;
   }
 
+  /**
+   * Returns the leaderboard page controller.
+   *
+   * @return leaderboard page controller
+   */
   public LeaderboardController getLeaderboard() {
     return leaderboard;
   }
 
+  /**
+   * Returns the learning hub controller.
+   *
+   * @return learning hub controller
+   */
   public LearningHubController getLearningHub() {
     return learningHub;
   }
 
+  /**
+   * Returns the quiz controller.
+   *
+   * @return quiz controller
+   */
   public QuizController getQuiz() {
     return quiz;
   }
 
+  /**
+   * Creates a fresh profile editor controller for the active session service.
+   *
+   * @return profile editor controller
+   */
   public ProfileEditorController createProfileEditorController() {
     return new ProfileEditorController(sessionService);
   }
 
+  /**
+   * Builds a concise summary of the active session.
+   *
+   * @return concise text describing the active session and trading day
+   */
   public String getSessionSummary() {
     return "Logged in as "
         + session.player().getName()
@@ -140,6 +228,11 @@ public class WorkspaceController {
         + session.exchange().getDay();
   }
 
+  /**
+   * Resolves the avatar path for the active profile.
+   *
+   * @return avatar path for the active profile
+   */
   public Path getAvatarPath() {
     return sessionService.avatarPath(session.normalizedUsername());
   }

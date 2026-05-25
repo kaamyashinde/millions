@@ -10,7 +10,7 @@ import model.core.asset.Stock;
  *
  * @author kevindmazali
  * @version 1.0.0
- * @since 29-03-2026
+ * @since 2026-03-29
  */
 public class InsufficientBalanceForRegularSavingsException extends RuntimeException {
 
@@ -18,6 +18,8 @@ public class InsufficientBalanceForRegularSavingsException extends RuntimeExcept
   private final String symbol;
 
   /**
+   * Creates an insufficient-balance exception for a savings plan.
+   *
    * @param symbol stock symbol for the plan
    * @param cause  typically {@link InsufficientFundsException}
    */
@@ -27,6 +29,8 @@ public class InsufficientBalanceForRegularSavingsException extends RuntimeExcept
   }
 
   /**
+   * Returns the affected savings plan symbol.
+   *
    * @return the plan's stock symbol
    */
   public String getSymbol() {

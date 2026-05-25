@@ -10,6 +10,12 @@ import util.IoLogger;
  */
 public final class CsvMarketDataWriter implements TextDocumentWriter<MarketData, PersistenceException> {
 
+  /**
+   * Creates a market-data CSV writer.
+   */
+  public CsvMarketDataWriter() {
+  }
+
   @Override
   public void write(Path path, MarketData value) throws PersistenceException {
     try {

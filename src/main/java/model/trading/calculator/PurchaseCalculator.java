@@ -11,7 +11,7 @@ import util.Validator;
  *
  * @author kaamyashinde
  * @version 0.0.2
- * @since 31-01-2026
+ * @since 2026-01-31
  */
 public class PurchaseCalculator implements TransactionCalculator {
 

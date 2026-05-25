@@ -14,6 +14,14 @@ import model.session.leaderboard.PlayerLeaderboardRanking;
 
 /**
  * Manages auth-screen player comparison leaderboard sorting and rank display.
+ *
+ * <p>The source rows remain unchanged while {@link #applySort(PlayerLeaderboardMetric, boolean)}
+ * rebuilds the displayed list and rank lookup for the selected metric.
+ *
+ * @author kaamyashinde
+ * @contributor kevindmazali
+ * @version 1.0.0
+ * @since 2026-05-02
  */
 public class PlayerLeaderboardController {
 
@@ -25,25 +33,47 @@ public class PlayerLeaderboardController {
   private boolean ascending;
 
   /**
-   * @param entries saved-player leaderboard entries from {@link model.session.SessionService}
+   * Creates a sortable player leaderboard.
+   *
+   * @param entries saved-player leaderboard entries from {@link SessionService}
    */
   public PlayerLeaderboardController(List<PlayerLeaderboardEntry> entries) {
     this.sourceEntries = new ArrayList<>(entries);
     applySort(activeMetric, ascending);
   }
 
+  /**
+   * Exposes the entries in the current sort order.
+   *
+   * @return observable entries in the current display order
+   */
   public ObservableList<PlayerLeaderboardEntry> getDisplayedEntries() {
     return displayedEntries;
   }
 
+  /**
+   * Exposes the one-based rank lookup for displayed usernames.
+   *
+   * @return map from username to one-based rank in the current display order
+   */
   public Map<String, Integer> getRankByUsername() {
     return rankByUsername;
   }
 
+  /**
+   * Returns the metric currently controlling the sort order.
+   *
+   * @return metric currently used for sorting
+   */
   public PlayerLeaderboardMetric getActiveMetric() {
     return activeMetric;
   }
 
+  /**
+   * Returns whether rows are displayed in ascending order.
+   *
+   * @return true when the displayed entries are reversed into ascending order
+   */
   public boolean isAscending() {
     return ascending;
   }
@@ -69,6 +99,12 @@ public class PlayerLeaderboardController {
     }
   }
 
+  /**
+   * Looks up a user's current rank.
+   *
+   * @param username username to find
+   * @return one-based rank, or {@code 0} when the user is not displayed
+   */
   public int getRankFor(String username) {
     return rankByUsername.getOrDefault(username, 0);
   }

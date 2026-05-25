@@ -52,6 +52,8 @@ public class SavingsPage extends BorderPane {
   private final Label status = new Label();
 
   /**
+   * Creates a regular savings page.
+   *
    * @param controller savings controller
    * @param afterModelChange invoked after successful mutations
    */

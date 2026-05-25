@@ -7,6 +7,16 @@ import java.math.BigDecimal;
 
 /**
  * Holds one calculated metric together with its availability state.
+ *
+ * <p>{@link PerformanceMetrics} uses this wrapper so the UI can distinguish a real numeric value
+ * from metrics that cannot be computed yet.
+ *
+ * @param value numeric value when available, otherwise {@code null}
+ * @param status availability state for the metric
+ *
+ * @author kevindmazali
+ * @version 1.0.0
+ * @since 2026-04-04
  */
 public record MetricValue(BigDecimal value, MetricStatus status) {
 

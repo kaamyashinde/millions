@@ -18,6 +18,11 @@ public final class SessionServiceFactory {
   private SessionServiceFactory() {
   }
 
+  /**
+   * Returns the default local profile root.
+   *
+   * @return default profile directory under the user's home folder
+   */
   public static Path defaultProfilesRoot() {
     return Path.of(System.getProperty("user.home"), ".millions", "profiles");
   }

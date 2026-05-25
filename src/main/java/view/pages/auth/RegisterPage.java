@@ -33,6 +33,8 @@ public class RegisterPage extends AuthLayout {
   private Path selectedMarketDataFile;
 
   /**
+   * Creates a registration page without a side panel.
+   *
    * @param registerAction registration submit handler
    * @param toLogin navigate to login
    */
@@ -41,6 +43,8 @@ public class RegisterPage extends AuthLayout {
   }
 
   /**
+   * Creates a registration page with optional side content and return action.
+   *
    * @param registerAction registration submit handler
    * @param toLogin navigate to login
    * @param sidePanel optional leaderboard panel
@@ -173,6 +177,11 @@ public class RegisterPage extends AuthLayout {
     clearMarketDataStatus();
   }
 
+  /**
+   * Sets the market data upload status text.
+   *
+   * @param message status text, or blank to hide the status
+   */
   public void setMarketDataStatus(String message) {
     if (message == null || message.isBlank()) {
       clearMarketDataStatus();
@@ -193,16 +202,31 @@ public class RegisterPage extends AuthLayout {
     super.setStatus(message);
   }
 
+  /**
+   * Returns the current footer status text.
+   *
+   * @return current status text
+   */
   public String getStatus() {
     return super.getStatus();
   }
 
+  /**
+   * Sets form values, primarily for tests.
+   *
+   * @param username username field value
+   * @param pin PIN field value
+   * @param startingMoney starting money field value
+   */
   public void setValues(String username, String pin, String startingMoney) {
     usernameField.setText(username);
     pinField.setText(pin);
     startingMoneyField.setText(startingMoney);
   }
 
+  /**
+   * Clears all user-entered registration fields.
+   */
   public void clearForm() {
     usernameField.clear();
     pinField.clear();
@@ -249,8 +273,20 @@ public class RegisterPage extends AuthLayout {
     });
   }
 
+  /**
+   * Callback invoked when the registration form is submitted.
+   */
   @FunctionalInterface
   public interface RegisterAction {
+
+    /**
+     * Runs the registration action.
+     *
+     * @param username username field value
+     * @param pin PIN field value
+     * @param startingMoney starting money field value
+     * @param marketDataFile optional custom market-data CSV
+     */
     void run(String username, String pin, String startingMoney, Optional<Path> marketDataFile);
   }
 }

@@ -18,7 +18,7 @@ import util.Validator;
  *
  * @author kevindmazali
  * @version 1.0.0
- * @since 29-03-2026
+ * @since 2026-03-29
  */
 public final class TransactionSizing {
 

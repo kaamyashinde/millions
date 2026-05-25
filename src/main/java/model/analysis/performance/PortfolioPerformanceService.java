@@ -19,10 +19,20 @@ import model.trading.transaction.Transaction;
 
 /**
  * Reconstructs the player's daily net worth and compares it with the market benchmark.
+ *
+ * @author kevindmazali
+ * @version 1.0.0
+ * @since 2026-04-04
  */
 public class PortfolioPerformanceService {
 
   private static final int SCALE = 8;
+
+  /**
+   * Creates a portfolio performance service.
+   */
+  public PortfolioPerformanceService() {
+  }
 
   /**
    * Calculates the player's portfolio metrics and market benchmark metrics side by side.

@@ -20,6 +20,12 @@ public class StockFinancialInfoProvider {
   private static final BigDecimal STRONG_MARGIN = new BigDecimal("0.10");
 
   /**
+   * Creates a stock financial info provider.
+   */
+  public StockFinancialInfoProvider() {
+  }
+
+  /**
    * Builds mock fundamentals for the given ticker symbol.
    *
    * @param symbol non-null stock symbol

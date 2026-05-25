@@ -10,6 +10,12 @@ import util.IoLogger;
  */
 public final class CsvMarketDataReader implements TextDocumentReader<MarketData, MarketDataImportException> {
 
+  /**
+   * Creates a market-data CSV reader.
+   */
+  public CsvMarketDataReader() {
+  }
+
   @Override
   public MarketData read(Path path) throws MarketDataImportException {
     try {

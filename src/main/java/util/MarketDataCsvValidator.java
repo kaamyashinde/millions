@@ -11,7 +11,10 @@ import model.core.asset.fund.Fund;
  */
 public final class MarketDataCsvValidator {
 
+  /** CSV record type for stock rows. */
   public static final String STOCK_RECORD = "STOCK";
+
+  /** CSV record type for fund rows. */
   public static final String FUND_RECORD = "FUND";
 
   private MarketDataCsvValidator() {
@@ -99,6 +102,7 @@ public final class MarketDataCsvValidator {
   /**
    * Validates that a symbol has not already been used in the same asset collection.
    *
+   * @param <T> asset value type stored in the map
    * @param assetsBySymbol assets keyed by symbol
    * @param symbol symbol to check
    * @param messagePrefix prefix for duplicate-symbol error messages

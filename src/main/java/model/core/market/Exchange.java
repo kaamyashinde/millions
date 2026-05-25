@@ -35,9 +35,13 @@ import model.trading.transaction.Transaction;
 /**
  * A class representing the Exchange Market in the system.
  *
+ * <p>The exchange owns listed stocks and funds, applies daily price movement strategies, records
+ * market events, and delegates buy/sell commands to trading command objects.
+ *
  * @author kevindmazali
+ * @contributor kaamyashinde
  * @version 1.0.0
- * @since 02-02-2026
+ * @since 2026-02-03
  */
 
 public class Exchange {
@@ -99,55 +103,99 @@ public class Exchange {
     private MarketEvent lastMarketEvent;
 
     /**
+     * Creates a builder for an exchange with the required display name.
+     *
      * @param name exchange display name (required)
      */
     public Builder(String name) {
       this.name = Objects.requireNonNull(name, "name");
     }
 
-    /** Listed stocks (default empty). */
+    /**
+     * Sets the listed stocks.
+     *
+     * @param stocks listed stocks, or {@code null} for an empty list
+     * @return this builder
+     */
     public Builder stocks(List<Stock> stocks) {
       this.stocks = stocks != null ? stocks : List.of();
       return this;
     }
 
-    /** Listed funds (default empty). */
+    /**
+     * Sets the listed funds.
+     *
+     * @param funds listed funds, or {@code null} for an empty list
+     * @return this builder
+     */
     public Builder funds(List<Fund> funds) {
       this.funds = funds != null ? funds : List.of();
       return this;
     }
 
-    /** Current trading day (default {@code 1}; must be at least 1). */
+    /**
+     * Sets the current trading day.
+     *
+     * @param day current trading day; must be at least {@code 1}
+     * @return this builder
+     */
     public Builder day(int day) {
       this.day = day;
       return this;
     }
 
-    /** Random source for simulation (default new {@link Random}). */
+    /**
+     * Sets the random source for simulation.
+     *
+     * @param random random source, or {@code null} to create a default source
+     * @return this builder
+     */
     public Builder random(Random random) {
       this.random = random;
       return this;
     }
 
-    /** Baseline daily price move strategy (default {@link DailyPriceMoveStrategy#uniform(double)}). */
+    /**
+     * Sets the baseline daily price movement strategy.
+     *
+     * @param strategy daily movement strategy, or {@code null} for
+     *     {@link DailyPriceMoveStrategy#uniform(double)}
+     * @return this builder
+     */
     public Builder dailyPriceMoveStrategy(DailyPriceMoveStrategy strategy) {
       this.dailyPriceMoveStrategy = strategy;
       return this;
     }
 
-    /** Rare market event strategy (default {@link MarketEventStrategy#randomFromResources()}). */
+    /**
+     * Sets the rare market event strategy.
+     *
+     * @param strategy market event strategy, or {@code null} for
+     *     {@link MarketEventStrategy#randomFromResources()}
+     * @return this builder
+     */
     public Builder marketEventStrategy(MarketEventStrategy strategy) {
       this.marketEventStrategy = strategy;
       return this;
     }
 
-    /** Prior market events, oldest first (default empty; copied into the exchange). */
+    /**
+     * Sets prior market events.
+     *
+     * @param history prior market events, oldest first, or {@code null} for an empty history
+     * @return this builder
+     */
     public Builder marketEventHistory(List<MarketEvent> history) {
       this.marketEventHistory = history != null ? history : List.of();
       return this;
     }
 
-    /** Latest event for the current day, if any (default none). */
+    /**
+     * Sets the latest event for the current day.
+     *
+     * @param event latest market event, or {@code null} when no event has occurred
+     * @return this builder
+     */
     public Builder lastMarketEvent(MarketEvent event) {
       this.lastMarketEvent = event;
       return this;

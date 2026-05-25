@@ -25,6 +25,8 @@ public final class SellUpToTargetNetCommand implements TradeCommand {
   private final BigDecimal targetNet;
 
   /**
+   * Creates a target-net sell command.
+   *
    * @param exchange  exchange providing day for each sale
    * @param symbol    asset symbol
    * @param targetNet maximum total net cash to raise (positive)

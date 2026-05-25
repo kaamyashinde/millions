@@ -200,6 +200,14 @@ public class StockDetailView extends BorderPane {
     updateTradeActions(selectedStock);
   }
 
+  /**
+   * Displays stock details without a stock detail controller.
+   *
+   * @param stock selected stock, or {@code null} for the empty state
+   * @param tradingDay current exchange trading day
+   * @param marketEvent latest market event, if any
+   * @param marketHistory chronological market events for the selected stock
+   */
   public void showStock(
       Stock stock,
       int tradingDay,
@@ -210,6 +218,12 @@ public class StockDetailView extends BorderPane {
 
   /**
    * Displays stock details using an optional {@link StockDetailController} for fundamentals.
+   *
+   * @param stock selected stock, or {@code null} for the empty state
+   * @param tradingDay current exchange trading day
+   * @param marketEvent latest market event, if any
+   * @param marketHistory chronological market events for the selected stock
+   * @param stockDetail controller for fundamentals and recommendations, or {@code null}
    */
   public void showStock(
       Stock stock,

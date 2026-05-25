@@ -15,7 +15,7 @@ import model.analysis.tools.FibonacciRetracement;
  *
  * @author kaamyashinde
  * @version 0.1.0
- * @since 30-03-2026
+ * @since 2026-03-30
  */
 public class FibonacciTool extends AbstractChartTool {
 
@@ -34,6 +34,12 @@ public class FibonacciTool extends AbstractChartTool {
 
   /** Price of the first pivot click; {@code null} until the first click is registered. */
   private Double firstPrice = null;
+
+  /**
+   * Creates a Fibonacci retracement chart tool.
+   */
+  public FibonacciTool() {
+  }
 
   /**
    * Returns the display name of this tool.

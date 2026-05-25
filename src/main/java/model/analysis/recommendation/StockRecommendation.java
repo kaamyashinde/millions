@@ -12,8 +12,11 @@ package model.analysis.recommendation;
  * @since 2026-04-04
  */
 public enum StockRecommendation {
+  /** Positive recommendation for buying. */
   BUY,
+  /** Neutral recommendation for holding. */
   HOLD,
+  /** Negative recommendation for selling. */
   SELL;
 
   /**

@@ -23,6 +23,8 @@ public final class BuyCommand implements TradeCommand {
   private final BigDecimal quantity;
 
   /**
+   * Creates a fixed-quantity buy command.
+   *
    * @param exchange exchange providing day and asset lookup
    * @param symbol   stock or fund symbol
    * @param quantity positive quantity of shares/units

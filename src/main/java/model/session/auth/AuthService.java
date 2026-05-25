@@ -26,6 +26,15 @@ import model.core.player.Player;
 
 /**
  * Handles user registration, authentication, and credential validation.
+ *
+ * <p>The service coordinates profile file paths, JSON persistence, market-data installation, and
+ * session restoration. Validation is delegated to {@link RegistrationValidator} chains so
+ * registration and login share the same input rules.
+ *
+ * @author kevindmazali
+ * @contributor kaamyashinde
+ * @version 1.0.0
+ * @since 2026-04-04
  */
 public final class AuthService {
 
@@ -40,6 +49,14 @@ public final class AuthService {
   private final MarketDataFileService marketDataFileService;
   private final String exchangeName;
 
+  /**
+   * Creates an authentication service with the persistence collaborators it needs.
+   *
+   * @param profilePaths profile file and market-data path resolver
+   * @param jsonStorage JSON storage abstraction for profile files
+   * @param marketDataFileService market data installer and loader
+   * @param exchangeName display name for newly created exchanges
+   */
   public AuthService(
       ProfilePaths profilePaths,
       JsonStorage jsonStorage,
@@ -51,6 +68,17 @@ public final class AuthService {
     this.exchangeName = exchangeName;
   }
 
+  /**
+   * Registers a new local profile and starts an active session for it.
+   *
+   * @param username username entered by the player
+   * @param pin PIN entered by the player
+   * @param startingMoney initial cash balance
+   * @param marketDataSource optional custom market-data CSV source
+   * @return active session for the newly registered profile
+   * @throws RegistrationValidationException if the registration fields are invalid
+   * @throws DuplicateUsernameException if the normalized username already exists
+   */
   public ActiveSession register(
       String username,
       char[] pin,
@@ -86,6 +114,14 @@ public final class AuthService {
     return new ActiveSession(trimmedUsername, normalizedUsername, player, exchange);
   }
 
+  /**
+   * Restores an existing local profile after validating credentials.
+   *
+   * @param username username entered by the player
+   * @param pin PIN entered by the player
+   * @return restored active session
+   * @throws AuthenticationException if credentials are invalid or the profile cannot be found
+   */
   public ActiveSession login(String username, char[] pin) {
     validateLoginInput(username, pin);
     ProfileFile profile = loadProfile(username)
@@ -101,19 +137,43 @@ public final class AuthService {
         profile.username(), profile.normalizedUsername(), restored.player(), restored.exchange());
   }
 
+  /**
+   * Lists usernames for profiles saved on this machine.
+   *
+   * @return registered usernames from profile storage
+   */
   public List<String> listRegisteredUsers() {
     return profilePaths.listUsernames(jsonStorage);
   }
 
+  /**
+   * Loads a profile or fails when it is missing.
+   *
+   * @param username profile username or normalized username
+   * @return saved profile file
+   * @throws IllegalStateException if the profile file is missing
+   */
   public ProfileFile loadProfileOrThrow(String username) {
     return loadProfile(username)
         .orElseThrow(() -> new IllegalStateException("Profile not found: " + username));
   }
 
+  /**
+   * Returns the market data service used by this authentication service.
+   *
+   * @return market data installer and loader
+   */
   public MarketDataFileService marketDataFileService() {
     return marketDataFileService;
   }
 
+  /**
+   * Validates login input before attempting to read profile files.
+   *
+   * @param username username entered by the player
+   * @param pin PIN entered by the player
+   * @throws AuthenticationException if either field is invalid
+   */
   public static void validateLoginInput(String username, char[] pin) {
     ValidationResult credentials = LOGIN_CREDENTIALS.validate(username, pin, null);
     if (credentials instanceof ValidationResult.Failure) {

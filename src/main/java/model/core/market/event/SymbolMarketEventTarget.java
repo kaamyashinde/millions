@@ -10,7 +10,12 @@ import model.core.asset.Stock;
 /**
  * Targets one or more stock symbols directly.
  *
- * @author OpenAI
+ * <p>The symbols are copied into an immutable set so event targeting cannot be mutated after a
+ * {@link MarketEvent} is created.
+ *
+ * @param affectedSymbols stock symbols affected by the event
+ *
+ * @author kevindmazali
  * @version 1.0.0
  * @since 2026-04-04
  */

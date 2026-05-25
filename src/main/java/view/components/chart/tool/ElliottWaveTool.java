@@ -15,7 +15,7 @@ import view.theme.ThemeStyles;
  *
  * @author kaamyashinde
  * @version 0.1.0
- * @since 30-03-2026
+ * @since 2026-03-30
  */
 public class ElliottWaveTool extends AbstractChartTool {
 
@@ -48,6 +48,12 @@ public class ElliottWaveTool extends AbstractChartTool {
 
   /** Whether the currently drawn overlay is an automatic preview. */
   private boolean previewDrawn = false;
+
+  /**
+   * Creates an Elliott Wave chart tool.
+   */
+  public ElliottWaveTool() {
+  }
 
   /**
    * Returns the display name of this tool.
@@ -83,8 +89,8 @@ public class ElliottWaveTool extends AbstractChartTool {
 
   /**
    * Accumulates click points up to a maximum of nine. Each click advances the status prompt to
-   * the next wave turning point. On the ninth click, {@link #drawAllSegments(LineChart)} is
-   * triggered to draw all eight wave segments and the chart legend is enabled.
+   * the next wave turning point. On the ninth click, all eight wave segments are drawn and the
+   * chart legend is enabled.
    *
    * @param chart    the target chart
    * @param price    the y-axis price value at the click position

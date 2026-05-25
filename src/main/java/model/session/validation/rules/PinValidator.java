@@ -12,6 +12,12 @@ import java.math.BigDecimal;
  */
 public final class PinValidator implements RegistrationValidator {
 
+  /**
+   * Creates a PIN validator.
+   */
+  public PinValidator() {
+  }
+
   @Override
   public ValidationResult validate(String username, char[] pin, BigDecimal startingMoney) {
     if (pin == null || pin.length < 4 || pin.length > 8) {

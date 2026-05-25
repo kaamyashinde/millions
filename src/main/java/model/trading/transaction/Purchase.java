@@ -11,7 +11,7 @@ import model.trading.calculator.PurchaseCalculator;
  *
  * @author kevindmazali
  * @version 0.0.3
- * @since 02-02-2026
+ * @since 2026-02-02
  */
 public class Purchase extends Transaction {
 

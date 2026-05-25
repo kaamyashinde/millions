@@ -7,9 +7,13 @@ import java.util.Optional;
  * Single-select options available in the stock chart analysis toolbar.
  */
 public enum ChartToolSelection {
+  /** No analysis overlay is selected. */
   NONE("None"),
+  /** Fibonacci retracement overlay. */
   FIBONACCI("Fibonacci"),
+  /** Elliott Wave overlay. */
   ELLIOTT_WAVE("Elliott Wave"),
+  /** Moon phase marker overlay. */
   MOON_PHASES("Moon Phases");
 
   private final String label;

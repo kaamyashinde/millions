@@ -19,7 +19,7 @@ import util.Validator;
  *                         when the player answers incorrectly; may be {@code null}
  * @author kaamyashinde
  * @version 1.0.0
- * @since 04-04-2026
+ * @since 2026-04-04
  */
 public record QuizQuestion(
     String id,
@@ -29,6 +29,9 @@ public record QuizQuestion(
     String explanationText,
     String linkedResourceId) {
 
+  /**
+   * Validates and defensively copies question fields.
+   */
   public QuizQuestion {
     Validator.checkNotNull(id, "id");
     Validator.checkNotNull(questionText, "questionText");

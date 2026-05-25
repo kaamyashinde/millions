@@ -63,6 +63,12 @@ public class MillionsApp extends Application {
   private Scene scene;
   private WorkspaceController currentWorkspace;
 
+  /**
+   * Creates the JavaFX application entry point.
+   */
+  public MillionsApp() {
+  }
+
   @Override
   public void start(Stage stage) {
     this.primaryStage = stage;

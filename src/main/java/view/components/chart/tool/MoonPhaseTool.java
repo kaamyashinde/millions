@@ -15,7 +15,7 @@ import view.theme.ThemeStyles;
  *
  * @author kaamyashinde
  * @version 0.1.0
- * @since 30-03-2026
+ * @since 2026-03-30
  */
 public class MoonPhaseTool extends AbstractChartTool {
 

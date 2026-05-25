@@ -13,6 +13,12 @@ import model.persistence.profile.ProfilePaths;
  */
 public final class UsernameValidator implements RegistrationValidator {
 
+  /**
+   * Creates a username validator.
+   */
+  public UsernameValidator() {
+  }
+
   @Override
   public ValidationResult validate(String username, char[] pin, BigDecimal startingMoney) {
     if (!ProfilePaths.isValidUsername(username)) {

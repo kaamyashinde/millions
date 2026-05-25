@@ -13,8 +13,9 @@ import model.core.asset.InvestableAsset;
  * {@link Exchange}, sorted by symbol, for combo-box selection when creating a plan.
  *
  * @author kevindmazali
+ * @contributor kaamyashinde
  * @version 1.0.0
- * @since 30-03-2026
+ * @since 2026-03-30
  */
 public class RegularSavingsPanelController {
 

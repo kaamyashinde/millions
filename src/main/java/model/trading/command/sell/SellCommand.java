@@ -20,6 +20,8 @@ public final class SellCommand implements TradeCommand {
   private final Share share;
 
   /**
+   * Creates a command that sells one FIFO slice.
+   *
    * @param exchange exchange providing the trading day
    * @param share    the lot or slice to sell
    */

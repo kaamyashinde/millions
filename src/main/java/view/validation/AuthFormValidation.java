@@ -22,6 +22,8 @@ public final class AuthFormValidation {
   }
 
   /**
+   * Validates username text for the authentication form.
+   *
    * @param text username field value
    * @return user-facing error when invalid, otherwise empty
    */
@@ -34,6 +36,8 @@ public final class AuthFormValidation {
   }
 
   /**
+   * Validates PIN text for the authentication form.
+   *
    * @param text PIN field value
    * @return user-facing error when invalid, otherwise empty
    */
@@ -46,6 +50,8 @@ public final class AuthFormValidation {
   }
 
   /**
+   * Validates starting-money text for the registration form.
+   *
    * @param text starting-money field value
    * @return user-facing error when invalid, otherwise empty
    */

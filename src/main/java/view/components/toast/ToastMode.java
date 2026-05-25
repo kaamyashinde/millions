@@ -15,6 +15,7 @@ import javafx.scene.shape.Shape;
  * @since 2026-03-29
  */
 public enum ToastMode {
+  /** Error notification style. */
   ERROR("#EF4444", "i") {
     @Override
     public Shape createShape() {
@@ -31,6 +32,7 @@ public enum ToastMode {
     }
   },
 
+  /** Warning notification style. */
   WARNING("#F59E0B", "i") {
     @Override
     public Shape createShape() {
@@ -47,6 +49,7 @@ public enum ToastMode {
     }
   },
 
+  /** Informational notification style. */
   INFO("#0EA5A4", "i") {
     @Override
     public Shape createShape() {
@@ -60,6 +63,7 @@ public enum ToastMode {
     }
   },
 
+  /** Success notification style. */
   SUCCESS("#22C55E", "✓") {
     @Override
     public Shape createShape() {

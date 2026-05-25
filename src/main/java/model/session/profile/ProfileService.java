@@ -22,6 +22,11 @@ import model.session.validation.ValidationResult;
 
 /**
  * Manages profile metadata: display names, avatars, and profile deletion.
+ *
+ * @author kevindmazali
+ * @contributor kaamyashinde
+ * @version 1.0.0
+ * @since 2026-04-04
  */
 public final class ProfileService {
 
@@ -29,6 +34,13 @@ public final class ProfileService {
   private final JsonStorage jsonStorage;
   private final ProfileImageService profileImageService;
 
+  /**
+   * Creates a profile service.
+   *
+   * @param profilePaths profile path resolver
+   * @param jsonStorage profile JSON storage
+   * @param profileImageService avatar image service
+   */
   public ProfileService(
       ProfilePaths profilePaths,
       JsonStorage jsonStorage,
@@ -38,6 +50,12 @@ public final class ProfileService {
     this.profileImageService = profileImageService;
   }
 
+  /**
+   * Updates the display name for the active session and persisted profile.
+   *
+   * @param session active session to update
+   * @param displayName new display name, or blank to reset to username
+   */
   public void updateDisplayName(ActiveSession session, String displayName) {
     ProfileFile existing = jsonStorage.read(
         profilePaths.profileFile(session.normalizedUsername()), ProfileFile.class);
@@ -63,18 +81,41 @@ public final class ProfileService {
     jsonStorage.write(profilePaths.profileFile(session.normalizedUsername()), saved);
   }
 
+  /**
+   * Saves a new avatar image for a profile.
+   *
+   * @param sourceImage source image chosen by the user
+   * @param normalizedUsername normalized profile username
+   */
   public void saveAvatarFromFile(Path sourceImage, String normalizedUsername) {
     profileImageService.saveAvatarFromFile(sourceImage, normalizedUsername);
   }
 
+  /**
+   * Deletes a profile avatar.
+   *
+   * @param normalizedUsername normalized profile username
+   */
   public void clearAvatar(String normalizedUsername) {
     profileImageService.deleteAvatar(normalizedUsername);
   }
 
+  /**
+   * Resolves a profile avatar path.
+   *
+   * @param normalizedUsername normalized profile username
+   * @return avatar image path
+   */
   public Path avatarPath(String normalizedUsername) {
     return profileImageService.avatarPath(normalizedUsername);
   }
 
+  /**
+   * Deletes the active profile after PIN verification.
+   *
+   * @param username active profile username
+   * @param pin PIN entered by the user
+   */
   public void deleteActiveProfile(String username, char[] pin) {
     verifyDeletionPin(username, pin);
     deleteProfileDirectory(username);
@@ -109,6 +150,12 @@ public final class ProfileService {
     deleteProfileDirectory(profilePaths.profileDirectory(username));
   }
 
+  /**
+   * Deletes a non-active profile after username and PIN verification.
+   *
+   * @param username profile username
+   * @param pin PIN entered by the user
+   */
   public void deleteOtherProfile(String username, char[] pin) {
     AuthService.validateLoginInput(username, pin);
     if (!profilePaths.profileExists(username)) {
@@ -121,6 +168,11 @@ public final class ProfileService {
     deleteProfileDirectory(profilePaths.profileDirectory(username));
   }
 
+  /**
+   * Returns the avatar image service.
+   *
+   * @return profile image service
+   */
   public ProfileImageService profileImageService() {
     return profileImageService;
   }

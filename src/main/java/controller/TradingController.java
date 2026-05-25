@@ -20,6 +20,13 @@ import view.components.toast.ToastMode;
 
 /**
  * Executes buy and sell operations for the GUI, mapping domain errors to user-facing messages.
+ *
+ * <p>The controller wraps {@link Exchange} trade commands and converts model exceptions into
+ * localized {@link TradeResult} values for dialogs and notifications.
+ *
+ * @author kevindmazali
+ * @version 1.0.0
+ * @since 2026-05-23
  */
 public class TradingController {
 
@@ -28,6 +35,8 @@ public class TradingController {
   private final NotificationService notifications;
 
   /**
+   * Creates a trading controller for one active player.
+   *
    * @param exchange exchange used for trades
    * @param player active player
    * @param notifications notification service for success toasts
@@ -41,19 +50,36 @@ public class TradingController {
     this.notifications = notifications;
   }
 
+  /**
+   * Exposes the exchange used to execute trades.
+   *
+   * @return exchange used to execute trades
+   */
   public Exchange getExchange() {
     return exchange;
   }
 
+  /**
+   * Exposes the player affected by trades.
+   *
+   * @return player whose portfolio and cash balance are changed by trades
+   */
   public Player getPlayer() {
     return player;
   }
 
+  /**
+   * Returns the player's current cash balance.
+   *
+   * @return player's current cash balance
+   */
   public BigDecimal getCashBalance() {
     return player.getMoney();
   }
 
   /**
+   * Returns the player's quantity for a symbol across all FIFO lots.
+   *
    * @param symbol stock or fund symbol
    * @return total quantity held across all lots
    */
@@ -65,6 +91,8 @@ public class TradingController {
   }
 
   /**
+   * Looks up the latest price for a listed asset.
+   *
    * @param symbol stock or fund symbol
    * @return latest listed price when the symbol exists
    */
@@ -80,6 +108,8 @@ public class TradingController {
   }
 
   /**
+   * Formats a monetary value for trade dialogs.
+   *
    * @param value amount to format
    * @return plain string with two decimal places
    */

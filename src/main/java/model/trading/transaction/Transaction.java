@@ -11,7 +11,7 @@ import model.trading.calculator.TransactionCalculator;
  *
  * @author kevindmazali
  * @version 0.0.1
- * @since 02-02-2026
+ * @since 2026-02-02
  */
 
 public abstract class Transaction {
@@ -19,6 +19,8 @@ public abstract class Transaction {
   private final Share share;
   private final int day;
   private final TransactionCalculator calculator;
+
+  /** Whether this transaction has already been committed. */
   protected boolean commited;
 
   /**
