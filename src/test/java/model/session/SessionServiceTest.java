@@ -383,7 +383,7 @@ class SessionServiceTest {
     ActiveSession session = sessionService.register(
         "Trader", "1234".toCharArray(), new BigDecimal("500.00"), Optional.of(customCsv));
 
-    assertEquals("CUSTOM", session.exchange().getStocks().getFirst().getSymbol());
+    assertEquals("CUSTOM", session.exchange().listings().getStocks().getFirst().getSymbol());
     assertTrue(Files.isRegularFile(tempDir.resolve("trader").resolve("market-data.csv")));
   }
 
@@ -398,7 +398,7 @@ class SessionServiceTest {
 
     ActiveSession restored = sessionService.login("Solo", "1234".toCharArray());
 
-    assertEquals("ONLY", restored.exchange().getStocks().getFirst().getSymbol());
+    assertEquals("ONLY", restored.exchange().listings().getStocks().getFirst().getSymbol());
   }
 
   private SessionService createSessionService() {
