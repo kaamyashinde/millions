@@ -15,6 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
+import model.analysis.performance.MetricValue;
 import model.core.market.Exchange;
 import model.core.market.ExchangeBuilder;
 import model.core.player.Player;
@@ -93,6 +94,15 @@ class PlayerPortfolioPageTest {
         });
 
     assertEquals(1, panel.getHoldingCount());
+  }
+
+  @Test
+  void metricFormattingUsesTwoDecimals() {
+    assertEquals(
+        "1.23",
+        PortfolioController.formatMetricValue(
+            MetricValue.available(new BigDecimal("1.234")),
+            false));
   }
 
   private static PlayerPortfolioPage createPage(Exchange exchange, Player player) throws Exception {
