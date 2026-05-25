@@ -37,7 +37,7 @@ public final class BuyCommand implements TradeCommand {
 
   @Override
   public List<Transaction> execute(Player player) {
-    InvestableAsset assetToBuy = exchange.getAsset(symbol);
+    InvestableAsset assetToBuy = exchange.listings().getAsset(symbol);
     if (assetToBuy == null) {
       throw new IllegalArgumentException("Unknown asset symbol: " + symbol);
     }

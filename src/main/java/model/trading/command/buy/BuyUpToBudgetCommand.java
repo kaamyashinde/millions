@@ -39,7 +39,7 @@ public final class BuyUpToBudgetCommand implements TradeCommand {
 
   @Override
   public List<Transaction> execute(Player player) {
-    InvestableAsset asset = exchange.getAsset(symbol);
+    InvestableAsset asset = exchange.listings().getAsset(symbol);
     if (asset == null) {
       throw new IllegalArgumentException("Unknown asset symbol: " + symbol);
     }
