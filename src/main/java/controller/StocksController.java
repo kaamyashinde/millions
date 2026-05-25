@@ -2,6 +2,8 @@ package controller;
 
 import static util.Validator.checkNotNull;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -27,9 +29,12 @@ import model.core.market.event.MarketEvent;
  */
 public class StocksController {
 
+  private static final int PERCENT_SCALE = 8;
+
   private final Exchange exchange;
   private final ObservableList<Stock> stocks = FXCollections.observableArrayList();
   private final ObjectProperty<Stock> selectedStock = new SimpleObjectProperty<>();
+  private String searchTerm = "";
 
   /**
    * Creates a stock-list controller and loads the initial rows.
@@ -87,18 +92,35 @@ public class StocksController {
     selectedStock.set(stock);
   }
 
+  public String getSearchTerm() {
+    return searchTerm;
+  }
+
+  /**
+   * Updates the active search term and reloads the filtered stock rows.
+   *
+   * @param searchTerm symbol or company text to match
+   */
+  public void setSearchTerm(String searchTerm) {
+    this.searchTerm = searchTerm == null ? "" : searchTerm.trim();
+    refresh();
+  }
+
   /**
    * Formats the stocks-page metadata line.
    *
    * @return compact exchange, day, and listing-count text for the stocks page
    */
   public String getMetaText() {
+    int total = exchange.findStocks("").size();
+    int visible = stocks.size();
+    String countText =
+        searchTerm.isBlank() ? total + " listing(s)" : visible + " of " + total + " listing(s)";
     return exchange.getName()
         + " · trading day "
         + exchange.getDay()
         + " · "
-        + exchange.listings().findStocks("").size()
-        + " listing(s)";
+        + countText;
   }
 
   /**
@@ -115,11 +137,50 @@ public class StocksController {
   }
 
   /**
+   * Returns the strongest positive movers by latest percentage price change.
+   *
+   * @param limit maximum number of rows to return
+   * @return winners sorted from highest to lowest percent gain
+   */
+  public List<MarketMover> getTopWinners(int limit) {
+    if (limit <= 0) {
+      return List.of();
+    }
+    return marketMovers().stream()
+        .filter(mover -> mover.absoluteChange().signum() > 0)
+        .sorted(
+            Comparator.comparing(MarketMover::percentChange)
+                .reversed()
+                .thenComparing(MarketMover::symbol))
+        .limit(limit)
+        .toList();
+  }
+
+  /**
+   * Returns the strongest negative movers by latest percentage price change.
+   *
+   * @param limit maximum number of rows to return
+   * @return losers sorted from lowest to highest percent loss
+   */
+  public List<MarketMover> getTopLosers(int limit) {
+    if (limit <= 0) {
+      return List.of();
+    }
+    return marketMovers().stream()
+        .filter(mover -> mover.absoluteChange().signum() < 0)
+        .sorted(
+            Comparator.comparing(MarketMover::percentChange)
+                .thenComparing(MarketMover::symbol))
+        .limit(limit)
+        .toList();
+  }
+
+  /**
    * Reloads stock rows from the exchange, preserving selection when possible.
    */
   public void refresh() {
     Stock previous = selectedStock.get();
-    List<Stock> sorted = new ArrayList<>(exchange.listings().findStocks(""));
+    List<Stock> sorted = new ArrayList<>(exchange.findStocks(searchTerm));
     sorted.sort(Comparator.comparing(Stock::getSymbol));
     stocks.setAll(sorted);
     if (previous != null) {
@@ -131,8 +192,47 @@ public class StocksController {
         return;
       }
     }
-    if (selectedStock.get() == null && !sorted.isEmpty()) {
-      selectedStock.set(sorted.get(0));
+    selectedStock.set(sorted.isEmpty() ? null : sorted.get(0));
+  }
+
+  /**
+   * Builds all non-zero latest price movers from the exchange's stock list.
+   *
+   * @return market movers in exchange iteration order
+   */
+  private List<MarketMover> marketMovers() {
+    return exchange.getStocks().stream()
+        .map(this::toMarketMover)
+        .flatMap(Optional::stream)
+        .toList();
+  }
+
+  /**
+   * Converts a stock into a market mover when it has enough positive price history.
+   *
+   * @param stock listed stock to inspect
+   * @return mover row, or empty when the stock has no latest movement
+   */
+  private Optional<MarketMover> toMarketMover(Stock stock) {
+    List<BigDecimal> prices = stock.getHistoricalPrices();
+    int size = prices.size();
+    if (size < 2) {
+      return Optional.empty();
     }
+    BigDecimal previousPrice = prices.get(size - 2);
+    BigDecimal currentPrice = prices.get(size - 1);
+    BigDecimal change = currentPrice.subtract(previousPrice);
+    if (previousPrice.signum() <= 0 || change.signum() == 0) {
+      return Optional.empty();
+    }
+    BigDecimal percentChange =
+        change.divide(previousPrice, PERCENT_SCALE, RoundingMode.HALF_UP);
+    return Optional.of(
+        new MarketMover(
+            stock.getSymbol(),
+            stock.getCompany(),
+            currentPrice,
+            change,
+            percentChange));
   }
 }

@@ -2,8 +2,10 @@ package view.pages.stocks;
 
 import static util.Validator.checkNotNull;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,6 +14,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
@@ -21,6 +24,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import controller.MarketMover;
 import controller.StockDetailController;
 import controller.StocksController;
 import controller.TradingController;
@@ -33,7 +37,9 @@ import view.components.chart.StockChart;
 import view.components.chart.tool.ElliottWaveTool;
 import view.components.chart.tool.FibonacciTool;
 import view.components.chart.tool.MoonPhaseTool;
+import view.components.table.AppTableView;
 import view.theme.ThemeStyles;
+import view.util.UiFormat;
 
 /**
  * JavaFX panel listing stocks with a detail pane and buy actions.
@@ -41,15 +47,25 @@ import view.theme.ThemeStyles;
 public class StocksPage extends BorderPane {
 
   private static final LocalDate SIMULATION_START_DATE = LocalDate.of(2024, 1, 11);
+  private static final int MARKET_MOVER_LIMIT = 3;
+  private static final double CHART_MIN_HEIGHT = 200;
+  private static final double CHART_PREF_HEIGHT = 280;
+  private static final double CHART_MAX_HEIGHT = 320;
 
   private final StocksController stocks;
   private final StockDetailController stockDetail;
   private final Runnable onTradeComplete;
 
   private final Label metaLabel = new Label();
-  private final BorderPane chartPanel = new BorderPane();
+  private final TextField searchField = new TextField();
+  private final VBox chartCard = new VBox(8);
+  private final VBox chartSlot = new VBox(chartCard);
   private final Label chartPlaceholder = new Label("Select a stock to view its price chart.");
   private final TableView<Stock> table = new TableView<>();
+  private final AppTableView<MarketMover> winnersTable =
+      new AppTableView<>("No winners yet.");
+  private final AppTableView<MarketMover> losersTable =
+      new AppTableView<>("No losers yet.");
   private final StockDetailView detailView = new StockDetailView();
   private ChartRange selectedChartRange = ChartRange.ALL;
   private ChartToolSelection selectedChartTool = ChartToolSelection.NONE;
@@ -76,7 +92,6 @@ public class StocksPage extends BorderPane {
     this.stockDetail = stockDetail;
     this.onTradeComplete = onTradeComplete;
 
-    setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "finance-page");
 
     Text heading = new Text("Available Stocks");
@@ -86,14 +101,23 @@ public class StocksPage extends BorderPane {
     metaLabel.setWrapText(true);
     ThemeStyles.addStyleClasses(metaLabel, "finance-meta");
     VBox.setMargin(metaLabel, new Insets(0, 0, 8, 0));
+    searchField.setPromptText("Search by symbol or company");
+    searchField.setId("stocks-search-field");
+    ThemeStyles.styleField(searchField);
+    searchField.textProperty().addListener((_, _, value) -> {
+      stocks.setSearchTerm(value);
+      syncTableSelection();
+      updateDetail(stocks.getSelectedStock());
+      updateMetaText();
+    });
 
     HBox topRow = new HBox(16, heading);
     topRow.setAlignment(Pos.CENTER_LEFT);
 
-    VBox top = new VBox(4, topRow, metaLabel);
-    setTop(top);
+    VBox header = new VBox(8, topRow, searchField, metaLabel);
 
     buildTable();
+    table.setId("stocks-table");
     table.setItems(stocks.getStocks());
     table.setPlaceholder(new Label("No stocks available."));
     table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
@@ -117,20 +141,30 @@ public class StocksPage extends BorderPane {
 
     chartPlaceholder.setWrapText(true);
     ThemeStyles.addStyleClasses(chartPlaceholder, "empty-state");
-    chartPanel.setPadding(new Insets(16));
-    chartPanel.setMinWidth(360);
-    ThemeStyles.addStyleClasses(chartPanel, "finance-panel");
+    chartCard.setPadding(new Insets(16));
+    chartCard.setMinWidth(360);
+    ThemeStyles.addStyleClasses(chartCard, "finance-panel");
+    chartSlot.setAlignment(Pos.TOP_LEFT);
+    VBox.setVgrow(chartCard, Priority.NEVER);
 
     VBox rightColumn = new VBox(12, table, detailView);
     rightColumn.setFillWidth(true);
-    ScrollPane rightScroll = new ScrollPane(rightColumn);
-    rightScroll.setFitToWidth(true);
-    rightScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-    rightScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
-    SplitPane splitPane = new SplitPane(chartPanel, rightScroll);
+    SplitPane splitPane = new SplitPane(chartSlot, rightColumn);
     splitPane.setDividerPositions(0.58);
-    setCenter(splitPane);
+    VBox.setVgrow(splitPane, Priority.ALWAYS);
+
+    VBox pageContent = new VBox(12, header, buildMarketMoversPanel(), splitPane);
+    pageContent.setId("stocks-page-content");
+    pageContent.setPadding(new Insets(16));
+    pageContent.setFillWidth(true);
+
+    ScrollPane rootScroll = new ScrollPane(pageContent);
+    rootScroll.setId("stocks-root-scroll");
+    rootScroll.setFitToWidth(true);
+    rootScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+    rootScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+    setCenter(rootScroll);
 
     refresh();
   }
@@ -144,7 +178,7 @@ public class StocksPage extends BorderPane {
 
     TableColumn<Stock, String> colPrice = new TableColumn<>("Latest Price");
     colPrice.setCellValueFactory(
-        c -> new SimpleStringProperty(c.getValue().getSalesPrice().toPlainString()));
+        c -> new SimpleStringProperty(UiFormat.decimal(c.getValue().getSalesPrice())));
 
     TableColumn<Stock, String> colRevenue = new TableColumn<>("Revenue (Mock)");
     colRevenue.setCellValueFactory(
@@ -164,13 +198,11 @@ public class StocksPage extends BorderPane {
    * Reloads list metadata and the detail pane for the current selection.
    */
   public void refresh() {
-    metaLabel.setText(stocks.getMetaText());
     stocks.refresh();
-    Stock selected = stocks.getSelectedStock();
-    if (selected != null) {
-      table.getSelectionModel().select(selected);
-    }
+    syncTableSelection();
+    updateMetaText();
     table.refresh();
+    updateMarketMovers();
     updateDetail(stocks.getSelectedStock());
   }
 
@@ -181,6 +213,145 @@ public class StocksPage extends BorderPane {
    */
   public StockDetailView getDetailView() {
     return detailView;
+  }
+
+  public String getSearchText() {
+    return searchField.getText();
+  }
+
+  /**
+   * Returns the winner rows currently shown in the market movers panel.
+   *
+   * @return immutable snapshot of winner rows
+   */
+  public List<MarketMover> getDisplayedWinners() {
+    return List.copyOf(winnersTable.getItems());
+  }
+
+  /**
+   * Returns the loser rows currently shown in the market movers panel.
+   *
+   * @return immutable snapshot of loser rows
+   */
+  public List<MarketMover> getDisplayedLosers() {
+    return List.copyOf(losersTable.getItems());
+  }
+
+  private void syncTableSelection() {
+    Stock selected = stocks.getSelectedStock();
+    if (selected != null) {
+      table.getSelectionModel().select(selected);
+    } else {
+      table.getSelectionModel().clearSelection();
+    }
+  }
+
+  private void updateMetaText() {
+    metaLabel.setText(stocks.getMetaText());
+  }
+
+  /**
+   * Reloads winner and loser rows from the stock controller.
+   */
+  private void updateMarketMovers() {
+    winnersTable.getItems().setAll(stocks.getTopWinners(MARKET_MOVER_LIMIT));
+    losersTable.getItems().setAll(stocks.getTopLosers(MARKET_MOVER_LIMIT));
+    winnersTable.refresh();
+    losersTable.refresh();
+  }
+
+  /**
+   * Builds the compact market movers summary shown above the main stocks split pane.
+   *
+   * @return market movers panel
+   */
+  private VBox buildMarketMoversPanel() {
+    Label heading = new Label("Market movers");
+    ThemeStyles.addStyleClasses(heading, "section-title");
+
+    configureMoverTable(winnersTable, "market-winners-table");
+    configureMoverTable(losersTable, "market-losers-table");
+
+    VBox winnersBox = buildMoverGroup("Winners", winnersTable);
+    VBox losersBox = buildMoverGroup("Losers", losersTable);
+    HBox tables = new HBox(12, winnersBox, losersBox);
+    tables.setAlignment(Pos.CENTER_LEFT);
+    HBox.setHgrow(winnersBox, Priority.ALWAYS);
+    HBox.setHgrow(losersBox, Priority.ALWAYS);
+
+    VBox panel = new VBox(8, heading, tables);
+    panel.setId("market-movers-panel");
+    ThemeStyles.addStyleClasses(panel, "finance-panel", "market-movers-panel");
+    return panel;
+  }
+
+  /**
+   * Builds one labeled mover table group.
+   *
+   * @param title visible table group title
+   * @param table configured market mover table
+   * @return group containing the title and table
+   */
+  private static VBox buildMoverGroup(String title, AppTableView<MarketMover> table) {
+    Label label = new Label(title);
+    ThemeStyles.addStyleClasses(label, "finance-meta", "market-mover-heading");
+    VBox group = new VBox(6, label, table);
+    group.setFillWidth(true);
+    VBox.setVgrow(table, Priority.ALWAYS);
+    return group;
+  }
+
+  /**
+   * Configures columns and sizing for a market mover table.
+   *
+   * @param table table to configure
+   * @param id JavaFX node id used by tests and lookup
+   */
+  private static void configureMoverTable(AppTableView<MarketMover> table, String id) {
+    table.setId(id);
+    table.setPrefHeight(150);
+    table.setMinHeight(130);
+    table.setMaxHeight(170);
+    table.setFocusTraversable(false);
+
+    TableColumn<MarketMover, String> symbolColumn =
+        AppTableView.createTextColumn("Symbol", MarketMover::symbol);
+    TableColumn<MarketMover, String> companyColumn =
+        AppTableView.createTextColumn("Company", MarketMover::company);
+    TableColumn<MarketMover, BigDecimal> priceColumn =
+        AppTableView.createNumericColumn(
+            "Price", MarketMover::currentPrice, UiFormat::decimal);
+    TableColumn<MarketMover, BigDecimal> changeColumn =
+        AppTableView.createNumericColumn(
+            "Change", MarketMover::absoluteChange, StocksPage::formatSignedDecimal);
+    TableColumn<MarketMover, BigDecimal> percentColumn =
+        AppTableView.createNumericColumn(
+            "Change %", MarketMover::percentChange, StocksPage::formatSignedPercent);
+
+    table.getColumns()
+        .setAll(List.of(symbolColumn, companyColumn, priceColumn, changeColumn, percentColumn));
+  }
+
+  /**
+   * Formats signed decimal changes with a leading plus sign for positive values.
+   *
+   * @param value decimal value to format
+   * @return signed display text
+   */
+  private static String formatSignedDecimal(BigDecimal value) {
+    String formatted = UiFormat.decimal(value);
+    return value != null && value.signum() > 0 ? "+" + formatted : formatted;
+  }
+
+  /**
+   * Formats signed percent changes with a leading plus sign for positive values.
+   *
+   * @param value fractional percent value to format
+   * @return signed percentage display text
+   */
+  private static String formatSignedPercent(BigDecimal value) {
+    String formatted = UiFormat.percent(value);
+    return value != null && value.signum() > 0 ? "+" + formatted : formatted;
   }
 
   private void updateDetail(Stock selected) {
@@ -203,24 +374,24 @@ public class StocksPage extends BorderPane {
     currentChart = null;
     if (selected == null) {
       chartPlaceholder.setText("Select a stock to view its price chart.");
-      chartPanel.setCenter(chartPlaceholder);
-      chartPanel.setBottom(null);
+      chartCard.getChildren().setAll(chartPlaceholder);
       return;
     }
     if (selected.getHistoricalPrices().isEmpty()) {
       chartPlaceholder.setText("No price history is available for " + selected.getSymbol() + " yet.");
-      chartPanel.setCenter(chartPlaceholder);
-      chartPanel.setBottom(null);
+      chartCard.getChildren().setAll(chartPlaceholder);
       return;
     }
 
     StockChart chart = new StockChart(selected, selectedChartRange);
     currentChart = chart;
     registerAnalysisTools(chart);
-    chart.setMinHeight(250);
-    chart.prefHeightProperty().bind(chartPanel.heightProperty().multiply(0.85));
-    chartPanel.setCenter(chart);
-    chartPanel.setBottom(buildChartControls(selected, chart));
+    chart.setMinHeight(CHART_MIN_HEIGHT);
+    chart.setPrefHeight(CHART_PREF_HEIGHT);
+    chart.setMaxHeight(CHART_MAX_HEIGHT);
+    VBox chartWrap = new VBox(chart);
+    chartWrap.setAlignment(Pos.TOP_CENTER);
+    chartCard.getChildren().setAll(chartWrap, buildChartControls(selected, chart));
   }
 
   private void registerAnalysisTools(StockChart chart) {
