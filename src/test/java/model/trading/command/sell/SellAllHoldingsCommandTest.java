@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
+import model.core.asset.Share;
 import model.core.asset.Stock;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
@@ -43,6 +44,16 @@ class SellAllHoldingsCommandTest {
     List<?> txs = new SellAllHoldingsCommand(exchange).execute(player);
     assertTrue(txs.isEmpty());
     assertTrue(player.getPortfolio().getShares().isEmpty());
+  }
+
+  @Test
+  void execute_skipsSymbolsWithNonPositiveQuantity() {
+    Stock ghost = exchange.getStock("AAPL");
+    player.getPortfolio().addShare(new Share(ghost, BigDecimal.ZERO, ghost.getSalesPrice()));
+
+    List<?> txs = new SellAllHoldingsCommand(exchange).execute(player);
+
+    assertTrue(txs.isEmpty());
   }
 
   @Test

@@ -120,12 +120,11 @@ public final class ProfilePaths {
   }
 
   /**
-   * Lists saved profile usernames.
+   * Lists normalized profile directory names that contain a profile file.
    *
-   * @param jsonStorage storage used to read profile metadata
-   * @return sorted usernames for valid profile directories
+   * @return sorted directory usernames for valid profile folders
    */
-  public List<String> listUsernames(JsonStorage jsonStorage) {
+  public List<String> listUsernames() {
     if (!Files.isDirectory(profilesRoot)) {
       return List.of();
     }
@@ -139,12 +138,24 @@ public final class ProfilePaths {
         if (!Files.exists(file)) {
           continue;
         }
-        ProfileFile profile = jsonStorage.read(file, ProfileFile.class);
-        names.add(profile.username());
+        names.add(dir.getFileName().toString());
       }
     } catch (IOException exception) {
       throw new PersistenceException("Could not list profiles in " + profilesRoot, exception);
     }
     return names.stream().sorted(Comparator.naturalOrder()).toList();
+  }
+
+  /**
+   * Lists display usernames from saved profile JSON files.
+   *
+   * @param jsonStorage storage used to read profile metadata
+   * @return sorted display usernames for valid profiles
+   */
+  public List<String> listUsernames(JsonStorage jsonStorage) {
+    return listUsernames().stream()
+        .map(username -> jsonStorage.read(profileFile(username), ProfileFile.class).username())
+        .sorted(Comparator.naturalOrder())
+        .toList();
   }
 }

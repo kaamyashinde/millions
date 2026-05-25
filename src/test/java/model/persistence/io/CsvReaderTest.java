@@ -144,4 +144,15 @@ class CsvReaderTest {
     assertEquals(1, stocks.size());
     assertEquals("NVDA", stocks.getFirst().getSymbol());
   }
+
+  @Test
+  void readCsv_fromDirectoryAndFileNameReturnsOnlyStocks() throws IOException {
+    Path csvFile = tempDir.resolve("stocks.csv");
+    Files.writeString(csvFile, "STOCK,NVDA,Nvidia,191.27\n");
+
+    List<Stock> stocks = CsvReader.readCsv(tempDir, "stocks");
+
+    assertEquals(1, stocks.size());
+    assertEquals("NVDA", stocks.getFirst().getSymbol());
+  }
 }

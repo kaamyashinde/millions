@@ -12,12 +12,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import javax.imageio.ImageIO;
 import model.persistence.ProfileFile;
 import model.persistence.io.JsonStorage;
 import model.persistence.profile.ProfilePaths;
@@ -61,6 +65,37 @@ class SessionServiceTest {
     assertThrows(
         AuthenticationException.class,
         () -> sessionService.login("Alice", "9999".toCharArray()));
+  }
+
+  @Test
+  void login_rejectsInvalidInputAndMissingProfiles() {
+    SessionService sessionService = createSessionService();
+
+    assertThrows(AuthenticationException.class, () -> sessionService.login("ab", "12".toCharArray()));
+    assertThrows(AuthenticationException.class, () -> sessionService.login("Missing", "1234".toCharArray()));
+  }
+
+  @Test
+  void login_sameActiveUserKeepsSessionAndReturnsLoadedProfile() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+
+    ActiveSession loggedIn = sessionService.login("Alice", "1234".toCharArray());
+
+    assertEquals("Alice", loggedIn.username());
+    assertTrue(sessionService.hasActiveSession());
+    assertTrue(sessionService.getActiveSession().isPresent());
+  }
+
+  @Test
+  void logoutAndSaveActiveSession_areNoopsWithoutActiveSession() {
+    SessionService sessionService = createSessionService();
+
+    assertFalse(sessionService.logout());
+    sessionService.saveActiveSession();
+    assertFalse(sessionService.hasActiveSession());
+    assertTrue(sessionService.getActiveSession().isEmpty());
+    assertEquals(List.of(), sessionService.listRegisteredUsers());
   }
 
   @Test
@@ -108,6 +143,35 @@ class SessionServiceTest {
     assertEquals(
         0,
         entries.getFirst().totalReturnPercent().compareTo(new BigDecimal("0.05000000")));
+  }
+
+  @Test
+  void listLeaderboardEntries_handlesSavedProfilesAndInvalidDisplayNames() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), BigDecimal.ZERO);
+    sessionService.logout();
+    ProfilePaths paths = new ProfilePaths(tempDir);
+    JsonStorage storage = new JsonStorage();
+    ProfileFile profile = storage.read(paths.profileFile("Alice"), ProfileFile.class);
+    storage.write(paths.profileFile("Alice"), profile.withDisplayName("x".repeat(49)));
+
+    List<PlayerLeaderboardEntry> entries = sessionService.listLeaderboardEntries();
+
+    assertEquals(1, entries.size());
+    assertEquals("Alice", entries.getFirst().username());
+    assertEquals(0, entries.getFirst().totalReturnPercent().compareTo(BigDecimal.ZERO));
+  }
+
+  @Test
+  void listLeaderboardEntries_appliesValidSavedDisplayNameForInactiveProfile() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    sessionService.updateDisplayName("Allie");
+    sessionService.logout();
+
+    List<PlayerLeaderboardEntry> entries = sessionService.listLeaderboardEntries();
+
+    assertEquals("Allie", entries.getFirst().username());
   }
 
   @Test
@@ -161,6 +225,48 @@ class SessionServiceTest {
   }
 
   @Test
+  void updateDisplayName_blankValueResetsToUsernameAndClearsStoredDisplayName() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    sessionService.updateDisplayName("Allie");
+
+    sessionService.updateDisplayName("   ");
+
+    ProfilePaths paths = new ProfilePaths(tempDir);
+    ProfileFile profile = new JsonStorage().read(paths.profileFile("Alice"), ProfileFile.class);
+    assertEquals("Alice", sessionService.getActiveSession().orElseThrow().player().getName());
+    assertEquals(null, profile.displayName());
+  }
+
+  @Test
+  void avatarMethods_delegateForActiveSession() throws Exception {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    Path source = tempDir.resolve("avatar.png");
+    writePng(source);
+
+    sessionService.saveAvatarFromFile(source);
+    Path avatar = sessionService.avatarPath("alice");
+
+    assertTrue(Files.isRegularFile(avatar));
+    sessionService.clearAvatar();
+    assertFalse(Files.exists(avatar));
+  }
+
+  @Test
+  void activeSessionOnlyOperations_throwWhenNoSessionExists() {
+    SessionService sessionService = createSessionService();
+
+    assertThrows(IllegalStateException.class, sessionService::hasSeenWelcome);
+    assertThrows(IllegalStateException.class, sessionService::markWelcomeSeen);
+    assertThrows(IllegalStateException.class, () -> sessionService.updateDisplayName("Allie"));
+    assertThrows(IllegalStateException.class, () -> sessionService.saveAvatarFromFile(tempDir));
+    assertThrows(IllegalStateException.class, sessionService::clearAvatar);
+    assertThrows(IllegalStateException.class, () -> sessionService.deleteActiveProfile("1234".toCharArray()));
+    assertThrows(IllegalStateException.class, () -> sessionService.exitGameAndDeleteProfile("1234".toCharArray()));
+  }
+
+  @Test
   void deleteActiveProfile_removesFiles() throws Exception {
     SessionService sessionService = createSessionService();
     sessionService.register("Zed", "1234".toCharArray(), new BigDecimal("100.00"));
@@ -168,6 +274,16 @@ class SessionServiceTest {
     assertTrue(Files.isDirectory(profileDir));
     sessionService.deleteActiveProfile("1234".toCharArray());
     assertFalse(Files.exists(profileDir));
+  }
+
+  @Test
+  void deleteActiveProfile_rejectsInvalidPinFormat() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Zed", "1234".toCharArray(), new BigDecimal("100.00"));
+
+    assertThrows(
+        RegistrationValidationException.class,
+        () -> sessionService.deleteActiveProfile("12".toCharArray()));
   }
 
   @Test
@@ -217,6 +333,48 @@ class SessionServiceTest {
   }
 
   @Test
+  void deleteProfile_removesInactiveProfileAndRejectsBadCredentials() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    sessionService.logout();
+    Path profileDir = tempDir.resolve("alice");
+
+    assertThrows(
+        AuthenticationException.class,
+        () -> sessionService.deleteProfile("Missing", "1234".toCharArray()));
+    assertThrows(
+        AuthenticationException.class,
+        () -> sessionService.deleteProfile("Alice", "9999".toCharArray()));
+
+    sessionService.deleteProfile("Alice", "1234".toCharArray());
+
+    assertFalse(Files.exists(profileDir));
+  }
+
+  @Test
+  void leaderboardServiceAndDefaultProfilesRoot_areAvailable() {
+    SessionService sessionService = createSessionService();
+
+    assertEquals(0, sessionService.leaderboardService().loadRows().size());
+    assertTrue(SessionServiceFactory.defaultProfilesRoot().endsWith(Path.of(".millions", "profiles")));
+  }
+
+  @Test
+  void login_ignoresInvalidSavedDisplayName() {
+    SessionService sessionService = createSessionService();
+    sessionService.register("Alice", "1234".toCharArray(), new BigDecimal("1000.00"));
+    sessionService.logout();
+    ProfilePaths paths = new ProfilePaths(tempDir);
+    JsonStorage storage = new JsonStorage();
+    ProfileFile profile = storage.read(paths.profileFile("Alice"), ProfileFile.class);
+    storage.write(paths.profileFile("Alice"), profile.withDisplayName("x".repeat(49)));
+
+    ActiveSession restored = sessionService.login("Alice", "1234".toCharArray());
+
+    assertEquals("Alice", restored.player().getName());
+  }
+
+  @Test
   void register_withCustomMarketDataFile_usesUploadedSymbols() throws Exception {
     SessionService sessionService = createSessionService();
     Path customCsv = tempDir.resolve("upload.csv");
@@ -249,5 +407,17 @@ class SessionServiceTest {
         "/data/demo-stocks.csv",
         SessionServiceTest.class,
         "NYSE");
+  }
+
+  private static void writePng(Path path) throws Exception {
+    BufferedImage image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D graphics = image.createGraphics();
+    try {
+      graphics.setColor(Color.GREEN);
+      graphics.fillRect(0, 0, 8, 8);
+    } finally {
+      graphics.dispose();
+    }
+    ImageIO.write(image, "png", path.toFile());
   }
 }

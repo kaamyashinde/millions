@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import model.trading.savings.RegularSavingsPlan;
+import model.trading.savings.SavingsInstallmentMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -90,6 +92,32 @@ class PlayerTest {
   @Test
   void setName_rejectsBlank() {
     assertThrows(IllegalArgumentException.class, () -> player.setName("   "));
+  }
+
+  @Test
+  void setName_rejectsNullAndOverlongNames() {
+    assertThrows(NullPointerException.class, () -> player.setName(null));
+    assertThrows(IllegalArgumentException.class, () -> player.setName("x".repeat(49)));
+  }
+
+  @Test
+  void regularSavingsPlans_areUnmodifiableAndCanBeRemovedByOneBasedIndex() {
+    RegularSavingsPlan plan = new RegularSavingsPlan(
+        "AAPL",
+        SavingsInstallmentMode.FIXED_SHARES,
+        BigDecimal.ONE,
+        7,
+        1);
+
+    assertThrows(NullPointerException.class, () -> player.addRegularSavingsPlan(null));
+    player.addRegularSavingsPlan(plan);
+
+    assertEquals(1, player.getRegularSavingsPlans().size());
+    assertThrows(UnsupportedOperationException.class, () -> player.getRegularSavingsPlans().clear());
+    assertEquals(false, player.removeRegularSavingsPlanAt(0));
+    assertEquals(false, player.removeRegularSavingsPlanAt(2));
+    assertEquals(true, player.removeRegularSavingsPlanAt(1));
+    assertTrue(player.getRegularSavingsPlans().isEmpty());
   }
 
   @Test

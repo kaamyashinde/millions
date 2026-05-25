@@ -51,6 +51,15 @@ class SellByQuantityCommandTest {
   }
 
   @Test
+  void execute_throwsWhenNoSliceCanBeBuilt() {
+    Player emptyPlayer = new Player("Empty", new BigDecimal("1000"));
+    SellByQuantityCommand cmd =
+        new SellByQuantityCommand(exchange, "AAPL", BigDecimal.ONE);
+
+    assertThrows(InsufficientSharesException.class, () -> cmd.execute(emptyPlayer));
+  }
+
+  @Test
   void describe_mentionsQuantityAndSymbol() {
     SellByQuantityCommand cmd =
         new SellByQuantityCommand(exchange, "AAPL", new BigDecimal("4"));
