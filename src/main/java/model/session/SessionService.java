@@ -4,22 +4,13 @@ package model.session;
 import model.session.auth.AuthService;
 import model.session.leaderboard.LocalLeaderboardService;
 import model.session.leaderboard.PlayerLeaderboardEntry;
-import model.session.leaderboard.PlayerLeaderboardMetric;
-import model.session.leaderboard.PlayerLeaderboardRanking;
 import model.exception.profile.ProfileInUseException;
 import model.session.profile.ProfileService;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import model.core.player.Player;
-import model.persistence.ProfileFile;
-import model.trading.transaction.Transaction;
 import model.persistence.io.JsonStorage;
 import model.persistence.profile.ProfilePaths;
 
@@ -37,6 +28,10 @@ public final class SessionService {
   private final ProfileService profileService;
   private final ProfilePaths profilePaths;
   private final JsonStorage jsonStorage;
+  private final SessionPersistenceService sessionPersistenceService;
+  private final WelcomePreferenceService welcomePreferenceService;
+  private final ExitGameService exitGameService;
+  private final SessionLeaderboardService sessionLeaderboardService;
 
   private ActiveSession activeSession;
 
@@ -57,6 +52,10 @@ public final class SessionService {
     this.profileService = profileService;
     this.profilePaths = profilePaths;
     this.jsonStorage = jsonStorage;
+    this.sessionPersistenceService = new SessionPersistenceService(profilePaths, jsonStorage);
+    this.welcomePreferenceService = new WelcomePreferenceService(profilePaths, jsonStorage);
+    this.exitGameService = new ExitGameService(profileService);
+    this.sessionLeaderboardService = new SessionLeaderboardService(authService);
   }
 
   /**
@@ -125,20 +124,7 @@ public final class SessionService {
    * Persists the active session if one is loaded.
    */
   public void saveActiveSession() {
-    if (activeSession == null) {
-      return;
-    }
-    Path path = profilePaths.profileFile(activeSession.normalizedUsername());
-    ProfileFile existing = jsonStorage.read(path, ProfileFile.class);
-    ProfileFile updated = ProfileFile.capture(
-        activeSession.player(),
-        activeSession.exchange(),
-        existing.username(),
-        existing.normalizedUsername(),
-        existing.pinHash(),
-        existing.displayName(),
-        existing.hasSeenWelcome());
-    jsonStorage.write(path, updated);
+    sessionPersistenceService.save(activeSession);
   }
 
   /**
@@ -174,29 +160,7 @@ public final class SessionService {
    * @return entries sorted by net worth descending
    */
   public List<PlayerLeaderboardEntry> listLeaderboardEntries() {
-    List<PlayerLeaderboardEntry> entries = new ArrayList<>();
-    for (String username : authService.listRegisteredUsers()) {
-      String normalized = ProfilePaths.normalizeUsername(username);
-      if (activeSession != null && activeSession.normalizedUsername().equals(normalized)) {
-        entries.add(toLeaderboardEntry(activeSession.player()));
-        continue;
-      }
-      ProfileFile profile = authService.loadProfileOrThrow(username);
-      Player player = profile
-          .restore(authService.marketDataFileService().loadForProfile(normalized))
-          .player();
-      if (profile.displayName() != null && !profile.displayName().isBlank()) {
-        try {
-          player.setName(profile.displayName().trim());
-        } catch (IllegalArgumentException ignored) {
-          // keep restored name
-        }
-      }
-      entries.add(toLeaderboardEntry(player));
-    }
-    return entries.stream()
-        .sorted(PlayerLeaderboardRanking.bestFirstComparator(PlayerLeaderboardMetric.NET_WORTH))
-        .toList();
+    return sessionLeaderboardService.listEntries(activeSession);
   }
 
   /**
@@ -205,10 +169,7 @@ public final class SessionService {
    * @return {@code true} when welcome has already been acknowledged
    */
   public boolean hasSeenWelcome() {
-    ProfileFile profile = jsonStorage.read(
-        profilePaths.profileFile(requireActiveSession().normalizedUsername()),
-        ProfileFile.class);
-    return profile.hasSeenWelcome();
+    return welcomePreferenceService.hasSeenWelcome(requireActiveSession());
   }
 
   /**
@@ -216,12 +177,7 @@ public final class SessionService {
    */
   public void markWelcomeSeen() {
     saveActiveSession();
-    ActiveSession session = requireActiveSession();
-    ProfileFile existing = jsonStorage.read(
-        profilePaths.profileFile(session.normalizedUsername()), ProfileFile.class);
-    jsonStorage.write(
-        profilePaths.profileFile(session.normalizedUsername()),
-        existing.withWelcomeSeen());
+    welcomePreferenceService.markWelcomeSeen(requireActiveSession());
   }
 
   /**
@@ -270,20 +226,9 @@ public final class SessionService {
    */
   public ExitGameResult exitGameAndDeleteProfile(char[] pin) {
     ActiveSession session = requireActiveSession();
-    String username = session.username();
-    Player player = session.player();
-    Set<String> symbols = new LinkedHashSet<>();
-    player.getPortfolio().getShares().stream()
-        .map(share -> share.getAsset().getSymbol())
-        .forEach(symbols::add);
-    int symbolsSold = symbols.size();
-    profileService.verifyDeletionPin(username, pin);
-    List<Transaction> transactions = session.exchange().sellAllHoldings(player);
-    player.clearRegularSavingsPlans();
-    BigDecimal finalCash = player.getMoney();
+    ExitGameResult result = exitGameService.exitAndDelete(session, pin);
     activeSession = null;
-    profileService.deleteProfileDirectory(username);
-    return new ExitGameResult(symbolsSold, transactions.size(), finalCash);
+    return result;
   }
 
   /**
@@ -329,14 +274,4 @@ public final class SessionService {
     return activeSession;
   }
 
-  private static PlayerLeaderboardEntry toLeaderboardEntry(Player player) {
-    BigDecimal netWorth = player.getNetWorth();
-    BigDecimal startingMoney = player.getStartingMoney();
-    BigDecimal totalReturnPercent = BigDecimal.ZERO;
-    if (startingMoney.compareTo(BigDecimal.ZERO) != 0) {
-      totalReturnPercent = netWorth.subtract(startingMoney)
-          .divide(startingMoney, 8, RoundingMode.HALF_UP);
-    }
-    return new PlayerLeaderboardEntry(player.getName(), netWorth, totalReturnPercent);
-  }
 }
