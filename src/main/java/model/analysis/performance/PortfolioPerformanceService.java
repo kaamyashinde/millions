@@ -69,7 +69,7 @@ public class PortfolioPerformanceService {
    * Calculates the market benchmark metrics from exchange stock history.
    */
   private PerformanceMetrics calculateBenchmarkMetrics(Exchange exchange) {
-    List<Stock> stocks = exchange.findStocks("");
+    List<Stock> stocks = exchange.listings().findStocks("");
     if (stocks.isEmpty() || exchange.getDay() < 2) {
       return PerformanceMetrics.unavailable(MetricStatus.INSUFFICIENT_HISTORY);
     }
