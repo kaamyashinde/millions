@@ -286,7 +286,7 @@ public class WorkspaceController {
   }
 
   private void showLoadedNotifications() {
-    List<Stock> stockList = session.exchange().findStocks("");
+    List<Stock> stockList = session.exchange().listings().findStocks("");
     String tickers = stockList.stream()
         .map(Stock::getSymbol)
         .limit(TICKER_PREVIEW_MAX)

@@ -47,7 +47,7 @@ public class RegularSavingsPanelController {
    * can change at runtime.
    */
   public void refreshListedAssets() {
-    List<InvestableAsset> sorted = new ArrayList<>(exchange.findAssets(""));
+    List<InvestableAsset> sorted = new ArrayList<>(exchange.listings().findAssets(""));
     sorted.sort(Comparator.comparing(InvestableAsset::getSymbol));
     listedAssets.setAll(sorted);
   }
