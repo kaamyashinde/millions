@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import model.core.player.Player;
 import model.core.asset.Stock;
 import model.exception.trading.InsufficientFundsException;
@@ -24,7 +25,7 @@ class BuyUpToBudgetCommandTest {
   void setUp() {
     stock = new Stock("AAPL", "Apple Inc.");
     stock.addNewSalesPrice(new BigDecimal("150.00"));
-    exchange = new Exchange.Builder("NYSE").stocks(List.of(stock)).build();
+    exchange = new ExchangeBuilder("NYSE").stocks(List.of(stock)).build();
   }
 
   @Test
