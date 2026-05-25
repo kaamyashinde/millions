@@ -276,7 +276,7 @@ public class TradingController {
     if (symbol == null || symbol.isBlank()) {
       return Optional.empty();
     }
-    return Optional.ofNullable(exchange.getAsset(symbol.trim().toUpperCase()));
+    return Optional.ofNullable(exchange.listings().getAsset(symbol.trim().toUpperCase()));
   }
 
   private static Optional<BigDecimal> parsePositiveAmountOrEmpty(String text) {

@@ -107,7 +107,7 @@ public class FundsController {
    * @return compact exchange, day, and listing-count text for the funds page
    */
   public String getMetaText() {
-    int total = exchange.findFunds("").size();
+    int total = exchange.listings().findFunds("").size();
     int visible = funds.size();
     String countText =
         searchTerm.isBlank() ? total + " fund(s)" : visible + " of " + total + " fund(s)";
@@ -123,7 +123,7 @@ public class FundsController {
    */
   public void refresh() {
     Fund previous = selectedFund.get();
-    List<Fund> sorted = new ArrayList<>(exchange.findFunds(searchTerm));
+    List<Fund> sorted = new ArrayList<>(exchange.listings().findFunds(searchTerm));
     sorted.sort(Comparator.comparing(Fund::getSymbol));
     funds.setAll(sorted);
     if (previous != null) {

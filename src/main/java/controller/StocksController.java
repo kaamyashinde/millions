@@ -112,7 +112,7 @@ public class StocksController {
    * @return compact exchange, day, and listing-count text for the stocks page
    */
   public String getMetaText() {
-    int total = exchange.findStocks("").size();
+    int total = exchange.listings().findStocks("").size();
     int visible = stocks.size();
     String countText =
         searchTerm.isBlank() ? total + " listing(s)" : visible + " of " + total + " listing(s)";
@@ -180,7 +180,7 @@ public class StocksController {
    */
   public void refresh() {
     Stock previous = selectedStock.get();
-    List<Stock> sorted = new ArrayList<>(exchange.findStocks(searchTerm));
+    List<Stock> sorted = new ArrayList<>(exchange.listings().findStocks(searchTerm));
     sorted.sort(Comparator.comparing(Stock::getSymbol));
     stocks.setAll(sorted);
     if (previous != null) {
@@ -201,7 +201,7 @@ public class StocksController {
    * @return market movers in exchange iteration order
    */
   private List<MarketMover> marketMovers() {
-    return exchange.getStocks().stream()
+    return exchange.listings().getStocks().stream()
         .map(this::toMarketMover)
         .flatMap(Optional::stream)
         .toList();
