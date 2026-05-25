@@ -5,9 +5,11 @@ import model.persistence.market.MarketData;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -119,5 +121,28 @@ class CsvWriterTest {
     assertEquals(new BigDecimal("150.25"), loaded.stocks().get(0).getSalesPrice());
     assertEquals("BLEND", loaded.funds().getFirst().getSymbol());
     assertEquals(new BigDecimal("0.50"), loaded.funds().getFirst().getComponents().getFirst().weight());
+  }
+
+  @Test
+  void writeMarketDataToPath_writesFundsToExactPath() throws IOException {
+    MarketData marketData = new MarketData(List.of(testStock1, testStock2, testStock3), List.of(blendFund));
+    Path csvFile = tempDir.resolve("exact.csv");
+
+    CsvWriter.writeMarketDataToPath(csvFile, marketData);
+
+    assertEquals("FUND,BLEND,Blend Fund,AAPL:0.50,GOOGL:0.30,MSFT:0.20",
+        Files.readAllLines(csvFile).get(3));
+  }
+
+  @Test
+  void writeMarketDataToFile_wrapsIoFailures() {
+    Path missingDirectory = tempDir.resolve("missing");
+
+    assertThrows(
+        UncheckedIOException.class,
+        () -> CsvWriter.writeMarketDataToFile(
+            missingDirectory,
+            "market",
+            new MarketData(List.of(testStock1), List.of())));
   }
 }

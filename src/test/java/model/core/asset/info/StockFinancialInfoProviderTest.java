@@ -3,8 +3,10 @@ package model.core.asset.info;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import model.core.asset.Stock;
@@ -47,6 +49,13 @@ class StockFinancialInfoProviderTest {
   }
 
   @Test
+  void nullInputsAreRejected() {
+    assertThrows(NullPointerException.class, () -> provider.forSymbol(null));
+    assertThrows(NullPointerException.class, () -> provider.forStock(null));
+    assertThrows(NullPointerException.class, () -> provider.formatMoney(null));
+  }
+
+  @Test
   void health_followsMarginRule() {
     StockFinancialInfo info = provider.forSymbol("ZZRULE");
     BigDecimal margin =
@@ -75,5 +84,18 @@ class StockFinancialInfoProviderTest {
   void formatMoney_negativeProfit() {
     String formatted = provider.formatMoney(new BigDecimal("-2500000"));
     assertEquals("-$2.5M", formatted);
+  }
+
+  @Test
+  void classifyHealthTreatsNonPositiveRevenueAsWeak() throws Exception {
+    Method method = StockFinancialInfoProvider.class.getDeclaredMethod(
+        "classifyHealth",
+        BigDecimal.class,
+        BigDecimal.class);
+    method.setAccessible(true);
+
+    Object result = method.invoke(null, BigDecimal.ZERO, BigDecimal.ONE);
+
+    assertEquals(CompanyHealth.WEAK, result);
   }
 }

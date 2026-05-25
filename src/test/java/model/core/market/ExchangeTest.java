@@ -79,6 +79,18 @@ class ExchangeTest {
   }
 
   @Test
+  void builderRejectsInvalidTradingDay() {
+    assertThrows(IllegalArgumentException.class, () -> new Exchange.Builder("NYSE").day(0).build());
+  }
+
+  @Test
+  void findAssetsAndGetFund_includeFundListings() {
+    assertEquals(techFund, exchange.getFund("techx"));
+    assertEquals(techFund, exchange.findAssets("titans").getFirst());
+    assertTrue(exchange.findAssets("aapl").stream().anyMatch(asset -> asset.getSymbol().equals("AAPL")));
+  }
+
+  @Test
   void hasStock_returnsTrueForExistingStock() {
     assertTrue(exchange.hasStock("AAPL"));
     assertTrue(exchange.hasStock("GOOGL"));
@@ -472,6 +484,19 @@ class ExchangeTest {
     assertTrue(event.description().contains("AAPL"));
     assertEquals(Set.of("AAPL"), event.getAffectedSymbols());
     assertTrue(event.priceFactor().compareTo(BigDecimal.ZERO) > 0);
+  }
+
+  @Test
+  void randomFromResources_returnsEmptyForNoStocksAndRejectsBadInputs() {
+    MarketEventStrategy strategy =
+        MarketEventStrategy.randomFromResources(1.0, MarketEventStrategy.DEFAULT_TEMPLATE_RESOURCE);
+
+    assertTrue(strategy.maybeCreateEvent(List.of(), 8, new Random(4)).isEmpty());
+    assertThrows(NullPointerException.class, () -> strategy.maybeCreateEvent(null, 8, new Random(4)));
+    assertThrows(NullPointerException.class, () -> strategy.maybeCreateEvent(List.of(appleStock), 8, null));
+    assertThrows(
+        IllegalStateException.class,
+        () -> MarketEventStrategy.randomFromResources(1.0, "data/missing-templates.json"));
   }
 
   @Test

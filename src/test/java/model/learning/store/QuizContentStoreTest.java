@@ -6,6 +6,13 @@ import model.learning.quiz.QuizQuestion;
 
 import java.util.List;
 import java.util.Optional;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
@@ -82,5 +89,95 @@ class QuizContentStoreTest {
   @Test
   void allQuizzesReturnsAllTen() {
     assertEquals(10, QuizContentStore.getAllQuizzesPublic().size());
+  }
+
+  @Test
+  void privateConstructor_isCoveredForUtilityClass() throws Exception {
+    Constructor<QuizContentStore> constructor = QuizContentStore.class.getDeclaredConstructor();
+    constructor.setAccessible(true);
+
+    constructor.newInstance();
+  }
+
+  @Test
+  void isolatedStoreFailsWhenQuizResourceIsMissing() throws Exception {
+    try (URLClassLoader loader = isolatedStoreLoader(null)) {
+      assertThrows(
+          ExceptionInInitializerError.class,
+          () -> Class.forName("model.learning.store.QuizContentStore", true, loader));
+    }
+  }
+
+  @Test
+  void isolatedStoreFailsWhenQuizResourceIsEmpty() throws Exception {
+    try (URLClassLoader loader = isolatedStoreLoader("{\"quizzes\":[]}")) {
+      assertThrows(
+          ExceptionInInitializerError.class,
+          () -> Class.forName("model.learning.store.QuizContentStore", true, loader));
+    }
+  }
+
+  @Test
+  void isolatedStoreFailsWhenQuizJsonIsMalformed() throws Exception {
+    try (URLClassLoader loader = isolatedStoreLoader("not-json")) {
+      assertThrows(
+          ExceptionInInitializerError.class,
+          () -> Class.forName("model.learning.store.QuizContentStore", true, loader));
+    }
+  }
+
+  private static URLClassLoader isolatedStoreLoader(String quizJson) throws Exception {
+    URL classes = Path.of(System.getProperty("user.dir"), "target", "classes")
+        .toUri()
+        .toURL();
+    return new ChildFirstStoreLoader(
+        classes,
+        "model.learning.store.QuizContentStore",
+        "learninghub/quizzes.json",
+        quizJson);
+  }
+
+  private static final class ChildFirstStoreLoader extends URLClassLoader {
+
+    private final String childFirstClassName;
+    private final String resourceName;
+    private final String resourceContent;
+
+    private ChildFirstStoreLoader(
+        URL classes,
+        String childFirstClassName,
+        String resourceName,
+        String resourceContent) {
+      super(new URL[] {classes}, ClassLoader.getSystemClassLoader());
+      this.childFirstClassName = childFirstClassName;
+      this.resourceName = resourceName;
+      this.resourceContent = resourceContent;
+    }
+
+    @Override
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+      if (name.equals(childFirstClassName) || name.startsWith(childFirstClassName + "$")) {
+        Class<?> loaded = findLoadedClass(name);
+        if (loaded == null) {
+          loaded = findClass(name);
+        }
+        if (resolve) {
+          resolveClass(loaded);
+        }
+        return loaded;
+      }
+      return super.loadClass(name, resolve);
+    }
+
+    @Override
+    public InputStream getResourceAsStream(String name) {
+      if (name.equals(resourceName)) {
+        if (resourceContent == null) {
+          return null;
+        }
+        return new ByteArrayInputStream(resourceContent.getBytes(StandardCharsets.UTF_8));
+      }
+      return super.getResourceAsStream(name);
+    }
   }
 }

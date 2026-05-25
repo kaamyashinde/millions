@@ -41,6 +41,13 @@ class RecommendationStrategyTest {
     }
 
     @Test
+    void recommend_returnsHoldWhenTrendStartPriceIsZero() {
+      assertEquals(
+          StockRecommendation.HOLD,
+          RecommendationStrategy.TREND.recommend(prices("0.00", "1.00")));
+    }
+
+    @Test
     void recommend_matchesStockHistoricalPrices() {
       Stock stock = stockWithPrices("100.00", "101.00", "102.00", "104.00");
 
@@ -95,6 +102,16 @@ class RecommendationStrategyTest {
 
       assertEquals(StockRecommendation.HOLD, RecommendationStrategy.MOMENTUM.recommend(prices));
     }
+
+    @Test
+    void recommend_returnsHoldWhenMomentumDenominatorIsZero() {
+      assertEquals(
+          StockRecommendation.HOLD,
+          RecommendationStrategy.MOMENTUM.recommend(prices("0.00", "1.00", "1.00", "2.00")));
+      assertEquals(
+          StockRecommendation.HOLD,
+          RecommendationStrategy.MOMENTUM.recommend(prices("1.00", "2.00", "0.00", "1.00")));
+    }
   }
 
   @Nested
@@ -139,6 +156,13 @@ class RecommendationStrategyTest {
     @Test
     void recommend_returnsHoldWhenHistoryIsTooShort() {
       List<BigDecimal> prices = List.of(new BigDecimal("100"));
+
+      assertEquals(StockRecommendation.HOLD, RecommendationStrategy.MEAN_REVERSION.recommend(prices));
+    }
+
+    @Test
+    void recommend_returnsHoldWhenMeanReversionAverageIsZero() {
+      List<BigDecimal> prices = List.of(BigDecimal.ZERO, BigDecimal.ZERO);
 
       assertEquals(StockRecommendation.HOLD, RecommendationStrategy.MEAN_REVERSION.recommend(prices));
     }

@@ -72,7 +72,7 @@ public final class ProfilePaths {
     return Files.exists(profileFile(username));
   }
 
-  public List<String> listUsernames(JsonStorage jsonStorage) {
+  public List<String> listUsernames() {
     if (!Files.isDirectory(profilesRoot)) {
       return List.of();
     }
@@ -86,12 +86,18 @@ public final class ProfilePaths {
         if (!Files.exists(file)) {
           continue;
         }
-        ProfileFile profile = jsonStorage.read(file, ProfileFile.class);
-        names.add(profile.username());
+        names.add(dir.getFileName().toString());
       }
     } catch (IOException exception) {
       throw new PersistenceException("Could not list profiles in " + profilesRoot, exception);
     }
     return names.stream().sorted(Comparator.naturalOrder()).toList();
+  }
+
+  public List<String> listUsernames(JsonStorage jsonStorage) {
+    return listUsernames().stream()
+        .map(username -> jsonStorage.read(profileFile(username), ProfileFile.class).username())
+        .sorted(Comparator.naturalOrder())
+        .toList();
   }
 }

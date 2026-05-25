@@ -164,4 +164,63 @@ class PortfolioTest {
     portfolio.addShare(anotherAppleShare);
     assertEquals(0, new BigDecimal("2227.50").compareTo(portfolio.getNetWorth()));
   }
+
+  @Test
+  void totalQuantityForSymbol_sumsMatchingLotsOnly() {
+    portfolio.addShare(appleShare);
+    portfolio.addShare(new Share(appleStock, new BigDecimal("2"), new BigDecimal("151.00")));
+    portfolio.addShare(googleShare);
+
+    assertEquals(0, new BigDecimal("12").compareTo(portfolio.totalQuantityForSymbol("AAPL")));
+    assertEquals(0, BigDecimal.ZERO.compareTo(portfolio.totalQuantityForSymbol("MSFT")));
+    assertThrows(NullPointerException.class, () -> portfolio.totalQuantityForSymbol(null));
+  }
+
+  @Test
+  void buildNextFifoSaleSlice_skipsOtherSymbolsAndNonPositiveQuantities() {
+    Share zeroApple = new Share(appleStock, BigDecimal.ZERO, new BigDecimal("150.00"));
+    portfolio.addShare(googleShare);
+    portfolio.addShare(zeroApple);
+    portfolio.addShare(appleShare);
+
+    Share slice = portfolio.buildNextFifoSaleSlice("AAPL", new BigDecimal("3"));
+
+    assertEquals(0, new BigDecimal("3").compareTo(slice.getQuantity()));
+    assertEquals("AAPL", slice.getAsset().getSymbol());
+    assertEquals(null, portfolio.buildNextFifoSaleSlice("MSFT", BigDecimal.ONE));
+    assertThrows(NullPointerException.class, () -> portfolio.buildNextFifoSaleSlice(null, BigDecimal.ONE));
+    assertThrows(NullPointerException.class, () -> portfolio.buildNextFifoSaleSlice("AAPL", null));
+  }
+
+  @Test
+  void buildNextFifoSliceForTargetNet_skipsUnsellableLotsAndMissingSymbols() {
+    Share zeroApple = new Share(appleStock, BigDecimal.ZERO, new BigDecimal("150.00"));
+    portfolio.addShare(googleShare);
+    portfolio.addShare(zeroApple);
+    portfolio.addShare(appleShare);
+
+    Share slice = portfolio.buildNextFifoSliceForTargetNet("AAPL", new BigDecimal("100.00"));
+
+    assertEquals("AAPL", slice.getAsset().getSymbol());
+    assertTrue(slice.getQuantity().compareTo(BigDecimal.ZERO) > 0);
+    assertEquals(null, portfolio.buildNextFifoSliceForTargetNet("MSFT", BigDecimal.ONE));
+    assertThrows(NullPointerException.class, () -> portfolio.buildNextFifoSliceForTargetNet(null, BigDecimal.ONE));
+    assertThrows(NullPointerException.class, () -> portfolio.buildNextFifoSliceForTargetNet("AAPL", null));
+  }
+
+  @Test
+  void removeFifoSliceForSale_skipsNonMatchingLotsAndRejectsOversizedSlice() {
+    portfolio.addShare(googleShare);
+    portfolio.addShare(appleShare);
+
+    assertFalse(portfolio.removeFifoSliceForSale(
+        new Share(appleStock, new BigDecimal("11"), new BigDecimal("150.00"))));
+    assertFalse(portfolio.removeFifoSliceForSale(
+        new Share(appleStock, BigDecimal.ONE, new BigDecimal("149.00"))));
+    assertTrue(portfolio.removeFifoSliceForSale(
+        new Share(appleStock, BigDecimal.ONE, new BigDecimal("150.00"))));
+    assertEquals(0, new BigDecimal("9").compareTo(
+        portfolio.getSharesBasedOnSymbol("AAPL").getFirst().getQuantity()));
+    assertThrows(NullPointerException.class, () -> portfolio.removeFifoSliceForSale(null));
+  }
 }

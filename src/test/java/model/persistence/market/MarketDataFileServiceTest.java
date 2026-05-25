@@ -59,6 +59,30 @@ class MarketDataFileServiceTest {
   }
 
   @Test
+  void importFromFile_wrapsSaveFailures() throws IOException {
+    Path source = tempDir.resolve("custom.csv");
+    Files.writeString(source, "STOCK,TEST,Test Co,10.00\n");
+    Files.writeString(tempDir.resolve("bob"), "blocks profile directory creation");
+
+    MarketDataImportException thrown = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(source, "bob"));
+
+    assertEquals("Could not save market data file.", thrown.getMessage());
+  }
+
+  @Test
+  void installDefault_wrapsSaveFailures() throws IOException {
+    Files.writeString(tempDir.resolve("blocked"), "blocks profile directory creation");
+
+    MarketDataImportException thrown = assertThrows(
+        MarketDataImportException.class,
+        () -> service.installDefault("blocked"));
+
+    assertEquals("Could not save market data file.", thrown.getMessage());
+  }
+
+  @Test
   void importFromFile_rejectsNonCsvExtension() throws IOException {
     Path source = tempDir.resolve("custom.txt");
     Files.writeString(source, "STOCK,TEST,Test Co,10.00");
@@ -68,6 +92,26 @@ class MarketDataFileServiceTest {
         () -> service.importFromFile(source, "bob"));
 
     assertEquals("Market data file must be a .csv file.", thrown.getMessage());
+  }
+
+  @Test
+  void importFromFile_rejectsNullMissingAndOversizedSources() throws IOException {
+    MarketDataImportException nullSource = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(null, "bob"));
+    assertEquals("Market data file not found.", nullSource.getMessage());
+
+    MarketDataImportException missing = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(tempDir.resolve("missing.csv"), "bob"));
+    assertEquals("Market data file not found.", missing.getMessage());
+
+    Path large = tempDir.resolve("large.csv");
+    Files.writeString(large, "x".repeat((int) MarketDataFileService.MAX_FILE_BYTES + 1));
+    MarketDataImportException tooLarge = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(large, "bob"));
+    assertEquals("Market data file is too large (max 1 MB).", tooLarge.getMessage());
   }
 
   @Test
@@ -82,6 +126,18 @@ class MarketDataFileServiceTest {
     assertEquals(
         "Could not read market data. Check that rows use STOCK or FUND format.",
         thrown.getMessage());
+  }
+
+  @Test
+  void importFromFile_rejectsCsvWithoutStocks() throws IOException {
+    Path source = tempDir.resolve("empty.csv");
+    Files.writeString(source, "");
+
+    MarketDataImportException thrown = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(source, "bob"));
+
+    assertEquals("Market data file must contain at least one stock.", thrown.getMessage());
   }
 
   @Test
@@ -103,5 +159,24 @@ class MarketDataFileServiceTest {
     MarketData marketData = service.loadForProfile(username);
 
     assertFalse(marketData.stocks().isEmpty());
+  }
+
+  @Test
+  void installDefault_rejectsMissingBundledResource() {
+    MarketDataFileService missingResourceService = new MarketDataFileService(
+        profilePaths,
+        MarketDataFileServiceTest.class,
+        "/data/does-not-exist.csv");
+
+    IllegalStateException thrown = assertThrows(
+        IllegalStateException.class,
+        () -> missingResourceService.installDefault("bob"));
+
+    assertEquals("Missing default market data resource: /data/does-not-exist.csv", thrown.getMessage());
+  }
+
+  @Test
+  void marketDataPath_returnsProfileCsvPath() {
+    assertEquals(profilePaths.marketDataFile("alice"), service.marketDataPath("alice"));
   }
 }

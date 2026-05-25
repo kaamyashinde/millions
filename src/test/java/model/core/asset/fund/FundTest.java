@@ -2,6 +2,7 @@ package model.core.asset.fund;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
 import java.util.List;
 import model.core.asset.Stock;
@@ -39,6 +40,27 @@ class FundTest {
     BigDecimal dayTwoPrice = fund.getPriceOnDay(2);
 
     assertEquals(0, new BigDecimal("88.00").compareTo(dayTwoPrice));
+  }
+
+  @Test
+  void constructorNormalizesSymbolAndRejectsInvalidComponents() {
+    Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
+    Fund fund = new Fund(
+        "blend",
+        "Blend Fund",
+        List.of(new FundComponent(apple, BigDecimal.ONE)));
+
+    assertEquals("BLEND", fund.getSymbol());
+    assertEquals("Blend Fund", fund.getDisplayName());
+    assertEquals("Fund", fund.getAssetType());
+    assertThrows(NullPointerException.class, () -> new Fund(null, "Name", List.of()));
+    assertThrows(NullPointerException.class, () -> new Fund("FUND", null, List.of()));
+    assertThrows(NullPointerException.class, () -> new Fund("FUND", "Name", null));
+    assertThrows(IllegalArgumentException.class, () -> new Fund("FUND", "Name", List.of()));
+    assertThrows(IllegalArgumentException.class, () -> new Fund(
+        "FUND",
+        "Name",
+        List.of(new FundComponent(apple, new BigDecimal("0.50")))));
   }
 
   private static Stock stockWithPrices(String symbol, String company, String... prices) {

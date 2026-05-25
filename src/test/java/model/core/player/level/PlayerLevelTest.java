@@ -49,6 +49,21 @@ class PlayerLevelTest {
   }
 
   @Test
+  void levelsExposeNamesAndMaxTradeSizes() {
+    assertEquals("NOVICE", PlayerLevels.NOVICE.name());
+    assertEquals("Novice", PlayerLevels.NOVICE.displayName());
+    assertEquals(new BigDecimal("10000.00"), PlayerLevels.NOVICE.maxTradeSize(player));
+
+    assertEquals("INVESTOR", PlayerLevels.INVESTOR.name());
+    assertEquals("Investor", PlayerLevels.INVESTOR.displayName());
+    assertEquals(new BigDecimal("50000.00"), PlayerLevels.INVESTOR.maxTradeSize(player));
+
+    assertEquals("SPECULATOR", PlayerLevels.SPECULATOR.name());
+    assertEquals("Speculator", PlayerLevels.SPECULATOR.displayName());
+    assertEquals(BigDecimal.valueOf(Long.MAX_VALUE), PlayerLevels.SPECULATOR.maxTradeSize(player));
+  }
+
+  @Test
   void levelAutoUpdates_toInvestor_whenThresholdMet() {
     assertEquals(PlayerLevels.NOVICE, player.getPlayerLevel());
 
