@@ -33,6 +33,7 @@ import view.pages.auth.RegisterPage;
 import view.pages.funds.FundsPage;
 import view.pages.leaderboard.LeaderboardPage;
 import view.pages.learning.LearningHubPage;
+import view.pages.notifications.NotificationHistoryPage;
 import view.pages.portfolio.PlayerPortfolioPage;
 import view.pages.quiz.QuizLauncherPage;
 import view.pages.savings.SavingsPage;
@@ -253,10 +254,12 @@ public class MillionsApp extends Application {
         onProfileDeleted);
     StocksPage stocksPage = new StocksPage(
         ctrl.getStocks(), ctrl.getStockDetail(), ctrl.getTrading(), onTradeComplete);
-    FundsPage fundsPage = new FundsPage(session.exchange(), ctrl.getTrading(), onTradeComplete);
+    FundsPage fundsPage = new FundsPage(ctrl.getFunds(), ctrl.getTrading(), onTradeComplete);
     SavingsPage savingsPage = new SavingsPage(ctrl.getSavings(), onSavingsChanged);
     TransactionHistoryPage transactionsPage =
         new TransactionHistoryPage(session.exchange(), session.player());
+    NotificationHistoryPage notificationsPage =
+        new NotificationHistoryPage(ctrl.getNotifications());
     LeaderboardPage leaderboardPage = new LeaderboardPage(svc);
     LearningHubPage learningHubPage =
         new LearningHubPage(ctrl.getLearningHub(), ctrl.getQuiz());
@@ -266,6 +269,7 @@ public class MillionsApp extends Application {
     Tab fundsTab = makeTab("Funds", fundsPage);
     Tab savingsTab = makeTab("Savings", savingsPage);
     Tab transactionsTab = makeTab("Transactions", transactionsPage);
+    Tab notificationsTab = makeTab("Notifications", notificationsPage);
 
     portfolioTab.selectedProperty().addListener((obs, oldVal, sel) -> {
       if (Boolean.TRUE.equals(sel)) {
@@ -304,7 +308,7 @@ public class MillionsApp extends Application {
 
     TabPane tabs = new TabPane(
         portfolioTab, stocksTab, fundsTab, savingsTab, transactionsTab,
-        leaderboardTab, learningTab, quizTab);
+        notificationsTab, leaderboardTab, learningTab, quizTab);
     tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
     java.util.function.Consumer<model.learning.content.LearningItem> openTopicInHub =
