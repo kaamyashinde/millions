@@ -30,6 +30,7 @@ import model.core.asset.info.StockFinancialInfo;
 import model.core.asset.info.StockFinancialInfoProvider;
 import view.components.recommendation.StockRecommendationLabel;
 import view.theme.ThemeStyles;
+import view.util.UiFormat;
 
 /**
  * Dedicated stock detail view showing summary data, mock company fundamentals, trend-based
@@ -139,7 +140,7 @@ public class StockDetailView extends BorderPane {
     ThemeStyles.addStyleClasses(recommendationBox, "finance-summary-card");
 
     ThemeStyles.styleAccentButton(buyButton);
-    ThemeStyles.styleButton(sellButton);
+    ThemeStyles.styleDangerButton(sellButton);
     tradeActionsBox.getChildren().addAll(buyButton, sellButton);
     tradeActionsBox.setVisible(false);
     tradeActionsBox.setManaged(false);
@@ -455,7 +456,7 @@ public class StockDetailView extends BorderPane {
       return "-";
     }
     BigDecimal latestPrice = stock.getSalesPrice();
-    return latestPrice.toPlainString();
+    return UiFormat.decimal(latestPrice);
   }
 
   /**

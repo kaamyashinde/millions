@@ -423,10 +423,15 @@
 }
 
 .btn-danger {
-    -fx-background-color: #F8717126;
-    -fx-text-fill: #F87171;
+    -fx-background-color: #DC2626;
+    -fx-text-fill: #ffffff;
     -fx-border-color: #F87171;
     -fx-border-width: 1;
+    -fx-font-weight: bold;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #B91C1C;
 }
 
 .pill,
@@ -556,6 +561,21 @@
 
 .toast-icon-symbol {
     -fx-fill: -millions-text-primary;
+    -fx-font-weight: bold;
+}
+
+.trade-estimate-card {
+    -fx-background-color: -millions-surface;
+    -fx-background-radius: 8;
+    -fx-border-color: -millions-accent;
+    -fx-border-radius: 8;
+    -fx-border-width: 1.5;
+    -fx-padding: 12;
+}
+
+.trade-estimate-total {
+    -fx-text-fill: -millions-warning;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
 }
 
@@ -906,6 +926,10 @@
 
 .finance-status {
     -fx-text-fill: -millions-text-secondary;
+}
+
+.market-mover-heading {
+    -fx-font-weight: bold;
 }
 
 /* === PAGES: LEARNING === */
