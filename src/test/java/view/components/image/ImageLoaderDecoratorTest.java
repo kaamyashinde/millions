@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Tests {@link ImageLoaderDecorator} wiring and chained composition.
+ * Integration tests for {@link ImageLoaderDecorator} with filesystem-backed loaders ({@link TempDir}).
  */
 class ImageLoaderDecoratorTest {
 

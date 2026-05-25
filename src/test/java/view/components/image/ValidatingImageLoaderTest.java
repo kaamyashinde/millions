@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Tests {@link ValidatingImageLoader}.
+ * Integration tests for {@link ValidatingImageLoader} using real file paths ({@link TempDir}).
  */
 class ValidatingImageLoaderTest {
 

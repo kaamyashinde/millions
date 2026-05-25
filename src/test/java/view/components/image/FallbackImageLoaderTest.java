@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Tests {@link FallbackImageLoader}.
+ * Integration tests for {@link FallbackImageLoader} with filesystem-backed delegates ({@link TempDir}).
  */
 class FallbackImageLoaderTest {
 

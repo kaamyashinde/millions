@@ -15,6 +15,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Integration tests for {@link MarketDataFileService} using real filesystem I/O
+ * ({@link TempDir}). CSV parsing unit tests belong in {@link model.persistence.io.CsvReaderTest}.
+ */
 class MarketDataFileServiceTest {
 
   private static final String DEFAULT_RESOURCE = "/data/demo-stocks.csv";
