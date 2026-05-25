@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import model.core.player.Player;
 import model.core.asset.Stock;
 import view.components.notification.NotificationService;
@@ -43,7 +44,7 @@ class PlayerPortfolioPageTest {
   @Test
   void emptyPlayerShowsNoTradesAndNoHoldings() throws Exception {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
-    Exchange exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
+    Exchange exchange = new ExchangeBuilder("NYSE").stocks(List.of(apple)).build();
     Player player = new Player("k", new BigDecimal("5000.00"));
 
     PlayerPortfolioPage panel = runOnFxThread(() -> createPage(exchange, player));
@@ -58,7 +59,7 @@ class PlayerPortfolioPageTest {
   @Test
   void refreshAfterTradeAndAdvanceUpdatesHoldingsAndMetrics() throws Exception {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
-    Exchange exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
+    Exchange exchange = new ExchangeBuilder("NYSE").stocks(List.of(apple)).build();
     Player player = new Player("k", new BigDecimal("5000.00"));
     PlayerPortfolioPage panel = runOnFxThread(() -> createPage(exchange, player));
 
@@ -78,7 +79,7 @@ class PlayerPortfolioPageTest {
   @Test
   void multiplePurchasesOfSameSymbolShowAsSingleHolding() throws Exception {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
-    Exchange exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
+    Exchange exchange = new ExchangeBuilder("NYSE").stocks(List.of(apple)).build();
     Player player = new Player("k", new BigDecimal("5000.00"));
     PlayerPortfolioPage panel = runOnFxThread(() -> createPage(exchange, player));
 
