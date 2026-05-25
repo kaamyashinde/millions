@@ -19,6 +19,7 @@ import model.core.asset.Stock;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import model.core.market.event.MarketEvent;
 import model.core.market.event.SymbolMarketEventTarget;
 import model.core.player.Player;
@@ -178,7 +179,7 @@ class ProfileFileTest {
         "Apple surprise",
         new SymbolMarketEventTarget(Set.of("AAPL")),
         new BigDecimal("1.10"));
-    Exchange exchange = new Exchange.Builder("NYSE")
+    Exchange exchange = new ExchangeBuilder("NYSE")
         .stocks(List.of(apple))
         .funds(List.of())
         .day(3)
@@ -278,7 +279,7 @@ class ProfileFileTest {
     ProfileFile.RestoredSession restored =
         profile.restore(new MarketData(List.of(sampleStock("AAPL")), List.of()));
 
-    assertEquals(new BigDecimal("150.00"), restored.exchange().getStock("AAPL").getSalesPrice());
+    assertEquals(new BigDecimal("150.00"), restored.exchange().listings().getStock("AAPL").getSalesPrice());
   }
 
   @Test
@@ -292,7 +293,7 @@ class ProfileFileTest {
         new MarketData(List.of(first, second), List.of()),
         "NYSE");
 
-    assertEquals("First", exchange.getStock("DUP").getCompany());
+    assertEquals("First", exchange.listings().getStock("DUP").getCompany());
   }
 
   @Test
