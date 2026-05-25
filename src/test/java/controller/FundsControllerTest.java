@@ -9,6 +9,7 @@ import model.core.asset.Stock;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +23,7 @@ class FundsControllerTest {
     Stock microsoft = stock("MSFT", "Microsoft Corporation", "300.00");
     Fund tech = fund("TECHX", "Tech Titans Blend Fund", apple, microsoft);
     Fund growth = fund("GROW", "Global Growth Fund", apple, microsoft);
-    Exchange exchange = new Exchange.Builder("NYSE")
+    Exchange exchange = new ExchangeBuilder("NYSE")
         .stocks(List.of(apple, microsoft))
         .funds(List.of(tech, growth))
         .build();

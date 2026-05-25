@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Label;
 import model.core.asset.Stock;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import model.core.player.Player;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class TradeDialogTest {
   void applyBuyEstimateFormatsCommissionSummaryWithTwoDecimals() throws Exception {
     Stock stock = new Stock("AAPL", "Apple Inc.");
     stock.addNewSalesPrice(new BigDecimal("150.00"));
-    Exchange exchange = new Exchange.Builder("NYSE").stocks(java.util.List.of(stock)).build();
+    Exchange exchange = new ExchangeBuilder("NYSE").stocks(java.util.List.of(stock)).build();
     TradingController controller =
         new TradingController(exchange, new Player("Alice", new BigDecimal("1000.00")),
             new NotificationService());

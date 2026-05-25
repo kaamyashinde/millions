@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import model.core.asset.Stock;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,7 @@ class StocksControllerTest {
     Stock apple = stock("AAPL", "Apple Inc.", "150.00");
     Stock microsoft = stock("MSFT", "Microsoft Corporation", "300.00");
     Stock alphabet = stock("GOOGL", "Alphabet Inc.", "2800.00");
-    Exchange exchange = new Exchange.Builder("NYSE")
+    Exchange exchange = new ExchangeBuilder("NYSE")
         .stocks(List.of(microsoft, apple, alphabet))
         .build();
     controller = new StocksController(exchange);
@@ -75,7 +76,7 @@ class StocksControllerTest {
   @Test
   void getTopWinners_sortsByPercentGainDescending() {
     StocksController movers = new StocksController(
-        new Exchange.Builder("NYSE")
+        new ExchangeBuilder("NYSE")
             .stocks(List.of(
                 stockWithPrices("AAPL", "Apple Inc.", "100.00", "105.00"),
                 stockWithPrices("MSFT", "Microsoft Corporation", "20.00", "22.00"),
@@ -94,7 +95,7 @@ class StocksControllerTest {
   @Test
   void getTopLosers_sortsByPercentLossAscending() {
     StocksController movers = new StocksController(
-        new Exchange.Builder("NYSE")
+        new ExchangeBuilder("NYSE")
             .stocks(List.of(
                 stockWithPrices("AAPL", "Apple Inc.", "100.00", "95.00"),
                 stockWithPrices("MSFT", "Microsoft Corporation", "20.00", "18.00"),
@@ -111,7 +112,7 @@ class StocksControllerTest {
   @Test
   void getTopMovers_ignoresSinglePriceAndUnchangedStocks() {
     StocksController movers = new StocksController(
-        new Exchange.Builder("NYSE")
+        new ExchangeBuilder("NYSE")
             .stocks(List.of(
                 stockWithPrices("AAPL", "Apple Inc.", "100.00"),
                 stockWithPrices("MSFT", "Microsoft Corporation", "20.00", "20.00"),
@@ -126,7 +127,7 @@ class StocksControllerTest {
   @Test
   void getTopMovers_respectsLimit() {
     StocksController movers = new StocksController(
-        new Exchange.Builder("NYSE")
+        new ExchangeBuilder("NYSE")
             .stocks(List.of(
                 stockWithPrices("AAPL", "Apple Inc.", "100.00", "105.00"),
                 stockWithPrices("MSFT", "Microsoft Corporation", "20.00", "22.00")))

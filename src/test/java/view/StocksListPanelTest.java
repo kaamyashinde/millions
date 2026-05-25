@@ -250,7 +250,7 @@ class StocksPageTest {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00", "102.00");
     Stock microsoft = stockWithPrices("MSFT", "Microsoft", "900.00", "1200.00");
     Exchange exchange =
-        new Exchange.Builder("NYSE").stocks(List.of(microsoft, apple)).build();
+        new ExchangeBuilder("NYSE").stocks(List.of(microsoft, apple)).build();
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
@@ -294,7 +294,7 @@ class StocksPageTest {
     Stock microsoft = stockWithPrices("MSFT", "Microsoft", "100.00", "90.00");
     Stock alphabet = stockWithPrices("GOOGL", "Alphabet Inc.", "100.00", "100.00");
     Exchange exchange =
-        new Exchange.Builder("NYSE").stocks(List.of(microsoft, apple, alphabet)).build();
+        new ExchangeBuilder("NYSE").stocks(List.of(microsoft, apple, alphabet)).build();
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
@@ -323,7 +323,7 @@ class StocksPageTest {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
     Stock microsoft = stockWithPrices("MSFT", "Microsoft", "100.00", "100.00");
     Exchange exchange =
-        new Exchange.Builder("NYSE").stocks(List.of(microsoft, apple)).build();
+        new ExchangeBuilder("NYSE").stocks(List.of(microsoft, apple)).build();
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
@@ -344,7 +344,7 @@ class StocksPageTest {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00", "102.00");
     Stock microsoft = stockWithPrices("MSFT", "Microsoft", "100.00", "90.00");
     Exchange exchange =
-        new Exchange.Builder("NYSE").stocks(List.of(microsoft, apple)).build();
+        new ExchangeBuilder("NYSE").stocks(List.of(microsoft, apple)).build();
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
