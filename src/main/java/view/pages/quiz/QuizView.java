@@ -1,11 +1,10 @@
 package view.pages.quiz;
 
+import controller.LearningHubController;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
-
-import controller.LearningHubController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -16,7 +15,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-
 import model.learning.content.LearningItem;
 import model.learning.quiz.QuizAnswer;
 import model.learning.quiz.QuizAttempt;
@@ -67,7 +65,7 @@ public class QuizView extends BorderPane {
 
     Button backBtn = new Button("← Back");
     ThemeStyles.styleButton(backBtn);
-    backBtn.setOnAction(_ -> onBack.run());
+    backBtn.setOnAction(unused -> onBack.run());
 
     progressLabel = new Label();
     ThemeStyles.addStyleClasses(progressLabel, "quiz-meta");
@@ -106,9 +104,9 @@ public class QuizView extends BorderPane {
     questionCard.setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(questionCard, "quiz-question-card");
 
-    VBox answersBox = new VBox(8);
+    final VBox answersBox = new VBox(8);
     List<QuizAnswer> answers = q.answers();
-    Button[] answerButtons = new Button[answers.size()];
+    final Button[] answerButtons = new Button[answers.size()];
 
     VBox feedbackPane = new VBox(8);
     feedbackPane.setVisible(false);
@@ -121,7 +119,7 @@ public class QuizView extends BorderPane {
     nextBtn.setVisible(false);
     nextBtn.setManaged(false);
     ThemeStyles.styleAccentButton(nextBtn);
-    nextBtn.setOnAction(_ -> {
+    nextBtn.setOnAction(unused -> {
       String chosenId = (String) nextBtn.getUserData();
       attempt.submitAnswer(chosenId);
       if (attempt.isFinished()) {
@@ -136,7 +134,7 @@ public class QuizView extends BorderPane {
       Button btn = buildAnswerButton(answer);
       answerButtons[i] = btn;
 
-      btn.setOnAction(_ -> {
+      btn.setOnAction(unused -> {
         Arrays.stream(answerButtons).forEach(b -> b.setDisable(true));
 
         String correctId = q.correctAnswerId();

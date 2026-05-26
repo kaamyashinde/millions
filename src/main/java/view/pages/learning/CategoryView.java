@@ -1,9 +1,8 @@
 package view.pages.learning;
 
+import controller.LearningHubController;
 import java.util.List;
 import java.util.function.Consumer;
-
-import controller.LearningHubController;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -55,7 +54,7 @@ public class CategoryView extends BorderPane {
 
     Button backBtn = new Button("← Back");
     ThemeStyles.styleButton(backBtn);
-    backBtn.setOnAction(_ -> onBack.run());
+    backBtn.setOnAction(unused -> onBack.run());
 
     Label emoji = new Label(category.emoji());
     ThemeStyles.addStyleClasses(emoji, "learning-card-emoji");
@@ -71,7 +70,8 @@ public class CategoryView extends BorderPane {
     ToggleGroup filterGroup = new ToggleGroup();
     ToggleButton btnAll = makeFilterToggle("All", null, filterGroup);
     ToggleButton btnBeginner = makeFilterToggle("Beginner", Difficulty.BEGINNER, filterGroup);
-    ToggleButton btnIntermediate = makeFilterToggle("Intermediate", Difficulty.INTERMEDIATE, filterGroup);
+    ToggleButton btnIntermediate =
+        makeFilterToggle("Intermediate", Difficulty.INTERMEDIATE, filterGroup);
     ToggleButton btnAdvanced = makeFilterToggle("Advanced", Difficulty.ADVANCED, filterGroup);
     btnAll.setSelected(true);
 
@@ -112,7 +112,8 @@ public class CategoryView extends BorderPane {
         ? items
         : items.stream().filter(i -> i.difficulty() == difficulty).toList();
     if (filtered.isEmpty()) {
-      Label empty = new Label("No " + difficulty.name().toLowerCase() + " topics in this category.");
+      Label empty =
+          new Label("No " + difficulty.name().toLowerCase() + " topics in this category.");
       ThemeStyles.addStyleClasses(empty, "empty-state");
       content.getChildren().add(empty);
     } else {
@@ -122,7 +123,8 @@ public class CategoryView extends BorderPane {
     }
   }
 
-  private static javafx.scene.Node buildItemCard(LearningItem item, Consumer<LearningItem> onItemClicked) {
+  private static javafx.scene.Node buildItemCard(
+      LearningItem item, Consumer<LearningItem> onItemClicked) {
     Label badge = new Label(item.difficulty().name());
     ThemeStyles.applyDifficultyBadge(badge, item.difficulty());
 
@@ -139,7 +141,7 @@ public class CategoryView extends BorderPane {
     card.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.addStyleClasses(card, "learning-card-accent");
 
-    card.setOnMouseClicked(_ -> onItemClicked.accept(item));
+    card.setOnMouseClicked(unused -> onItemClicked.accept(item));
     return card;
   }
 }

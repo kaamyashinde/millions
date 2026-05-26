@@ -81,7 +81,7 @@ public class NotificationHistoryPage extends BorderPane {
 
     clearButton.setId("clear-notifications-button");
     ThemeStyles.styleButton(clearButton);
-    clearButton.setOnAction(_ -> notifications.clearHistory());
+    clearButton.setOnAction(unused -> notifications.clearHistory());
 
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);

@@ -104,12 +104,12 @@ public class RegisterPage extends AuthLayout {
     Button chooseMarketDataButton = new Button("Choose market data…");
     chooseMarketDataButton.getStyleClass().add("auth-market-data-button");
     ThemeStyles.styleButton(chooseMarketDataButton);
-    chooseMarketDataButton.setOnAction(_ -> chooseMarketDataFile());
+    chooseMarketDataButton.setOnAction(unused -> chooseMarketDataFile());
 
     Button clearMarketDataButton = new Button("Use default");
     clearMarketDataButton.getStyleClass().add("auth-market-data-button");
     ThemeStyles.styleButton(clearMarketDataButton);
-    clearMarketDataButton.setOnAction(_ -> clearMarketDataFile());
+    clearMarketDataButton.setOnAction(unused -> clearMarketDataFile());
 
     HBox marketDataActions = new HBox(8, chooseMarketDataButton, clearMarketDataButton);
     marketDataActions.getStyleClass().add("auth-market-data-actions");
@@ -124,7 +124,7 @@ public class RegisterPage extends AuthLayout {
     registerButton.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.styleAccentButton(registerButton);
     registerButton.setOnAction(
-        _ ->
+        unused ->
             registerAction.run(
                 usernameField.getText(),
                 pinField.getText(),
@@ -198,6 +198,11 @@ public class RegisterPage extends AuthLayout {
     marketDataStatusLabel.setManaged(false);
   }
 
+  /**
+   * Updates the status message shown in the auth footer.
+   *
+   * @param message status message shown in the auth footer
+   */
   public void setStatus(String message) {
     super.setStatus(message);
   }

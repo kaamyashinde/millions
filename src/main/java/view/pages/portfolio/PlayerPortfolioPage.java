@@ -2,6 +2,10 @@ package view.pages.portfolio;
 
 import static util.Validator.checkNotNull;
 
+import controller.ExitGameController;
+import controller.HoldingSummary;
+import controller.PortfolioController;
+import controller.TradingController;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -19,14 +23,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import controller.ExitGameController;
-import controller.HoldingSummary;
-import controller.PortfolioController;
-import controller.TradingController;
-import util.I18n;
-import view.dialogs.ExitGameDialog;
 import model.analysis.performance.PerformanceComparison;
+import util.I18n;
 import view.components.image.ImageLoader;
+import view.dialogs.ExitGameDialog;
 import view.dialogs.TradeDialog;
 import view.theme.ThemeStyles;
 import view.util.UiFormat;
@@ -102,8 +102,18 @@ public class PlayerPortfolioPage extends BorderPane {
     GridPane summaryGrid = new GridPane();
     summaryGrid.setHgap(24);
     summaryGrid.setVgap(10);
-    summaryGrid.addRow(0, createHeaderLabel("Player"), playerLabel, createHeaderLabel("Trading Day"), tradingDayLabel);
-    summaryGrid.addRow(1, createHeaderLabel("Balance"), balanceLabel, createHeaderLabel("Net Worth"), netWorthLabel);
+    summaryGrid.addRow(
+        0,
+        createHeaderLabel("Player"),
+        playerLabel,
+        createHeaderLabel("Trading Day"),
+        tradingDayLabel);
+    summaryGrid.addRow(
+        1,
+        createHeaderLabel("Balance"),
+        balanceLabel,
+        createHeaderLabel("Net Worth"),
+        netWorthLabel);
 
     VBox summaryCard = new VBox(12, topRow, summaryGrid);
     ThemeStyles.addStyleClasses(summaryCard, "card");
@@ -119,7 +129,7 @@ public class PlayerPortfolioPage extends BorderPane {
     VBox metricsBox = buildMetricsBox();
     Button exitGameButton = new Button(I18n.get("exitGame.pin.confirm"));
     ThemeStyles.styleDangerButton(exitGameButton);
-    exitGameButton.setOnAction(_ -> {
+    exitGameButton.setOnAction(unused -> {
       if (getScene() != null) {
         ExitGameDialog.show(getScene().getWindow(), exitGame, onProfileDeleted);
       }
@@ -152,7 +162,8 @@ public class PlayerPortfolioPage extends BorderPane {
     quantityColumn.setCellValueFactory(
         c -> new SimpleStringProperty(UiFormat.decimal(c.getValue().totalQuantity())));
 
-    TableColumn<HoldingSummary, String> purchasePriceColumn = new TableColumn<>("Avg. Purchase Price");
+    TableColumn<HoldingSummary, String> purchasePriceColumn =
+        new TableColumn<>("Avg. Purchase Price");
     purchasePriceColumn.setCellValueFactory(
         c -> new SimpleStringProperty(UiFormat.decimal(c.getValue().avgPurchasePrice())));
 
@@ -162,12 +173,12 @@ public class PlayerPortfolioPage extends BorderPane {
 
     TableColumn<HoldingSummary, Void> actionsColumn = new TableColumn<>("Actions");
     actionsColumn.setPrefWidth(90);
-    actionsColumn.setCellFactory(_ -> new TableCell<>() {
+    actionsColumn.setCellFactory(unused -> new TableCell<>() {
       private final Button sellButton = new Button("Sell");
 
       {
         ThemeStyles.styleDangerButton(sellButton);
-        sellButton.setOnAction(_ -> {
+        sellButton.setOnAction(unused -> {
           HoldingSummary holding = getTableRow() != null ? getTableRow().getItem() : null;
           if (holding != null && getScene() != null) {
             TradeDialog.showSell(
@@ -204,14 +215,20 @@ public class PlayerPortfolioPage extends BorderPane {
     metricsGrid.setHgap(24);
     metricsGrid.setVgap(10);
 
-    metricsGrid.addRow(0, createHeaderLabel("Metric"), createHeaderLabel("Your Portfolio"), createHeaderLabel("Market Benchmark"));
-    metricsGrid.addRow(1, new Label("Return %"), portfolioReturnValueLabel, benchmarkReturnValueLabel);
+    metricsGrid.addRow(
+        0,
+        createHeaderLabel("Metric"),
+        createHeaderLabel("Your Portfolio"),
+        createHeaderLabel("Market Benchmark"));
+    metricsGrid.addRow(
+        1, new Label("Return %"), portfolioReturnValueLabel, benchmarkReturnValueLabel);
     metricsGrid.addRow(
         2,
         new Label("Volatility"),
         portfolioVolatilityValueLabel,
         benchmarkVolatilityValueLabel);
-    metricsGrid.addRow(3, new Label("Sharpe Ratio"), portfolioSharpeValueLabel, benchmarkSharpeValueLabel);
+    metricsGrid.addRow(
+        3, new Label("Sharpe Ratio"), portfolioSharpeValueLabel, benchmarkSharpeValueLabel);
 
     VBox metricsBox = new VBox(12, heading, metricsGrid);
     metricsBox.setPadding(new Insets(14));

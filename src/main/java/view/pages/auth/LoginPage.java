@@ -1,5 +1,7 @@
 package view.pages.auth;
 
+import java.util.Optional;
+import java.util.function.Function;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,8 +12,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.layout.VBox;
-import java.util.Optional;
-import java.util.function.Function;
 import view.layout.AuthLayout;
 import view.theme.ThemeStyles;
 import view.validation.AuthFormValidation;
@@ -90,7 +90,7 @@ public class LoginPage extends AuthLayout {
     Button loginButton = new Button("Log In");
     loginButton.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.styleAccentButton(loginButton);
-    loginButton.setOnAction(_ -> loginAction.run(usernameField.getText(), pinField.getText()));
+    loginButton.setOnAction(unused -> loginAction.run(usernameField.getText(), pinField.getText()));
     loginButton.disableProperty().bind(
         Bindings.createBooleanBinding(
             () -> AuthFormValidation.usernameError(usernameField.getText()).isPresent()
@@ -115,6 +115,8 @@ public class LoginPage extends AuthLayout {
   }
 
   /**
+   * Updates the status message shown in the auth footer.
+   *
    * @param message status message shown in the auth footer
    */
   public void setStatus(String message) {

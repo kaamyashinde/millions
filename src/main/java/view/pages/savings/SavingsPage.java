@@ -88,7 +88,7 @@ public class SavingsPage extends BorderPane {
 
     Button addBtn = new Button("Add plan");
     ThemeStyles.styleButton(addBtn);
-    addBtn.setOnAction(_ -> addPlan());
+    addBtn.setOnAction(unused -> addPlan());
 
     GridPane addGrid = new GridPane();
     addGrid.setHgap(8);
@@ -104,8 +104,8 @@ public class SavingsPage extends BorderPane {
     Button removeBtn = new Button("Remove selected");
     ThemeStyles.styleButton(applyBtn);
     ThemeStyles.styleButton(removeBtn);
-    applyBtn.setOnAction(_ -> applyEdit());
-    removeBtn.setOnAction(_ -> removeSelected());
+    applyBtn.setOnAction(unused -> applyEdit());
+    removeBtn.setOnAction(unused -> removeSelected());
 
     editGrid.setHgap(8);
     editGrid.setVgap(8);
@@ -157,14 +157,14 @@ public class SavingsPage extends BorderPane {
     colAct.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().isActive()));
     TableColumn<RegularSavingsPlan, Void> colEdit = new TableColumn<>("Edit");
     colEdit.setCellFactory(
-        _ ->
+        unused ->
             new TableCell<>() {
               private final Button editBtn = new Button("Edit");
 
               {
                 ThemeStyles.styleButton(editBtn);
                 editBtn.setOnAction(
-                    _ -> {
+                    unused -> {
                       int index = getIndex();
                       if (index >= 0 && !isEmpty()) {
                         table.getSelectionModel().select(index);
@@ -196,7 +196,8 @@ public class SavingsPage extends BorderPane {
   private void addPlan() {
     status.setText("");
     try {
-      controller.addPlan(addAsset.getValue(), addMode.getValue(), addAmount.getText(), addInterval.getText());
+      controller.addPlan(
+          addAsset.getValue(), addMode.getValue(), addAmount.getText(), addInterval.getText());
       addAsset.setValue(null);
       addAmount.clear();
       addInterval.clear();

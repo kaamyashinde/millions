@@ -1,10 +1,9 @@
 package view.pages.learning;
 
-import java.util.List;
-import java.util.function.Consumer;
-
 import controller.LearningHubController;
 import controller.QuizController;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -66,7 +65,7 @@ public class ItemDetailView extends BorderPane {
 
     Button backBtn = new Button("← Back");
     ThemeStyles.styleButton(backBtn);
-    backBtn.setOnAction(_ -> onBack.run());
+    backBtn.setOnAction(unused -> onBack.run());
 
     VBox topBar = new VBox(12, backBtn, buildArticleHeader(item));
     topBar.setPadding(new Insets(0, 0, 8, 0));
@@ -131,7 +130,7 @@ public class ItemDetailView extends BorderPane {
   }
 
   private javafx.scene.Node buildResourcesSection(LearningItem item) {
-    List<LearningResource> resources = learningHub.getResourcesForItem(item);
+    final List<LearningResource> resources = learningHub.getResourcesForItem(item);
 
     VBox section = new VBox(10);
     section.setPadding(new Insets(8, 0, 0, 0));
@@ -196,7 +195,7 @@ public class ItemDetailView extends BorderPane {
     card.setPadding(new Insets(12));
     card.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.addStyleClasses(card, "learning-card-accent");
-    card.setOnMouseClicked(_ -> onItemClicked.accept(item));
+    card.setOnMouseClicked(unused -> onItemClicked.accept(item));
     return card;
   }
 
@@ -216,7 +215,7 @@ public class ItemDetailView extends BorderPane {
     quizBtn.setMaxWidth(Double.MAX_VALUE);
     quizBtn.setWrapText(true);
     ThemeStyles.addStyleClasses(quizBtn, "quiz-take-button");
-    quizBtn.setOnAction(_ -> onTakeQuiz.accept(new QuizAttempt(quiz)));
+    quizBtn.setOnAction(unused -> onTakeQuiz.accept(new QuizAttempt(quiz)));
 
     VBox section = new VBox(8, heading, quizBtn);
     section.setPadding(new Insets(8, 0, 0, 0));
@@ -337,6 +336,8 @@ public class ItemDetailView extends BorderPane {
     String exampleBlock =
         nextHeading >= 0 ? html.substring(start, nextHeading) : html.substring(start);
     String wrapped = "<div class=\"callout\">" + exampleBlock + "</div>";
-    return html.substring(0, start) + wrapped + (nextHeading >= 0 ? html.substring(nextHeading) : "");
+    return html.substring(0, start)
+        + wrapped
+        + (nextHeading >= 0 ? html.substring(nextHeading) : "");
   }
 }

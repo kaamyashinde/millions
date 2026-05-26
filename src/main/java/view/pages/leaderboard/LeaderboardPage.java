@@ -10,8 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
-import model.session.leaderboard.LocalLeaderboardService.LeaderboardRow;
 import model.session.SessionService;
+import model.session.leaderboard.LocalLeaderboardService.LeaderboardRow;
 import view.util.UiFormat;
 
 /**
