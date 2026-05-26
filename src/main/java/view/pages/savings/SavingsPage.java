@@ -203,7 +203,10 @@ public class SavingsPage extends BorderPane {
       addInterval.clear();
       afterModelChange.run();
     } catch (RuntimeException ex) {
-      status.setText("Invalid amount or interval.");
+      String message = ex.getMessage();
+      status.setText(message != null && !message.isBlank()
+          ? message
+          : "Invalid amount or interval.");
     }
   }
 
