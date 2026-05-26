@@ -1,9 +1,8 @@
 package model.core.player.level;
 
 
-import model.core.player.Player;
-
 import java.math.BigDecimal;
+import model.core.player.Player;
 
 /**
  * Speculator level: requires 20 distinct trading days and net worth at least 2x starting money;

@@ -75,7 +75,8 @@ public final class LocalLeaderboardService {
           ? profile.displayName().trim()
           : profile.username();
       String level = player.getPlayerLevel().displayName();
-      rows.add(new LeaderboardRow(profile.normalizedUsername(), label, player.getNetWorth(), level));
+      rows.add(
+          new LeaderboardRow(profile.normalizedUsername(), label, player.getNetWorth(), level));
     }
     rows.sort(Comparator.comparing(LeaderboardRow::netWorth).reversed());
     return rows;

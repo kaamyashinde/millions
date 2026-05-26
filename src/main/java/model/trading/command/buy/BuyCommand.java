@@ -1,15 +1,14 @@
 package model.trading.command.buy;
 
 
-import model.trading.command.TradeCommand;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import model.core.market.Exchange;
 import model.core.asset.InvestableAsset;
-import model.core.player.Player;
 import model.core.asset.Share;
+import model.core.market.Exchange;
+import model.core.player.Player;
+import model.trading.command.TradeCommand;
 import model.trading.transaction.Purchase;
 import model.trading.transaction.Transaction;
 

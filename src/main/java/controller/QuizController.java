@@ -2,7 +2,6 @@ package controller;
 
 import java.util.List;
 import java.util.Optional;
-
 import model.learning.quiz.Quiz;
 import model.learning.quiz.QuizAttempt;
 import model.learning.quiz.QuizSession;

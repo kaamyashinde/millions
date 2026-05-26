@@ -140,7 +140,9 @@ public final class ExchangeBuilder {
             ? dailyPriceMoveStrategy
             : DailyPriceMoveStrategy.uniform(DAILY_SIGMA);
     MarketEventStrategy resolvedEvents =
-        marketEventStrategy != null ? marketEventStrategy : MarketEventStrategy.randomFromResources();
+        marketEventStrategy != null
+            ? marketEventStrategy
+            : MarketEventStrategy.randomFromResources();
     return new Exchange(
         name,
         List.copyOf(stocks),

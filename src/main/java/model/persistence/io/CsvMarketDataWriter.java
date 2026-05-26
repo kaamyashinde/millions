@@ -8,7 +8,8 @@ import util.IoLogger;
 /**
  * Writes mixed market-data CSV files to an arbitrary path.
  */
-public final class CsvMarketDataWriter implements TextDocumentWriter<MarketData, PersistenceException> {
+public final class CsvMarketDataWriter
+    implements TextDocumentWriter<MarketData, PersistenceException> {
 
   /**
    * Creates a market-data CSV writer.

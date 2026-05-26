@@ -3,7 +3,6 @@ package view.components.learning;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-
 import model.learning.content.LearningItem;
 import view.theme.ThemeStyles;
 
@@ -40,7 +39,7 @@ public final class LearningTopicCard {
     card.setPadding(new Insets(12));
     card.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.addStyleClasses(card, "learning-card-accent");
-    card.setOnMouseClicked(_ -> onOpen.run());
+    card.setOnMouseClicked(unused -> onOpen.run());
     return card;
   }
 }

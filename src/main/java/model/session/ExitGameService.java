@@ -16,6 +16,8 @@ final class ExitGameService {
   private final ProfileService profileService;
 
   /**
+   * Creates an exit-game flow backed by profile operations.
+   *
    * @param profileService profile operations used for PIN checks and deletion
    */
   ExitGameService(ProfileService profileService) {
@@ -31,7 +33,7 @@ final class ExitGameService {
    */
   ExitGameResult exitAndDelete(ActiveSession session, char[] pin) {
     Player player = session.player();
-    Set<String> symbols = heldSymbols(player);
+    final Set<String> symbols = heldSymbols(player);
     profileService.verifyDeletionPin(session.username(), pin);
     List<Transaction> transactions = session.exchange().sellAllHoldings(player);
     player.clearRegularSavingsPlans();

@@ -10,8 +10,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.core.market.Exchange;
 import model.core.asset.fund.Fund;
+import model.core.market.Exchange;
 
 /**
  * Supplies sorted fund listings and selection state for the funds tab.

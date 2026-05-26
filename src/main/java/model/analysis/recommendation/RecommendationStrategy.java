@@ -53,7 +53,8 @@ public enum RecommendationStrategy {
       return StockRecommendation.HOLD;
     }
 
-    BigDecimal startPrice = historicalPrices.get(recentStartIndex(historicalPrices, LOOKBACK_PRICE_POINTS));
+    BigDecimal startPrice =
+        historicalPrices.get(recentStartIndex(historicalPrices, LOOKBACK_PRICE_POINTS));
     BigDecimal endPrice = historicalPrices.getLast();
     if (startPrice.signum() == 0) {
       return StockRecommendation.HOLD;

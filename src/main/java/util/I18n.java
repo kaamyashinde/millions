@@ -58,7 +58,7 @@ public final class I18n {
   public static String get(String key) {
     try {
       return bundle.getString(key);
-    } catch (MissingResourceException _) {
+    } catch (MissingResourceException unused) {
       return key;
     }
   }
@@ -74,7 +74,7 @@ public final class I18n {
     String pattern;
     try {
       pattern = bundle.getString(key);
-    } catch (MissingResourceException _) {
+    } catch (MissingResourceException unused) {
       return key;
     }
     return MessageFormat.format(pattern, args);

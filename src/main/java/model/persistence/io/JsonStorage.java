@@ -1,13 +1,12 @@
 package model.persistence.io;
 
 
-import model.exception.persistence.PersistenceException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import model.exception.persistence.PersistenceException;
 
 /**
  * Reads and writes small JSON documents used for profile persistence.

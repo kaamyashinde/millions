@@ -1,9 +1,8 @@
 package model.core.player.level;
 
 
-import model.core.player.Player;
-
 import java.math.BigDecimal;
+import model.core.player.Player;
 
 /**
  * Sealed state hierarchy for player progression. Each level defines qualification rules,

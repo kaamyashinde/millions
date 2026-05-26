@@ -16,7 +16,8 @@ public final class AuthFormValidation {
 
   private static final UsernameValidator USERNAME_VALIDATOR = new UsernameValidator();
   private static final PinValidator PIN_VALIDATOR = new PinValidator();
-  private static final StartingMoneyValidator STARTING_MONEY_VALIDATOR = new StartingMoneyValidator();
+  private static final StartingMoneyValidator STARTING_MONEY_VALIDATOR =
+      new StartingMoneyValidator();
 
   private AuthFormValidation() {
   }

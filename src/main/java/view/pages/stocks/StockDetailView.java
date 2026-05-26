@@ -1,5 +1,7 @@
 package view.pages.stocks;
 
+import controller.StockDetailController;
+import controller.TradingController;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,23 +14,21 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.layout.HBox;
-import javafx.stage.Window;
-import controller.StockDetailController;
-import controller.TradingController;
-import view.dialogs.TradeDialog;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.core.asset.Stock;
-import model.core.market.event.MarketEvent;
+import javafx.stage.Window;
 import model.analysis.recommendation.StockRecommendation;
 import model.analysis.recommendation.StockRecommendationService;
+import model.core.asset.Stock;
 import model.core.asset.info.StockFinancialInfo;
 import model.core.asset.info.StockFinancialInfoProvider;
+import model.core.market.event.MarketEvent;
 import view.components.recommendation.StockRecommendationLabel;
+import view.dialogs.TradeDialog;
 import view.theme.ThemeStyles;
 import view.util.UiFormat;
 
@@ -96,7 +96,7 @@ public class StockDetailView extends BorderPane {
     basisLabel.setWrapText(true);
     placeholderLabel.setWrapText(true);
     marketHistoryList.setPlaceholder(new Label("No past events for this stock yet."));
-    marketHistoryList.setCellFactory(_ -> new javafx.scene.control.ListCell<>() {
+    marketHistoryList.setCellFactory(unused -> new javafx.scene.control.ListCell<>() {
       @Override
       protected void updateItem(MarketEvent event, boolean empty) {
         super.updateItem(event, empty);
@@ -127,7 +127,7 @@ public class StockDetailView extends BorderPane {
         new VBox(4, fundamentalsHeading, revenueLabel, profitLabel, healthLabel);
     ThemeStyles.addStyleClasses(fundamentalsBox, "card");
 
-    VBox header =
+    final VBox header =
         new VBox(
             10,
             titleLabel,
@@ -164,7 +164,8 @@ public class StockDetailView extends BorderPane {
   }
 
   /**
-   * Displays details for the selected stock and the latest market event relevant to the current day.
+   * Displays details for the selected stock and the latest market event relevant to the current
+   * day.
    *
    * @param stock selected stock, or {@code null} to show the empty state
    * @param tradingDay current exchange trading day
@@ -172,33 +173,6 @@ public class StockDetailView extends BorderPane {
    */
   public void showStock(Stock stock, int tradingDay, Optional<MarketEvent> marketEvent) {
     showStock(stock, tradingDay, marketEvent, List.of());
-  }
-
-  /**
-   * Registers a callback invoked when the user clicks a past market event in the list.
-   *
-   * @param onEventClicked consumer receiving the clicked event, or {@code null} to clear
-   */
-  public void setOnEventClicked(Consumer<MarketEvent> onEventClicked) {
-    this.onEventClicked = onEventClicked;
-  }
-
-  /**
-   * Configures buy/sell actions shown when a stock is selected.
-   *
-   * @param trading trading controller
-   * @param dialogOwnerSupplier supplies the modal owner window
-   * @param onTradeComplete invoked after a successful trade
-   */
-  public void setTradeHandlers(
-      TradingController trading,
-      Supplier<Window> dialogOwnerSupplier,
-      Runnable onTradeComplete) {
-    this.tradingController = trading;
-    this.dialogOwnerSupplier = dialogOwnerSupplier;
-    this.onTradeComplete = onTradeComplete;
-    wireTradeButtons();
-    updateTradeActions(selectedStock);
   }
 
   /**
@@ -246,7 +220,8 @@ public class StockDetailView extends BorderPane {
       clearFundamentalsLabels();
       marketHistoryList.setItems(FXCollections.observableArrayList());
       recommendationLabel.setRecommendation(StockRecommendation.HOLD);
-      placeholderLabel.setText("Choose a stock from the list to view chart and recommendation details.");
+      placeholderLabel.setText(
+          "Choose a stock from the list to view chart and recommendation details.");
       content.getChildren().setAll(tradeActionsBox, recommendationBox, placeholderLabel);
       updateTradeActions(null);
       return;
@@ -257,19 +232,51 @@ public class StockDetailView extends BorderPane {
     latestPriceLabel.setText("Latest price: " + formatLatestPrice(stock));
     marketEventLabel.setText(buildMarketEventText(stock, marketEvent));
     applyFundamentalsLabels(stock);
-    marketHistoryList.setItems(FXCollections.observableArrayList(buildMarketHistoryList(marketHistory)));
+    marketHistoryList.setItems(
+        FXCollections.observableArrayList(buildMarketHistoryList(marketHistory)));
     recommendationLabel.setRecommendation(resolveRecommendation(stock));
     updateTradeActions(stock);
 
     if (stock.getHistoricalPrices().isEmpty()) {
       placeholderLabel.setText("No price history is available for this stock yet.");
       content.getChildren().setAll(
-          tradeActionsBox, recommendationBox, marketHistoryHeading, marketHistoryList, placeholderLabel);
+          tradeActionsBox,
+          recommendationBox,
+          marketHistoryHeading,
+          marketHistoryList,
+          placeholderLabel);
       return;
     }
 
     content.getChildren().setAll(
         tradeActionsBox, recommendationBox, marketHistoryHeading, marketHistoryList);
+  }
+
+  /**
+   * Registers a callback invoked when the user clicks a past market event in the list.
+   *
+   * @param onEventClicked consumer receiving the clicked event, or {@code null} to clear
+   */
+  public void setOnEventClicked(Consumer<MarketEvent> onEventClicked) {
+    this.onEventClicked = onEventClicked;
+  }
+
+  /**
+   * Configures buy/sell actions shown when a stock is selected.
+   *
+   * @param trading trading controller
+   * @param dialogOwnerSupplier supplies the modal owner window
+   * @param onTradeComplete invoked after a successful trade
+   */
+  public void setTradeHandlers(
+      TradingController trading,
+      Supplier<Window> dialogOwnerSupplier,
+      Runnable onTradeComplete) {
+    this.tradingController = trading;
+    this.dialogOwnerSupplier = dialogOwnerSupplier;
+    this.onTradeComplete = onTradeComplete;
+    wireTradeButtons();
+    updateTradeActions(selectedStock);
   }
 
   private StockRecommendation resolveRecommendation(Stock stock) {
@@ -280,7 +287,7 @@ public class StockDetailView extends BorderPane {
   }
 
   private void wireTradeButtons() {
-    buyButton.setOnAction(_ -> {
+    buyButton.setOnAction(unused -> {
       if (selectedStock == null || tradingController == null || dialogOwnerSupplier == null) {
         return;
       }
@@ -290,7 +297,7 @@ public class StockDetailView extends BorderPane {
           selectedStock.getSymbol(),
           onTradeComplete);
     });
-    sellButton.setOnAction(_ -> {
+    sellButton.setOnAction(unused -> {
       if (selectedStock == null || tradingController == null || dialogOwnerSupplier == null) {
         return;
       }
@@ -345,7 +352,8 @@ public class StockDetailView extends BorderPane {
    * @param marketEvent latest market event, if one occurred on the current day
    * @param marketHistory past market events relevant to the selected stock
    */
-  public void refresh(int tradingDay, Optional<MarketEvent> marketEvent, List<MarketEvent> marketHistory) {
+  public void refresh(
+      int tradingDay, Optional<MarketEvent> marketEvent, List<MarketEvent> marketHistory) {
     showStock(selectedStock, tradingDay, marketEvent, marketHistory);
   }
 
@@ -391,7 +399,9 @@ public class StockDetailView extends BorderPane {
    * @return immutable copy of the current past-event rows
    */
   public List<String> getDisplayedMarketHistory() {
-    return marketHistoryList.getItems().stream().map(StockDetailView::formatMarketHistoryItem).toList();
+    return marketHistoryList.getItems().stream()
+        .map(StockDetailView::formatMarketHistoryItem)
+        .toList();
   }
 
   /**

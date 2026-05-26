@@ -76,7 +76,7 @@ public record ProfileFile(
     int day,
     List<PriceRow> stockPrices,
     List<EventRow> events,
-  EventRow lastEvent
+    EventRow lastEvent
 ) {
 
   /**
@@ -110,7 +110,8 @@ public record ProfileFile(
    * @param day exchange day when the transaction occurred
    */
   @JsonIgnoreProperties(ignoreUnknown = true)
-  public record TxRow(String type, String symbol, BigDecimal quantity, BigDecimal purchasePrice, int day) {}
+  public record TxRow(
+      String type, String symbol, BigDecimal quantity, BigDecimal purchasePrice, int day) {}
 
   /**
    * Persisted regular savings plan row.
@@ -408,7 +409,8 @@ public record ProfileFile(
   }
 
   private static Transaction toTransaction(TxRow row, Exchange exchange) {
-    Share share = toShare(new HoldingRow(row.symbol(), row.quantity(), row.purchasePrice()), exchange);
+    Share share =
+        toShare(new HoldingRow(row.symbol(), row.quantity(), row.purchasePrice()), exchange);
     if ("PURCHASE".equals(row.type())) {
       return new Purchase(share, row.day());
     }

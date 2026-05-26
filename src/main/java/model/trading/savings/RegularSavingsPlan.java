@@ -1,9 +1,8 @@
 package model.trading.savings;
 
 
-import model.core.asset.Share;
-
 import java.math.BigDecimal;
+import model.core.asset.Share;
 import util.Validator;
 
 /**
@@ -11,7 +10,8 @@ import util.Validator;
  * days, next due day, and active flag. The {@link #symbol} is fixed for the lifetime of the
  * instance; to invest in a different stock, remove this plan and add a new one. Other fields may be
  * updated via setters; changing {@code mode}, {@code amount}, or {@code intervalDays} does
- * <strong>not</strong> automatically change {@link #nextDueDay} — use {@link #setNextDueDay(int)} if
+ * <strong>not</strong> automatically change {@link #nextDueDay} — use {@link #setNextDueDay(int)}
+ * if
  * the schedule should be adjusted. {@link RegularSavingsProcessor} reads current values on each run
  * and updates {@link #nextDueDay} after each installment attempt.
  *

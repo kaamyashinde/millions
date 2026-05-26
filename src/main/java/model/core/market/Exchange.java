@@ -1,29 +1,28 @@
 package model.core.market;
 
 
-import model.core.asset.Share;
-import model.core.asset.Stock;
-import model.core.player.Player;
-import model.exception.trading.InsufficientFundsException;
-import model.trading.calculator.SaleCalculator;
-import model.trading.transaction.Purchase;
-import model.trading.transaction.Sale;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import model.core.asset.Share;
+import model.core.asset.Stock;
 import model.core.asset.fund.Fund;
-import model.core.market.pricing.DailyPriceMoveStrategy;
 import model.core.market.event.MarketEvent;
+import model.core.market.pricing.DailyPriceMoveStrategy;
 import model.core.market.pricing.MarketEventStrategy;
+import model.core.player.Player;
+import model.exception.trading.InsufficientFundsException;
+import model.trading.calculator.SaleCalculator;
 import model.trading.command.buy.BuyCommand;
 import model.trading.command.buy.BuyUpToBudgetCommand;
 import model.trading.command.sell.SellAllHoldingsCommand;
 import model.trading.command.sell.SellByQuantityCommand;
 import model.trading.command.sell.SellCommand;
 import model.trading.command.sell.SellUpToTargetNetCommand;
+import model.trading.transaction.Purchase;
+import model.trading.transaction.Sale;
 import model.trading.transaction.Transaction;
 
 /**
@@ -163,7 +162,8 @@ public class Exchange {
 
   /**
    * Sells a total quantity of the given symbol using FIFO lots (oldest holding first). May perform
-   * several {@link Sale} transactions if the quantity spans multiple lots. Partial lots are split so
+   * several {@link Sale} transactions if the quantity spans multiple lots. Partial lots are split
+   * so that
    * cost basis is preserved per lot.
    *
    * @param symbol   the stock symbol
@@ -230,7 +230,7 @@ public class Exchange {
    *
    * @param limit the maximum number of gainers to return
    * @return a list of the top gainers in the exchange, sorted by their latest price change in
-   * descending order
+   *     descending order
    */
   public List<Stock> getGainers(int limit) {
     return MarketMovers.gainers(listings.getStocks(), limit);
@@ -243,7 +243,7 @@ public class Exchange {
    *
    * @param limit the maximum number of losers to return
    * @return a list of the top losers in the exchange, sorted by their latest price change in
-   * ascending order
+   *     ascending order
    */
   public List<Stock> getLosers(int limit) {
     return MarketMovers.losers(listings.getStocks(), limit);

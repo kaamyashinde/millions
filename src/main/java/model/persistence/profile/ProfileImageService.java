@@ -1,8 +1,6 @@
 package model.persistence.profile;
 
 
-import model.exception.persistence.PersistenceException;
-
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -10,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.imageio.ImageIO;
+import model.exception.persistence.PersistenceException;
 
 /**
  * Copies and validates profile avatar images into the profile directory as PNG.
@@ -121,7 +120,9 @@ public final class ProfileImageService {
     if (source.getType() == BufferedImage.TYPE_INT_ARGB) {
       return source;
     }
-    BufferedImage copy = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_ARGB);
+    BufferedImage copy =
+        new BufferedImage(
+            source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = copy.createGraphics();
     try {
       g.drawImage(source, 0, 0, null);

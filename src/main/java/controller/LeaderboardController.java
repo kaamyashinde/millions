@@ -3,8 +3,8 @@ package controller;
 import static util.Validator.checkNotNull;
 
 import java.util.List;
-import model.session.leaderboard.LocalLeaderboardService.LeaderboardRow;
 import model.session.SessionService;
+import model.session.leaderboard.LocalLeaderboardService.LeaderboardRow;
 
 /**
  * Supplies local leaderboard rows ranked by net worth.

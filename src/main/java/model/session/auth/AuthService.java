@@ -1,28 +1,26 @@
 package model.session.auth;
 
 
-import model.exception.auth.AuthenticationException;
-import model.exception.auth.DuplicateUsernameException;
-import model.exception.auth.RegistrationValidationException;
-
-import model.persistence.ProfileFile;
-import model.persistence.io.JsonStorage;
-import model.persistence.market.MarketData;
-import model.persistence.market.MarketDataFileService;
-import model.persistence.profile.ProfilePaths;
-import model.session.ActiveSession;
-import model.session.validation.rules.PinValidator;
-import model.session.validation.RegistrationValidator;
-import model.session.validation.rules.StartingMoneyValidator;
-import model.session.validation.rules.UsernameValidator;
-import model.session.validation.ValidationResult;
-
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import model.core.market.Exchange;
 import model.core.player.Player;
+import model.exception.auth.AuthenticationException;
+import model.exception.auth.DuplicateUsernameException;
+import model.exception.auth.RegistrationValidationException;
+import model.persistence.ProfileFile;
+import model.persistence.io.JsonStorage;
+import model.persistence.market.MarketData;
+import model.persistence.market.MarketDataFileService;
+import model.persistence.profile.ProfilePaths;
+import model.session.ActiveSession;
+import model.session.validation.RegistrationValidator;
+import model.session.validation.ValidationResult;
+import model.session.validation.rules.PinValidator;
+import model.session.validation.rules.StartingMoneyValidator;
+import model.session.validation.rules.UsernameValidator;
 
 /**
  * Handles user registration, authentication, and credential validation.

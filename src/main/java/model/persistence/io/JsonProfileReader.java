@@ -12,7 +12,8 @@ import util.IoLogger;
 /**
  * Reads profile JSON documents from disk with post-read validation.
  */
-public final class JsonProfileReader implements TextDocumentReader<ProfileFile, PersistenceException> {
+public final class JsonProfileReader
+    implements TextDocumentReader<ProfileFile, PersistenceException> {
 
   private final ObjectMapper objectMapper;
 
@@ -38,7 +39,8 @@ public final class JsonProfileReader implements TextDocumentReader<ProfileFile, 
     } catch (IllegalArgumentException exception) {
       throw new PersistenceException("Invalid profile file: " + exception.getMessage(), exception);
     } catch (IOException exception) {
-      throw new PersistenceException("Could not read JSON content: " + exception.getMessage(), exception);
+      throw new PersistenceException(
+          "Could not read JSON content: " + exception.getMessage(), exception);
     }
   }
 

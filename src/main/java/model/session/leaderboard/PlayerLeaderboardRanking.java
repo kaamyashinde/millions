@@ -18,7 +18,8 @@ public final class PlayerLeaderboardRanking {
    * @param metric active ranking metric
    * @return comparator ordering strongest players first
    */
-  public static Comparator<PlayerLeaderboardEntry> bestFirstComparator(PlayerLeaderboardMetric metric) {
+  public static Comparator<PlayerLeaderboardEntry> bestFirstComparator(
+      PlayerLeaderboardMetric metric) {
     return Comparator
         .comparing(
             (PlayerLeaderboardEntry entry) -> metricValue(entry, metric),
@@ -44,7 +45,8 @@ public final class PlayerLeaderboardRanking {
       return bestFirstComparator(metric);
     }
     return Comparator
-        .comparing((PlayerLeaderboardEntry entry) -> metricValue(entry, metric), BigDecimal::compareTo)
+        .comparing(
+            (PlayerLeaderboardEntry entry) -> metricValue(entry, metric), BigDecimal::compareTo)
         .thenComparing(
             entry -> metricValue(entry, secondaryMetric(metric)),
             Comparator.reverseOrder())
@@ -59,7 +61,8 @@ public final class PlayerLeaderboardRanking {
    * @param metric chosen metric
    * @return numeric value for that metric
    */
-  public static BigDecimal metricValue(PlayerLeaderboardEntry entry, PlayerLeaderboardMetric metric) {
+  public static BigDecimal metricValue(
+      PlayerLeaderboardEntry entry, PlayerLeaderboardMetric metric) {
     return switch (metric) {
       case NET_WORTH -> entry.netWorth();
       case TOTAL_RETURN_PERCENT -> entry.totalReturnPercent();

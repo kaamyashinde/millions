@@ -1,10 +1,9 @@
 package view.pages.quiz;
 
-import java.util.List;
-import java.util.function.Consumer;
-
 import controller.LearningHubController;
 import controller.QuizController;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -92,7 +91,7 @@ public class QuizLauncherPage extends BorderPane {
     card.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.addStyleClasses(card, "quiz-card");
 
-    card.setOnMouseClicked(_ -> startQuiz(quizItem));
+    card.setOnMouseClicked(unused -> startQuiz(quizItem));
     return card;
   }
 

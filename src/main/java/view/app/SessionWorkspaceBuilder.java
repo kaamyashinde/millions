@@ -68,7 +68,7 @@ public final class SessionWorkspaceBuilder {
           TRANSACTIONS_CHANGED,
           LEADERBOARD_CHANGED);
     };
-    Runnable onProfileSaved = () -> {
+    final Runnable onProfileSaved = () -> {
       persistAction.run();
       events.publish(PROFILE_CHANGED, LEADERBOARD_CHANGED);
     };
@@ -257,7 +257,8 @@ public final class SessionWorkspaceBuilder {
       WorkspaceEventBus events,
       WorkspaceLayout layout,
       WorkspaceController workspaceController) {
-    Runnable refreshSummary = () -> layout.setSessionSummary(workspaceController.getSessionSummary());
+    Runnable refreshSummary =
+        () -> layout.setSessionSummary(workspaceController.getSessionSummary());
     Runnable refreshAvatar = () -> layout.loadHeaderAvatar(workspaceController.getAvatarPath());
 
     events.subscribe(MARKET_CHANGED, refreshSummary);

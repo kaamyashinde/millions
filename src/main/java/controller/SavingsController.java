@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.core.market.Exchange;
 import model.core.asset.InvestableAsset;
+import model.core.market.Exchange;
 import model.core.player.Player;
 import model.trading.savings.RegularSavingsPlan;
 import model.trading.savings.SavingsInstallmentMode;
@@ -115,6 +115,17 @@ public class SavingsController {
       String intervalText) {
     if (asset == null || mode == null) {
       throw new IllegalArgumentException("Asset and mode are required.");
+    }
+    String symbol = asset.getSymbol();
+    boolean duplicateActive =
+        player.getRegularSavingsPlans().stream()
+            .anyMatch(
+                plan ->
+                    plan.isActive()
+                        && plan.getSymbol().equalsIgnoreCase(symbol));
+    if (duplicateActive) {
+      throw new IllegalArgumentException(
+          "An active savings plan already exists for " + symbol + ".");
     }
     BigDecimal amount = new BigDecimal(amountText.trim());
     int interval = Integer.parseInt(intervalText.trim());

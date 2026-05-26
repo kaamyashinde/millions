@@ -8,7 +8,8 @@ import java.util.List;
 import model.core.asset.Stock;
 
 /**
- * Computes a simplified recommendation from recent stock price data using a pluggable {@link RecommendationStrategy}.
+ * Computes a simplified recommendation from recent stock price data using a pluggable
+ * {@link RecommendationStrategy}.
  *
  * <p>This service only reads historical prices. It does not mutate {@link Stock} instances or
  * participate in exchange price generation, which keeps recommendation logic separate from actual

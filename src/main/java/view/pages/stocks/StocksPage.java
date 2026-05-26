@@ -2,6 +2,10 @@ package view.pages.stocks;
 
 import static util.Validator.checkNotNull;
 
+import controller.MarketMover;
+import controller.StockDetailController;
+import controller.StocksController;
+import controller.TradingController;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -24,10 +28,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import controller.MarketMover;
-import controller.StockDetailController;
-import controller.StocksController;
-import controller.TradingController;
 import model.core.asset.Stock;
 import model.core.asset.info.StockFinancialInfo;
 import view.components.chart.AnalysisToolbar;
@@ -104,7 +104,7 @@ public class StocksPage extends BorderPane {
     searchField.setPromptText("Search by symbol or company");
     searchField.setId("stocks-search-field");
     ThemeStyles.styleField(searchField);
-    searchField.textProperty().addListener((_, _, value) -> {
+    searchField.textProperty().addListener((obs, previous, value) -> {
       stocks.setSearchTerm(value);
       syncTableSelection();
       updateDetail(stocks.getSelectedStock());
@@ -114,7 +114,7 @@ public class StocksPage extends BorderPane {
     HBox topRow = new HBox(16, heading);
     topRow.setAlignment(Pos.CENTER_LEFT);
 
-    VBox header = new VBox(8, topRow, searchField, metaLabel);
+    final VBox header = new VBox(8, topRow, searchField, metaLabel);
 
     buildTable();
     table.setId("stocks-table");
@@ -189,7 +189,9 @@ public class StocksPage extends BorderPane {
 
     TableColumn<Stock, String> colHealth = new TableColumn<>("Health");
     colHealth.setCellValueFactory(
-        c -> new SimpleStringProperty(stockDetail.financialInfo(c.getValue()).health().displayLabel()));
+        c ->
+            new SimpleStringProperty(
+                stockDetail.financialInfo(c.getValue()).health().displayLabel()));
 
     table.getColumns().setAll(colSym, colCompany, colPrice, colRevenue, colHealth);
   }
@@ -383,7 +385,8 @@ public class StocksPage extends BorderPane {
       return;
     }
     if (selected.getHistoricalPrices().isEmpty()) {
-      chartPlaceholder.setText("No price history is available for " + selected.getSymbol() + " yet.");
+      chartPlaceholder.setText(
+          "No price history is available for " + selected.getSymbol() + " yet.");
       chartCard.getChildren().setAll(chartPlaceholder);
       return;
     }

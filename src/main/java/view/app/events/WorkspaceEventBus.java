@@ -30,7 +30,7 @@ public class WorkspaceEventBus {
    * @return subscription that removes the handler when closed
    */
   public Subscription subscribe(WorkspaceEventType eventType, Runnable handler) {
-    subscribers.computeIfAbsent(eventType, _ -> new ArrayList<>()).add(handler);
+    subscribers.computeIfAbsent(eventType, unused -> new ArrayList<>()).add(handler);
     return new Subscription(() -> unsubscribe(eventType, handler));
   }
 

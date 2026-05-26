@@ -1,9 +1,8 @@
 package model.exception.trading;
 
 
-import model.core.asset.Stock;
-
 import java.math.BigDecimal;
+import model.core.asset.Stock;
 
 /**
  * Thrown when a sale or aggregate sale requests more shares than the portfolio holds for that

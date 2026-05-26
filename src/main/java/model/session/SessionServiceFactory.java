@@ -1,14 +1,13 @@
 package model.session;
 
 
-import model.session.auth.AuthService;
-import model.session.profile.ProfileService;
-
 import java.nio.file.Path;
 import model.persistence.io.JsonStorage;
 import model.persistence.market.MarketDataFileService;
 import model.persistence.profile.ProfileImageService;
 import model.persistence.profile.ProfilePaths;
+import model.session.auth.AuthService;
+import model.session.profile.ProfileService;
 
 /**
  * Creates fully wired local-profile session services for application entry points.

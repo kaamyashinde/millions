@@ -1,24 +1,23 @@
 package model.session.profile;
 
 
-import model.session.ActiveSession;
-import model.session.auth.AuthService;
-import model.exception.auth.AuthenticationException;
-import model.exception.auth.RegistrationValidationException;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
+import model.exception.auth.AuthenticationException;
+import model.exception.auth.RegistrationValidationException;
 import model.exception.persistence.PersistenceException;
 import model.persistence.ProfileFile;
 import model.persistence.io.JsonStorage;
 import model.persistence.profile.ProfileImageService;
 import model.persistence.profile.ProfilePaths;
-import model.session.validation.rules.PinValidator;
+import model.session.ActiveSession;
+import model.session.auth.AuthService;
 import model.session.validation.ValidationResult;
+import model.session.validation.rules.PinValidator;
 
 /**
  * Manages profile metadata: display names, avatars, and profile deletion.
@@ -150,6 +149,20 @@ public final class ProfileService {
     deleteProfileDirectory(profilePaths.profileDirectory(username));
   }
 
+  private static void deleteProfileDirectory(Path dir) {
+    if (!Files.exists(dir)) {
+      return;
+    }
+    try (Stream<Path> walk = Files.walk(dir)) {
+      List<Path> paths = walk.sorted(Comparator.reverseOrder()).toList();
+      for (Path path : paths) {
+        Files.deleteIfExists(path);
+      }
+    } catch (IOException exception) {
+      throw new PersistenceException("Could not delete profile directory: " + dir, exception);
+    }
+  }
+
   /**
    * Deletes a non-active profile after username and PIN verification.
    *
@@ -175,19 +188,5 @@ public final class ProfileService {
    */
   public ProfileImageService profileImageService() {
     return profileImageService;
-  }
-
-  private static void deleteProfileDirectory(Path dir) {
-    if (!Files.exists(dir)) {
-      return;
-    }
-    try (Stream<Path> walk = Files.walk(dir)) {
-      List<Path> paths = walk.sorted(Comparator.reverseOrder()).toList();
-      for (Path path : paths) {
-        Files.deleteIfExists(path);
-      }
-    } catch (IOException exception) {
-      throw new PersistenceException("Could not delete profile directory: " + dir, exception);
-    }
   }
 }

@@ -74,7 +74,7 @@ public class TransactionHistoryPage extends BorderPane {
         AppTableView.createNumericColumn(
             "Quantity",
             TransactionRow::quantity,
-            TransactionHistoryPage::formatDecimal);
+            TransactionHistoryPage::formatQuantity);
     quantityCol.setPrefWidth(100);
 
     TableColumn<TransactionRow, BigDecimal> priceCol =
@@ -117,6 +117,10 @@ public class TransactionHistoryPage extends BorderPane {
 
   private static String formatDecimal(BigDecimal value) {
     return UiFormat.decimal(value);
+  }
+
+  private static String formatQuantity(BigDecimal value) {
+    return UiFormat.quantity(value);
   }
 
   private record TransactionRow(

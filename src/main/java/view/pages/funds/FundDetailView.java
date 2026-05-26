@@ -1,5 +1,6 @@
 package view.pages.funds;
 
+import controller.TradingController;
 import java.math.BigDecimal;
 import java.util.function.Supplier;
 import javafx.collections.FXCollections;
@@ -14,7 +15,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Window;
-import controller.TradingController;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
 import view.components.table.AppTableView;
@@ -63,7 +63,8 @@ public class FundDetailView extends BorderPane {
     tradeActionsBox.setVisible(false);
     tradeActionsBox.setManaged(false);
 
-    VBox content = new VBox(12, titleLabel, subtitleLabel, latestPriceLabel, tradeActionsBox, componentList);
+    VBox content =
+        new VBox(12, titleLabel, subtitleLabel, latestPriceLabel, tradeActionsBox, componentList);
     VBox.setVgrow(componentList, Priority.ALWAYS);
     setCenter(content);
   }
@@ -82,7 +83,7 @@ public class FundDetailView extends BorderPane {
     this.tradingController = trading;
     this.dialogOwnerSupplier = dialogOwnerSupplier;
     this.onTradeComplete = onTradeComplete;
-    buyButton.setOnAction(_ -> {
+    buyButton.setOnAction(unused -> {
       if (selectedFund == null || tradingController == null || dialogOwnerSupplier == null) {
         return;
       }

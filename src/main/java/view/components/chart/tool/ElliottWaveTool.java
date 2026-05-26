@@ -170,7 +170,11 @@ public class ElliottWaveTool extends AbstractChartTool {
     List<XYChart.Data<Number, Number>> data = chart.getData().getFirst().getData();
     if (data.size() <= 9) {
       return data.stream()
-          .map(point -> new double[] {point.getXValue().doubleValue(), point.getYValue().doubleValue()})
+          .map(
+              point ->
+                  new double[] {
+                    point.getXValue().doubleValue(), point.getYValue().doubleValue()
+                  })
           .toList();
     }
     List<double[]> selected = new ArrayList<>();

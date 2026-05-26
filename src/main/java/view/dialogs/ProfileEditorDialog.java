@@ -1,5 +1,7 @@
 package view.dialogs;
 
+import controller.ExitGameController;
+import controller.ProfileEditorController;
 import java.nio.file.Path;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,8 +18,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import controller.ExitGameController;
-import controller.ProfileEditorController;
 import model.session.ActiveSession;
 import model.session.SessionService;
 import util.I18n;
@@ -106,7 +106,7 @@ public final class ProfileEditorDialog {
     ThemeStyles.addStyleClasses(status, "text-error");
 
     Button chooseImage = new Button("Choose image…");
-    chooseImage.setOnAction(_ -> {
+    chooseImage.setOnAction(unused -> {
       FileChooser chooser = new FileChooser();
       chooser.setTitle("Profile image");
       chooser.getExtensionFilters().add(
@@ -121,7 +121,7 @@ public final class ProfileEditorDialog {
     });
 
     Button removeImage = new Button("Remove image");
-    removeImage.setOnAction(_ -> {
+    removeImage.setOnAction(unused -> {
       pendingImage[0] = null;
       removeAvatar[0] = true;
       preview.setImage(null);
@@ -130,7 +130,7 @@ public final class ProfileEditorDialog {
 
     Button save = new Button("Save");
     save.setDefaultButton(true);
-    save.setOnAction(_ -> {
+    save.setOnAction(unused -> {
       status.setText("");
       try {
         sessionService.updateDisplayName(nameField.getText());
@@ -144,13 +144,14 @@ public final class ProfileEditorDialog {
       } catch (IllegalArgumentException exception) {
         status.setText(exception.getMessage());
       } catch (RuntimeException exception) {
-        status.setText(exception.getMessage() != null ? exception.getMessage() : "Could not save profile.");
+        status.setText(
+            exception.getMessage() != null ? exception.getMessage() : "Could not save profile.");
       }
     });
 
     Button cancel = new Button("Cancel");
     cancel.setCancelButton(true);
-    cancel.setOnAction(_ -> stage.close());
+    cancel.setOnAction(unused -> stage.close());
 
     Label danger = new Label(I18n.get("exitGame.pin.confirm"));
     ThemeStyles.addStyleClasses(danger, "font-bold");
@@ -160,7 +161,7 @@ public final class ProfileEditorDialog {
     ThemeStyles.addStyleClasses(dangerHint, "text-secondary");
 
     Button exitGameButton = new Button(I18n.get("exitGame.pin.confirm"));
-    exitGameButton.setOnAction(_ -> {
+    exitGameButton.setOnAction(unused -> {
       stage.close();
       ExitGameDialog.show(stage.getOwner(), exitGame, onAccountDeleted);
     });

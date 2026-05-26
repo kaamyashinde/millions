@@ -1,8 +1,7 @@
 package view.components.learning;
 
-import java.util.function.Consumer;
-
 import controller.LearningHubController;
+import java.util.function.Consumer;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import model.learning.content.LearningItem;
@@ -23,7 +22,7 @@ public final class QuizWrongAnswerLinks {
    * @param learningHub     supplies linked topic and resource lookups
    * @param question        answered question
    * @param linkedItemId    parent quiz topic ID ({@link model.learning.quiz.Quiz#linkedItemId()})
-   * @param onOpenHubTopic  called when the user opens the in-app topic; may be null to omit hub card
+   * @param onOpenHubTopic called when the user opens the in-app topic; may be null to omit hub card
    */
   public static void appendTo(
       VBox parent,

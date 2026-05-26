@@ -1,9 +1,8 @@
 package view.pages.learning;
 
-import java.util.List;
-
 import controller.LearningHubController;
 import controller.QuizController;
+import java.util.List;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -153,7 +152,7 @@ public class LearningHubPage extends BorderPane implements ResponsiveLayout {
     ThemeStyles.addStyleClasses(card, "learning-card-accent");
     HBox.setHgrow(card, Priority.ALWAYS);
 
-    card.setOnMouseClicked(_ -> onFeaturedCardClicked(item));
+    card.setOnMouseClicked(unused -> onFeaturedCardClicked(item));
     return card;
   }
 
@@ -173,7 +172,7 @@ public class LearningHubPage extends BorderPane implements ResponsiveLayout {
     card.setPadding(new Insets(12));
     ThemeStyles.addStyleClasses(card, "learning-card");
 
-    card.setOnMouseClicked(_ -> onCategoryCardClicked(category));
+    card.setOnMouseClicked(unused -> onCategoryCardClicked(category));
     return card;
   }
 

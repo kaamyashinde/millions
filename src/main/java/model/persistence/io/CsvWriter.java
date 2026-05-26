@@ -1,8 +1,6 @@
 package model.persistence.io;
 
 
-import model.persistence.market.MarketData;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -13,6 +11,7 @@ import java.util.List;
 import model.core.asset.Stock;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
+import model.persistence.market.MarketData;
 
 /**
  * Writes mixed market-data CSV files containing both stocks and funds.

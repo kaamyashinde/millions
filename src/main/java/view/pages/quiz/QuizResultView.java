@@ -1,10 +1,9 @@
 package view.pages.quiz;
 
+import controller.LearningHubController;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
-
-import controller.LearningHubController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -60,11 +59,11 @@ public class QuizResultView extends BorderPane {
 
     Button backToTopicBtn = new Button("← Back to Topic");
     ThemeStyles.styleButton(backToTopicBtn);
-    backToTopicBtn.setOnAction(_ -> onBackToTopic.run());
+    backToTopicBtn.setOnAction(unused -> onBackToTopic.run());
 
     Button backToHubBtn = new Button("Learning Hub");
     ThemeStyles.styleButton(backToHubBtn);
-    backToHubBtn.setOnAction(_ -> onBackToHub.run());
+    backToHubBtn.setOnAction(unused -> onBackToHub.run());
 
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -108,7 +107,7 @@ public class QuizResultView extends BorderPane {
 
   private VBox buildBreakdownRow(
       QuizAttempt attempt, QuizQuestion q, boolean correct, int number) {
-    String badgeText = correct ? "CORRECT" : "WRONG";
+    final String badgeText = correct ? "CORRECT" : "WRONG";
 
     String questionPreview = q.questionText().length() > 65
         ? q.questionText().substring(0, 62) + "..."
@@ -117,15 +116,15 @@ public class QuizResultView extends BorderPane {
     Label numLabel = new Label("#" + number);
     ThemeStyles.addStyleClasses(numLabel, "quiz-result-subtitle");
 
-    Label qText = new Label(questionPreview);
-    qText.setWrapText(true);
-    ThemeStyles.addStyleClasses(qText, "quiz-result-question");
+    Label questionText = new Label(questionPreview);
+    questionText.setWrapText(true);
+    ThemeStyles.addStyleClasses(questionText, "quiz-result-question");
 
     Label badge = new Label(badgeText);
     ThemeStyles.addStyleClasses(
         badge, "status-badge", correct ? "status-badge-success" : "status-badge-error");
 
-    VBox row = new VBox(4, new HBox(8, numLabel, badge), qText);
+    VBox row = new VBox(4, new HBox(8, numLabel, badge), questionText);
 
     if (!correct) {
       Label explanation = new Label(q.explanationText());

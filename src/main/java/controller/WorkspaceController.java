@@ -1,13 +1,12 @@
 package controller;
 
-import model.core.player.Player;
-
 import static util.Validator.checkNotNull;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import model.core.asset.Stock;
+import model.core.player.Player;
 import model.session.ActiveSession;
 import model.session.SessionService;
 import model.trading.savings.RegularSavingsProcessor;

@@ -1,24 +1,23 @@
 package model.trading.command.sell;
 
 
-import model.trading.command.TradeCommand;
-import model.trading.transaction.Sale;
-
 import static util.Validator.requirePositive;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import model.core.asset.Share;
 import model.core.market.Exchange;
 import model.core.player.Player;
-import model.core.asset.Share;
 import model.exception.trading.InsufficientSharesException;
+import model.trading.command.TradeCommand;
+import model.trading.transaction.Sale;
 import model.trading.transaction.Transaction;
 
 /**
- * Sells a total quantity across FIFO lots, producing one committed {@link model.trading.transaction.Sale}
- * per slice as needed.
+ * Sells a total quantity across FIFO lots, producing one committed
+ * {@link model.trading.transaction.Sale} per slice as needed.
  */
 public final class SellByQuantityCommand implements TradeCommand {
 

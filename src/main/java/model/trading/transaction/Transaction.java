@@ -1,8 +1,8 @@
 package model.trading.transaction;
 
 
-import model.core.player.Player;
 import model.core.asset.Share;
+import model.core.player.Player;
 import model.exception.trading.AlreadyCommittedException;
 import model.trading.calculator.TransactionCalculator;
 

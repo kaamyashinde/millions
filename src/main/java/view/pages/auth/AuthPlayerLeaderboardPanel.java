@@ -1,7 +1,5 @@
 package view.pages.auth;
 
-import model.core.player.Player;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +18,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import model.core.player.Player;
 import model.session.leaderboard.PlayerLeaderboardEntry;
 import model.session.leaderboard.PlayerLeaderboardMetric;
 import model.session.leaderboard.PlayerLeaderboardRanking;
@@ -184,7 +183,7 @@ public class AuthPlayerLeaderboardPanel extends BorderPane {
 
     table.getColumns().setAll(List.of(rankColumn, playerColumn, netWorthColumn, returnColumn));
     table.setRowClassProvider(this::rowClassFor);
-    table.setSortPolicy(_ -> {
+    table.setSortPolicy(unused -> {
       syncSortStateFromTable();
       refreshRows();
       return true;
@@ -204,7 +203,8 @@ public class AuthPlayerLeaderboardPanel extends BorderPane {
     activeMetric = primaryColumn == returnColumn
         ? PlayerLeaderboardMetric.TOTAL_RETURN_PERCENT
         : PlayerLeaderboardMetric.NET_WORTH;
-    SortType sortType = primaryColumn.getSortType() == null ? SortType.DESCENDING : primaryColumn.getSortType();
+    SortType sortType =
+        primaryColumn.getSortType() == null ? SortType.DESCENDING : primaryColumn.getSortType();
     ascending = sortType == SortType.ASCENDING;
   }
 

@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.core.market.Exchange;
-import model.core.player.Player;
 import model.analysis.performance.MetricValue;
 import model.analysis.performance.PerformanceComparison;
 import model.analysis.performance.PortfolioPerformanceService;
 import model.core.asset.Share;
+import model.core.market.Exchange;
+import model.core.player.Player;
 import view.util.UiFormat;
 
 /**
@@ -150,7 +150,8 @@ public class PortfolioController {
         case NO_TRADES -> "N/A (no trades yet)";
         case INSUFFICIENT_HISTORY -> "N/A (need more history)";
         case ZERO_VOLATILITY -> "N/A (zero volatility)";
-        case AVAILABLE -> throw new IllegalArgumentException("Available metrics do not need fallback text.");
+        case AVAILABLE ->
+            throw new IllegalArgumentException("Available metrics do not need fallback text.");
       };
     }
     BigDecimal value = metric.value();
@@ -171,7 +172,9 @@ public class PortfolioController {
   private static List<HoldingSummary> summarizeHoldings(List<Share> shares) {
     Map<String, List<Share>> bySymbol = new LinkedHashMap<>();
     for (Share share : shares) {
-      bySymbol.computeIfAbsent(share.getAsset().getSymbol(), _ -> new ArrayList<>()).add(share);
+      bySymbol
+          .computeIfAbsent(share.getAsset().getSymbol(), unused -> new ArrayList<>())
+          .add(share);
     }
 
     List<HoldingSummary> summaries = new ArrayList<>();

@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
-import view.theme.ThemeStyles;
 import model.analysis.tools.FibonacciRetracement;
+import view.theme.ThemeStyles;
 import view.util.UiFormat;
 
 /**
@@ -111,7 +111,7 @@ public class FibonacciTool extends AbstractChartTool {
     for (int i = 0; i < levels.size(); i++) {
       FibonacciRetracement.Level level = levels.get(i);
       double levelPrice = level.price().doubleValue();
-      String seriesName = level.name() + " \u2014 $" + UiFormat.decimal(level.price());
+      String seriesName = level.name() + " — $" + UiFormat.decimal(level.price());
 
       XYChart.Series<Number, Number> series = new XYChart.Series<>();
       series.setName(seriesName);

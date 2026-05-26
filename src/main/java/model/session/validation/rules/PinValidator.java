@@ -1,12 +1,11 @@
 package model.session.validation.rules;
 
 
+import java.math.BigDecimal;
+import java.util.stream.IntStream;
 import model.session.validation.RegistrationValidator;
 import model.session.validation.ValidationError;
 import model.session.validation.ValidationResult;
-
-import java.math.BigDecimal;
-import java.util.stream.IntStream;
 
 /**
  * Validates PIN length (4–8) and that every character is a digit.

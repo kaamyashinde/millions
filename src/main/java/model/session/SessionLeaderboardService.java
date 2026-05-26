@@ -20,6 +20,8 @@ final class SessionLeaderboardService {
   private final AuthService authService;
 
   /**
+   * Creates a leaderboard service backed by profile data.
+   *
    * @param authService authentication/profile loader used to enumerate profiles
    */
   SessionLeaderboardService(AuthService authService) {

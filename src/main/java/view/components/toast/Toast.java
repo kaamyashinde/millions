@@ -81,7 +81,7 @@ public class Toast extends HBox {
     setMinHeight(MIN_TOAST_HEIGHT);
     ThemeStyles.addStyleClasses(this, "toast", "toast-" + mode.name().toLowerCase());
 
-    StackPane iconPane = buildIconPane(mode);
+    final StackPane iconPane = buildIconPane(mode);
     VBox textBox = new VBox(4);
     textBox.setAlignment(Pos.CENTER_LEFT);
     textBox.setMaxWidth(Double.MAX_VALUE);
@@ -92,9 +92,9 @@ public class Toast extends HBox {
     if (description != null) {
       Label descLabel = new Label(description);
       descLabel.setWrapText(true);
-      boolean _ = textBox.getChildren().addAll(titleLabel, descLabel);
+      boolean unused = textBox.getChildren().addAll(titleLabel, descLabel);
     } else {
-      boolean _ = textBox.getChildren().addAll(titleLabel);
+      boolean unused = textBox.getChildren().addAll(titleLabel);
     }
 
     Region spacer = new Region();
@@ -105,7 +105,7 @@ public class Toast extends HBox {
     if (actionLabel != null) {
       Button actionButton = new Button(actionLabel);
       if (onAction != null) {
-        actionButton.setOnAction(_ -> onAction.run());
+        actionButton.setOnAction(unused -> onAction.run());
       }
       getChildren().add(actionButton);
     }
@@ -121,7 +121,7 @@ public class Toast extends HBox {
     StackPane pane = new StackPane();
     pane.setPrefSize(ICON_SIZE, ICON_SIZE);
 
-    Shape outline = mode.createShape();
+    final Shape outline = mode.createShape();
     Text symbol = new Text(mode.getSymbol());
     symbol.setFont(Font.font(SYMBOL_FONT_SIZE));
     ThemeStyles.addStyleClasses(symbol, "toast-icon-symbol");
@@ -132,7 +132,7 @@ public class Toast extends HBox {
                     ? Color.web("#F8FAFC")
                     : Color.web("#0F172A"),
             ThemeManager.getInstance().themeProperty()));
-    boolean _ = pane.getChildren().addAll(outline, symbol);
+    boolean unused = pane.getChildren().addAll(outline, symbol);
 
     return pane;
   }

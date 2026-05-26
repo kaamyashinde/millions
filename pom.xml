@@ -32,6 +32,8 @@
     <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
     <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
     <maven.javadoc.plugin.version>3.12.0</maven.javadoc.plugin.version>
+    <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
+    <checkstyle.version>10.25.0</checkstyle.version>
   </properties>
 
   <dependencies>
@@ -128,6 +130,26 @@
             <phase>package</phase>
           </execution>
         </executions>
+      </plugin>
+
+      <!-- Runs Google Java Style checks via mvn checkstyle:check -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${maven.checkstyle.plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${checkstyle.version}</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <configLocation>google_checks.xml</configLocation>
+          <consoleOutput>true</consoleOutput>
+          <violationSeverity>warning</violationSeverity>
+          <excludes>**/Main.java,**/UserInterface.java</excludes>
+        </configuration>
       </plugin>
 
     </plugins>

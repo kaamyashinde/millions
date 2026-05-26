@@ -1,5 +1,7 @@
 package view.pages.funds;
 
+import controller.FundsController;
+import controller.TradingController;
 import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
@@ -16,8 +18,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import controller.FundsController;
-import controller.TradingController;
 import model.core.asset.fund.Fund;
 import view.theme.ThemeStyles;
 import view.util.UiFormat;
@@ -40,7 +40,8 @@ public class FundsPage extends BorderPane {
    * @param trading trading controller for buy actions in the detail pane
    * @param onTradeComplete invoked after a successful trade
    */
-  public FundsPage(FundsController controller, TradingController trading, Runnable onTradeComplete) {
+  public FundsPage(
+      FundsController controller, TradingController trading, Runnable onTradeComplete) {
     this.controller = controller;
 
     setPadding(new Insets(16));
@@ -54,7 +55,7 @@ public class FundsPage extends BorderPane {
     searchField.setPromptText("Search by symbol or fund name");
     searchField.setId("funds-search-field");
     ThemeStyles.styleField(searchField);
-    searchField.textProperty().addListener((_, _, value) -> {
+    searchField.textProperty().addListener((obs, previous, value) -> {
       controller.setSearchTerm(value);
       syncTableSelection();
       detailView.showFund(controller.getSelectedFund());

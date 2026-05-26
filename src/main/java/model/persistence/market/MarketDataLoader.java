@@ -1,10 +1,9 @@
 package model.persistence.market;
 
 
-import model.persistence.io.CsvReader;
-
 import java.io.IOException;
 import java.io.InputStream;
+import model.persistence.io.CsvReader;
 
 /**
  * Shared startup loader for bundled market-data resources.

@@ -19,8 +19,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import view.components.image.ImageLoader;
 import util.Validator;
+import view.components.image.ImageLoader;
 import view.components.notification.NotificationService;
 import view.components.notification.ToastTray;
 import view.components.toast.ToastMode;
@@ -79,11 +79,11 @@ public class WorkspaceLayout extends StackPane implements ResponsiveLayout {
     ThemeStyles.styleButton(profileButton);
     ThemeStyles.styleButton(logoutButton);
 
-    profileButton.setOnAction(_ -> onProfile.run());
-    logoutButton.setOnAction(_ -> onLogout.run());
+    profileButton.setOnAction(unused -> onProfile.run());
+    logoutButton.setOnAction(unused -> onLogout.run());
 
     Button themeToggleButton = new Button();
-    themeToggleButton.setOnAction(_ -> onThemeToggle.run());
+    themeToggleButton.setOnAction(unused -> onThemeToggle.run());
     themeToggleButton.textProperty().bind(
         Bindings.createStringBinding(
             () -> ThemeManager.getInstance().getTheme() == ThemeManager.Theme.DARK
@@ -100,7 +100,7 @@ public class WorkspaceLayout extends StackPane implements ResponsiveLayout {
     ThemeStyles.styleField(daysField);
     Button skipDaysButton = new Button("Skip trading days");
     ThemeStyles.styleButton(skipDaysButton);
-    skipDaysButton.setOnAction(_ -> {
+    skipDaysButton.setOnAction(unused -> {
       try {
         int days =
             Validator.parsePositiveInt(

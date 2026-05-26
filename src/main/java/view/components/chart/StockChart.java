@@ -48,36 +48,38 @@ public class StockChart extends LineChart<Number, Number> {
    * @param range selected chart range
    */
   public StockChart(Stock stock, ChartRange range) {
-    super(buildXAxis(), buildYAxis());
+    super(buildXaxis(), buildYaxis());
 
     List<BigDecimal> prices = stock.getHistoricalPrices();
     int startIndex = rangeStartIndex(prices, range);
     List<BigDecimal> visiblePrices = prices.subList(startIndex, prices.size());
 
-    setTitle(stock.getSymbol() + " \u2014 " + stock.getCompany());
+    setTitle(stock.getSymbol() + " — " + stock.getCompany());
     setCreateSymbols(visiblePrices.size() == 1);
     setLegendVisible(false);
     setAnimated(false);
 
-    configureYAxis((NumberAxis) getYAxis(), visiblePrices);
-    configureXAxis((NumberAxis) getXAxis(), startIndex, visiblePrices);
+    configureYaxis((NumberAxis) getYAxis(), visiblePrices);
+    configureXaxis((NumberAxis) getXAxis(), startIndex, visiblePrices);
     getData().add(buildSeries(visiblePrices, startIndex));
 
     setOnMouseClicked(
         event -> {
-          NumberAxis xAxis = (NumberAxis) getXAxis();
-          NumberAxis yAxis = (NumberAxis) getYAxis();
+          NumberAxis horizontalAxis = (NumberAxis) getXAxis();
+          NumberAxis verticalAxis = (NumberAxis) getYAxis();
           double price =
-              yAxis
+              verticalAxis
                   .getValueForDisplay(
-                      yAxis.sceneToLocal(event.getSceneX(), event.getSceneY()).getY())
+                      verticalAxis.sceneToLocal(event.getSceneX(), event.getSceneY()).getY())
                   .doubleValue();
           int dayIndex =
               (int)
                   Math.round(
-                      xAxis
+                      horizontalAxis
                           .getValueForDisplay(
-                              xAxis.sceneToLocal(event.getSceneX(), event.getSceneY()).getX())
+                              horizontalAxis
+                                  .sceneToLocal(event.getSceneX(), event.getSceneY())
+                                  .getX())
                           .doubleValue());
           List<XYChart.Data<Number, Number>> visibleData = getData().getFirst().getData();
           if (visibleData.isEmpty()) {
@@ -146,9 +148,9 @@ public class StockChart extends LineChart<Number, Number> {
       return;
     }
 
-    NumberAxis yAxis = (NumberAxis) getYAxis();
-    double markerLow = yAxis.getLowerBound();
-    double markerHigh = yAxis.getUpperBound();
+    NumberAxis verticalAxis = (NumberAxis) getYAxis();
+    double markerLow = verticalAxis.getLowerBound();
+    double markerHigh = verticalAxis.getUpperBound();
 
     XYChart.Series<Number, Number> series = new XYChart.Series<>();
     series.setName(label);
@@ -181,7 +183,7 @@ public class StockChart extends LineChart<Number, Number> {
    *
    * @return a configured {@link NumberAxis} for the horizontal axis
    */
-  private static NumberAxis buildXAxis() {
+  private static NumberAxis buildXaxis() {
     NumberAxis axis = new NumberAxis();
     axis.setLabel("Day");
     axis.setMinorTickVisible(false);
@@ -194,7 +196,7 @@ public class StockChart extends LineChart<Number, Number> {
    *
    * @return a configured {@link NumberAxis} for the vertical axis
    */
-  private static NumberAxis buildYAxis() {
+  private static NumberAxis buildYaxis() {
     NumberAxis axis = new NumberAxis();
     axis.setLabel("Price ($)");
     axis.setAutoRanging(false);
@@ -226,7 +228,7 @@ public class StockChart extends LineChart<Number, Number> {
    * @param startIndex zero-based index of the first visible price in the full history
    * @param visiblePrices prices currently shown by the chart
    */
-  private static void configureXAxis(
+  private static void configureXaxis(
       NumberAxis axis, int startIndex, List<BigDecimal> visiblePrices) {
     if (visiblePrices.isEmpty()) {
       return;
@@ -234,7 +236,7 @@ public class StockChart extends LineChart<Number, Number> {
 
     int firstDay = startIndex + 1;
     int lastDay = startIndex + visiblePrices.size();
-    AxisBounds bounds = calculateXAxisBounds(firstDay, lastDay);
+    AxisBounds bounds = calculateXaxisBounds(firstDay, lastDay);
     axis.setLowerBound(bounds.lowerBound());
     axis.setUpperBound(bounds.upperBound());
     axis.setTickUnit(calculateTickUnit(bounds));
@@ -247,7 +249,7 @@ public class StockChart extends LineChart<Number, Number> {
    * @param lastDay last 1-based trading day shown
    * @return lower and upper axis bounds with dynamic padding
    */
-  private static AxisBounds calculateXAxisBounds(int firstDay, int lastDay) {
+  private static AxisBounds calculateXaxisBounds(int firstDay, int lastDay) {
     double padding = calculateAxisPadding(firstDay, lastDay);
     return new AxisBounds(firstDay - padding, lastDay + padding);
   }
@@ -258,12 +260,12 @@ public class StockChart extends LineChart<Number, Number> {
    * @param axis axis to update
    * @param visiblePrices prices currently shown by the chart
    */
-  private static void configureYAxis(NumberAxis axis, List<BigDecimal> visiblePrices) {
+  private static void configureYaxis(NumberAxis axis, List<BigDecimal> visiblePrices) {
     if (visiblePrices.isEmpty()) {
       return;
     }
 
-    AxisBounds bounds = calculateYAxisBounds(visiblePrices);
+    AxisBounds bounds = calculateYaxisBounds(visiblePrices);
     axis.setLowerBound(bounds.lowerBound());
     axis.setUpperBound(bounds.upperBound());
     axis.setTickUnit(calculateTickUnit(bounds));
@@ -275,7 +277,7 @@ public class StockChart extends LineChart<Number, Number> {
    * @param visiblePrices prices currently shown by the chart
    * @return lower and upper axis bounds with dynamic padding
    */
-  private static AxisBounds calculateYAxisBounds(List<BigDecimal> visiblePrices) {
+  private static AxisBounds calculateYaxisBounds(List<BigDecimal> visiblePrices) {
     double min = visiblePrices.stream().mapToDouble(BigDecimal::doubleValue).min().orElse(0.0);
     double max = visiblePrices.stream().mapToDouble(BigDecimal::doubleValue).max().orElse(0.0);
     double padding = calculateAxisPadding(min, max);

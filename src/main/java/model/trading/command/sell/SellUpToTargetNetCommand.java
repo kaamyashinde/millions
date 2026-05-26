@@ -1,22 +1,22 @@
 package model.trading.command.sell;
 
 
-import model.trading.command.TradeCommand;
-
 import static util.Validator.requirePositive;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import model.core.asset.Share;
 import model.core.market.Exchange;
 import model.core.player.Player;
-import model.core.asset.Share;
-import model.trading.transaction.Transaction;
 import model.trading.calculator.SaleCalculator;
+import model.trading.command.TradeCommand;
+import model.trading.transaction.Transaction;
 
 /**
- * Sells FIFO slices until cumulative net proceeds reach {@code targetNet} or holdings are exhausted.
+ * Sells FIFO slices until cumulative net proceeds reach {@code targetNet} or holdings are
+ * exhausted.
  */
 public final class SellUpToTargetNetCommand implements TradeCommand {
 

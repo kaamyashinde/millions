@@ -12,7 +12,8 @@ import util.IoLogger;
 /**
  * Writes profile JSON documents to disk, creating parent directories when needed.
  */
-public final class JsonProfileWriter implements TextDocumentWriter<ProfileFile, PersistenceException> {
+public final class JsonProfileWriter
+    implements TextDocumentWriter<ProfileFile, PersistenceException> {
 
   private final ObjectMapper objectMapper;
 
