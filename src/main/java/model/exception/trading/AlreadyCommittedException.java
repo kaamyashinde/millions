@@ -12,7 +12,7 @@ package model.exception.trading;
 public class AlreadyCommittedException extends RuntimeException {
 
   /**
-   * Constructs a new AlreadyCommittedException with a default error message indicating that the
+   * Constructs a new AlreadyCommittedException with a default error message.
    */
   public AlreadyCommittedException() {
     super("This purchase is already commited. A transaction cannot be commited twice.");

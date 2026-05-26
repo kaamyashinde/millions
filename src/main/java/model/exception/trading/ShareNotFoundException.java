@@ -1,10 +1,9 @@
 package model.exception.trading;
 
 
-import model.core.asset.Stock;
-
-import model.core.player.Player;
 import model.core.asset.Share;
+import model.core.asset.Stock;
+import model.core.player.Player;
 
 /**
  * An exception thrown when a player attempts to sell a share that is not present in their
