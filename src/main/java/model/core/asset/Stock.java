@@ -1,12 +1,12 @@
 package model.core.asset;
 
 
-import model.core.market.Exchange;
-
 import static util.Validator.checkNotNull;
+
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import model.core.market.Exchange;
 
 /**
  * Represents a stock in a company. This has a unique stock symbol, f.e.g., "AAPL" for Apple Inc.
@@ -95,7 +95,8 @@ public class Stock implements InvestableAsset {
    *
    * @param day trading day number, 1-based
    * @return price recorded on the requested day
-   * @throws IllegalArgumentException if the day is before day 1 or no price is recorded for that day
+   * @throws IllegalArgumentException if the day is before day 1 or no price is recorded for that
+   *     day
    */
   @Override
   public BigDecimal getPriceOnDay(int day) {
@@ -110,7 +111,7 @@ public class Stock implements InvestableAsset {
    * Returns the highest recorded price of a stock.
    *
    * @return The highest recorded price of the stock, or {@code BigDecimal.ZERO} if there are no
-   * prices.
+   *     prices.
    */
   public BigDecimal getHighestPrice() {
     return this.price.stream().max(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
@@ -120,7 +121,7 @@ public class Stock implements InvestableAsset {
    * Returns the lowest recorded price of a stock.
    *
    * @return The lowest recorded price of the stock, or {@code BigDecimal.ZERO} if there are no
-   * prices.
+   *     prices.
    */
   public BigDecimal getLowestPrice() {
     return this.price.stream().min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
@@ -131,7 +132,7 @@ public class Stock implements InvestableAsset {
    * recent price and the previous price.
    *
    * @return The latest price change of the stock, or {@code BigDecimal.ZERO} if there are fewer
-   * than two
+   *     than two prices.
    */
   public BigDecimal getLatestPriceChange() {
     int size = price.size();

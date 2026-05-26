@@ -1,10 +1,10 @@
 package model.core.asset;
 
 
-import model.trading.transaction.Purchase;
-
 import static util.Validator.checkNotNull;
+
 import java.math.BigDecimal;
+import model.trading.transaction.Purchase;
 
 /**
  * Represents a share in the stock market. A purchase results in acquiring certain amount of
