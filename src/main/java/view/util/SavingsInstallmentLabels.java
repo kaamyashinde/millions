@@ -11,6 +11,8 @@ public final class SavingsInstallmentLabels {
   private SavingsInstallmentLabels() {}
 
   /**
+   * Returns the localized label for the given installment sizing mode.
+   *
    * @param mode installment sizing mode
    * @return user-facing label for the current locale
    */

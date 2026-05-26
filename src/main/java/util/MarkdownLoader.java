@@ -1,5 +1,6 @@
 package util;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
@@ -34,7 +35,7 @@ public final class MarkdownLoader {
         return "";
       }
       return new String(in.readAllBytes(), StandardCharsets.UTF_8);
-    } catch (Exception e) {
+    } catch (IOException exception) {
       return "";
     }
   }

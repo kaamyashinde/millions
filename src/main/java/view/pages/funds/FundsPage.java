@@ -110,10 +110,20 @@ public class FundsPage extends BorderPane {
     table.getColumns().setAll(List.of(symbolColumn, nameColumn, priceColumn));
   }
 
+  /**
+   * Returns the current text in the search field.
+   *
+   * @return search field text
+   */
   public String getSearchText() {
     return searchField.getText();
   }
 
+  /**
+   * Returns the embedded fund detail view.
+   *
+   * @return embedded fund detail view
+   */
   public FundDetailView getDetailView() {
     return detailView;
   }
