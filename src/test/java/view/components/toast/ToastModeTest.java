@@ -3,6 +3,7 @@ package view.components.toast;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,11 @@ import view.components.toast.ToastMode;
  * getColorHex() and getSymbol().
  */
 class ToastModeTest {
+
+  @Test
+  void valueOf_unknownName_throwsIllegalArgumentException() {
+    assertThrows(IllegalArgumentException.class, () -> ToastMode.valueOf("NOT_A_MODE"));
+  }
 
   @Test
   void enumHasFourConstants() {

@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.application.Platform;
+import view.JavaFxTestSupport;
 import javafx.scene.layout.VBox;
 
 import model.learning.store.LearningContentStore;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class LearningTopicCardTest {
 
   @BeforeAll
-  static void initJavaFx() {
+  static void initJavaFx() throws InterruptedException {
     JavaFxTestSupport.ensureStarted();
   }
 
