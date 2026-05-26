@@ -9,7 +9,7 @@ import java.math.RoundingMode;
 public final class UiFormat {
 
   private static final int DISPLAY_SCALE = 2;
-  private static final int QUANTITY_SCALE = 6;
+  private static final int QUANTITY_SCALE = 2;
 
   private UiFormat() {}
 
@@ -27,7 +27,7 @@ public final class UiFormat {
   }
 
   /**
-   * Formats a share quantity with up to six fractional digits, stripping trailing zeros.
+   * Formats a share quantity with up to two fractional digits, stripping trailing zeros.
    *
    * @param value quantity to format
    * @return quantity display text, or {@code "-"} when value is null

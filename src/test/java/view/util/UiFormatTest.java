@@ -18,8 +18,8 @@ class UiFormatTest {
   }
 
   @Test
-  void quantity_smallFraction_showsUpToSixDecimals() {
-    assertEquals("0.004123", UiFormat.quantity(new BigDecimal("0.0041234")));
+  void quantity_smallFraction_roundsToTwoDecimals() {
+    assertEquals("0.01", UiFormat.quantity(new BigDecimal("0.0051")));
   }
 
   @Test
