@@ -1,13 +1,12 @@
 package model.trading.command.sell;
 
 
-import model.trading.command.TradeCommand;
-
 import java.util.List;
 import java.util.Objects;
+import model.core.asset.Share;
 import model.core.market.Exchange;
 import model.core.player.Player;
-import model.core.asset.Share;
+import model.trading.command.TradeCommand;
 import model.trading.transaction.Sale;
 import model.trading.transaction.Transaction;
 

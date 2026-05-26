@@ -34,7 +34,8 @@ public final class RegularSavingsProcessor {
    * @param player            player whose plans are run; if null, returns an empty list
    * @param fromDayExclusive  day before the first simulated day (typically previous
    *                            {@link Exchange#getDay()} before {@link Exchange#advance(int)})
-   * @param toDayInclusive    last calendar day to process (typically current {@link Exchange#getDay()})
+   * @param toDayInclusive last calendar day to process (typically current
+   *                            {@link Exchange#getDay()})
    * @return symbols for which a scheduled installment was skipped due to insufficient funds
    */
   public static List<String> run(Exchange exchange, Player player, int fromDayExclusive,

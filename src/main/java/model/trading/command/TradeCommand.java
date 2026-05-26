@@ -1,16 +1,15 @@
 package model.trading.command;
 
 
-import model.core.market.Exchange;
-
 import java.util.List;
+import model.core.market.Exchange;
 import model.core.player.Player;
 import model.trading.transaction.Transaction;
 
 /**
  * Command abstraction for trade execution. Encapsulates validation, transaction construction, and
- * commit so callers can queue, log, or batch trades without coupling to {@link model.core.market.Exchange}
- * internals.
+ * commit so callers can queue, log, or batch trades without coupling to
+ * {@link model.core.market.Exchange} internals.
  */
 public interface TradeCommand {
 

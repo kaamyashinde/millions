@@ -1,17 +1,16 @@
 package model.trading.command.buy;
 
 
-import model.trading.command.TradeCommand;
-
 import static util.Validator.requirePositive;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import model.core.market.Exchange;
 import model.core.asset.InvestableAsset;
+import model.core.market.Exchange;
 import model.core.player.Player;
 import model.exception.trading.InsufficientFundsException;
+import model.trading.command.TradeCommand;
 import model.trading.transaction.Transaction;
 import model.trading.transaction.TransactionSizing;
 
