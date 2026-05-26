@@ -77,13 +77,13 @@ class StockFinancialInfoProviderTest {
   void formatMoney_usesMillionsSuffix() {
     BigDecimal amount = new BigDecimal("47500000.00");
     String formatted = provider.formatMoney(amount);
-    assertEquals("$47.5M", formatted);
+    assertEquals("$47.50M", formatted);
   }
 
   @Test
   void formatMoney_negativeProfit() {
     String formatted = provider.formatMoney(new BigDecimal("-2500000"));
-    assertEquals("-$2.5M", formatted);
+    assertEquals("-$2.50M", formatted);
   }
 
   @Test

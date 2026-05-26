@@ -3,7 +3,7 @@ package view.dialogs;
 import controller.TradeResult;
 import controller.TradingController;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.Optional;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -18,6 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import util.I18n;
 import view.theme.ThemeStyles;
 
 /**
@@ -42,29 +43,42 @@ public final class TradeDialog {
     symbolField.setPromptText("Symbol");
 
     ToggleGroup modeGroup = new ToggleGroup();
-    RadioButton quantityMode = new RadioButton("Quantity");
+    RadioButton quantityMode = new RadioButton(I18n.get("trade.buy.mode.quantity"));
     quantityMode.setToggleGroup(modeGroup);
     quantityMode.setSelected(true);
-    RadioButton budgetMode = new RadioButton("Max spend");
+    RadioButton budgetMode = new RadioButton(I18n.get("trade.buy.mode.investmentAmount"));
     budgetMode.setToggleGroup(modeGroup);
 
     TextField amountField = new TextField();
-    amountField.setPromptText("Shares or max spend");
+    amountField.setPromptText(I18n.get("trade.buy.amount.prompt"));
 
-    Label priceHint = new Label();
     Label balanceHint = new Label();
     Label ownedHint = new Label();
-    Label estimateHint = new Label();
-    priceHint.setWrapText(true);
     balanceHint.setWrapText(true);
     ownedHint.setWrapText(true);
-    estimateHint.setWrapText(true);
+    Label unitPriceHint = new Label("Unit price: —");
+    Label quantityHint = new Label("Quantity: —");
+    Label beforeCommissionHint = new Label("Before commission: —");
+    Label commissionHint = new Label("Commission: —");
+    Label afterCommissionHint = new Label("After commission: —");
+    ThemeStyles.addStyleClasses(afterCommissionHint, "trade-estimate-total");
+    VBox estimateBox =
+        new VBox(
+            4,
+            new Label("Cost estimate"),
+            unitPriceHint,
+            quantityHint,
+            beforeCommissionHint,
+            commissionHint,
+            afterCommissionHint);
+    ThemeStyles.addStyleClasses(estimateBox, "trade-estimate-card");
 
     Label errorLabel = createErrorLabel();
 
     Runnable updateHints = () -> updateBuyHints(
         controller, symbolField, amountField, quantityMode.isSelected(),
-        priceHint, balanceHint, ownedHint, estimateHint);
+        balanceHint, ownedHint, unitPriceHint, quantityHint, beforeCommissionHint,
+        commissionHint, afterCommissionHint);
     symbolField.textProperty().addListener((_, _, _) -> updateHints.run());
     amountField.textProperty().addListener((_, _, _) -> updateHints.run());
     modeGroup.selectedToggleProperty().addListener((_, _, _) -> updateHints.run());
@@ -94,10 +108,9 @@ public final class TradeDialog {
     VBox root = new VBox(
         10,
         form,
-        priceHint,
+        estimateBox,
         balanceHint,
         ownedHint,
-        estimateHint,
         errorLabel,
         new HBox(10, confirm, cancel));
     root.setPadding(new Insets(16));
@@ -129,7 +142,7 @@ public final class TradeDialog {
     Runnable updateHints = () -> {
       String sym = symbolField.getText();
       BigDecimal owned = controller.getOwnedQuantity(sym);
-      ownedHint.setText("You own " + owned.toPlainString() + " share(s)");
+      ownedHint.setText("You own " + controller.formatQuantity(owned) + " share(s)");
     };
     symbolField.textProperty().addListener((_, _, _) -> updateHints.run());
     updateHints.run();
@@ -164,42 +177,53 @@ public final class TradeDialog {
       TextField symbolField,
       TextField amountField,
       boolean quantityMode,
-      Label priceHint,
       Label balanceHint,
       Label ownedHint,
-      Label estimateHint) {
+      Label unitPriceHint,
+      Label quantityHint,
+      Label beforeCommissionHint,
+      Label commissionHint,
+      Label afterCommissionHint) {
     String sym = symbolField.getText();
-    controller.getLatestPrice(sym).ifPresentOrElse(
-        price -> priceHint.setText("Latest price: " + controller.formatMoney(price)),
-        () -> priceHint.setText("Latest price: —"));
     balanceHint.setText("Cash balance: " + controller.formatMoney(controller.getCashBalance()));
     BigDecimal owned = controller.getOwnedQuantity(sym);
-    ownedHint.setText("You own " + owned.toPlainString() + " share(s)");
-    estimateHint.setText(estimateBuyCost(controller, sym, amountField.getText(), quantityMode));
+    ownedHint.setText("You own " + controller.formatQuantity(owned) + " share(s)");
+    Optional<TradingController.BuyEstimate> estimate =
+        quantityMode
+            ? controller.estimateBuyByQuantity(sym, amountField.getText())
+            : controller.estimateBuyForBudget(sym, amountField.getText());
+    applyBuyEstimate(
+        controller,
+        estimate,
+        unitPriceHint,
+        quantityHint,
+        beforeCommissionHint,
+        commissionHint,
+        afterCommissionHint);
   }
 
-  private static String estimateBuyCost(
-      TradingController controller, String symbol, String amountText, boolean quantityMode) {
-    if (amountText == null || amountText.isBlank()) {
-      return quantityMode ? "Estimated cost: —" : "Max spend: —";
+  static void applyBuyEstimate(
+      TradingController controller,
+      Optional<TradingController.BuyEstimate> estimate,
+      Label unitPriceHint,
+      Label quantityHint,
+      Label beforeCommissionHint,
+      Label commissionHint,
+      Label afterCommissionHint) {
+    if (estimate.isEmpty()) {
+      unitPriceHint.setText("Unit price: —");
+      quantityHint.setText("Quantity: —");
+      beforeCommissionHint.setText("Before commission: —");
+      commissionHint.setText("Commission: —");
+      afterCommissionHint.setText("After commission: —");
+      return;
     }
-    if (!quantityMode) {
-      return "Max spend: " + amountText.trim();
-    }
-    try {
-      BigDecimal qty = new BigDecimal(amountText.trim());
-      if (qty.signum() <= 0) {
-        return "Estimated cost: —";
-      }
-      return controller.getLatestPrice(symbol)
-          .map(price -> {
-            BigDecimal estimate = price.multiply(qty).setScale(2, RoundingMode.HALF_UP);
-            return "Estimated cost (excl. commission): " + controller.formatMoney(estimate);
-          })
-          .orElse("Estimated cost: —");
-    } catch (NumberFormatException e) {
-      return "Estimated cost: —";
-    }
+    TradingController.BuyEstimate value = estimate.get();
+    unitPriceHint.setText("Unit price: " + controller.formatMoney(value.unitPrice()));
+    quantityHint.setText("Quantity: " + controller.formatQuantity(value.quantity()));
+    beforeCommissionHint.setText("Before commission: " + controller.formatMoney(value.gross()));
+    commissionHint.setText("Commission: " + controller.formatMoney(value.commission()));
+    afterCommissionHint.setText("After commission: " + controller.formatMoney(value.total()));
   }
 
   private static void handleResult(
@@ -249,7 +273,11 @@ public final class TradeDialog {
     ThemeStyles.addStyleClasses(root, "dialog-root");
     ThemeStyles.styleField(primaryField);
     ThemeStyles.styleField(secondaryField);
-    ThemeStyles.styleAccentButton(confirm);
+    if (stage.getTitle() != null && stage.getTitle().toLowerCase().contains("sell")) {
+      ThemeStyles.styleDangerButton(confirm);
+    } else {
+      ThemeStyles.styleAccentButton(confirm);
+    }
     ThemeStyles.styleButton(cancel);
     stage.setScene(scene);
     stage.showAndWait();

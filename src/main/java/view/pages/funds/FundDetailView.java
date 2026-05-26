@@ -20,6 +20,7 @@ import model.core.asset.fund.FundComponent;
 import view.components.table.AppTableView;
 import view.dialogs.TradeDialog;
 import view.theme.ThemeStyles;
+import view.util.UiFormat;
 
 /**
  * Dedicated fund detail view showing the latest derived price and composite holdings.
@@ -54,7 +55,7 @@ public class FundDetailView extends BorderPane {
         AppTableView.createTextColumn("Company", c -> c.stock().getCompany());
     TableColumn<FundComponent, BigDecimal> weightColumn =
         AppTableView.createNumericColumn(
-            "Weight", FundComponent::weight, BigDecimal::toPlainString);
+            "Weight", FundComponent::weight, UiFormat::decimal);
     componentList.getColumns().addAll(symbolColumn, companyColumn, weightColumn);
 
     ThemeStyles.styleAccentButton(buyButton);
@@ -111,7 +112,7 @@ public class FundDetailView extends BorderPane {
     }
     titleLabel.setText(fund.getSymbol() + " · " + fund.getDisplayName());
     subtitleLabel.setText("Composite fund built from weighted stock holdings.");
-    latestPriceLabel.setText("Latest price: " + fund.getSalesPrice().toPlainString());
+    latestPriceLabel.setText("Latest price: " + UiFormat.decimal(fund.getSalesPrice()));
     componentList.setItems(FXCollections.observableArrayList(fund.getComponents()));
     updateTradeActions(fund);
   }
@@ -121,6 +122,15 @@ public class FundDetailView extends BorderPane {
    */
   public void refresh() {
     showFund(selectedFund);
+  }
+
+  /**
+   * Returns the fund currently displayed in the detail view.
+   *
+   * @return selected fund, or {@code null} when the view is empty
+   */
+  public Fund getSelectedFund() {
+    return selectedFund;
   }
 
   private void updateTradeActions(Fund fund) {

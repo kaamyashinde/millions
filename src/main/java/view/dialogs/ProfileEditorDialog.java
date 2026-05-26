@@ -160,7 +160,6 @@ public final class ProfileEditorDialog {
     ThemeStyles.addStyleClasses(dangerHint, "text-secondary");
 
     Button exitGameButton = new Button(I18n.get("exitGame.pin.confirm"));
-    ThemeStyles.addStyleClasses(exitGameButton, "text-error");
     exitGameButton.setOnAction(_ -> {
       stage.close();
       ExitGameDialog.show(stage.getOwner(), exitGame, onAccountDeleted);
@@ -195,7 +194,7 @@ public final class ProfileEditorDialog {
     ThemeStyles.styleButton(removeImage);
     ThemeStyles.styleAccentButton(save);
     ThemeStyles.styleButton(cancel);
-    ThemeStyles.styleButton(exitGameButton);
+    ThemeStyles.styleDangerButton(exitGameButton);
     stage.setScene(scene);
     stage.showAndWait();
   }

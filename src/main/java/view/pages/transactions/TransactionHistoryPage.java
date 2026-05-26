@@ -3,7 +3,6 @@ package view.pages.transactions;
 import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Insets;
@@ -20,6 +19,7 @@ import model.core.player.Player;
 import model.trading.transaction.Transaction;
 import view.components.table.AppTableView;
 import view.theme.ThemeStyles;
+import view.util.UiFormat;
 
 /**
  * Read-only list of all buys and sells for the current playthrough.
@@ -116,10 +116,7 @@ public class TransactionHistoryPage extends BorderPane {
   }
 
   private static String formatDecimal(BigDecimal value) {
-    if (value == null) {
-      return "—";
-    }
-    return value.setScale(2, RoundingMode.HALF_UP).toPlainString();
+    return UiFormat.decimal(value);
   }
 
   private record TransactionRow(

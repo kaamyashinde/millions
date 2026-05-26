@@ -65,7 +65,7 @@ public class StockFinancialInfoProvider {
     Objects.requireNonNull(amount, "amount");
     BigDecimal abs = amount.abs();
     if (abs.compareTo(MILLION) >= 0) {
-      BigDecimal millions = amount.divide(MILLION, 1, RoundingMode.HALF_UP);
+      BigDecimal millions = amount.divide(MILLION, 2, RoundingMode.HALF_UP);
       String sign = amount.signum() < 0 ? "-" : "";
       return sign + "$" + millions.abs().toPlainString() + "M";
     }

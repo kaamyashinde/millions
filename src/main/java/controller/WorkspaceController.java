@@ -15,6 +15,7 @@ import util.Validator;
 import view.components.notification.LevelUpNotificationObserver;
 import view.components.notification.NotificationService;
 import view.components.toast.ToastMode;
+import view.util.UiFormat;
 
 /**
  * Orchestrates session-scoped workspace state and child page controllers.
@@ -303,6 +304,6 @@ public class WorkspaceController {
     notifications.show(
         ToastMode.SUCCESS,
         "Player ready",
-        session.player().getName() + " · balance " + session.player().getMoney().toPlainString());
+        session.player().getName() + " · balance " + UiFormat.decimal(session.player().getMoney()));
   }
 }

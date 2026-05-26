@@ -2,7 +2,6 @@ package view.pages.portfolio;
 
 import static util.Validator.checkNotNull;
 
-import java.math.RoundingMode;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -30,6 +29,7 @@ import model.analysis.performance.PerformanceComparison;
 import view.components.image.ImageLoader;
 import view.dialogs.TradeDialog;
 import view.theme.ThemeStyles;
+import view.util.UiFormat;
 
 /**
  * JavaFX panel showing player summary data, current holdings, and portfolio-vs-market metrics.
@@ -118,8 +118,7 @@ public class PlayerPortfolioPage extends BorderPane {
 
     VBox metricsBox = buildMetricsBox();
     Button exitGameButton = new Button(I18n.get("exitGame.pin.confirm"));
-    ThemeStyles.addStyleClasses(exitGameButton, "text-error");
-    ThemeStyles.styleButton(exitGameButton);
+    ThemeStyles.styleDangerButton(exitGameButton);
     exitGameButton.setOnAction(_ -> {
       if (getScene() != null) {
         ExitGameDialog.show(getScene().getWindow(), exitGame, onProfileDeleted);
@@ -151,20 +150,15 @@ public class PlayerPortfolioPage extends BorderPane {
 
     TableColumn<HoldingSummary, String> quantityColumn = new TableColumn<>("Quantity");
     quantityColumn.setCellValueFactory(
-        c ->
-            new SimpleStringProperty(
-                c.getValue()
-                    .totalQuantity()
-                    .setScale(2, RoundingMode.HALF_UP)
-                    .toPlainString()));
+        c -> new SimpleStringProperty(UiFormat.decimal(c.getValue().totalQuantity())));
 
     TableColumn<HoldingSummary, String> purchasePriceColumn = new TableColumn<>("Avg. Purchase Price");
     purchasePriceColumn.setCellValueFactory(
-        c -> new SimpleStringProperty(c.getValue().avgPurchasePrice().toPlainString()));
+        c -> new SimpleStringProperty(UiFormat.decimal(c.getValue().avgPurchasePrice())));
 
     TableColumn<HoldingSummary, String> currentPriceColumn = new TableColumn<>("Current Price");
     currentPriceColumn.setCellValueFactory(
-        c -> new SimpleStringProperty(c.getValue().currentPrice().toPlainString()));
+        c -> new SimpleStringProperty(UiFormat.decimal(c.getValue().currentPrice())));
 
     TableColumn<HoldingSummary, Void> actionsColumn = new TableColumn<>("Actions");
     actionsColumn.setPrefWidth(90);
@@ -172,7 +166,7 @@ public class PlayerPortfolioPage extends BorderPane {
       private final Button sellButton = new Button("Sell");
 
       {
-        ThemeStyles.styleButton(sellButton);
+        ThemeStyles.styleDangerButton(sellButton);
         sellButton.setOnAction(_ -> {
           HoldingSummary holding = getTableRow() != null ? getTableRow().getItem() : null;
           if (holding != null && getScene() != null) {
