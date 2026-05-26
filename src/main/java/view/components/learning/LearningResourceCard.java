@@ -3,7 +3,6 @@ package view.components.learning;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-
 import model.learning.content.LearningResource;
 import util.ExternalLinkOpener;
 import view.theme.ThemeStyles;
@@ -40,7 +39,7 @@ public final class LearningResourceCard {
     card.setPadding(new Insets(12));
     card.setMaxWidth(Double.MAX_VALUE);
     ThemeStyles.addStyleClasses(card, "learning-card-resource");
-    card.setOnMouseClicked(_ -> ExternalLinkOpener.open(resource.url()));
+    card.setOnMouseClicked(unused -> ExternalLinkOpener.open(resource.url()));
     return card;
   }
 }

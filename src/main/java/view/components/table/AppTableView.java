@@ -34,7 +34,7 @@ public class AppTableView<T> extends TableView<T> {
     placeholderLabel.setText(placeholderText);
     setPlaceholder(placeholderLabel);
     setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
-    setRowFactory(_ -> new TableRow<>() {
+    setRowFactory(unused -> new TableRow<>() {
       @Override
       protected void updateItem(T item, boolean empty) {
         super.updateItem(item, empty);
@@ -100,7 +100,8 @@ public class AppTableView<T> extends TableView<T> {
       Function<T, N> extractor,
       Function<N, String> formatter) {
     TableColumn<T, N> column = new TableColumn<>(title);
-    column.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(extractor.apply(cell.getValue())));
+    column.setCellValueFactory(
+        cell -> new ReadOnlyObjectWrapper<>(extractor.apply(cell.getValue())));
     column.setComparator((left, right) -> {
       if (left == right) {
         return 0;
@@ -113,7 +114,7 @@ public class AppTableView<T> extends TableView<T> {
       }
       return left.compareTo(right);
     });
-    column.setCellFactory(_ -> new TableCell<>() {
+    column.setCellFactory(unused -> new TableCell<>() {
       @Override
       protected void updateItem(N item, boolean empty) {
         super.updateItem(item, empty);

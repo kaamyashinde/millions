@@ -85,7 +85,9 @@ public class AnalysisToolbar extends HBox {
                 deps));
 
     ChartToolSelection initialSelection =
-        toolsBySelection.containsKey(selectedSelection) ? selectedSelection : ChartToolSelection.NONE;
+        toolsBySelection.containsKey(selectedSelection)
+            ? selectedSelection
+            : ChartToolSelection.NONE;
     group.getToggles().stream()
         .filter(toggle -> toggle.getUserData() == initialSelection)
         .findFirst()

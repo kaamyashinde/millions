@@ -3,8 +3,8 @@ package view.components.notification;
 import static util.Validator.checkNotNull;
 
 import model.core.player.Player;
-import model.core.player.level.PlayerLevel;
 import model.core.player.PlayerObserver;
+import model.core.player.level.PlayerLevel;
 import view.components.toast.ToastMode;
 
 /**

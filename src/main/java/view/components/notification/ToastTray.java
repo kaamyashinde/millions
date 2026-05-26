@@ -76,7 +76,8 @@ public class ToastTray extends VBox {
    */
   private void insertToastAt(NotificationItem item, int index) {
     Toast toast =
-        new Toast(item.mode(), item.title(), item.description(), item.actionLabel(), item.onAction());
+        new Toast(
+            item.mode(), item.title(), item.description(), item.actionLabel(), item.onAction());
     idToNode.put(item.id(), toast);
     getChildren().add(index, toast);
   }

@@ -3,7 +3,6 @@ package view.components.notification;
 import static util.Validator.checkNotNull;
 
 import java.util.UUID;
-
 import view.components.toast.ToastMode;
 
 /**

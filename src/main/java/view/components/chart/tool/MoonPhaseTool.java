@@ -75,7 +75,7 @@ public class MoonPhaseTool extends AbstractChartTool {
               MoonPhaseCalculator.Phase phase = entry.getValue();
               boolean isNewMoon = phase == MoonPhaseCalculator.Phase.NEW_MOON;
               String seriesName = (isNewMoon ? "New Moon" : "Full Moon") + " (Day " + day + ")";
-              String phaseClass = isNewMoon ? "moon-phase-new" : "moon-phase-full";
+              final String phaseClass = isNewMoon ? "moon-phase-new" : "moon-phase-full";
 
               XYChart.Series<Number, Number> series = new XYChart.Series<>();
               series.setName(seriesName);
