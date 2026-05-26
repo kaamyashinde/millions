@@ -207,4 +207,121 @@ class TradingControllerTest {
 
     assertInstanceOf(TradeResult.Failure.class, result);
   }
+
+  @Test
+  void sellUpToTargetNet_success_reducesHoldings() {
+    exchange.buy("AAPL", new BigDecimal("10"), player);
+    BigDecimal before = player.getPortfolio().totalQuantityForSymbol("AAPL");
+
+    TradeResult result = controller.sellUpToTargetNet("AAPL", "500");
+
+    assertInstanceOf(TradeResult.Success.class, result);
+    assertTrue(player.getPortfolio().totalQuantityForSymbol("AAPL").compareTo(before) < 0);
+  }
+
+  @Test
+  void sellUpToTargetNet_unknownSymbol_returnsFailure() {
+    TradeResult result = controller.sellUpToTargetNet("UNKNOWN", "500");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+  }
+
+  @Test
+  void sellUpToTargetNet_invalidAmount_returnsFailure() {
+    exchange.buy("AAPL", new BigDecimal("5"), player);
+    TradeResult result = controller.sellUpToTargetNet("AAPL", "not-a-number");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+  }
+
+  @Test
+  void sellUpToTargetNet_zeroAmount_returnsFailure() {
+    exchange.buy("AAPL", new BigDecimal("5"), player);
+    TradeResult result = controller.sellUpToTargetNet("AAPL", "0");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+  }
+
+  @Test
+  void sellAllForSymbol_success_clearsHoldings() {
+    exchange.buy("AAPL", new BigDecimal("5"), player);
+
+    TradeResult result = controller.sellAllForSymbol("AAPL");
+
+    assertInstanceOf(TradeResult.Success.class, result);
+    assertEquals(0, player.getPortfolio().totalQuantityForSymbol("AAPL").signum());
+  }
+
+  @Test
+  void sellAllForSymbol_noHoldings_returnsFailure() {
+    TradeResult result = controller.sellAllForSymbol("AAPL");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+  }
+
+  @Test
+  void sellAllForSymbol_unknownSymbol_returnsFailure() {
+    TradeResult result = controller.sellAllForSymbol("UNKNOWN");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+  }
+
+  @Test
+  void sellAllForSymbol_afterBudgetBuy_sellsExactFractionalQuantity() {
+    controller.buyUpToBudget("AAPL", "1000");
+    BigDecimal owned = player.getPortfolio().totalQuantityForSymbol("AAPL");
+    assertTrue(owned.signum() > 0);
+
+    TradeResult result = controller.sellAllForSymbol("AAPL");
+
+    assertInstanceOf(TradeResult.Success.class, result);
+    assertEquals(0, player.getPortfolio().totalQuantityForSymbol("AAPL").signum());
+  }
+
+  @Test
+  void estimateSellByQuantity_returnsEstimateWithProceedsBreakdown() {
+    exchange.buy("AAPL", new BigDecimal("5"), player);
+
+    Optional<TradingController.SellEstimate> estimate =
+        controller.estimateSellByQuantity("AAPL", "3");
+
+    assertTrue(estimate.isPresent());
+    TradingController.SellEstimate value = estimate.get();
+    assertEquals(0, value.unitPrice().compareTo(new BigDecimal("150.00")));
+    assertEquals(0, value.quantity().compareTo(new BigDecimal("3")));
+    assertTrue(value.gross().signum() > 0);
+    assertTrue(value.commission().signum() > 0);
+    assertTrue(value.netProceeds().signum() > 0);
+    assertTrue(value.netProceeds().compareTo(value.gross()) < 0);
+  }
+
+  @Test
+  void estimateSellByQuantity_insufficientShares_returnsEmpty() {
+    exchange.buy("AAPL", new BigDecimal("2"), player);
+
+    Optional<TradingController.SellEstimate> estimate =
+        controller.estimateSellByQuantity("AAPL", "5");
+
+    assertTrue(estimate.isEmpty());
+  }
+
+  @Test
+  void estimateSellAll_returnsEstimateForEntireHolding() {
+    exchange.buy("AAPL", new BigDecimal("5"), player);
+
+    Optional<TradingController.SellEstimate> estimate =
+        controller.estimateSellAll("AAPL");
+
+    assertTrue(estimate.isPresent());
+    assertEquals(0, estimate.get().quantity().compareTo(new BigDecimal("5")));
+    assertTrue(estimate.get().netProceeds().signum() > 0);
+  }
+
+  @Test
+  void estimateSellAll_noHoldings_returnsEmpty() {
+    Optional<TradingController.SellEstimate> estimate =
+        controller.estimateSellAll("AAPL");
+
+    assertTrue(estimate.isEmpty());
+  }
 }
