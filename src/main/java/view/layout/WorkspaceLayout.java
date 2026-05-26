@@ -29,6 +29,9 @@ import view.theme.ThemeStyles;
 
 /**
  * Logged-in workspace shell: header bar, tabbed content, and floating toast overlay.
+ *
+ * <p>AI assistance note: Claude Code was used as inspiration when planning the page structure for
+ * this layout; the final implementation was reviewed and adapted by the group.
  */
 public class WorkspaceLayout extends StackPane implements ResponsiveLayout {
 

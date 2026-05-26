@@ -19,6 +19,9 @@ import view.components.chart.tool.ChartTool;
  * Analysis tools can be registered via {@link #registerTool(ChartTool)}; the chart routes every
  * mouse click to all currently active tools.
  *
+ * <p>AI assistance note: Cursor was used as inspiration when planning the chart interaction model;
+ * the final implementation was reviewed and adapted by the group.
+ *
  * @author kaamyashinde
  * @version 0.6.0
  * @since 2026-03-29

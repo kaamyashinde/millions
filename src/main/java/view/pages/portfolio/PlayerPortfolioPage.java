@@ -33,6 +33,9 @@ import view.util.UiFormat;
 
 /**
  * JavaFX panel showing player summary data, current holdings, and portfolio-vs-market metrics.
+ *
+ * <p>AI assistance note: Cursor was used as inspiration when planning the page structure for this
+ * view; the final implementation was reviewed and adapted by the group.
  */
 public class PlayerPortfolioPage extends BorderPane {
 

@@ -8,6 +8,9 @@ import javafx.scene.Scene;
 
 /**
  * Manages dark/light theme selection and applies the light override stylesheet.
+ *
+ * <p>AI assistance note: Cursor was used as inspiration when planning the styling organization
+ * for this manager; the final implementation was reviewed and adapted by the group.
  */
 public final class ThemeManager {
 
