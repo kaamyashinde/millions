@@ -3,6 +3,7 @@ package model.learning.quiz;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Tracks a player's progress through a single {@link Quiz} during a session.
@@ -104,13 +105,9 @@ public final class QuizAttempt {
    * @return correct answer count
    */
   public int correctCount() {
-    int count = 0;
-    for (int i = 0; i < givenAnswerIds.size(); i++) {
-      if (wasCorrect(i)) {
-        count++;
-      }
-    }
-    return count;
+    return (int) IntStream.range(0, givenAnswerIds.size())
+        .filter(this::wasCorrect)
+        .count();
   }
 
   /**

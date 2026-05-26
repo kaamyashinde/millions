@@ -116,9 +116,9 @@ public class CategoryView extends BorderPane {
       ThemeStyles.addStyleClasses(empty, "empty-state");
       content.getChildren().add(empty);
     } else {
-      for (LearningItem item : filtered) {
-        content.getChildren().add(buildItemCard(item, onItemClicked));
-      }
+      content.getChildren().addAll(filtered.stream()
+          .map(item -> buildItemCard(item, onItemClicked))
+          .toList());
     }
   }
 

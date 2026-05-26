@@ -1,7 +1,9 @@
 package view.pages.quiz;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 import controller.LearningHubController;
 import javafx.geometry.Insets;
@@ -129,24 +131,20 @@ public class QuizView extends BorderPane {
       }
     });
 
-    for (int i = 0; i < answers.size(); i++) {
+    IntStream.range(0, answers.size()).forEach(i -> {
       QuizAnswer answer = answers.get(i);
       Button btn = buildAnswerButton(answer);
       answerButtons[i] = btn;
 
       btn.setOnAction(_ -> {
-        for (Button b : answerButtons) {
-          b.setDisable(true);
-        }
+        Arrays.stream(answerButtons).forEach(b -> b.setDisable(true));
 
         String correctId = q.correctAnswerId();
         boolean correct = answer.id().equals(correctId);
 
-        for (Button b : answerButtons) {
-          if (b.getUserData().equals(correctId)) {
-            ThemeStyles.addStyleClasses(b, "quiz-answer-correct");
-          }
-        }
+        Arrays.stream(answerButtons)
+            .filter(b -> b.getUserData().equals(correctId))
+            .forEach(b -> ThemeStyles.addStyleClasses(b, "quiz-answer-correct"));
 
         if (!correct) {
           ThemeStyles.addStyleClasses(btn, "quiz-answer-wrong");
@@ -162,7 +160,7 @@ public class QuizView extends BorderPane {
       });
 
       answersBox.getChildren().add(btn);
-    }
+    });
 
     HBox nextRow = new HBox(nextBtn);
     nextRow.setAlignment(Pos.CENTER_RIGHT);

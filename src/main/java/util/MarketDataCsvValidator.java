@@ -1,5 +1,6 @@
 package util;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,10 +33,7 @@ public final class MarketDataCsvValidator {
     if (rawTokens.length == 0) {
       throw new IllegalArgumentException("Invalid market-data row: " + line);
     }
-    String[] tokens = new String[rawTokens.length];
-    for (int index = 0; index < rawTokens.length; index++) {
-      tokens[index] = rawTokens[index].trim();
-    }
+    String[] tokens = Arrays.stream(rawTokens).map(String::trim).toArray(String[]::new);
     if (!STOCK_RECORD.equals(tokens[0]) && !FUND_RECORD.equals(tokens[0])) {
       throw new IllegalArgumentException("Unknown market-data record type: " + line);
     }

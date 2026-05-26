@@ -147,9 +147,9 @@ public class ItemDetailView extends BorderPane {
       fallback.setWrapText(true);
       section.getChildren().add(fallback);
     } else {
-      for (LearningResource res : resources) {
-        section.getChildren().add(LearningResourceCard.create(res));
-      }
+      section.getChildren().addAll(resources.stream()
+          .map(LearningResourceCard::create)
+          .toList());
     }
 
     return section;
@@ -169,9 +169,9 @@ public class ItemDetailView extends BorderPane {
     ThemeStyles.addStyleClasses(heading, "section-heading");
     section.getChildren().add(heading);
 
-    for (LearningItem relatedItem : related) {
-      section.getChildren().add(buildRelatedTopicCard(relatedItem, onItemClicked));
-    }
+    section.getChildren().addAll(related.stream()
+        .map(relatedItem -> buildRelatedTopicCard(relatedItem, onItemClicked))
+        .toList());
 
     return section;
   }

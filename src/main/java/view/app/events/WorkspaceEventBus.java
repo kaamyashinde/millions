@@ -1,6 +1,7 @@
 package view.app.events;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,12 +41,9 @@ public class WorkspaceEventBus {
    */
   public void publish(WorkspaceEventType... eventTypes) {
     Set<Runnable> handlersToRun = new LinkedHashSet<>();
-    for (WorkspaceEventType eventType : eventTypes) {
-      handlersToRun.addAll(subscribers.getOrDefault(eventType, List.of()));
-    }
-    for (Runnable handler : handlersToRun) {
-      handler.run();
-    }
+    Arrays.stream(eventTypes)
+        .forEach(eventType -> handlersToRun.addAll(subscribers.getOrDefault(eventType, List.of())));
+    handlersToRun.forEach(Runnable::run);
   }
 
   private void unsubscribe(WorkspaceEventType eventType, Runnable handler) {

@@ -2,6 +2,7 @@ package view.pages.quiz;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 import controller.LearningHubController;
 import javafx.geometry.Insets;
@@ -98,10 +99,9 @@ public class QuizResultView extends BorderPane {
     VBox section = new VBox(8, heading);
     List<QuizQuestion> questions = attempt.quiz().questions();
 
-    for (int i = 0; i < questions.size(); i++) {
-      section.getChildren().add(
-          buildBreakdownRow(attempt, questions.get(i), attempt.wasCorrect(i), i + 1));
-    }
+    section.getChildren().addAll(IntStream.range(0, questions.size())
+        .mapToObj(i -> buildBreakdownRow(attempt, questions.get(i), attempt.wasCorrect(i), i + 1))
+        .toList());
 
     return section;
   }

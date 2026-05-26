@@ -118,12 +118,11 @@ public class FundsPage extends BorderPane {
       table.getSelectionModel().clearSelection();
       return;
     }
-    for (Fund fund : sorted) {
-      if (fund.getSymbol().equals(previousSelection.getSymbol())) {
-        table.getSelectionModel().select(fund);
-        return;
-      }
-    }
-    table.getSelectionModel().clearSelection();
+    sorted.stream()
+        .filter(fund -> fund.getSymbol().equals(previousSelection.getSymbol()))
+        .findFirst()
+        .ifPresentOrElse(
+            table.getSelectionModel()::select,
+            table.getSelectionModel()::clearSelection);
   }
 }
