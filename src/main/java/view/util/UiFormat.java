@@ -9,6 +9,7 @@ import java.math.RoundingMode;
 public final class UiFormat {
 
   private static final int DISPLAY_SCALE = 2;
+  private static final int QUANTITY_SCALE = 6;
 
   private UiFormat() {}
 
@@ -23,6 +24,22 @@ public final class UiFormat {
       return "-";
     }
     return value.setScale(DISPLAY_SCALE, RoundingMode.HALF_UP).toPlainString();
+  }
+
+  /**
+   * Formats a share quantity with up to six fractional digits, stripping trailing zeros.
+   *
+   * @param value quantity to format
+   * @return quantity display text, or {@code "-"} when value is null
+   */
+  public static String quantity(BigDecimal value) {
+    if (value == null) {
+      return "-";
+    }
+    return value
+        .setScale(QUANTITY_SCALE, RoundingMode.HALF_UP)
+        .stripTrailingZeros()
+        .toPlainString();
   }
 
   /**

@@ -160,7 +160,7 @@ public class PlayerPortfolioPage extends BorderPane {
 
     TableColumn<HoldingSummary, String> quantityColumn = new TableColumn<>("Quantity");
     quantityColumn.setCellValueFactory(
-        c -> new SimpleStringProperty(UiFormat.decimal(c.getValue().totalQuantity())));
+        c -> new SimpleStringProperty(UiFormat.quantity(c.getValue().totalQuantity())));
 
     TableColumn<HoldingSummary, String> purchasePriceColumn =
         new TableColumn<>("Avg. Purchase Price");
