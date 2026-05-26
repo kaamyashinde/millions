@@ -172,9 +172,9 @@ public final class TradeDialog {
         amountMode, sellAllMode,
         ownedHint, unitPriceHint, quantityHint, grossHint,
         commissionHint, taxHint, netProceedsHint);
-    symbolField.textProperty().addListener((obs, previous, current) -> updateHints.run());
-    amountField.textProperty().addListener((obs, previous, current) -> updateHints.run());
-    modeGroup.selectedToggleProperty().addListener((obs, previous, current) -> {
+    symbolField.textProperty().addListener((_, _, _) -> updateHints.run());
+    amountField.textProperty().addListener((_, _, _) -> updateHints.run());
+    modeGroup.selectedToggleProperty().addListener((_, _, _) -> {
       amountField.setDisable(sellAllMode.isSelected());
       if (sellAllMode.isSelected()) {
         amountField.setText("");
