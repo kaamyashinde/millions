@@ -14,6 +14,8 @@ final class SessionPersistenceService {
   private final JsonStorage jsonStorage;
 
   /**
+   * Creates a persistence helper for active session state.
+   *
    * @param profilePaths profile path resolver
    * @param jsonStorage JSON persistence adapter
    */

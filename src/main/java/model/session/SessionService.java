@@ -1,18 +1,17 @@
 package model.session;
 
 
-import model.session.auth.AuthService;
-import model.session.leaderboard.LocalLeaderboardService;
-import model.session.leaderboard.PlayerLeaderboardEntry;
-import model.exception.profile.ProfileInUseException;
-import model.session.profile.ProfileService;
-
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import model.exception.profile.ProfileInUseException;
 import model.persistence.io.JsonStorage;
 import model.persistence.profile.ProfilePaths;
+import model.session.auth.AuthService;
+import model.session.leaderboard.LocalLeaderboardService;
+import model.session.leaderboard.PlayerLeaderboardEntry;
+import model.session.profile.ProfileService;
 
 /**
  * Coordinates authentication, profile management, and persistence for the active session.
@@ -219,7 +218,8 @@ public final class SessionService {
   }
 
   /**
-   * Liquidates all holdings, clears savings plans, deletes the active profile, and ends the session.
+   * Liquidates all holdings, clears savings plans, deletes the active profile, and ends the
+   * session.
    *
    * @param pin PIN confirming the action
    * @return summary of liquidation before profile removal

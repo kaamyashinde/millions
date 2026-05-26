@@ -13,6 +13,8 @@ final class WelcomePreferenceService {
   private final JsonStorage jsonStorage;
 
   /**
+   * Creates a service for welcome-screen preferences.
+   *
    * @param profilePaths profile path resolver
    * @param jsonStorage JSON persistence adapter
    */
