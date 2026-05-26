@@ -1,11 +1,10 @@
 package model.session.validation.rules;
 
 
+import java.math.BigDecimal;
 import model.session.validation.RegistrationValidator;
 import model.session.validation.ValidationError;
 import model.session.validation.ValidationResult;
-
-import java.math.BigDecimal;
 
 /**
  * Validates that starting money is present and not negative.
