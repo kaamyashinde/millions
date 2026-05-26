@@ -97,7 +97,7 @@ public class StocksController {
         + " · trading day "
         + exchange.getDay()
         + " · "
-        + exchange.findStocks("").size()
+        + exchange.listings().findStocks("").size()
         + " listing(s)";
   }
 
@@ -119,7 +119,7 @@ public class StocksController {
    */
   public void refresh() {
     Stock previous = selectedStock.get();
-    List<Stock> sorted = new ArrayList<>(exchange.findStocks(""));
+    List<Stock> sorted = new ArrayList<>(exchange.listings().findStocks(""));
     sorted.sort(Comparator.comparing(Stock::getSymbol));
     stocks.setAll(sorted);
     if (previous != null) {

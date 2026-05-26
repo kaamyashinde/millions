@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import model.core.asset.Stock;
 import org.junit.jupiter.api.Test;
 
@@ -36,13 +37,13 @@ class MarketDataLoaderTest {
   @Test
   void loadFromResource_canBootstrapExchangeWithFunds() {
     MarketData marketData = MarketDataLoader.loadFromResource(MarketDataLoaderTest.class, DEMO_RESOURCE);
-    Exchange exchange = new Exchange.Builder("NYSE")
+    Exchange exchange = new ExchangeBuilder("NYSE")
         .stocks(marketData.stocks())
         .funds(marketData.funds())
         .build();
 
-    assertFalse(exchange.getFunds().isEmpty());
-    assertEquals(6, exchange.getAssets().size());
+    assertFalse(exchange.listings().getFunds().isEmpty());
+    assertEquals(6, exchange.listings().getAssets().size());
   }
 
   @Test

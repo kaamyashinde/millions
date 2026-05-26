@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.util.List;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import model.core.player.Player;
 import model.core.asset.Stock;
 import model.core.asset.fund.Fund;
@@ -28,7 +29,7 @@ class RegularSavingsProcessorTest {
         "TECHX",
         "Tech Titans Blend Fund",
         List.of(new FundComponent(apple, BigDecimal.ONE)));
-    exchange = new Exchange.Builder("NYSE")
+    exchange = new ExchangeBuilder("NYSE")
         .stocks(List.of(apple))
         .funds(List.of(techFund))
         .build();

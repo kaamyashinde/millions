@@ -10,6 +10,7 @@ import model.core.asset.Stock;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import model.core.player.Player;
 import model.trading.command.buy.BuyCommand;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +33,7 @@ class SellAllHoldingsCommandTest {
         List.of(
             new FundComponent(aapl, new BigDecimal("0.60")),
             new FundComponent(msft, new BigDecimal("0.40"))));
-    exchange = new Exchange.Builder("NYSE")
+    exchange = new ExchangeBuilder("NYSE")
         .stocks(List.of(aapl, msft))
         .funds(List.of(fund))
         .build();
@@ -48,7 +49,7 @@ class SellAllHoldingsCommandTest {
 
   @Test
   void execute_skipsSymbolsWithNonPositiveQuantity() {
-    Stock ghost = exchange.getStock("AAPL");
+    Stock ghost = exchange.listings().getStock("AAPL");
     player.getPortfolio().addShare(new Share(ghost, BigDecimal.ZERO, ghost.getSalesPrice()));
 
     List<?> txs = new SellAllHoldingsCommand(exchange).execute(player);

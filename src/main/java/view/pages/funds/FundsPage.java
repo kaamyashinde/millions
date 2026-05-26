@@ -84,9 +84,9 @@ public class FundsPage extends BorderPane {
     metaLabel.setText(
         exchange.getName()
             + " · "
-            + exchange.getFunds().size()
+            + exchange.listings().getFunds().size()
             + " Fund Listing(s)");
-    List<Fund> sorted = new ArrayList<>(exchange.findFunds(""));
+    List<Fund> sorted = new ArrayList<>(exchange.listings().findFunds(""));
     sorted.sort(Comparator.comparing(Fund::getSymbol));
     Fund previousSelection = table.getSelectionModel().getSelectedItem();
     rows.setAll(sorted);

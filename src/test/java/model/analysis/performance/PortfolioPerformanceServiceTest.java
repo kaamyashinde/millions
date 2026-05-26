@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import model.core.asset.Share;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import model.core.market.pricing.DailyPriceMoveStrategy;
 import model.core.market.pricing.MarketEventStrategy;
 import model.core.player.Player;
@@ -30,7 +31,7 @@ class PortfolioPerformanceServiceTest {
   void setUp() {
     apple = new Stock("AAPL", "Apple Inc.");
     apple.addNewSalesPrice(new BigDecimal("100.00"));
-    exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
+    exchange = new ExchangeBuilder("NYSE").stocks(List.of(apple)).build();
     player = new Player("TestPlayer", new BigDecimal("1000.00"));
   }
 
@@ -53,7 +54,7 @@ class PortfolioPerformanceServiceTest {
         (stock, random) -> stock.getSalesPrice().add(new BigDecimal("10.00"));
     MarketEventStrategy noMarketEvents =
         (listedStocks, tradingDay, random) -> Optional.empty();
-    exchange = new Exchange.Builder("NYSE")
+    exchange = new ExchangeBuilder("NYSE")
         .stocks(List.of(apple))
         .dailyPriceMoveStrategy(tenDollarDailyIncrease)
         .marketEventStrategy(noMarketEvents)
@@ -79,7 +80,7 @@ class PortfolioPerformanceServiceTest {
 
   @Test
   void compareAgainstMarket_returnsInsufficientHistoryWhenBenchmarkHasNoStocks() {
-    Exchange emptyExchange = new Exchange.Builder("EMPTY").stocks(List.of()).build();
+    Exchange emptyExchange = new ExchangeBuilder("EMPTY").stocks(List.of()).build();
     PortfolioPerformanceService service = new PortfolioPerformanceService();
 
     PerformanceComparison comparison = service.compareAgainstMarket(player, emptyExchange);
@@ -125,7 +126,7 @@ class PortfolioPerformanceServiceTest {
   void compareAgainstMarket_rejectsZeroBenchmarkStartingPrice() {
     Stock zero = new Stock("ZERO", "Zero Corp");
     zero.addNewSalesPrice(BigDecimal.ZERO);
-    Exchange zeroExchange = new Exchange.Builder("ZERO")
+    Exchange zeroExchange = new ExchangeBuilder("ZERO")
         .stocks(List.of(zero))
         .dailyPriceMoveStrategy((stock, random) -> BigDecimal.ONE)
         .marketEventStrategy((listedStocks, tradingDay, random) -> Optional.empty())

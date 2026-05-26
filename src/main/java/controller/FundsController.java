@@ -96,7 +96,7 @@ public class FundsController {
         + " · trading day "
         + exchange.getDay()
         + " · "
-        + exchange.findFunds("").size()
+        + exchange.listings().findFunds("").size()
         + " fund(s)";
   }
 
@@ -105,7 +105,7 @@ public class FundsController {
    */
   public void refresh() {
     Fund previous = selectedFund.get();
-    List<Fund> sorted = new ArrayList<>(exchange.findFunds(""));
+    List<Fund> sorted = new ArrayList<>(exchange.listings().findFunds(""));
     sorted.sort(Comparator.comparing(Fund::getSymbol));
     funds.setAll(sorted);
     if (previous != null) {

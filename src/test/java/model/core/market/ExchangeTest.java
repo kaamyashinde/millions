@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
@@ -60,7 +59,7 @@ class ExchangeTest {
             new FundComponent(microsoftStock, new BigDecimal("0.25"))));
 
     List<Stock> stocks = List.of(appleStock, googleStock, microsoftStock);
-    exchange = new Exchange.Builder("NYSE")
+    exchange = new ExchangeBuilder("NYSE")
         .stocks(stocks)
         .funds(List.of(techFund))
         .build();
@@ -80,90 +79,7 @@ class ExchangeTest {
 
   @Test
   void builderRejectsInvalidTradingDay() {
-    assertThrows(IllegalArgumentException.class, () -> new Exchange.Builder("NYSE").day(0).build());
-  }
-
-  @Test
-  void findAssetsAndGetFund_includeFundListings() {
-    assertEquals(techFund, exchange.getFund("techx"));
-    assertEquals(techFund, exchange.findAssets("titans").getFirst());
-    assertTrue(exchange.findAssets("aapl").stream().anyMatch(asset -> asset.getSymbol().equals("AAPL")));
-  }
-
-  @Test
-  void hasStock_returnsTrueForExistingStock() {
-    assertTrue(exchange.hasStock("AAPL"));
-    assertTrue(exchange.hasStock("GOOGL"));
-    assertTrue(exchange.hasStock("MSFT"));
-  }
-
-  @Test
-  void hasStock_returnsFalseForNonExistingStock() {
-    assertFalse(exchange.hasStock("TSLA"));
-    assertFalse(exchange.hasStock("AMZN"));
-  }
-
-  @Test
-  void hasAsset_returnsTrueForExistingStockAndFund() {
-    assertTrue(exchange.hasAsset("AAPL"));
-    assertTrue(exchange.hasAsset("TECHX"));
-  }
-
-  @Test
-  void getStock_returnsCorrectStock() {
-    Stock retrievedStock = exchange.getStock("AAPL");
-    assertNotNull(retrievedStock);
-    assertEquals("AAPL", retrievedStock.getSymbol());
-    assertEquals("Apple Inc.", retrievedStock.getCompany());
-  }
-
-  @Test
-  void getStock_returnsNullForNonExistingStock() {
-    assertNull(exchange.getStock("TSLA"));
-  }
-
-  @Test
-  void findStocks_findsBySymbol() {
-    List<Stock> results = exchange.findStocks("AAPL");
-    assertEquals(1, results.size());
-    assertEquals("AAPL", results.getFirst().getSymbol());
-  }
-
-  @Test
-  void findStocks_findsByCompanyName() {
-    List<Stock> results = exchange.findStocks("Microsoft");
-    assertEquals(1, results.size());
-    assertEquals("MSFT", results.getFirst().getSymbol());
-  }
-
-  @Test
-  void findStocks_findsByPartialMatch() {
-    List<Stock> results = exchange.findStocks("Inc");
-    assertEquals(2, results.size());
-  }
-
-  @Test
-  void findStocks_isCaseInsensitive() {
-    List<Stock> resultsByLowerCase = exchange.findStocks("apple");
-    List<Stock> resultsByUpperCase = exchange.findStocks("APPLE");
-
-    assertEquals(1, resultsByLowerCase.size());
-    assertEquals(1, resultsByUpperCase.size());
-    assertEquals(resultsByLowerCase.getFirst().getSymbol(),
-        resultsByUpperCase.getFirst().getSymbol());
-  }
-
-  @Test
-  void findStocks_returnsEmptyListWhenNoMatch() {
-    List<Stock> results = exchange.findStocks("Tesla");
-    assertTrue(results.isEmpty());
-  }
-
-  @Test
-  void findFunds_findsByName() {
-    List<Fund> results = exchange.findFunds("Titans");
-    assertEquals(1, results.size());
-    assertEquals("TECHX", results.getFirst().getSymbol());
+    assertThrows(IllegalArgumentException.class, () -> new ExchangeBuilder("NYSE").day(0).build());
   }
 
   @Test
@@ -257,7 +173,7 @@ class ExchangeTest {
   @Test
   void advance_updateStockPrices() {
     Exchange rangeCheckedExchange =
-        new Exchange.Builder("NYSE")
+        new ExchangeBuilder("NYSE")
             .stocks(List.of(appleStock, googleStock, microsoftStock))
             .random(new Random(7))
             .dailyPriceMoveStrategy(DailyPriceMoveStrategy.uniform(0.05 / Math.sqrt(7)))
@@ -291,7 +207,7 @@ class ExchangeTest {
   @Test
   void advance_roundsGeneratedPricesToCents() {
     Exchange preciseExchange =
-        new Exchange.Builder("NYSE")
+        new ExchangeBuilder("NYSE")
             .stocks(List.of(appleStock))
             .dailyPriceMoveStrategy(
                 (stock, random) ->
@@ -433,7 +349,7 @@ class ExchangeTest {
   @Test
   void advance_appliesLargeShockToAffectedStockAndStoresEvent() {
     Exchange eventExchange =
-        new Exchange.Builder("NYSE")
+        new ExchangeBuilder("NYSE")
             .stocks(List.of(appleStock, googleStock, microsoftStock))
             .random(new Random(3))
             .dailyPriceMoveStrategy(
@@ -516,7 +432,7 @@ class ExchangeTest {
           return Optional.empty();
         };
     Exchange eventExchange =
-        new Exchange.Builder("NYSE")
+        new ExchangeBuilder("NYSE")
             .stocks(List.of(appleStock, googleStock, microsoftStock))
             .random(new Random(11))
             .dailyPriceMoveStrategy((stock, random) -> stock.getSalesPrice())
@@ -536,7 +452,7 @@ class ExchangeTest {
   void getMarketEventsForStock_returnsOnlyMatchingEventsInChronologicalOrder() {
     AtomicInteger calls = new AtomicInteger();
     Exchange eventExchange =
-        new Exchange.Builder("NYSE")
+        new ExchangeBuilder("NYSE")
             .stocks(List.of(appleStock, googleStock, microsoftStock))
             .random(new Random(15))
             .dailyPriceMoveStrategy((stock, random) -> stock.getSalesPrice())

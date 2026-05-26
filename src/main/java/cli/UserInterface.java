@@ -327,7 +327,7 @@ public class UserInterface {
     if (isPlayerMissing()) {
       return;
     }
-    List<Stock> stocks = exchange.findStocks("");
+    List<Stock> stocks = exchange.listings().findStocks("");
     if (stocks.isEmpty()) {
       System.out.println(I18n.get("stocks.none"));
       return;
@@ -347,7 +347,7 @@ public class UserInterface {
     input.nextLine();
     System.out.println(I18n.get("prompt.search"));
     String term = input.nextLine().trim();
-    List<Stock> results = exchange.findStocks(term);
+    List<Stock> results = exchange.listings().findStocks(term);
     if (results.isEmpty()) {
       System.out.println(I18n.format("search.none", term));
       return;
@@ -364,7 +364,7 @@ public class UserInterface {
     if (isPlayerMissing()) {
       return;
     }
-    List<Fund> funds = exchange.findFunds("");
+    List<Fund> funds = exchange.listings().findFunds("");
     if (funds.isEmpty()) {
       System.out.println(I18n.get("funds.none"));
       return;
@@ -384,7 +384,7 @@ public class UserInterface {
     input.nextLine();
     System.out.println(I18n.get("prompt.search.funds"));
     String term = input.nextLine().trim();
-    List<Fund> results = exchange.findFunds(term);
+    List<Fund> results = exchange.listings().findFunds(term);
     if (results.isEmpty()) {
       System.out.println(I18n.format("fund.search.none", term));
       return;
@@ -408,7 +408,7 @@ public class UserInterface {
       System.out.println(I18n.get("invalid.input"));
       return;
     }
-    Fund fund = exchange.getFund(symbol);
+    Fund fund = exchange.listings().getFund(symbol);
     if (fund == null) {
       System.out.println(I18n.format("error.fundNotOnExchange", symbol));
       return;
@@ -441,7 +441,7 @@ public class UserInterface {
       System.out.println(I18n.get("invalid.input"));
       return;
     }
-    if (!exchange.hasAsset(symbol)) {
+    if (!exchange.listings().hasAsset(symbol)) {
       System.out.println(I18n.format("error.assetNotOnExchange", symbol));
       return;
     }
@@ -571,7 +571,7 @@ public class UserInterface {
   private static void sellByQuantityCli() {
     System.out.println(I18n.get("prompt.symbol"));
     String symbol = input.nextLine().trim().toUpperCase();
-    if (symbol.isEmpty() || !exchange.hasAsset(symbol)) {
+    if (symbol.isEmpty() || !exchange.listings().hasAsset(symbol)) {
       System.out.println(I18n.get("invalid.input"));
       return;
     }
@@ -594,7 +594,7 @@ public class UserInterface {
   private static void sellByTargetNetCli() {
     System.out.println(I18n.get("prompt.symbol"));
     String symbol = input.nextLine().trim().toUpperCase();
-    if (symbol.isEmpty() || !exchange.hasAsset(symbol)) {
+    if (symbol.isEmpty() || !exchange.listings().hasAsset(symbol)) {
       System.out.println(I18n.get("invalid.input"));
       return;
     }
@@ -731,7 +731,7 @@ public class UserInterface {
     input.nextLine();
     System.out.println(I18n.get("savings.prompt.symbol"));
     String symbol = input.nextLine().trim().toUpperCase();
-    if (symbol.isEmpty() || !exchange.hasAsset(symbol)) {
+    if (symbol.isEmpty() || !exchange.listings().hasAsset(symbol)) {
       System.out.println(I18n.get("invalid.input"));
       return;
     }

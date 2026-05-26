@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.List;
 import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
 import model.core.player.Player;
 import model.core.asset.Share;
 import model.core.asset.Stock;
@@ -27,7 +28,7 @@ class SellCommandTest {
   void setUp() {
     Stock stock = new Stock("AAPL", "Apple Inc.");
     stock.addNewSalesPrice(new BigDecimal("200.00"));
-    exchange = new Exchange.Builder("NYSE").stocks(List.of(stock)).build();
+    exchange = new ExchangeBuilder("NYSE").stocks(List.of(stock)).build();
     share = new Share(stock, new BigDecimal("10"), new BigDecimal("100.00"));
     player = new Player("Alice", new BigDecimal("10000.00"));
     player.getPortfolio().addShare(share);

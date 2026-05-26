@@ -100,7 +100,7 @@ public class TradingController {
     if (symbol == null || symbol.isBlank()) {
       return Optional.empty();
     }
-    InvestableAsset asset = exchange.getAsset(symbol.trim().toUpperCase());
+    InvestableAsset asset = exchange.listings().getAsset(symbol.trim().toUpperCase());
     if (asset == null) {
       return Optional.empty();
     }
@@ -206,7 +206,7 @@ public class TradingController {
       return Optional.of(I18n.get("invalid.input"));
     }
     String normalized = symbol.trim().toUpperCase();
-    if (!exchange.hasAsset(normalized)) {
+    if (!exchange.listings().hasAsset(normalized)) {
       return Optional.of(I18n.format("error.assetNotOnExchange", normalized));
     }
     return Optional.empty();
