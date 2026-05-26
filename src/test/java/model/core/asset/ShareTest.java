@@ -59,6 +59,27 @@ class ShareTest {
   }
 
   @Test
+  void constructor_nullAsset_throwsNullPointerException() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new Share(null, testQuantity, testPurchasePrice));
+  }
+
+  @Test
+  void constructor_nullQuantity_throwsNullPointerException() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new Share(testStock, null, testPurchasePrice));
+  }
+
+  @Test
+  void constructor_nullPurchasePrice_throwsNullPointerException() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new Share(testStock, testQuantity, null));
+  }
+
+  @Test
   void shareWithDifferentPrices() {
     BigDecimal lowPrice = new BigDecimal("10.00");
     BigDecimal highPrice = new BigDecimal("9999.99");

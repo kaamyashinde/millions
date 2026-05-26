@@ -76,6 +76,13 @@ class TransactionArchiveTest {
   }
 
   @Test
+  void getTransactions_dayZero_returnsEmptyList() {
+    archive.addTransaction(new Purchase(share, 5));
+
+    assertTrue(archive.getTransactions(0).isEmpty());
+  }
+
+  @Test
   void countDistinctDay() {
     assertEquals(0, archive.countDistinctDay());
     archive.addTransaction(new Purchase(share, 1));

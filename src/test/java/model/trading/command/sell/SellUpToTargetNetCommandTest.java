@@ -3,6 +3,7 @@ package model.trading.command.sell;
 
 import model.trading.command.buy.BuyCommand;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -28,6 +29,20 @@ class SellUpToTargetNetCommandTest {
     exchange = new ExchangeBuilder("NYSE").stocks(List.of(stock)).build();
     player = new Player("T", new BigDecimal("100000.00"));
     new BuyCommand(exchange, "AAPL", new BigDecimal("100")).execute(player);
+  }
+
+  @Test
+  void constructor_nullExchange_throwsNullPointerException() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new SellUpToTargetNetCommand(null, "AAPL", new BigDecimal("100")));
+  }
+
+  @Test
+  void constructor_zeroTargetNet_throwsIllegalArgumentException() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new SellUpToTargetNetCommand(exchange, "AAPL", BigDecimal.ZERO).execute(player));
   }
 
   @Test

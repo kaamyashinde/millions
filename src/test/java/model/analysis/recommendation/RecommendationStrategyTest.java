@@ -2,6 +2,7 @@ package model.analysis.recommendation;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -166,6 +167,13 @@ class RecommendationStrategyTest {
 
       assertEquals(StockRecommendation.HOLD, RecommendationStrategy.MEAN_REVERSION.recommend(prices));
     }
+  }
+
+  @Test
+  void recommend_nullHistoricalPrices_throwsNullPointerException() {
+    assertThrows(
+        NullPointerException.class,
+        () -> RecommendationStrategy.TREND.recommend(null));
   }
 
   private static List<BigDecimal> prices(String... values) {

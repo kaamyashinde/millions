@@ -1,6 +1,7 @@
 package model.core.market;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -8,6 +9,13 @@ import model.core.asset.Stock;
 import org.junit.jupiter.api.Test;
 
 class MarketMoversTest {
+
+  @Test
+  void gainers_zeroLimit_returnsEmptyList() {
+    Stock stock = stockWithPrices("AAA", "Alpha", "100.00", "110.00");
+
+    assertTrue(MarketMovers.gainers(List.of(stock), 0).isEmpty());
+  }
 
   @Test
   void gainersAndLosers_filterAndSortByLatestPriceChange() {
