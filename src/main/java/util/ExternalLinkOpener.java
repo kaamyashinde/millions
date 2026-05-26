@@ -45,7 +45,8 @@ public final class ExternalLinkOpener {
   public static void open(String url) {
     toBrowsableUri(url).ifPresent(uri -> {
       try {
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+        if (Desktop.isDesktopSupported()
+            && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
           Desktop.getDesktop().browse(uri);
         }
       } catch (Exception ignored) {

@@ -92,7 +92,8 @@ public final class MarketDataCsvValidator {
     String normalizedSymbol = symbol.toUpperCase();
     Stock stock = stocksBySymbol.get(normalizedSymbol);
     if (stock == null) {
-      throw new IllegalArgumentException("Unknown stock symbol in fund component: " + normalizedSymbol);
+      throw new IllegalArgumentException(
+          "Unknown stock symbol in fund component: " + normalizedSymbol);
     }
     return stock;
   }
