@@ -1,9 +1,8 @@
 package model.core.player.level;
 
 
-import model.core.player.Player;
-
 import java.math.BigDecimal;
+import model.core.player.Player;
 
 /**
  * Investor level: requires 10 distinct trading days and net worth at least 1.2x starting money;

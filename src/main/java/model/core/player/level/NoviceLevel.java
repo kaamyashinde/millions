@@ -1,9 +1,8 @@
 package model.core.player.level;
 
 
-import model.core.player.Player;
-
 import java.math.BigDecimal;
+import model.core.player.Player;
 
 /**
  * Novice player level: always qualifies as a fallback; limits trade size to 10x starting money.

@@ -1,14 +1,14 @@
 package model.core.player;
 
 
-import model.core.asset.Share;
-import model.trading.transaction.Sale;
-
 import static util.Validator.checkNotNull;
+
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import model.core.asset.Share;
 import model.trading.calculator.SaleCalculator;
+import model.trading.transaction.Sale;
 import model.trading.transaction.TransactionSizing;
 
 /**

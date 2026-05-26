@@ -1,16 +1,15 @@
 package model.core.player;
 
 
-import model.core.asset.Share;
-import model.core.player.level.PlayerLevel;
-import model.core.player.level.PlayerLevels;
-
 import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import model.core.asset.Share;
+import model.core.player.level.PlayerLevel;
+import model.core.player.level.PlayerLevels;
 import model.trading.savings.RegularSavingsPlan;
 import model.trading.transaction.Transaction;
 import model.trading.transaction.TransactionArchive;
