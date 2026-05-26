@@ -1,0 +1,1003 @@
+{
+  "quizzes" : [ {
+    "id" : "quiz-what-is-a-stock",
+    "linkedItemId" : "what-is-a-stock",
+    "title" : "What Is a Stock? — Quiz",
+    "questions" : [ {
+      "id" : "wias-q1",
+      "questionText" : "What does owning a single share of a company give you?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "A loan to the company"
+      }, {
+        "id" : "b",
+        "text" : "A fractional ownership stake in that company"
+      }, {
+        "id" : "c",
+        "text" : "Guaranteed dividends every year"
+      }, {
+        "id" : "d",
+        "text" : "The right to vote on every business decision"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "A share represents part-ownership of a company. Shareholders own a slice of the business proportional to how many shares they hold.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    }, {
+      "id" : "wias-q2",
+      "questionText" : "What is an IPO?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "An internal price offer between existing shareholders"
+      }, {
+        "id" : "b",
+        "text" : "When a private company first sells shares to the public"
+      }, {
+        "id" : "c",
+        "text" : "A government bond issued to the public"
+      }, {
+        "id" : "d",
+        "text" : "A type of dividend payment"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "IPO stands for Initial Public Offering — the first time a private company offers its shares for purchase on a public stock exchange.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    }, {
+      "id" : "wias-q3",
+      "questionText" : "What is a dividend?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "A fee charged when you sell shares"
+      }, {
+        "id" : "b",
+        "text" : "A penalty for holding shares too long"
+      }, {
+        "id" : "c",
+        "text" : "A portion of company profits paid to shareholders"
+      }, {
+        "id" : "d",
+        "text" : "The difference between buy and sell price"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Dividends are distributions of a company's profits to its shareholders. Not all companies pay dividends — many reinvest profits back into the business.",
+      "linkedResourceId" : "res-aksjer-for-alle"
+    }, {
+      "id" : "wias-q4",
+      "questionText" : "A company has 1 000 shares outstanding, each worth 100 NOK. What is its market capitalisation?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "1 000 NOK"
+      }, {
+        "id" : "b",
+        "text" : "100 NOK"
+      }, {
+        "id" : "c",
+        "text" : "10 000 NOK"
+      }, {
+        "id" : "d",
+        "text" : "100 000 NOK"
+      } ],
+      "correctAnswerId" : "d",
+      "explanationText" : "Market capitalisation = share price × number of shares outstanding. Here: 100 NOK × 1 000 = 100 000 NOK.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    }, {
+      "id" : "wias-q5",
+      "questionText" : "Which entity sets the day-to-day strategy of a public company?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "The shareholders directly"
+      }, {
+        "id" : "b",
+        "text" : "The stock exchange"
+      }, {
+        "id" : "c",
+        "text" : "The company's management team"
+      }, {
+        "id" : "d",
+        "text" : "The government regulator"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Shareholders elect a board of directors, who in turn appoint management. Day-to-day decisions are made by the management team — shareholders vote on major decisions at annual meetings.",
+      "linkedResourceId" : "res-aksjer-for-alle"
+    } ]
+  }, {
+    "id" : "quiz-how-stock-prices-move",
+    "linkedItemId" : "how-stock-prices-move",
+    "title" : "How Stock Prices Move — Quiz",
+    "questions" : [ {
+      "id" : "hspm-q1",
+      "questionText" : "What happens to a stock's price when there are more buyers than sellers?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "The price falls"
+      }, {
+        "id" : "b",
+        "text" : "The price stays the same"
+      }, {
+        "id" : "c",
+        "text" : "The price rises"
+      }, {
+        "id" : "d",
+        "text" : "Trading is suspended"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Stock prices are driven by supply and demand. When demand (buyers) exceeds supply (sellers), buyers must offer higher prices to attract sellers — pushing the price up.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    }, {
+      "id" : "hspm-q2",
+      "questionText" : "Which single factor most strongly drives a company's long-term share price?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "The company's social media following"
+      }, {
+        "id" : "b",
+        "text" : "The company's earnings (profits)"
+      }, {
+        "id" : "c",
+        "text" : "The number of employees"
+      }, {
+        "id" : "d",
+        "text" : "The age of the company"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Over the long term, a company's earnings growth is the primary driver of its share price. In the short term, sentiment and news play a larger role, but profits ultimately determine value.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    }, {
+      "id" : "hspm-q3",
+      "questionText" : "What does 'volatility' describe in the context of a stock?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "How frequently a stock pays dividends"
+      }, {
+        "id" : "b",
+        "text" : "How many people own the stock"
+      }, {
+        "id" : "c",
+        "text" : "How quickly you can sell the stock"
+      }, {
+        "id" : "d",
+        "text" : "How much the price swings up and down over time"
+      } ],
+      "correctAnswerId" : "d",
+      "explanationText" : "Volatility measures the degree of price variation over time. A highly volatile stock can move sharply in either direction, indicating higher risk and potential reward.",
+      "linkedResourceId" : "res-yt-investing-basics"
+    }, {
+      "id" : "hspm-q4",
+      "questionText" : "A company reports earnings far below analyst expectations. What typically happens to its share price?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "It rises because the company is honest"
+      }, {
+        "id" : "b",
+        "text" : "Nothing — only dividends affect the price"
+      }, {
+        "id" : "c",
+        "text" : "It falls as investors sell in disappointment"
+      }, {
+        "id" : "d",
+        "text" : "The stock is automatically delisted"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Markets react strongly to earnings surprises. When results miss expectations, investors often sell, pushing the price lower — even if the company is still profitable.",
+      "linkedResourceId" : "res-yt-investing-basics"
+    }, {
+      "id" : "hspm-q5",
+      "questionText" : "What is 'market sentiment'?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "The total value of all stocks on an exchange"
+      }, {
+        "id" : "b",
+        "text" : "A government report on economic conditions"
+      }, {
+        "id" : "c",
+        "text" : "The overall mood (optimism or pessimism) of investors collectively"
+      }, {
+        "id" : "d",
+        "text" : "The average dividend yield of the market"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Market sentiment refers to the overall attitude of investors toward a market or asset. Positive sentiment (bulls) drives prices up; negative sentiment (bears) drives them down.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    } ]
+  }, {
+    "id" : "quiz-what-is-investment-risk",
+    "linkedItemId" : "what-is-investment-risk",
+    "title" : "What Is Investment Risk? — Quiz",
+    "questions" : [ {
+      "id" : "wiir-q1",
+      "questionText" : "Which statement best describes the risk-return relationship in investing?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Lower risk always leads to higher returns"
+      }, {
+        "id" : "b",
+        "text" : "Risk and return are unrelated"
+      }, {
+        "id" : "c",
+        "text" : "Higher potential returns typically come with higher risk"
+      }, {
+        "id" : "d",
+        "text" : "Government bonds always outperform stocks"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "The risk-return trade-off is a fundamental principle: to earn higher potential returns, investors must accept higher risk. There is no free lunch in investing.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "wiir-q2",
+      "questionText" : "Which type of risk can you reduce by investing in many different companies?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Market (systematic) risk"
+      }, {
+        "id" : "b",
+        "text" : "Inflation risk"
+      }, {
+        "id" : "c",
+        "text" : "Interest rate risk"
+      }, {
+        "id" : "d",
+        "text" : "Company-specific (unsystematic) risk"
+      } ],
+      "correctAnswerId" : "d",
+      "explanationText" : "Diversification reduces unsystematic (company-specific) risk. If one company fails, others in your portfolio can offset the loss. Systematic risk affects the whole market and cannot be diversified away.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "wiir-q3",
+      "questionText" : "What is 'liquidity risk'?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "The risk that a company runs out of cash"
+      }, {
+        "id" : "b",
+        "text" : "The risk that you cannot sell an investment quickly at a fair price"
+      }, {
+        "id" : "c",
+        "text" : "The risk that inflation erodes your returns"
+      }, {
+        "id" : "d",
+        "text" : "The risk of currency fluctuations"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Liquidity risk is the danger of being unable to sell an asset quickly without accepting a significant price discount. Small-cap stocks and real estate often carry higher liquidity risk than large-cap shares.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "wiir-q4",
+      "questionText" : "Even a savings account carries some risk. Which risk is it?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Default risk — the bank might go bankrupt"
+      }, {
+        "id" : "b",
+        "text" : "Volatility risk — the balance fluctuates daily"
+      }, {
+        "id" : "c",
+        "text" : "Inflation risk — rising costs erode the real value of savings"
+      }, {
+        "id" : "d",
+        "text" : "Liquidity risk — you cannot withdraw your money"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Inflation risk means the purchasing power of your money decreases over time. If inflation is 3% and your savings account pays 1%, you are effectively losing 2% of real value per year.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "wiir-q5",
+      "questionText" : "A stock whose price varies by 20% annually is described as having higher __ compared to a stock varying by 4%?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Liquidity"
+      }, {
+        "id" : "b",
+        "text" : "Yield"
+      }, {
+        "id" : "c",
+        "text" : "Volatility"
+      }, {
+        "id" : "d",
+        "text" : "Dividend coverage"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Volatility is measured as the standard deviation of returns. A stock swinging 20% per year is far more volatile than one swinging 4%, meaning it carries more short-term price risk.",
+      "linkedResourceId" : "res-nordnet-academy"
+    } ]
+  }, {
+    "id" : "quiz-stocks-vs-bonds",
+    "linkedItemId" : "stocks-vs-bonds",
+    "title" : "Stocks vs. Bonds — Quiz",
+    "questions" : [ {
+      "id" : "svb-q1",
+      "questionText" : "What does a bondholder receive that a shareholder does not automatically get?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Voting rights at company meetings"
+      }, {
+        "id" : "b",
+        "text" : "A share of company profits"
+      }, {
+        "id" : "c",
+        "text" : "Fixed interest payments (coupons) and return of principal"
+      }, {
+        "id" : "d",
+        "text" : "Ownership of the company's assets"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Bonds are debt instruments — the bondholder lends money and receives scheduled interest (coupon) payments and the principal back at maturity. Shareholders own equity and receive no guaranteed payments.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    }, {
+      "id" : "svb-q2",
+      "questionText" : "In a company bankruptcy, who gets paid first?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Common shareholders"
+      }, {
+        "id" : "b",
+        "text" : "Bondholders (creditors)"
+      }, {
+        "id" : "c",
+        "text" : "Preferred shareholders"
+      }, {
+        "id" : "d",
+        "text" : "All are paid equally"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "In liquidation, creditors (including bondholders) have a higher claim on assets than shareholders. Common shareholders are last in line and often receive nothing.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    }, {
+      "id" : "svb-q3",
+      "questionText" : "Which asset class typically offers higher long-term returns but with more short-term volatility?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Government bonds"
+      }, {
+        "id" : "b",
+        "text" : "Corporate bonds"
+      }, {
+        "id" : "c",
+        "text" : "Stocks"
+      }, {
+        "id" : "d",
+        "text" : "Both are identical in risk and return"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Historically, stocks have delivered higher long-term returns than bonds, but with considerably more year-to-year price swings. Bonds offer more stability but lower expected returns.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "svb-q4",
+      "questionText" : "When interest rates rise, what typically happens to the price of existing bonds?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Bond prices rise"
+      }, {
+        "id" : "b",
+        "text" : "Bond prices fall"
+      }, {
+        "id" : "c",
+        "text" : "Bond prices are unaffected"
+      }, {
+        "id" : "d",
+        "text" : "Bond coupon payments increase"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "There is an inverse relationship between interest rates and bond prices. When new bonds offer higher coupons (due to rising rates), older lower-coupon bonds become less attractive and fall in price.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    }, {
+      "id" : "svb-q5",
+      "questionText" : "Why might an investor include both stocks and bonds in their portfolio?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Bonds amplify stock returns"
+      }, {
+        "id" : "b",
+        "text" : "Stocks and bonds often move in opposite directions, reducing overall risk"
+      }, {
+        "id" : "c",
+        "text" : "It is a legal requirement"
+      }, {
+        "id" : "d",
+        "text" : "To maximise tax liability"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Diversifying across asset classes — stocks for growth potential, bonds for income and stability — can smooth out a portfolio's returns over time, as they often respond differently to economic conditions.",
+      "linkedResourceId" : "res-nordnet-academy"
+    } ]
+  }, {
+    "id" : "quiz-compound-interest",
+    "linkedItemId" : "compound-interest",
+    "title" : "Compound Interest — Quiz",
+    "questions" : [ {
+      "id" : "ci-q1",
+      "questionText" : "What is 'compound interest'?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Interest calculated only on the original principal"
+      }, {
+        "id" : "b",
+        "text" : "Interest earned on both the principal and previously earned interest"
+      }, {
+        "id" : "c",
+        "text" : "A fixed interest payment regardless of balance"
+      }, {
+        "id" : "d",
+        "text" : "Interest charged for withdrawing money early"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Compound interest means you earn returns on your returns. Over time, this causes your investment to grow exponentially rather than linearly — it is the 'eighth wonder of the world' according to many investors.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "ci-q2",
+      "questionText" : "You invest 1 000 NOK at 10% annual return. Approximately how much will you have after 10 years with compounding?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "2 000 NOK"
+      }, {
+        "id" : "b",
+        "text" : "1 100 NOK"
+      }, {
+        "id" : "c",
+        "text" : "2 594 NOK"
+      }, {
+        "id" : "d",
+        "text" : "5 000 NOK"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "With compound growth, 1 000 NOK × 1.10^10 ≈ 2 594 NOK. Simple interest would only give 2 000 NOK. The extra 594 NOK is the power of compounding.",
+      "linkedResourceId" : "res-yt-investing-basics"
+    }, {
+      "id" : "ci-q3",
+      "questionText" : "Why does starting to invest early make such a large difference?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Early investors pay lower fees"
+      }, {
+        "id" : "b",
+        "text" : "Stock markets only grow when young investors participate"
+      }, {
+        "id" : "c",
+        "text" : "More time allows compounding to multiply returns over a longer period"
+      }, {
+        "id" : "d",
+        "text" : "Early investors receive government subsidies"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Time is the most powerful ingredient in compounding. Each additional year multiplies your total return. Starting 10 years earlier can more than double your final portfolio value.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "ci-q4",
+      "questionText" : "What is the 'Rule of 72'?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "You must diversify into at least 72 stocks"
+      }, {
+        "id" : "b",
+        "text" : "Divide 72 by the annual return to estimate how many years to double your money"
+      }, {
+        "id" : "c",
+        "text" : "You should invest 72% of your salary"
+      }, {
+        "id" : "d",
+        "text" : "A stock index rebalances every 72 days"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "The Rule of 72 is a quick mental maths shortcut: 72 ÷ annual return % = approximate years to double. At 8% return, 72 ÷ 8 = 9 years to double your investment.",
+      "linkedResourceId" : "res-yt-investing-basics"
+    }, {
+      "id" : "ci-q5",
+      "questionText" : "Which of the following benefits most from compound interest over a long period?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "A savings account with monthly withdrawals"
+      }, {
+        "id" : "b",
+        "text" : "A stock portfolio where dividends are reinvested and left to grow"
+      }, {
+        "id" : "c",
+        "text" : "A fixed-term deposit with annual withdrawals of interest"
+      }, {
+        "id" : "d",
+        "text" : "Cash kept under a mattress"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Reinvesting dividends and letting them compound is the textbook example of compounding in action. Each reinvested dividend buys more shares, which in turn pay more dividends.",
+      "linkedResourceId" : "res-nordnet-academy"
+    } ]
+  }, {
+    "id" : "quiz-diversification-basics",
+    "linkedItemId" : "diversification-basics",
+    "title" : "Diversification Basics — Quiz",
+    "questions" : [ {
+      "id" : "db-q1",
+      "questionText" : "What is the primary purpose of diversification?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "To guarantee positive returns"
+      }, {
+        "id" : "b",
+        "text" : "To reduce the impact of any single investment performing poorly"
+      }, {
+        "id" : "c",
+        "text" : "To increase the overall risk of a portfolio"
+      }, {
+        "id" : "d",
+        "text" : "To concentrate on the best-performing sector"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Diversification spreads risk across multiple assets so that a poor performance by one does not devastate the whole portfolio. It does not eliminate risk, but it reduces unnecessary concentration.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "db-q2",
+      "questionText" : "An investor holds only shares in one oil company. Which risk are they most exposed to?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Inflation risk"
+      }, {
+        "id" : "b",
+        "text" : "Currency risk"
+      }, {
+        "id" : "c",
+        "text" : "Company-specific (unsystematic) risk"
+      }, {
+        "id" : "d",
+        "text" : "Liquidity risk"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Concentrating in a single company means any bad news specific to that company — a scandal, poor earnings, or management failure — hits your entire portfolio.",
+      "linkedResourceId" : "res-aksjer-for-alle"
+    }, {
+      "id" : "db-q3",
+      "questionText" : "Which type of risk CANNOT be eliminated through diversification?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Company-specific risk"
+      }, {
+        "id" : "b",
+        "text" : "Industry-specific risk"
+      }, {
+        "id" : "c",
+        "text" : "Systematic (market) risk"
+      }, {
+        "id" : "d",
+        "text" : "Management risk"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Systematic risk (market risk) affects all investments — a global recession, for example, hits virtually every asset class. Diversification reduces unsystematic risk but cannot remove systematic risk.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "db-q4",
+      "questionText" : "A well-diversified portfolio might include which combination?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Only technology stocks from one country"
+      }, {
+        "id" : "b",
+        "text" : "Stocks, bonds, and assets from multiple sectors and regions"
+      }, {
+        "id" : "c",
+        "text" : "Only the ten largest companies in one index"
+      }, {
+        "id" : "d",
+        "text" : "Cash and gold only"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "True diversification spans asset classes (stocks, bonds, real estate), sectors (technology, healthcare, energy), and geographies (domestic, international, emerging markets).",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "db-q5",
+      "questionText" : "What is 'correlation' in the context of portfolio diversification?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "The fee charged to manage a diversified fund"
+      }, {
+        "id" : "b",
+        "text" : "A measure of how similarly two assets move in price"
+      }, {
+        "id" : "c",
+        "text" : "The number of assets in a portfolio"
+      }, {
+        "id" : "d",
+        "text" : "The annual return of a portfolio"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Correlation measures how closely two assets move together. Low or negative correlation between assets means they tend to move differently, which is the key to effective diversification.",
+      "linkedResourceId" : "res-nordnet-academy"
+    } ]
+  }, {
+    "id" : "quiz-reading-stock-charts",
+    "linkedItemId" : "reading-stock-charts",
+    "title" : "Reading Stock Charts — Quiz",
+    "questions" : [ {
+      "id" : "rsc-q1",
+      "questionText" : "On a candlestick chart, what does the body of a candle represent?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "The highest and lowest prices of the day"
+      }, {
+        "id" : "b",
+        "text" : "The difference between opening and closing price"
+      }, {
+        "id" : "c",
+        "text" : "The trading volume for the day"
+      }, {
+        "id" : "d",
+        "text" : "The dividend paid that day"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "The body of a candlestick shows the range between the opening and closing price. A green/white body means the close was higher than the open (bullish); red/black means the opposite (bearish).",
+      "linkedResourceId" : "res-yt-investing-basics"
+    }, {
+      "id" : "rsc-q2",
+      "questionText" : "What does a 'moving average' show on a stock chart?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "The average trading volume over a period"
+      }, {
+        "id" : "b",
+        "text" : "The smoothed average price over a defined number of days"
+      }, {
+        "id" : "c",
+        "text" : "The predicted future price"
+      }, {
+        "id" : "d",
+        "text" : "The total return including dividends"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "A moving average smooths out day-to-day price fluctuations to show the underlying trend. A 50-day moving average, for example, shows the average closing price over the past 50 trading days.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    }, {
+      "id" : "rsc-q3",
+      "questionText" : "What does high trading volume during a price increase generally suggest?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "The price rise is likely to reverse soon"
+      }, {
+        "id" : "b",
+        "text" : "The move has weak conviction behind it"
+      }, {
+        "id" : "c",
+        "text" : "Many investors support the move, giving it stronger conviction"
+      }, {
+        "id" : "d",
+        "text" : "The stock is about to be delisted"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Volume confirms price moves. A price rise on high volume suggests broad market participation and conviction. A rise on low volume may be less reliable and more likely to reverse.",
+      "linkedResourceId" : "res-yt-investing-basics"
+    }, {
+      "id" : "rsc-q4",
+      "questionText" : "What is a 'support level' on a price chart?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "The highest price a stock has ever reached"
+      }, {
+        "id" : "b",
+        "text" : "A price level where the stock tends to find buying interest and stop falling"
+      }, {
+        "id" : "c",
+        "text" : "The average analyst price target"
+      }, {
+        "id" : "d",
+        "text" : "The price at which the company buys back its own shares"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "A support level is a price zone where demand has historically been strong enough to prevent further decline. Traders watch these levels as potential entry points or as warning signs if they are broken.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    }, {
+      "id" : "rsc-q5",
+      "questionText" : "What does the term 'trend' mean in technical analysis?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "A sudden one-day price spike"
+      }, {
+        "id" : "b",
+        "text" : "The general direction in which a price is moving over time"
+      }, {
+        "id" : "c",
+        "text" : "A stock that is popular on social media"
+      }, {
+        "id" : "d",
+        "text" : "A guaranteed future price direction"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "A trend describes the general price direction over time: uptrend (higher highs and higher lows), downtrend (lower highs and lower lows), or sideways. Technical analysts look for trends to guide trading decisions.",
+      "linkedResourceId" : "res-investopedia-stocks"
+    } ]
+  }, {
+    "id" : "quiz-index-funds-explained",
+    "linkedItemId" : "index-funds-explained",
+    "title" : "Index Funds Explained — Quiz",
+    "questions" : [ {
+      "id" : "ife-q1",
+      "questionText" : "What does an index fund aim to do?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Beat the market through active stock picking"
+      }, {
+        "id" : "b",
+        "text" : "Invest only in government bonds"
+      }, {
+        "id" : "c",
+        "text" : "Replicate the performance of a specific market index"
+      }, {
+        "id" : "d",
+        "text" : "Invest only in dividend-paying stocks"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "An index fund passively tracks a market index (e.g., S&P 500, Oslo Børs All-Share) by holding all or a representative sample of the index's securities in the same weights.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "ife-q2",
+      "questionText" : "Why are index funds generally cheaper than actively managed funds?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "They invest in fewer companies"
+      }, {
+        "id" : "b",
+        "text" : "They require no fund manager to pick stocks, so costs are lower"
+      }, {
+        "id" : "c",
+        "text" : "They are only sold to professional investors"
+      }, {
+        "id" : "d",
+        "text" : "They are sponsored by governments"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Active funds pay managers to research and select stocks, increasing costs. Index funds follow a rules-based approach requiring minimal human intervention, resulting in much lower annual fees (expense ratios).",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "ife-q3",
+      "questionText" : "What is an ETF (Exchange-Traded Fund)?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "A bond that pays interest monthly"
+      }, {
+        "id" : "b",
+        "text" : "An index fund that trades on a stock exchange like a share"
+      }, {
+        "id" : "c",
+        "text" : "A government savings scheme"
+      }, {
+        "id" : "d",
+        "text" : "A fund that only invests in emerging markets"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "An ETF is a type of index fund that is listed and traded on a stock exchange, just like individual shares. This gives investors flexibility to buy and sell throughout the trading day at market prices.",
+      "linkedResourceId" : "res-aksjer-for-alle"
+    }, {
+      "id" : "ife-q4",
+      "questionText" : "Studies show that over long periods, most actively managed funds:",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Consistently outperform index funds after fees"
+      }, {
+        "id" : "b",
+        "text" : "Match index funds exactly"
+      }, {
+        "id" : "c",
+        "text" : "Underperform index funds after fees"
+      }, {
+        "id" : "d",
+        "text" : "Are guaranteed to deliver positive returns"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Academic research consistently shows that the majority of actively managed funds underperform their benchmark index after accounting for fees over long periods. This is a core argument for passive index investing.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "ife-q5",
+      "questionText" : "What does it mean that an index fund provides 'instant diversification'?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "You receive your money back instantly"
+      }, {
+        "id" : "b",
+        "text" : "The fund splits your investment across all companies in the index in one purchase"
+      }, {
+        "id" : "c",
+        "text" : "All your money is converted to foreign currency"
+      }, {
+        "id" : "d",
+        "text" : "You are protected from all losses"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Buying a single index fund share gives you exposure to all the companies within that index. For example, a global index fund might spread your investment across thousands of companies worldwide.",
+      "linkedResourceId" : "res-nordnet-academy"
+    } ]
+  }, {
+    "id" : "quiz-dollar-cost-averaging",
+    "linkedItemId" : "dollar-cost-averaging",
+    "title" : "Dollar-Cost Averaging — Quiz",
+    "questions" : [ {
+      "id" : "dca-q1",
+      "questionText" : "What is dollar-cost averaging (DCA)?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Investing a lump sum at the lowest price of the year"
+      }, {
+        "id" : "b",
+        "text" : "Investing a fixed amount at regular intervals regardless of price"
+      }, {
+        "id" : "c",
+        "text" : "Converting all savings to US dollars"
+      }, {
+        "id" : "d",
+        "text" : "Selling shares whenever the price averages out to your purchase price"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "DCA means investing a consistent amount (e.g., 500 NOK per month) on a regular schedule. This automatically buys more shares when prices are low and fewer when prices are high.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "dca-q2",
+      "questionText" : "What is the main benefit of DCA during a falling market?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "You stop buying, protecting you from losses"
+      }, {
+        "id" : "b",
+        "text" : "You automatically buy more shares at lower prices"
+      }, {
+        "id" : "c",
+        "text" : "You receive a government bonus for continued investing"
+      }, {
+        "id" : "d",
+        "text" : "Your existing shares increase in value"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "When prices fall, your fixed investment amount buys more shares. This lowers your average cost per share over time — a process called 'averaging down' — so you benefit more when prices recover.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "dca-q3",
+      "questionText" : "Which psychological benefit does DCA offer?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "It guarantees you buy at the absolute lowest price"
+      }, {
+        "id" : "b",
+        "text" : "It removes the need to time the market, reducing emotional decision-making"
+      }, {
+        "id" : "c",
+        "text" : "It eliminates all investment risk"
+      }, {
+        "id" : "d",
+        "text" : "It doubles your return compared to lump-sum investing"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "One of DCA's greatest advantages is removing the temptation to time the market. By investing automatically on schedule, investors avoid making fear-driven or greed-driven decisions.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "dca-q4",
+      "questionText" : "An investor uses DCA and buys 3 months in a row at prices of 100, 50, and 100 NOK per share. What is their average cost per share?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "83.33 NOK"
+      }, {
+        "id" : "b",
+        "text" : "75 NOK"
+      }, {
+        "id" : "c",
+        "text" : "100 NOK"
+      }, {
+        "id" : "d",
+        "text" : "50 NOK"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "With a fixed monthly investment (say 100 NOK): Month 1 = 1 share at 100, Month 2 = 2 shares at 50, Month 3 = 1 share at 100. Total: 4 shares for 300 NOK → average 75 NOK per share. Lower than the simple average of 83.33.",
+      "linkedResourceId" : "res-nordnet-academy"
+    }, {
+      "id" : "dca-q5",
+      "questionText" : "In what scenario might a lump-sum investment outperform DCA?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "When markets are volatile"
+      }, {
+        "id" : "b",
+        "text" : "When markets consistently rise throughout the investment period"
+      }, {
+        "id" : "c",
+        "text" : "When interest rates are rising"
+      }, {
+        "id" : "d",
+        "text" : "When you are investing for less than one month"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "If markets rise steadily, a lump-sum investment deployed immediately captures more of the gains. DCA is most advantageous in volatile or declining markets. Over the long run, both strategies tend to produce similar results.",
+      "linkedResourceId" : "res-nordnet-academy"
+    } ]
+  }, {
+    "id" : "quiz-paper-trading",
+    "linkedItemId" : "paper-trading",
+    "title" : "Paper Trading — Quiz",
+    "questions" : [ {
+      "id" : "pt-q1",
+      "questionText" : "What is paper trading?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Trading shares printed on physical paper certificates"
+      }, {
+        "id" : "b",
+        "text" : "Simulated investing with virtual money to practise without real risk"
+      }, {
+        "id" : "c",
+        "text" : "A government-regulated trading test for new investors"
+      }, {
+        "id" : "d",
+        "text" : "Trading only in paper and publishing companies"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Paper trading is the practice of simulating buy and sell decisions without using real money. It lets beginners learn market mechanics, test strategies, and build confidence before risking actual capital.",
+      "linkedResourceId" : "res-yt-investing-basics"
+    }, {
+      "id" : "pt-q2",
+      "questionText" : "What is a key limitation of paper trading compared to real investing?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "You cannot track your performance in paper trading"
+      }, {
+        "id" : "b",
+        "text" : "Paper trading does not simulate the emotional pressure of real money on the line"
+      }, {
+        "id" : "c",
+        "text" : "Paper trading always shows worse results than real trading"
+      }, {
+        "id" : "d",
+        "text" : "Paper trading uses outdated price data"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "The biggest gap between paper and real trading is psychology. Knowing you can 'reset' removes the fear and greed that profoundly affect real trading decisions — skills developed in paper trading may not fully transfer.",
+      "linkedResourceId" : "res-yt-investing-basics"
+    }, {
+      "id" : "pt-q3",
+      "questionText" : "Which of the following is a good use of paper trading?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Generating actual income from the stock market"
+      }, {
+        "id" : "b",
+        "text" : "Testing a new investment strategy before committing real money"
+      }, {
+        "id" : "c",
+        "text" : "Guaranteed practice that will make you profitable in real markets"
+      }, {
+        "id" : "d",
+        "text" : "Replacing real investing entirely for the long term"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Paper trading is excellent for testing strategies, understanding order types, and learning how markets work — all without financial risk. It is a stepping stone, not a substitute for real investing.",
+      "linkedResourceId" : "res-yt-investing-basics"
+    }, {
+      "id" : "pt-q4",
+      "questionText" : "If a paper trader consistently profits in simulation, what should they conclude?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Their strategy will definitely work with real money"
+      }, {
+        "id" : "b",
+        "text" : "Their strategy shows promise, but real trading will test it more rigorously"
+      }, {
+        "id" : "c",
+        "text" : "They should immediately invest all their savings"
+      }, {
+        "id" : "d",
+        "text" : "Paper profits equal real profits"
+      } ],
+      "correctAnswerId" : "b",
+      "explanationText" : "Paper trading success is promising but not guaranteed to translate. Real trading involves emotions, slippage, transaction costs, and taxes that simulation often cannot perfectly replicate.",
+      "linkedResourceId" : "res-yt-investing-basics"
+    }, {
+      "id" : "pt-q5",
+      "questionText" : "Which concept does paper trading help you practice that is crucial in real investing?",
+      "answers" : [ {
+        "id" : "a",
+        "text" : "Filing tax returns on investment gains"
+      }, {
+        "id" : "b",
+        "text" : "Applying for a brokerage account"
+      }, {
+        "id" : "c",
+        "text" : "Entering and exiting positions according to a plan, not impulse"
+      }, {
+        "id" : "d",
+        "text" : "Receiving dividends from companies"
+      } ],
+      "correctAnswerId" : "c",
+      "explanationText" : "Discipline — sticking to your strategy and not reacting emotionally to short-term price moves — is one of the most important investing skills. Paper trading helps you build and test this discipline in a safe environment.",
+      "linkedResourceId" : "res-yt-investing-basics"
+    } ]
+  } ]
+}

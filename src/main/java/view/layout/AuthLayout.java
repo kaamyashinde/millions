@@ -23,9 +23,10 @@ import view.theme.ThemeStyles;
  * <p>This class holds no authentication logic. Login and Register pages each construct
  * their own {@code AuthLayout}, supplying their form content and a nav-link callback.
  */
-public class AuthLayout extends HBox {
+public class AuthLayout extends HBox implements ResponsiveLayout {
 
   private final StackPane contentSlot;
+  private final VBox leftPanel;
   private final Label statusLabel = new Label();
   private final Button returnButton = new Button("Back to current session");
 
@@ -37,7 +38,7 @@ public class AuthLayout extends HBox {
    * @param navLinkAction callback invoked when the navigation link is clicked
    */
   public AuthLayout(Node formContent, String navLinkText, Runnable navLinkAction) {
-    this(formContent, navLinkText, navLinkAction, null, null, false, null);
+    this(formContent, navLinkText, navLinkAction, null, false, null);
   }
 
   /**
@@ -47,7 +48,6 @@ public class AuthLayout extends HBox {
    * @param navLinkText navigation link label in the top-right corner
    * @param navLinkAction invoked when the navigation link is clicked
    * @param sidePanel optional panel displayed beside the form
-   * @param helpAction optional help handler; {@code null} hides the help action
    * @param showReturnToSession whether to show the return-to-session button
    * @param returnAction invoked when return-to-session is clicked
    */
@@ -56,7 +56,6 @@ public class AuthLayout extends HBox {
       String navLinkText,
       Runnable navLinkAction,
       Node sidePanel,
-      Runnable helpAction,
       boolean showReturnToSession,
       Runnable returnAction) {
     ThemeStyles.addStyleClasses(this, "auth-root");
@@ -64,6 +63,7 @@ public class AuthLayout extends HBox {
     contentSlot.setAlignment(Pos.CENTER);
 
     VBox left = buildLeftPanel();
+    this.leftPanel = left;
     BorderPane right = buildRightPanel(navLinkText, navLinkAction, sidePanel);
 
     returnButton.setVisible(showReturnToSession);
@@ -80,15 +80,7 @@ public class AuthLayout extends HBox {
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
 
-    Button helpButton = new Button("Help");
-    ThemeStyles.styleButton(helpButton);
-    helpButton.setVisible(helpAction != null);
-    helpButton.setManaged(helpAction != null);
-    if (helpAction != null) {
-      helpButton.setOnAction(_ -> helpAction.run());
-    }
-
-    HBox bottom = new HBox(12, statusLabel, spacer, helpButton, returnButton);
+    HBox bottom = new HBox(12, statusLabel, spacer, returnButton);
     bottom.setAlignment(Pos.CENTER_LEFT);
     bottom.setPadding(new Insets(16, 32, 24, 32));
     right.setBottom(bottom);
@@ -130,6 +122,13 @@ public class AuthLayout extends HBox {
     if (returnButton.isManaged()) {
       returnButton.fire();
     }
+  }
+
+  @Override
+  public void onWindowResized(double width, double height) {
+    boolean showLeft = width >= 800;
+    leftPanel.setVisible(showLeft);
+    leftPanel.setManaged(showLeft);
   }
 
   private VBox buildLeftPanel() {

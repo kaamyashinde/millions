@@ -3,6 +3,7 @@ package view.pages.learning;
 import java.util.List;
 import java.util.function.Consumer;
 
+import controller.LearningHubController;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -14,11 +15,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
-import model.learninghub.Difficulty;
-import model.learninghub.LearningCategory;
-import model.learninghub.LearningContentStore;
-import model.learninghub.LearningItem;
+import model.learning.content.Difficulty;
+import model.learning.content.LearningCategory;
+import model.learning.content.LearningItem;
 import view.theme.ThemeStyles;
 
 /**
@@ -26,18 +25,10 @@ import view.theme.ThemeStyles;
  * {@link LearningCategory} as clickable cards, with difficulty filter toggle buttons.
  *
  * @author kaamyashinde
- * @version 1.1.0
- * @since 04-04-2026
+ * @version 2.0.0
+ * @since 2026-04-04
  */
 public class CategoryView extends BorderPane {
-
-  private static final String COLOR_BG_CARD = "#1e1e1e";
-  private static final String COLOR_BORDER_ACCENT = "#2196F3";
-  private static final String COLOR_HEADING = "#e0e0e0";
-  private static final String COLOR_SUBTITLE = "#9e9e9e";
-  private static final String COLOR_DIFFICULTY_BEGINNER = "#4CAF50";
-  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#FFA500";
-  private static final String COLOR_DIFFICULTY_ADVANCED = "#FF4444";
 
   private final VBox content = new VBox(12);
   private List<LearningItem> items;
@@ -46,19 +37,22 @@ public class CategoryView extends BorderPane {
   /**
    * Builds the category view.
    *
+   * @param learningHub   supplies items for the category
    * @param category      the category whose items are displayed
    * @param onBack        called when the back button is clicked
    * @param onItemClicked called with the clicked item
    */
   public CategoryView(
-      LearningCategory category, Runnable onBack, Consumer<LearningItem> onItemClicked) {
+      LearningHubController learningHub,
+      LearningCategory category,
+      Runnable onBack,
+      Consumer<LearningItem> onItemClicked) {
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "learning-root");
 
-    this.items = LearningContentStore.getItemsByCategory(category);
+    this.items = learningHub.getItemsForCategory(category);
     this.onItemClicked = onItemClicked;
 
-    // ── TOP: back button + category header ───────────────────────────────────
     Button backBtn = new Button("← Back");
     ThemeStyles.styleButton(backBtn);
     backBtn.setOnAction(_ -> onBack.run());
@@ -74,7 +68,6 @@ public class CategoryView extends BorderPane {
     ThemeStyles.addStyleClasses(desc, "learning-card-summary");
     desc.setWrapText(true);
 
-    // ── Filter bar ───────────────────────────────────────────────────────────
     ToggleGroup filterGroup = new ToggleGroup();
     ToggleButton btnAll = makeFilterToggle("All", null, filterGroup);
     ToggleButton btnBeginner = makeFilterToggle("Beginner", Difficulty.BEGINNER, filterGroup);
@@ -89,7 +82,6 @@ public class CategoryView extends BorderPane {
     header.setPadding(new Insets(0, 0, 16, 0));
     setTop(header);
 
-    // ── CENTER: item cards ───────────────────────────────────────────────────
     content.setPadding(new Insets(4, 0, 16, 0));
     applyFilter(null);
 
@@ -124,22 +116,15 @@ public class CategoryView extends BorderPane {
       ThemeStyles.addStyleClasses(empty, "empty-state");
       content.getChildren().add(empty);
     } else {
-      for (LearningItem item : filtered) {
-        content.getChildren().add(buildItemCard(item, onItemClicked));
-      }
+      content.getChildren().addAll(filtered.stream()
+          .map(item -> buildItemCard(item, onItemClicked))
+          .toList());
     }
   }
 
   private static javafx.scene.Node buildItemCard(LearningItem item, Consumer<LearningItem> onItemClicked) {
-    String badgeColor = difficultyColor(item.difficulty());
-
     Label badge = new Label(item.difficulty().name());
-    badge.setStyle(
-        "-fx-background-color: " + badgeColor + "22;"
-            + "-fx-text-fill: " + badgeColor + ";"
-            + "-fx-background-radius: 4;"
-            + "-fx-padding: 2 6 2 6;"
-            + "-fx-font-size: 10;");
+    ThemeStyles.applyDifficultyBadge(badge, item.difficulty());
 
     Label title = new Label(item.title());
     ThemeStyles.addStyleClasses(title, "learning-card-title");
@@ -156,13 +141,5 @@ public class CategoryView extends BorderPane {
 
     card.setOnMouseClicked(_ -> onItemClicked.accept(item));
     return card;
-  }
-
-  private static String difficultyColor(Difficulty difficulty) {
-    return switch (difficulty) {
-      case BEGINNER -> COLOR_DIFFICULTY_BEGINNER;
-      case INTERMEDIATE -> COLOR_DIFFICULTY_INTERMEDIATE;
-      case ADVANCED -> COLOR_DIFFICULTY_ADVANCED;
-    };
   }
 }

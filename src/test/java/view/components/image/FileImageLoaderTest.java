@@ -15,7 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Tests {@link FileImageLoader}. Requires JavaFX for {@link javafx.scene.image.Image}.
+ * Integration tests for {@link FileImageLoader} using real filesystem I/O ({@link TempDir}).
+ * Requires JavaFX for {@link javafx.scene.image.Image}.
  */
 class FileImageLoaderTest {
 

@@ -8,7 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import model.session.PlayerLeaderboardEntry;
+import model.session.leaderboard.PlayerLeaderboardEntry;
 import view.pages.auth.AuthPlayerLeaderboardPanel;
 
 import org.junit.jupiter.api.BeforeAll;

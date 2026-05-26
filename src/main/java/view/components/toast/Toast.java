@@ -1,7 +1,8 @@
 package view.components.toast;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -11,9 +12,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import view.theme.ThemeManager;
 import view.theme.ThemeStyles;
 
 /**
@@ -76,7 +79,7 @@ public class Toast extends HBox {
     setPrefWidth(TOAST_WIDTH);
     setMaxWidth(TOAST_WIDTH);
     setMinHeight(MIN_TOAST_HEIGHT);
-    ThemeStyles.addStyleClasses(this, "toast");
+    ThemeStyles.addStyleClasses(this, "toast", "toast-" + mode.name().toLowerCase());
 
     StackPane iconPane = buildIconPane(mode);
     VBox textBox = new VBox(4);
@@ -121,6 +124,14 @@ public class Toast extends HBox {
     Shape outline = mode.createShape();
     Text symbol = new Text(mode.getSymbol());
     symbol.setFont(Font.font(SYMBOL_FONT_SIZE));
+    ThemeStyles.addStyleClasses(symbol, "toast-icon-symbol");
+    symbol.fillProperty().bind(
+        Bindings.createObjectBinding(
+            () ->
+                ThemeManager.getInstance().getTheme() == ThemeManager.Theme.DARK
+                    ? Color.web("#F8FAFC")
+                    : Color.web("#0F172A"),
+            ThemeManager.getInstance().themeProperty()));
     boolean _ = pane.getChildren().addAll(outline, symbol);
 
     return pane;

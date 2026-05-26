@@ -1,6 +1,7 @@
 package view;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -10,15 +11,17 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import model.Stock;
-import model.marketevent.MarketEvent;
-import model.stockinfo.StockFinancialInfo;
-import model.stockinfo.StockFinancialInfoProvider;
+import javafx.scene.layout.VBox;
+import model.core.asset.Stock;
+import model.core.market.event.MarketEvent;
+import model.core.asset.info.StockFinancialInfo;
+import model.core.asset.info.StockFinancialInfoProvider;
+import view.components.chart.StockChart;
 import view.pages.stocks.StockDetailView;
-import model.marketevent.SymbolMarketEventTarget;
+import model.core.market.event.SymbolMarketEventTarget;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import model.recommendation.StockRecommendation;
+import model.analysis.recommendation.StockRecommendation;
 
 /**
  * Tests refresh behavior of the stock detail view.
@@ -72,6 +75,24 @@ class StockDetailViewTest {
   }
 
   @Test
+  void showStock_doesNotRenderChartWhenHistoryExists() throws Exception {
+    Stock stock = new Stock("AAPL", "Apple Inc.");
+    stock.addNewSalesPrice(new BigDecimal("100.00"));
+    stock.addNewSalesPrice(new BigDecimal("102.00"));
+
+    StockDetailView view =
+        runOnFxThread(
+            () -> {
+              StockDetailView detailView = new StockDetailView();
+              detailView.showStock(stock, 1);
+              return detailView;
+            });
+
+    VBox content = (VBox) view.getCenter();
+    assertFalse(content.getChildren().stream().anyMatch(StockChart.class::isInstance));
+  }
+
+  @Test
   void refreshRecomputesRecommendationFromUpdatedHistory() throws Exception {
     Stock stock = new Stock("AAPL", "Apple Inc.");
     stock.addNewSalesPrice(new BigDecimal("100.00"));
@@ -97,6 +118,22 @@ class StockDetailViewTest {
 
     assertEquals(StockRecommendation.SELL, view.getDisplayedRecommendation());
     assertEquals("Latest price: 95.00", view.getLatestPriceText());
+  }
+
+  @Test
+  void showStock_roundsLatestPriceToTwoDecimals() throws Exception {
+    Stock stock = new Stock("AAPL", "Apple Inc.");
+    stock.addNewSalesPrice(new BigDecimal("102.005"));
+
+    StockDetailView view =
+        runOnFxThread(
+            () -> {
+              StockDetailView detailView = new StockDetailView();
+              detailView.showStock(stock, 1);
+              return detailView;
+            });
+
+    assertEquals("Latest price: 102.01", view.getLatestPriceText());
   }
 
   @Test

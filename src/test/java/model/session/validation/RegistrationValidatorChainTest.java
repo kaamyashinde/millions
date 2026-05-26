@@ -1,7 +1,14 @@
 package model.session.validation;
 
+
+import model.session.validation.rules.PinValidator;
+import model.session.validation.rules.StartingMoneyValidator;
+import model.session.validation.rules.UsernameValidator;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import model.exception.auth.RegistrationValidationException;
 
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
@@ -16,6 +23,22 @@ class RegistrationValidatorChainTest {
     ValidationResult r =
         chain.validate("good_user", "5678".toCharArray(), new BigDecimal("100"));
     assertInstanceOf(ValidationResult.Success.class, r);
+  }
+
+  @Test
+  void usernameFailure_throwsRegistrationValidationExceptionWhenMapped() {
+    ValidationResult result = chain.validate("x", "1234".toCharArray(), BigDecimal.TEN);
+
+    RegistrationValidationException thrown = assertThrows(
+        RegistrationValidationException.class,
+        () -> {
+          if (result instanceof ValidationResult.Failure failure) {
+            throw new RegistrationValidationException(failure.error());
+          }
+          throw new AssertionError("expected validation failure");
+        });
+
+    assertEquals(ValidationError.INVALID_USERNAME, thrown.error());
   }
 
   @Test

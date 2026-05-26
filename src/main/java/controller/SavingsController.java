@@ -1,94 +1,102 @@
 package controller;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.math.BigDecimal;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.Exchange;
-import model.InvestableAsset;
-import model.Player;
-import model.savings.RegularSavingsPlan;
-import model.savings.RegularSavingsProcessor;
-import model.savings.SavingsInstallmentMode;
-import view.components.notification.NotificationService;
-import view.components.toast.ToastMode;
+import model.core.market.Exchange;
+import model.core.asset.InvestableAsset;
+import model.core.player.Player;
+import model.trading.savings.RegularSavingsPlan;
+import model.trading.savings.SavingsInstallmentMode;
 
 /**
- * Manages regular savings plans and trading-day advancement for the savings tab.
+ * Manages regular savings plans for the savings tab.
+ *
+ * <p>The controller combines {@link RegularSavingsPanelController} asset listings with the active
+ * {@link Player}'s {@link RegularSavingsPlan} collection, parsing form text before creating or
+ * editing plans.
+ *
+ * @author kevindmazali
+ * @contributor kaamyashinde
+ * @version 1.0.0
+ * @since 2026-05-01
  */
 public class SavingsController {
 
   private final Exchange exchange;
   private final Player player;
-  private final NotificationService notifications;
   private final RegularSavingsPanelController assetListing;
   private final ObservableList<RegularSavingsPlan> plans = FXCollections.observableArrayList();
 
   /**
-   * @param exchange exchange whose day advances
+   * Creates a savings controller and loads the player's current plans.
+   *
+   * @param exchange exchange supplying trading-day state for new plans
    * @param player player owning savings plans
-   * @param notifications notification service for skip warnings and market events
    */
-  public SavingsController(Exchange exchange, Player player, NotificationService notifications) {
+  public SavingsController(Exchange exchange, Player player) {
     checkNotNull(exchange, "Exchange");
     checkNotNull(player, "Player");
-    checkNotNull(notifications, "notifications");
     this.exchange = exchange;
     this.player = player;
-    this.notifications = notifications;
     this.assetListing = new RegularSavingsPanelController(exchange);
     refreshPlans();
   }
 
+  /**
+   * Exposes the exchange used by the savings page.
+   *
+   * @return exchange used for asset listings and current trading day
+   */
   public Exchange getExchange() {
     return exchange;
   }
 
+  /**
+   * Exposes the player who owns the savings plans.
+   *
+   * @return player who owns the displayed savings plans
+   */
   public Player getPlayer() {
     return player;
   }
 
+  /**
+   * Exposes investable assets for new plan creation.
+   *
+   * @return observable investable assets available for new plans
+   */
   public ObservableList<InvestableAsset> getListedAssets() {
     return assetListing.getListedAssets();
   }
 
+  /**
+   * Exposes the player's savings plans.
+   *
+   * @return observable savings plans owned by the player
+   */
   public ObservableList<RegularSavingsPlan> getPlans() {
     return plans;
   }
 
+  /**
+   * Returns the current exchange trading day.
+   *
+   * @return current exchange trading day
+   */
   public int getTradingDay() {
     return exchange.getDay();
   }
 
+  /**
+   * Refreshes listed assets and savings plans from the current model state.
+   */
   public void refreshPlans() {
     assetListing.refreshListedAssets();
     plans.setAll(player.getRegularSavingsPlans());
-  }
-
-  /**
-   * Advances the exchange one day, processes installments, and surfaces notifications.
-   *
-   * @return comma-separated symbols skipped for insufficient funds, or empty
-   */
-  public String advanceOneDay() {
-    int before = exchange.getDay();
-    exchange.advance();
-    List<String> skipped =
-        RegularSavingsProcessor.run(exchange, player, before, exchange.getDay());
-    refreshPlans();
-    exchange.getLastMarketEvent().ifPresent(event -> notifications.show(
-        ToastMode.INFO,
-        event.title(),
-        event.description()));
-    for (String sym : skipped) {
-      notifications.show(
-          ToastMode.WARNING,
-          "Regular savings skipped",
-          "Insufficient funds for " + sym + ".");
-    }
-    return String.join(", ", skipped);
   }
 
   /**

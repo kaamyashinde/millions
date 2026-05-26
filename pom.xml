@@ -111,6 +111,13 @@
         <version>${maven.javadoc.plugin.version}</version>
         <configuration>
           <source>${java.version}</source>
+          <tags>
+            <tag>
+              <name>contributor</name>
+              <placement>t</placement>
+              <head>Contributor:</head>
+            </tag>
+          </tags>
         </configuration>
         <executions>
           <execution>

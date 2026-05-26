@@ -1,27 +1,39 @@
 package controller;
 
-import static model.utils.Validator.checkNotNull;
+import static util.Validator.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.Exchange;
-import model.fund.Fund;
+import model.core.market.Exchange;
+import model.core.asset.fund.Fund;
 
 /**
  * Supplies sorted fund listings and selection state for the funds tab.
+ *
+ * <p>The controller adapts {@link Exchange#findFunds(String)} into an {@link ObservableList} for
+ * table and detail bindings, preserving the selected {@link Fund} when listings refresh.
+ *
+ * @author kevindmazali
+ * @contributor kaamyashinde
+ * @version 1.0.0
+ * @since 2026-05-01
  */
 public class FundsController {
 
   private final Exchange exchange;
   private final ObservableList<Fund> funds = FXCollections.observableArrayList();
   private final ObjectProperty<Fund> selectedFund = new SimpleObjectProperty<>();
+  private String searchTerm = "";
 
   /**
+   * Creates a fund-list controller and loads the initial rows.
+   *
    * @param exchange exchange whose funds are listed
    */
   public FundsController(Exchange exchange) {
@@ -30,33 +42,80 @@ public class FundsController {
     refresh();
   }
 
+  /**
+   * Exposes the exchange backing the fund listings.
+   *
+   * @return exchange backing the fund listings
+   */
   public Exchange getExchange() {
     return exchange;
   }
 
+  /**
+   * Exposes fund rows for table and list bindings.
+   *
+   * @return observable fund rows sorted by symbol
+   */
   public ObservableList<Fund> getFunds() {
     return funds;
   }
 
+  /**
+   * Exposes the selected fund property for bidirectional bindings.
+   *
+   * @return selected fund property for view bindings
+   */
   public ObjectProperty<Fund> selectedFundProperty() {
     return selectedFund;
   }
 
+  /**
+   * Returns the currently selected fund.
+   *
+   * @return currently selected fund, or {@code null} when no fund is available
+   */
   public Fund getSelectedFund() {
     return selectedFund.get();
   }
 
+  /**
+   * Updates the selected fund.
+   *
+   * @param fund fund to select, or {@code null} to clear selection
+   */
   public void setSelectedFund(Fund fund) {
     selectedFund.set(fund);
   }
 
+  public String getSearchTerm() {
+    return searchTerm;
+  }
+
+  /**
+   * Updates the active search term and reloads the filtered fund rows.
+   *
+   * @param searchTerm symbol or fund name text to match
+   */
+  public void setSearchTerm(String searchTerm) {
+    this.searchTerm = searchTerm == null ? "" : searchTerm.trim();
+    refresh();
+  }
+
+  /**
+   * Formats the funds-page metadata line.
+   *
+   * @return compact exchange, day, and listing-count text for the funds page
+   */
   public String getMetaText() {
+    int total = exchange.listings().findFunds("").size();
+    int visible = funds.size();
+    String countText =
+        searchTerm.isBlank() ? total + " fund(s)" : visible + " of " + total + " fund(s)";
     return exchange.getName()
         + " · trading day "
         + exchange.getDay()
         + " · "
-        + exchange.findFunds("").size()
-        + " fund(s)";
+        + countText;
   }
 
   /**
@@ -64,19 +123,18 @@ public class FundsController {
    */
   public void refresh() {
     Fund previous = selectedFund.get();
-    List<Fund> sorted = new ArrayList<>(exchange.findFunds(""));
+    List<Fund> sorted = new ArrayList<>(exchange.listings().findFunds(searchTerm));
     sorted.sort(Comparator.comparing(Fund::getSymbol));
     funds.setAll(sorted);
     if (previous != null) {
-      for (Fund fund : sorted) {
-        if (fund.getSymbol().equals(previous.getSymbol())) {
-          selectedFund.set(fund);
-          return;
-        }
+      Optional<Fund> restored = sorted.stream()
+          .filter(fund -> fund.getSymbol().equals(previous.getSymbol()))
+          .findFirst();
+      if (restored.isPresent()) {
+        selectedFund.set(restored.get());
+        return;
       }
     }
-    if (selectedFund.get() == null && !sorted.isEmpty()) {
-      selectedFund.set(sorted.get(0));
-    }
+    selectedFund.set(sorted.isEmpty() ? null : sorted.get(0));
   }
 }

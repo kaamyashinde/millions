@@ -3,6 +3,11 @@ package view;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import controller.ExitGameController;
+import controller.PortfolioController;
+import controller.TradingController;
+import model.session.SessionService;
+import model.session.SessionServiceFactory;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
@@ -10,9 +15,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
-import model.Exchange;
-import model.Player;
-import model.Stock;
+import model.analysis.performance.MetricValue;
+import model.core.market.Exchange;
+import model.core.market.ExchangeBuilder;
+import model.core.player.Player;
+import model.core.asset.Stock;
+import view.components.notification.NotificationService;
 import view.pages.portfolio.PlayerPortfolioPage;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -37,11 +45,10 @@ class PlayerPortfolioPageTest {
   @Test
   void emptyPlayerShowsNoTradesAndNoHoldings() throws Exception {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
-    Exchange exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
+    Exchange exchange = new ExchangeBuilder("NYSE").stocks(List.of(apple)).build();
     Player player = new Player("k", new BigDecimal("5000.00"));
 
-    PlayerPortfolioPage panel =
-        runOnFxThread(() -> new PlayerPortfolioPage(exchange, player, Path.of("/no/avatar.png")));
+    PlayerPortfolioPage panel = runOnFxThread(() -> createPage(exchange, player));
 
     assertEquals("k", panel.getDisplayedPlayerName());
     assertEquals("5000.00", panel.getDisplayedBalance());
@@ -53,10 +60,9 @@ class PlayerPortfolioPageTest {
   @Test
   void refreshAfterTradeAndAdvanceUpdatesHoldingsAndMetrics() throws Exception {
     Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
-    Exchange exchange = new Exchange.Builder("NYSE").stocks(List.of(apple)).build();
+    Exchange exchange = new ExchangeBuilder("NYSE").stocks(List.of(apple)).build();
     Player player = new Player("k", new BigDecimal("5000.00"));
-    PlayerPortfolioPage panel =
-        runOnFxThread(() -> new PlayerPortfolioPage(exchange, player, Path.of("/no/avatar.png")));
+    PlayerPortfolioPage panel = runOnFxThread(() -> createPage(exchange, player));
 
     exchange.buy("AAPL", BigDecimal.ONE, player);
     exchange.advance();
@@ -69,6 +75,49 @@ class PlayerPortfolioPageTest {
     assertEquals(1, panel.getHoldingCount());
     assertTrue(panel.getPortfolioReturnText().endsWith("%"));
     assertTrue(panel.getBenchmarkReturnText().endsWith("%"));
+  }
+
+  @Test
+  void multiplePurchasesOfSameSymbolShowAsSingleHolding() throws Exception {
+    Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
+    Exchange exchange = new ExchangeBuilder("NYSE").stocks(List.of(apple)).build();
+    Player player = new Player("k", new BigDecimal("5000.00"));
+    PlayerPortfolioPage panel = runOnFxThread(() -> createPage(exchange, player));
+
+    exchange.buy("AAPL", BigDecimal.ONE, player);
+    exchange.buy("AAPL", BigDecimal.ONE, player);
+    exchange.buy("AAPL", BigDecimal.ONE, player);
+    runOnFxThread(
+        () -> {
+          panel.refresh();
+          return panel;
+        });
+
+    assertEquals(1, panel.getHoldingCount());
+  }
+
+  @Test
+  void metricFormattingUsesTwoDecimals() {
+    assertEquals(
+        "1.23",
+        PortfolioController.formatMetricValue(
+            MetricValue.available(new BigDecimal("1.234")),
+            false));
+  }
+
+  private static PlayerPortfolioPage createPage(Exchange exchange, Player player) throws Exception {
+    Path avatarPath = Path.of("/no/avatar.png");
+    PortfolioController portfolio = new PortfolioController(exchange, player, avatarPath);
+    TradingController trading =
+        new TradingController(exchange, player, new NotificationService());
+    Path profilesRoot = java.nio.file.Files.createTempDirectory("millions-portfolio-test");
+    SessionService sessionService = SessionServiceFactory.createLocalProfileSessionService(
+        profilesRoot,
+        "/data/demo-stocks.csv",
+        PlayerPortfolioPageTest.class,
+        "NYSE");
+    ExitGameController exitGame = new ExitGameController(sessionService);
+    return new PlayerPortfolioPage(portfolio, trading, exitGame, () -> {}, () -> {});
   }
 
   /**

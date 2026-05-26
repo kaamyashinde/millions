@@ -52,8 +52,13 @@ class NotificationServiceTest {
     NotificationService service = new NotificationService(Duration.millis(500));
     runOnFxAndWait(() -> service.show(ToastMode.INFO, "Hi"));
     AtomicInteger size = new AtomicInteger();
-    runOnFxAndWait(() -> size.set(service.getItems().size()));
+    AtomicInteger historySize = new AtomicInteger();
+    runOnFxAndWait(() -> {
+      size.set(service.getItems().size());
+      historySize.set(service.getHistoryItems().size());
+    });
     assertEquals(1, size.get());
+    assertEquals(1, historySize.get());
   }
 
   @Test
@@ -67,12 +72,15 @@ class NotificationServiceTest {
     Thread.sleep(250);
 
     AtomicInteger listSize = new AtomicInteger();
+    AtomicInteger historySize = new AtomicInteger();
     AtomicInteger childCount = new AtomicInteger();
     runOnFxAndWait(() -> {
       listSize.set(service.getItems().size());
+      historySize.set(service.getHistoryItems().size());
       childCount.set(trayRef.get().getChildren().size());
     });
     assertEquals(0, listSize.get());
+    assertEquals(1, historySize.get());
     assertEquals(0, childCount.get());
   }
 
@@ -88,8 +96,13 @@ class NotificationServiceTest {
     runOnFxAndWait(() -> service.dismiss(idRef.get()));
 
     AtomicInteger sizeAfter = new AtomicInteger();
-    runOnFxAndWait(() -> sizeAfter.set(service.getItems().size()));
+    AtomicInteger historySize = new AtomicInteger();
+    runOnFxAndWait(() -> {
+      sizeAfter.set(service.getItems().size());
+      historySize.set(service.getHistoryItems().size());
+    });
     assertEquals(0, sizeAfter.get());
+    assertEquals(1, historySize.get());
   }
 
   @Test
@@ -106,8 +119,30 @@ class NotificationServiceTest {
     runOnFxAndWait(service::clear);
 
     AtomicInteger end = new AtomicInteger();
-    runOnFxAndWait(() -> end.set(service.getItems().size()));
+    AtomicInteger historyEnd = new AtomicInteger();
+    runOnFxAndWait(() -> {
+      end.set(service.getItems().size());
+      historyEnd.set(service.getHistoryItems().size());
+    });
     assertEquals(0, end.get());
+    assertEquals(0, historyEnd.get());
+  }
+
+  @Test
+  void clearHistoryLeavesVisibleItems() throws Exception {
+    NotificationService service = new NotificationService(Duration.seconds(10));
+    runOnFxAndWait(() -> service.show(ToastMode.INFO, "A"));
+
+    runOnFxAndWait(service::clearHistory);
+
+    AtomicInteger visible = new AtomicInteger();
+    AtomicInteger history = new AtomicInteger();
+    runOnFxAndWait(() -> {
+      visible.set(service.getItems().size());
+      history.set(service.getHistoryItems().size());
+    });
+    assertEquals(1, visible.get());
+    assertEquals(0, history.get());
   }
 
   @Test

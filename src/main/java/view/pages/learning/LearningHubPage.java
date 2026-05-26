@@ -1,11 +1,10 @@
 package view.pages.learning;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.util.List;
 
+import controller.LearningHubController;
+import controller.QuizController;
 import javafx.geometry.Insets;
-
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
@@ -17,50 +16,46 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-
-import model.learninghub.Difficulty;
-import model.learninghub.LearningCategory;
-import model.learninghub.LearningContentStore;
-import model.learninghub.LearningItem;
-import model.learninghub.LearningResource;
-import model.learninghub.QuizAttempt;
-import model.learninghub.QuizSession;
+import model.learning.content.LearningCategory;
+import model.learning.content.LearningItem;
+import model.learning.content.LearningResource;
+import model.learning.quiz.QuizAttempt;
+import view.components.learning.LearningResourceCard;
+import view.layout.ResponsiveLayout;
 import view.pages.quiz.QuizResultView;
 import view.pages.quiz.QuizView;
 import view.theme.ThemeStyles;
 
 /**
  * Learning Hub landing page. Displays a featured-topics row, a 6-category grid, and a highlighted
- * beginner resource card. All content is sourced from {@link LearningContentStore}.
+ * beginner resource card. All content is supplied by {@link LearningHubController}.
  *
  * @author kaamyashinde
- * @version 1.0.0
- * @since 04-04-2026
+ * @version 2.0.0
+ * @since 2026-04-04
  */
-public class LearningHubPage extends BorderPane {
+public class LearningHubPage extends BorderPane implements ResponsiveLayout {
 
+  private final LearningHubController learningHub;
+  private final QuizController quiz;
+  private final List<LearningCategory> categories;
+  private final VBox categorySection;
   private javafx.scene.Node landingView;
 
-  private static final String COLOR_BG_CARD = "#1e1e1e";
-  private static final String COLOR_BORDER_DEFAULT = "#2a2a2a";
-  private static final String COLOR_BORDER_ACCENT = "#2196F3";
-  private static final String COLOR_BORDER_RESOURCE = "#4CAF50";
-
-  private static final String COLOR_DIFFICULTY_BEGINNER = "#4CAF50";
-  private static final String COLOR_DIFFICULTY_INTERMEDIATE = "#FFA500";
-  private static final String COLOR_DIFFICULTY_ADVANCED = "#FF4444";
-
-  private static final String COLOR_HEADING = "#e0e0e0";
-  private static final String COLOR_SUBTITLE = "#9e9e9e";
-
   /**
-   * Builds the panel, wires up all sections from {@link LearningContentStore}.
+   * Builds the panel and wires up all sections from the learning hub controller.
+   *
+   * @param learningHub supplies catalog content
+   * @param quiz        supplies quiz content and session recording
    */
-  public LearningHubPage() {
+  public LearningHubPage(LearningHubController learningHub, QuizController quiz) {
+    this.learningHub = learningHub;
+    this.quiz = quiz;
+    this.categories = learningHub.getCategories();
+
     setPadding(new Insets(16));
     ThemeStyles.addStyleClasses(this, "learning-root", "learning-hub-root");
 
-    // ── TOP: heading + subtitle ──────────────────────────────────────────────
     Text heading = new Text("Learning Hub");
     heading.setFont(Font.font("System", FontWeight.BOLD, 26));
     ThemeStyles.addStyleClasses(heading, "learning-heading");
@@ -72,15 +67,13 @@ public class LearningHubPage extends BorderPane {
     top.setPadding(new Insets(0, 0, 12, 0));
     setTop(top);
 
-    // ── CENTER: scrollable content ───────────────────────────────────────────
     VBox content = new VBox(28);
     content.setPadding(new Insets(4, 0, 16, 0));
-
+    categorySection = buildCategorySection();
     content.getChildren().addAll(
         buildFeaturedSection(),
-        buildCategorySection(),
-        buildStartHereSection()
-    );
+        categorySection,
+        buildStartHereSection());
 
     ScrollPane scroll = new ScrollPane(content);
     scroll.setFitToWidth(true);
@@ -90,62 +83,59 @@ public class LearningHubPage extends BorderPane {
     setCenter(landingView);
   }
 
-  // ── Section builders ────────────────────────────────────────────────────────
-
   private VBox buildFeaturedSection() {
-    List<LearningItem> featured = LearningContentStore.getFeaturedItems();
+    List<LearningItem> featured = learningHub.getFeaturedItems();
 
     HBox cards = new HBox(12);
-    for (LearningItem item : featured) {
-      cards.getChildren().add(buildFeaturedCard(item));
-    }
+    cards.getChildren().addAll(featured.stream()
+        .map(this::buildFeaturedCard)
+        .toList());
 
     return buildSection("Featured Topics", cards);
   }
 
   private VBox buildCategorySection() {
-    List<LearningCategory> categories = LearningContentStore.getCategories();
+    return buildSection("Browse by Category", buildCategoryGrid(columnCountForWidth(getWidth())));
+  }
 
+  private GridPane buildCategoryGrid(int columns) {
     GridPane grid = new GridPane();
     grid.setHgap(12);
     grid.setVgap(12);
 
-    // 3 equal columns
-    for (int i = 0; i < 3; i++) {
+    double percentWidth = 100.0 / columns;
+    for (int i = 0; i < columns; i++) {
       ColumnConstraints col = new ColumnConstraints();
       col.setHgrow(Priority.ALWAYS);
-      col.setPercentWidth(33.33);
+      col.setPercentWidth(percentWidth);
       grid.getColumnConstraints().add(col);
     }
 
     for (int i = 0; i < categories.size(); i++) {
-      grid.add(buildCategoryCard(categories.get(i)), i % 3, i / 3);
+      grid.add(buildCategoryCard(categories.get(i)), i % columns, i / columns);
     }
 
-    return buildSection("Browse by Category", grid);
+    return grid;
+  }
+
+  private static int columnCountForWidth(double width) {
+    if (width < 700) {
+      return 1;
+    }
+    if (width < 1000) {
+      return 2;
+    }
+    return 3;
   }
 
   private VBox buildStartHereSection() {
-    LearningResource resource = LearningContentStore.getResources().stream()
-        .filter(r -> "res-aksjer-for-alle".equals(r.id()))
-        .findFirst()
-        .orElse(LearningContentStore.getResources().get(0));
-
-    return buildSection("Start Here", buildResourceCard(resource));
+    LearningResource resource = learningHub.getStartHereResource();
+    return buildSection("Start Here", LearningResourceCard.create(resource));
   }
 
-  // ── Card builders ────────────────────────────────────────────────────────────
-
   private javafx.scene.Node buildFeaturedCard(LearningItem item) {
-    String badgeColor = difficultyColor(item.difficulty());
-
     Label badge = new Label(item.difficulty().name());
-    badge.setStyle(
-        "-fx-background-color: " + badgeColor + "22;"
-            + "-fx-text-fill: " + badgeColor + ";"
-            + "-fx-background-radius: 4;"
-            + "-fx-padding: 2 6 2 6;"
-            + "-fx-font-size: 10;");
+    ThemeStyles.applyDifficultyBadge(badge, item.difficulty());
 
     Label title = new Label(item.title());
     ThemeStyles.addStyleClasses(title, "learning-card-title");
@@ -187,61 +177,29 @@ public class LearningHubPage extends BorderPane {
     return card;
   }
 
-  private javafx.scene.Node buildResourceCard(LearningResource resource) {
-    Label sourceLabel = new Label(resource.sourceLabel());
-    sourceLabel.setStyle(
-        "-fx-background-color: " + COLOR_BORDER_RESOURCE + "22;"
-            + "-fx-text-fill: " + COLOR_BORDER_RESOURCE + ";"
-            + "-fx-background-radius: 4;"
-            + "-fx-padding: 2 6 2 6;"
-            + "-fx-font-size: 10;");
-
-    Label title = new Label(resource.title());
-    ThemeStyles.addStyleClasses(title, "learning-resource-title");
-
-    Label desc = new Label(resource.description());
-    ThemeStyles.addStyleClasses(desc, "learning-card-summary");
-    desc.setWrapText(true);
-
-    Label cta = new Label("Open article →");
-    ThemeStyles.addStyleClasses(cta, "learning-resource-cta");
-
-    VBox card = new VBox(6, sourceLabel, title, desc, cta);
-    card.setPadding(new Insets(14));
-    card.setMaxWidth(Double.MAX_VALUE);
-    ThemeStyles.addStyleClasses(card, "learning-card-resource");
-
-    card.setOnMouseClicked(_ -> openUrl(resource.url()));
-    return card;
-  }
-
-  // ── Helpers ─────────────────────────────────────────────────────────────────
-
   private static VBox buildSection(String title, javafx.scene.Node content) {
     Label heading = new Label(title);
     ThemeStyles.addStyleClasses(heading, "learning-section-title");
-
-    VBox section = new VBox(10, heading, content);
-    return section;
+    return new VBox(10, heading, content);
   }
 
-  private static String difficultyColor(Difficulty difficulty) {
-    return switch (difficulty) {
-      case BEGINNER -> COLOR_DIFFICULTY_BEGINNER;
-      case INTERMEDIATE -> COLOR_DIFFICULTY_INTERMEDIATE;
-      case ADVANCED -> COLOR_DIFFICULTY_ADVANCED;
-    };
+  /**
+   * Opens the topic detail view for the given learning item ID.
+   *
+   * @param itemId {@link LearningItem#id()}
+   */
+  public void openTopic(String itemId) {
+    learningHub.getItemById(itemId).ifPresent(this::onItemCardClicked);
   }
 
-  private static void openUrl(String url) {
-    try {
-      Desktop.getDesktop().browse(URI.create(url));
-    } catch (Exception ignored) {
-      // Silent fail — desktop browsing may be unavailable in some environments
+  @Override
+  public void onWindowResized(double width, double height) {
+    if (getCenter() != landingView) {
+      return;
     }
+    int columns = columnCountForWidth(width);
+    categorySection.getChildren().set(1, buildCategoryGrid(columns));
   }
-
-  // ── Navigation ───────────────────────────────────────────────────────────────
 
   private void showLanding() {
     setCenter(landingView);
@@ -249,11 +207,17 @@ public class LearningHubPage extends BorderPane {
 
   private void onItemCardClicked(LearningItem item) {
     setCenter(new ItemDetailView(
-        item, this::showLanding, this::onItemCardClicked, this::onTakeQuiz));
+        learningHub,
+        quiz,
+        item,
+        this::showLanding,
+        this::onItemCardClicked,
+        this::onTakeQuiz));
   }
 
   private void onCategoryCardClicked(LearningCategory category) {
-    setCenter(new CategoryView(category, this::showLanding, this::onItemCardClicked));
+    setCenter(new CategoryView(
+        learningHub, category, this::showLanding, this::onItemCardClicked));
   }
 
   private void onFeaturedCardClicked(LearningItem item) {
@@ -261,17 +225,19 @@ public class LearningHubPage extends BorderPane {
   }
 
   private void onTakeQuiz(QuizAttempt attempt) {
-    LearningItem item = LearningContentStore
-        .getItemsByIds(List.of(attempt.quiz().linkedItemId())).get(0);
+    LearningItem item = learningHub.getItemById(attempt.quiz().linkedItemId()).orElseThrow();
     Runnable backToItem = () -> onItemCardClicked(item);
     setCenter(new QuizView(
         attempt,
         backToItem,
-        () -> showQuizResult(attempt, backToItem)));
+        () -> showQuizResult(attempt, backToItem),
+        learningHub,
+        this::onItemCardClicked));
   }
 
   private void showQuizResult(QuizAttempt attempt, Runnable onBackToTopic) {
-    QuizSession.record(attempt);
-    setCenter(new QuizResultView(attempt, onBackToTopic, this::showLanding));
+    quiz.recordAttempt(attempt);
+    setCenter(new QuizResultView(
+        attempt, onBackToTopic, this::showLanding, learningHub, this::onItemCardClicked));
   }
 }

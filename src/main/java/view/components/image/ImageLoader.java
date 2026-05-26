@@ -12,6 +12,15 @@ import javafx.scene.image.Image;
 public interface ImageLoader {
 
   /**
+   * Returns the standard avatar loader: validation over file-based loading.
+   *
+   * @return validating decorator wrapping {@link FileImageLoader}
+   */
+  static ImageLoader defaultLoader() {
+    return new ValidatingImageLoader(new FileImageLoader());
+  }
+
+  /**
    * Loads an image from disk, or returns {@code null} when loading is not possible.
    *
    * @param imagePath path to the image file; may be {@code null} depending on implementation

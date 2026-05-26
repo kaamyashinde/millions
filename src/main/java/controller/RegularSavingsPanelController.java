@@ -5,16 +5,17 @@ import java.util.Comparator;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.Exchange;
-import model.InvestableAsset;
+import model.core.market.Exchange;
+import model.core.asset.InvestableAsset;
 
 /**
  * Supplies UI-ready data for the savings page: investable assets listed on an
  * {@link Exchange}, sorted by symbol, for combo-box selection when creating a plan.
  *
  * @author kevindmazali
+ * @contributor kaamyashinde
  * @version 1.0.0
- * @since 30-03-2026
+ * @since 2026-03-30
  */
 public class RegularSavingsPanelController {
 
@@ -46,7 +47,7 @@ public class RegularSavingsPanelController {
    * can change at runtime.
    */
   public void refreshListedAssets() {
-    List<InvestableAsset> sorted = new ArrayList<>(exchange.findAssets(""));
+    List<InvestableAsset> sorted = new ArrayList<>(exchange.listings().findAssets(""));
     sorted.sort(Comparator.comparing(InvestableAsset::getSymbol));
     listedAssets.setAll(sorted);
   }

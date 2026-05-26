@@ -1,0 +1,51 @@
+package model.persistence.market;
+
+
+import java.util.List;
+import model.core.asset.Stock;
+import model.core.asset.fund.Fund;
+
+/**
+ * Immutable persisted market payload containing all loaded stocks and funds.
+ *
+ * <p>{@link MarketDataFileService} and {@link MarketDataLoader} pass this value object between
+ * CSV parsing, validation, and exchange construction.
+ *
+ * @param stocks loaded stock definitions
+ * @param funds loaded fund definitions
+ *
+ * @author kevindmazali
+ * @version 1.0.0
+ * @since 2026-04-04
+ */
+public record MarketData(List<Stock> stocks, List<Fund> funds) {
+
+  /**
+   * Creates a normalized market-data bundle with immutable list copies.
+   *
+   * @param stocks loaded stock definitions
+   * @param funds loaded fund definitions
+   */
+  public MarketData {
+    stocks = List.copyOf(stocks);
+    funds = List.copyOf(funds);
+  }
+
+  /**
+   * Returns an empty market-data bundle.
+   *
+   * @return market data with no stocks and no funds
+   */
+  public static MarketData empty() {
+    return new MarketData(List.of(), List.of());
+  }
+
+  /**
+   * Returns whether the market bundle contains no assets at all.
+   *
+   * @return {@code true} when both stocks and funds are empty
+   */
+  public boolean isEmpty() {
+    return stocks.isEmpty() && funds.isEmpty();
+  }
+}

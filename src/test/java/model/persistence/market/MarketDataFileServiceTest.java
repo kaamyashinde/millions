@@ -1,0 +1,186 @@
+package model.persistence.market;
+
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import model.exception.market.MarketDataImportException;
+import model.persistence.profile.ProfilePaths;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+/**
+ * Integration tests for {@link MarketDataFileService} using real filesystem I/O
+ * ({@link TempDir}). CSV parsing unit tests belong in {@link model.persistence.io.CsvReaderTest}.
+ */
+class MarketDataFileServiceTest {
+
+  private static final String DEFAULT_RESOURCE = "/data/demo-stocks.csv";
+
+  @TempDir
+  Path tempDir;
+
+  private MarketDataFileService service;
+  private ProfilePaths profilePaths;
+
+  @BeforeEach
+  void setUp() {
+    profilePaths = new ProfilePaths(tempDir);
+    service = new MarketDataFileService(profilePaths, MarketDataFileServiceTest.class, DEFAULT_RESOURCE);
+  }
+
+  @Test
+  void installDefault_copiesBundledCsvIntoProfileDirectory() {
+    String username = "alice";
+
+    MarketData marketData = service.installDefault(username);
+
+    Path profileCsv = profilePaths.marketDataFile(username);
+    assertTrue(Files.isRegularFile(profileCsv));
+    assertTrue(marketData.stocks().size() >= 3);
+    assertFalse(marketData.funds().isEmpty());
+  }
+
+  @Test
+  void importFromFile_copiesAndParsesCustomCsv() throws IOException {
+    String username = "bob";
+    Path source = tempDir.resolve("custom.csv");
+    Files.writeString(source, """
+        STOCK,TEST,Test Co,10.00
+        """);
+
+    MarketData marketData = service.importFromFile(source, username);
+
+    assertEquals(1, marketData.stocks().size());
+    assertEquals("TEST", marketData.stocks().getFirst().getSymbol());
+    assertTrue(Files.isRegularFile(profilePaths.marketDataFile(username)));
+  }
+
+  @Test
+  void importFromFile_wrapsSaveFailures() throws IOException {
+    Path source = tempDir.resolve("custom.csv");
+    Files.writeString(source, "STOCK,TEST,Test Co,10.00\n");
+    Files.writeString(tempDir.resolve("bob"), "blocks profile directory creation");
+
+    MarketDataImportException thrown = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(source, "bob"));
+
+    assertEquals("Could not save market data file.", thrown.getMessage());
+  }
+
+  @Test
+  void installDefault_wrapsSaveFailures() throws IOException {
+    Files.writeString(tempDir.resolve("blocked"), "blocks profile directory creation");
+
+    MarketDataImportException thrown = assertThrows(
+        MarketDataImportException.class,
+        () -> service.installDefault("blocked"));
+
+    assertEquals("Could not save market data file.", thrown.getMessage());
+  }
+
+  @Test
+  void importFromFile_rejectsNonCsvExtension() throws IOException {
+    Path source = tempDir.resolve("custom.txt");
+    Files.writeString(source, "STOCK,TEST,Test Co,10.00");
+
+    MarketDataImportException thrown = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(source, "bob"));
+
+    assertEquals("Market data file must be a .csv file.", thrown.getMessage());
+  }
+
+  @Test
+  void importFromFile_rejectsNullMissingAndOversizedSources() throws IOException {
+    MarketDataImportException nullSource = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(null, "bob"));
+    assertEquals("Market data file not found.", nullSource.getMessage());
+
+    MarketDataImportException missing = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(tempDir.resolve("missing.csv"), "bob"));
+    assertEquals("Market data file not found.", missing.getMessage());
+
+    Path large = tempDir.resolve("large.csv");
+    Files.writeString(large, "x".repeat((int) MarketDataFileService.MAX_FILE_BYTES + 1));
+    MarketDataImportException tooLarge = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(large, "bob"));
+    assertEquals("Market data file is too large (max 1 MB).", tooLarge.getMessage());
+  }
+
+  @Test
+  void importFromFile_rejectsInvalidContent() throws IOException {
+    Path source = tempDir.resolve("bad.csv");
+    Files.writeString(source, "not,a,valid,market,row");
+
+    MarketDataImportException thrown = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(source, "bob"));
+
+    assertEquals(
+        "Could not read market data. Check that rows use STOCK or FUND format.",
+        thrown.getMessage());
+  }
+
+  @Test
+  void importFromFile_rejectsCsvWithoutStocks() throws IOException {
+    Path source = tempDir.resolve("empty.csv");
+    Files.writeString(source, "");
+
+    MarketDataImportException thrown = assertThrows(
+        MarketDataImportException.class,
+        () -> service.importFromFile(source, "bob"));
+
+    assertEquals("Market data file must contain at least one stock.", thrown.getMessage());
+  }
+
+  @Test
+  void loadForProfile_selfHealsMissingFile() throws IOException {
+    String username = "legacy";
+    Files.createDirectories(profilePaths.profileDirectory(username));
+
+    MarketData marketData = service.loadForProfile(username);
+
+    assertTrue(Files.isRegularFile(profilePaths.marketDataFile(username)));
+    assertFalse(marketData.stocks().isEmpty());
+  }
+
+  @Test
+  void loadForProfile_readsExistingProfileFile() throws IOException {
+    String username = "carol";
+    service.installDefault(username);
+
+    MarketData marketData = service.loadForProfile(username);
+
+    assertFalse(marketData.stocks().isEmpty());
+  }
+
+  @Test
+  void installDefault_rejectsMissingBundledResource() {
+    MarketDataFileService missingResourceService = new MarketDataFileService(
+        profilePaths,
+        MarketDataFileServiceTest.class,
+        "/data/does-not-exist.csv");
+
+    IllegalStateException thrown = assertThrows(
+        IllegalStateException.class,
+        () -> missingResourceService.installDefault("bob"));
+
+    assertEquals("Missing default market data resource: /data/does-not-exist.csv", thrown.getMessage());
+  }
+
+  @Test
+  void marketDataPath_returnsProfileCsvPath() {
+    assertEquals(profilePaths.marketDataFile("alice"), service.marketDataPath("alice"));
+  }
+}

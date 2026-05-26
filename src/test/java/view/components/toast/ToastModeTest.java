@@ -3,6 +3,7 @@ package view.components.toast;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,11 @@ import view.components.toast.ToastMode;
  * getColorHex() and getSymbol().
  */
 class ToastModeTest {
+
+  @Test
+  void valueOf_unknownName_throwsIllegalArgumentException() {
+    assertThrows(IllegalArgumentException.class, () -> ToastMode.valueOf("NOT_A_MODE"));
+  }
 
   @Test
   void enumHasFourConstants() {
@@ -41,22 +47,22 @@ class ToastModeTest {
 
   @Test
   void errorColorHex() {
-    assertEquals("#FF4444", ToastMode.ERROR.getColorHex());
+    assertEquals("#EF4444", ToastMode.ERROR.getColorHex());
   }
 
   @Test
   void warningColorHex() {
-    assertEquals("#FFA500", ToastMode.WARNING.getColorHex());
+    assertEquals("#F59E0B", ToastMode.WARNING.getColorHex());
   }
 
   @Test
   void infoColorHex() {
-    assertEquals("#2196F3", ToastMode.INFO.getColorHex());
+    assertEquals("#0EA5A4", ToastMode.INFO.getColorHex());
   }
 
   @Test
   void successColorHex() {
-    assertEquals("#4CAF50", ToastMode.SUCCESS.getColorHex());
+    assertEquals("#22C55E", ToastMode.SUCCESS.getColorHex());
   }
 
   @Test
