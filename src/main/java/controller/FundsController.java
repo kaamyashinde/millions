@@ -29,6 +29,7 @@ public class FundsController {
   private final Exchange exchange;
   private final ObservableList<Fund> funds = FXCollections.observableArrayList();
   private final ObjectProperty<Fund> selectedFund = new SimpleObjectProperty<>();
+  private String searchTerm = "";
 
   /**
    * Creates a fund-list controller and loads the initial rows.
@@ -86,18 +87,35 @@ public class FundsController {
     selectedFund.set(fund);
   }
 
+  public String getSearchTerm() {
+    return searchTerm;
+  }
+
+  /**
+   * Updates the active search term and reloads the filtered fund rows.
+   *
+   * @param searchTerm symbol or fund name text to match
+   */
+  public void setSearchTerm(String searchTerm) {
+    this.searchTerm = searchTerm == null ? "" : searchTerm.trim();
+    refresh();
+  }
+
   /**
    * Formats the funds-page metadata line.
    *
    * @return compact exchange, day, and listing-count text for the funds page
    */
   public String getMetaText() {
+    int total = exchange.listings().findFunds("").size();
+    int visible = funds.size();
+    String countText =
+        searchTerm.isBlank() ? total + " fund(s)" : visible + " of " + total + " fund(s)";
     return exchange.getName()
         + " · trading day "
         + exchange.getDay()
         + " · "
-        + exchange.listings().findFunds("").size()
-        + " fund(s)";
+        + countText;
   }
 
   /**
@@ -105,7 +123,7 @@ public class FundsController {
    */
   public void refresh() {
     Fund previous = selectedFund.get();
-    List<Fund> sorted = new ArrayList<>(exchange.listings().findFunds(""));
+    List<Fund> sorted = new ArrayList<>(exchange.listings().findFunds(searchTerm));
     sorted.sort(Comparator.comparing(Fund::getSymbol));
     funds.setAll(sorted);
     if (previous != null) {
@@ -117,8 +135,6 @@ public class FundsController {
         return;
       }
     }
-    if (selectedFund.get() == null && !sorted.isEmpty()) {
-      selectedFund.set(sorted.get(0));
-    }
+    selectedFund.set(sorted.isEmpty() ? null : sorted.get(0));
   }
 }

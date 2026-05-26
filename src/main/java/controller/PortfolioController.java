@@ -17,6 +17,7 @@ import model.analysis.performance.MetricValue;
 import model.analysis.performance.PerformanceComparison;
 import model.analysis.performance.PortfolioPerformanceService;
 import model.core.asset.Share;
+import view.util.UiFormat;
 
 /**
  * Supplies portfolio summary, holdings, and performance metrics for the player tab.
@@ -124,7 +125,7 @@ public class PortfolioController {
    * @return cash balance formatted with two decimal places
    */
   public String getFormattedBalance() {
-    return player.getMoney().setScale(2, RoundingMode.HALF_UP).toPlainString();
+    return UiFormat.decimal(player.getMoney());
   }
 
   /**
@@ -133,7 +134,7 @@ public class PortfolioController {
    * @return net worth formatted with two decimal places
    */
   public String getFormattedNetWorth() {
-    return player.getNetWorth().setScale(2, RoundingMode.HALF_UP).toPlainString();
+    return UiFormat.decimal(player.getNetWorth());
   }
 
   /**
@@ -154,11 +155,9 @@ public class PortfolioController {
     }
     BigDecimal value = metric.value();
     if (percentDisplay) {
-      return value.multiply(BigDecimal.valueOf(100))
-          .setScale(2, RoundingMode.HALF_UP)
-          .toPlainString() + "%";
+      return UiFormat.percent(value);
     }
-    return value.setScale(3, RoundingMode.HALF_UP).toPlainString();
+    return UiFormat.decimal(value);
   }
 
   /**

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import controller.MarketMover;
 import controller.StockDetailController;
 import controller.StocksController;
 import controller.TradingController;
@@ -19,11 +20,13 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.control.Label;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import model.core.market.Exchange;
 import model.core.market.ExchangeBuilder;
@@ -64,16 +67,14 @@ class StocksPageTest {
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
-    SplitPane splitPane = (SplitPane) panel.getCenter();
-    BorderPane chartPanel = (BorderPane) splitPane.getItems().getFirst();
-    ScrollPane rightScroll = (ScrollPane) splitPane.getItems().get(1);
-    VBox rightColumn = (VBox) rightScroll.getContent();
+    SplitPane splitPane = mainSplitPane(panel);
+    VBox chartCard = chartCard(splitPane);
     @SuppressWarnings("unchecked")
-    TableView<Stock> table = (TableView<Stock>) rightColumn.getChildren().getFirst();
+    TableView<Stock> table = (TableView<Stock>) stockTable(panel);
 
-    assertEquals(StockChart.class, chartPanel.getCenter().getClass());
+    assertEquals(StockChart.class, chartFromCard(chartCard).getClass());
     layout(panel);
-    double appleUpperBound = yAxisUpperBound((StockChart) chartPanel.getCenter());
+    double appleUpperBound = yAxisUpperBound(chartFromCard(chartCard));
     assertNotNull(panel.getDetailView().getSelectedStock());
     assertEquals("AAPL", panel.getDetailView().getSelectedStock().getSymbol());
 
@@ -85,9 +86,9 @@ class StocksPageTest {
 
     assertNotNull(panel.getDetailView().getSelectedStock());
     assertEquals("MSFT", panel.getDetailView().getSelectedStock().getSymbol());
-    assertEquals(StockChart.class, chartPanel.getCenter().getClass());
+    assertEquals(StockChart.class, chartFromCard(chartCard).getClass());
     layout(panel);
-    double microsoftUpperBound = yAxisUpperBound((StockChart) chartPanel.getCenter());
+    double microsoftUpperBound = yAxisUpperBound(chartFromCard(chartCard));
     assertTrue(microsoftUpperBound >= 1200.00);
     assertTrue(microsoftUpperBound > appleUpperBound);
   }
@@ -103,25 +104,23 @@ class StocksPageTest {
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
-    SplitPane splitPane = (SplitPane) panel.getCenter();
-    BorderPane chartPanel = (BorderPane) splitPane.getItems().getFirst();
-    ScrollPane rightScroll = (ScrollPane) splitPane.getItems().get(1);
-    VBox rightColumn = (VBox) rightScroll.getContent();
+    SplitPane splitPane = mainSplitPane(panel);
+    VBox chartCard = chartCard(splitPane);
     @SuppressWarnings("unchecked")
-    TableView<Stock> table = (TableView<Stock>) rightColumn.getChildren().getFirst();
+    TableView<Stock> table = (TableView<Stock>) stockTable(panel);
 
-    assertTrue(chartPanel.getBottom() instanceof VBox);
-    assertEquals(7, dataPointCount((StockChart) chartPanel.getCenter()));
+    assertTrue(chartControls(chartCard) instanceof VBox);
+    assertEquals(7, dataPointCount(chartFromCard(chartCard)));
 
     runOnFxThread(
         () -> {
-          rangeButton(chartPanel, ChartRange.FIVE_DAYS).fire();
+          rangeButton(chartCard, ChartRange.FIVE_DAYS).fire();
           return panel;
         });
 
-    assertEquals(5, dataPointCount((StockChart) chartPanel.getCenter()));
-    assertEquals(3, firstChartDay((StockChart) chartPanel.getCenter()));
-    assertTrue(rangeButton(chartPanel, ChartRange.FIVE_DAYS).isSelected());
+    assertEquals(5, dataPointCount(chartFromCard(chartCard)));
+    assertEquals(3, firstChartDay(chartFromCard(chartCard)));
+    assertTrue(rangeButton(chartCard, ChartRange.FIVE_DAYS).isSelected());
 
     runOnFxThread(
         () -> {
@@ -130,9 +129,9 @@ class StocksPageTest {
         });
 
     assertEquals("MSFT", panel.getDetailView().getSelectedStock().getSymbol());
-    assertEquals(5, dataPointCount((StockChart) chartPanel.getCenter()));
-    assertEquals(3, firstChartDay((StockChart) chartPanel.getCenter()));
-    assertTrue(rangeButton(chartPanel, ChartRange.FIVE_DAYS).isSelected());
+    assertEquals(5, dataPointCount(chartFromCard(chartCard)));
+    assertEquals(3, firstChartDay(chartFromCard(chartCard)));
+    assertTrue(rangeButton(chartCard, ChartRange.FIVE_DAYS).isSelected());
   }
 
   @Test
@@ -142,12 +141,12 @@ class StocksPageTest {
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
-    SplitPane splitPane = (SplitPane) panel.getCenter();
-    BorderPane chartPanel = (BorderPane) splitPane.getItems().getFirst();
-    StockChart chart = (StockChart) chartPanel.getCenter();
+    SplitPane splitPane = mainSplitPane(panel);
+    VBox chartCard = chartCard(splitPane);
+    StockChart chart = chartFromCard(chartCard);
 
     assertEquals(3, chart.getTools().size());
-    assertTrue(analysisButton(chartPanel, ChartToolSelection.NONE).isSelected());
+    assertTrue(analysisButton(chartCard, ChartToolSelection.NONE).isSelected());
     assertEquals(1, chart.getData().size());
     assertTrue(chart.getTools().stream().noneMatch(tool -> tool.activeProperty().get()));
   }
@@ -159,13 +158,13 @@ class StocksPageTest {
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
-    SplitPane splitPane = (SplitPane) panel.getCenter();
-    BorderPane chartPanel = (BorderPane) splitPane.getItems().getFirst();
-    StockChart chart = (StockChart) chartPanel.getCenter();
+    SplitPane splitPane = mainSplitPane(panel);
+    VBox chartCard = chartCard(splitPane);
+    StockChart chart = chartFromCard(chartCard);
 
     runOnFxThread(
         () -> {
-          analysisButton(chartPanel, ChartToolSelection.FIBONACCI).fire();
+          analysisButton(chartCard, ChartToolSelection.FIBONACCI).fire();
           return panel;
         });
 
@@ -175,7 +174,7 @@ class StocksPageTest {
 
     runOnFxThread(
         () -> {
-          analysisButton(chartPanel, ChartToolSelection.ELLIOTT_WAVE).fire();
+          analysisButton(chartCard, ChartToolSelection.ELLIOTT_WAVE).fire();
           return panel;
         });
 
@@ -185,7 +184,7 @@ class StocksPageTest {
 
     runOnFxThread(
         () -> {
-          analysisButton(chartPanel, ChartToolSelection.MOON_PHASES).fire();
+          analysisButton(chartCard, ChartToolSelection.MOON_PHASES).fire();
           return panel;
         });
 
@@ -194,7 +193,7 @@ class StocksPageTest {
 
     runOnFxThread(
         () -> {
-          analysisButton(chartPanel, ChartToolSelection.NONE).fire();
+          analysisButton(chartCard, ChartToolSelection.NONE).fire();
           return panel;
         });
 
@@ -209,13 +208,13 @@ class StocksPageTest {
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
-    SplitPane splitPane = (SplitPane) panel.getCenter();
-    BorderPane chartPanel = (BorderPane) splitPane.getItems().getFirst();
-    StockChart chart = (StockChart) chartPanel.getCenter();
+    SplitPane splitPane = mainSplitPane(panel);
+    VBox chartCard = chartCard(splitPane);
+    StockChart chart = chartFromCard(chartCard);
 
     runOnFxThread(
         () -> {
-          analysisButton(chartPanel, ChartToolSelection.MOON_PHASES).fire();
+          analysisButton(chartCard, ChartToolSelection.MOON_PHASES).fire();
           return panel;
         });
 
@@ -230,20 +229,138 @@ class StocksPageTest {
     Player player = new Player("tester", new BigDecimal("10000.00"));
 
     StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
-    SplitPane splitPane = (SplitPane) panel.getCenter();
-    BorderPane chartPanel = (BorderPane) splitPane.getItems().getFirst();
+    SplitPane splitPane = mainSplitPane(panel);
+    VBox chartCard = chartCard(splitPane);
 
     runOnFxThread(
         () -> {
-          analysisButton(chartPanel, ChartToolSelection.MOON_PHASES).fire();
-          rangeButton(chartPanel, ChartRange.FIVE_DAYS).fire();
+          analysisButton(chartCard, ChartToolSelection.MOON_PHASES).fire();
+          rangeButton(chartCard, ChartRange.FIVE_DAYS).fire();
           return panel;
         });
 
-    StockChart rebuiltChart = (StockChart) chartPanel.getCenter();
-    assertTrue(analysisButton(chartPanel, ChartToolSelection.MOON_PHASES).isSelected());
+    StockChart rebuiltChart = chartFromCard(chartCard);
+    assertTrue(analysisButton(chartCard, ChartToolSelection.MOON_PHASES).isSelected());
     assertTrue(chartTool(rebuiltChart, ChartToolSelection.MOON_PHASES).activeProperty().get());
     assertEquals(36, firstChartDay(rebuiltChart));
+  }
+
+  @Test
+  void searchFieldFiltersBySymbolAndCompanyName() throws Exception {
+    Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00", "102.00");
+    Stock microsoft = stockWithPrices("MSFT", "Microsoft", "900.00", "1200.00");
+    Exchange exchange =
+        new ExchangeBuilder("NYSE").stocks(List.of(microsoft, apple)).build();
+    Player player = new Player("tester", new BigDecimal("10000.00"));
+
+    StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
+    layout(panel);
+    @SuppressWarnings("unchecked")
+    TableView<Stock> table = (TableView<Stock>) stockTable(panel);
+    TextField search = (TextField) panel.lookup("#stocks-search-field");
+
+    runOnFxThread(
+        () -> {
+          search.setText("micro");
+          return panel;
+        });
+
+    assertEquals(1, table.getItems().size());
+    assertEquals("MSFT", table.getItems().getFirst().getSymbol());
+    assertEquals("MSFT", panel.getDetailView().getSelectedStock().getSymbol());
+
+    runOnFxThread(
+        () -> {
+          search.setText("zz");
+          return panel;
+        });
+
+    assertEquals(0, table.getItems().size());
+    assertEquals(null, panel.getDetailView().getSelectedStock());
+
+    runOnFxThread(
+        () -> {
+          search.clear();
+          return panel;
+        });
+
+    assertEquals(2, table.getItems().size());
+    assertEquals("AAPL", panel.getDetailView().getSelectedStock().getSymbol());
+  }
+
+  @Test
+  void marketMoversPanelDisplaysWinnerAndLoserRows() throws Exception {
+    Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00", "110.00");
+    Stock microsoft = stockWithPrices("MSFT", "Microsoft", "100.00", "90.00");
+    Stock alphabet = stockWithPrices("GOOGL", "Alphabet Inc.", "100.00", "100.00");
+    Exchange exchange =
+        new ExchangeBuilder("NYSE").stocks(List.of(microsoft, apple, alphabet)).build();
+    Player player = new Player("tester", new BigDecimal("10000.00"));
+
+    StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
+    layout(panel);
+    ScrollPane rootScroll = (ScrollPane) panel.getCenter();
+    VBox pageContent = (VBox) rootScroll.getContent();
+    SplitPane splitPane = mainSplitPane(panel);
+
+    assertEquals("stocks-root-scroll", rootScroll.getId());
+    assertEquals("market-movers-panel", pageContent.getChildren().get(1).getId());
+    assertEquals(splitPane, pageContent.getChildren().get(2));
+    assertTrue(splitPane.getItems().getFirst() instanceof VBox);
+    assertTrue(splitPane.getItems().get(1) instanceof VBox);
+    assertTrue(nodeById(pageContent.getChildren().get(1), "market-winners-table").isPresent());
+    assertTrue(nodeById(pageContent.getChildren().get(1), "market-losers-table").isPresent());
+    assertEquals(List.of("AAPL"),
+        panel.getDisplayedWinners().stream().map(MarketMover::symbol).toList());
+    assertEquals(List.of("MSFT"),
+        panel.getDisplayedLosers().stream().map(MarketMover::symbol).toList());
+    assertTrue(visibleText(panel).contains("+10.00%"));
+    assertTrue(visibleText(panel).contains("-10.00%"));
+  }
+
+  @Test
+  void marketMoversPanelShowsEmptyStateWhenNoMoversExist() throws Exception {
+    Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00");
+    Stock microsoft = stockWithPrices("MSFT", "Microsoft", "100.00", "100.00");
+    Exchange exchange =
+        new ExchangeBuilder("NYSE").stocks(List.of(microsoft, apple)).build();
+    Player player = new Player("tester", new BigDecimal("10000.00"));
+
+    StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
+    layout(panel);
+
+    assertTrue(panel.getDisplayedWinners().isEmpty());
+    assertTrue(panel.getDisplayedLosers().isEmpty());
+    assertEquals(
+        "No winners yet.",
+        ((Label) marketTable(panel, "#market-winners-table").getPlaceholder()).getText());
+    assertEquals(
+        "No losers yet.",
+        ((Label) marketTable(panel, "#market-losers-table").getPlaceholder()).getText());
+  }
+
+  @Test
+  void marketMoversPanelRefreshesWhenPricesChange() throws Exception {
+    Stock apple = stockWithPrices("AAPL", "Apple Inc.", "100.00", "102.00");
+    Stock microsoft = stockWithPrices("MSFT", "Microsoft", "100.00", "90.00");
+    Exchange exchange =
+        new ExchangeBuilder("NYSE").stocks(List.of(microsoft, apple)).build();
+    Player player = new Player("tester", new BigDecimal("10000.00"));
+
+    StocksPage panel = runOnFxThread(() -> createPage(exchange, player));
+
+    runOnFxThread(
+        () -> {
+          apple.addNewSalesPrice(new BigDecimal("101.00"));
+          microsoft.addNewSalesPrice(new BigDecimal("95.00"));
+          panel.refresh();
+          return panel;
+        });
+
+    assertEquals(List.of("MSFT"),
+        panel.getDisplayedWinners().stream().map(MarketMover::symbol).toList());
+    assertEquals(List.of("AAPL"),
+        panel.getDisplayedLosers().stream().map(MarketMover::symbol).toList());
   }
 
   private static StocksPage createPage(Exchange exchange, Player player) {
@@ -279,6 +396,44 @@ class StocksPageTest {
     return stock;
   }
 
+  private static VBox chartCard(SplitPane splitPane) {
+    Node first = splitPane.getItems().getFirst();
+    if (first instanceof VBox slot && slot.getChildren().size() == 1) {
+      Node child = slot.getChildren().getFirst();
+      if (child instanceof VBox card) {
+        return card;
+      }
+    }
+    throw new IllegalStateException("Expected chart card in split pane, got " + first);
+  }
+
+  private static StockChart chartFromCard(VBox chartCard) {
+    for (Node child : chartCard.getChildren()) {
+      if (child instanceof StockChart stockChart) {
+        return stockChart;
+      }
+      if (child instanceof VBox wrap) {
+        for (Node nested : wrap.getChildren()) {
+          if (nested instanceof StockChart stockChart) {
+            return stockChart;
+          }
+        }
+      }
+    }
+    throw new IllegalStateException("Expected StockChart in chart card, got " + chartCard.getChildren());
+  }
+
+  private static VBox chartControls(VBox chartCard) {
+    if (chartCard.getChildren().isEmpty()) {
+      throw new IllegalStateException("Chart card has no children");
+    }
+    Node last = chartCard.getChildren().getLast();
+    if (last instanceof VBox controls) {
+      return controls;
+    }
+    throw new IllegalStateException("Expected chart controls VBox, got " + last);
+  }
+
   private static double yAxisUpperBound(StockChart chart) {
     return ((NumberAxis) chart.getYAxis()).getUpperBound();
   }
@@ -291,13 +446,57 @@ class StocksPageTest {
     return chart.getData().getFirst().getData().getFirst().getXValue().intValue();
   }
 
-  private static ToggleButton rangeButton(BorderPane chartPanel, ChartRange range) {
-    return toggleButton(chartPanel.getBottom(), range.getLabel()).orElseThrow();
+  private static ToggleButton rangeButton(VBox chartCard, ChartRange range) {
+    return toggleButton(chartControls(chartCard), range.getLabel()).orElseThrow();
   }
 
-  private static ToggleButton analysisButton(
-      BorderPane chartPanel, ChartToolSelection selection) {
-    return toggleButton(chartPanel.getBottom(), selection.getLabel()).orElseThrow();
+  private static TableView<?> stockTable(StocksPage panel) {
+    SplitPane splitPane = mainSplitPane(panel);
+    VBox rightColumn = (VBox) splitPane.getItems().get(1);
+    return (TableView<?>) rightColumn.getChildren().stream()
+        .filter(child -> "stocks-table".equals(child.getId()))
+        .findFirst()
+        .orElseThrow();
+  }
+
+  private static TableView<?> marketTable(StocksPage panel, String selector) {
+    return (TableView<?>) nodeById(panel, selector.substring(1)).orElseThrow();
+  }
+
+  private static SplitPane mainSplitPane(StocksPage panel) {
+    ScrollPane rootScroll = (ScrollPane) panel.getCenter();
+    VBox pageContent = (VBox) rootScroll.getContent();
+    return (SplitPane) pageContent.getChildren().get(2);
+  }
+
+  private static Optional<Node> nodeById(Node root, String id) {
+    if (id.equals(root.getId())) {
+      return Optional.of(root);
+    }
+    if (root instanceof Parent parent) {
+      return parent.getChildrenUnmodifiable().stream()
+          .map(child -> nodeById(child, id))
+          .filter(Optional::isPresent)
+          .map(Optional::get)
+          .findFirst();
+    }
+    return Optional.empty();
+  }
+
+  private static List<String> visibleText(Node root) {
+    if (root instanceof Labeled labeled && labeled.getText() != null) {
+      return List.of(labeled.getText());
+    }
+    if (root instanceof Parent parent) {
+      return parent.getChildrenUnmodifiable().stream()
+          .flatMap(child -> visibleText(child).stream())
+          .toList();
+    }
+    return List.of();
+  }
+
+  private static ToggleButton analysisButton(VBox chartCard, ChartToolSelection selection) {
+    return toggleButton(chartControls(chartCard), selection.getLabel()).orElseThrow();
   }
 
   private static Optional<ToggleButton> toggleButton(Node root, String text) {

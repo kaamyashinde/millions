@@ -12,11 +12,14 @@ import model.core.player.Player;
 import model.exception.trading.InsufficientFundsException;
 import model.exception.trading.InsufficientSharesException;
 import model.exception.trading.ShareNotFoundException;
+import model.trading.calculator.PurchaseCalculator;
+import model.trading.transaction.TransactionSizing;
 import model.trading.transaction.Transaction;
 import util.I18n;
 import util.Validator;
 import view.components.notification.NotificationService;
 import view.components.toast.ToastMode;
+import view.util.UiFormat;
 
 /**
  * Executes buy and sell operations for the GUI, mapping domain errors to user-facing messages.
@@ -33,6 +36,22 @@ public class TradingController {
   private final Exchange exchange;
   private final Player player;
   private final NotificationService notifications;
+
+  /**
+   * Display-friendly purchase estimate for the current price and quantity.
+   *
+   * @param unitPrice current unit price
+   * @param quantity estimated quantity to buy
+   * @param gross cost before commission
+   * @param commission purchase commission
+   * @param total total purchase cost after commission
+   */
+  public record BuyEstimate(
+      BigDecimal unitPrice,
+      BigDecimal quantity,
+      BigDecimal gross,
+      BigDecimal commission,
+      BigDecimal total) {}
 
   /**
    * Creates a trading controller for one active player.
@@ -114,10 +133,51 @@ public class TradingController {
    * @return plain string with two decimal places
    */
   public String formatMoney(BigDecimal value) {
-    if (value == null) {
-      return "-";
+    return UiFormat.decimal(value);
+  }
+
+  /**
+   * @param value quantity to format
+   * @return plain string with two decimal places
+   */
+  public String formatQuantity(BigDecimal value) {
+    return UiFormat.decimal(value);
+  }
+
+  /**
+   * Estimates purchase cost for a fixed quantity.
+   *
+   * @param symbol stock or fund symbol
+   * @param quantityText quantity as entered by the user
+   * @return estimate when the symbol and quantity are valid
+   */
+  public Optional<BuyEstimate> estimateBuyByQuantity(String symbol, String quantityText) {
+    Optional<InvestableAsset> asset = findAsset(symbol);
+    Optional<BigDecimal> quantity = parsePositiveAmountOrEmpty(quantityText);
+    if (asset.isEmpty() || quantity.isEmpty()) {
+      return Optional.empty();
     }
-    return value.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
+    return Optional.of(createBuyEstimate(asset.get(), quantity.get()));
+  }
+
+  /**
+   * Estimates purchase cost for a max-spend amount.
+   *
+   * @param symbol stock or fund symbol
+   * @param maxSpendText spending cap as entered by the user
+   * @return estimate when the symbol and budget can buy a positive quantity
+   */
+  public Optional<BuyEstimate> estimateBuyForBudget(String symbol, String maxSpendText) {
+    Optional<InvestableAsset> asset = findAsset(symbol);
+    Optional<BigDecimal> maxSpend = parsePositiveAmountOrEmpty(maxSpendText);
+    if (asset.isEmpty() || maxSpend.isEmpty()) {
+      return Optional.empty();
+    }
+    BigDecimal quantity = TransactionSizing.maxQuantityForBudget(asset.get(), maxSpend.get());
+    if (quantity.signum() <= 0) {
+      return Optional.empty();
+    }
+    return Optional.of(createBuyEstimate(asset.get(), quantity));
   }
 
   /**
@@ -210,6 +270,33 @@ public class TradingController {
       return Optional.of(I18n.format("error.assetNotOnExchange", normalized));
     }
     return Optional.empty();
+  }
+
+  private Optional<InvestableAsset> findAsset(String symbol) {
+    if (symbol == null || symbol.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(exchange.listings().getAsset(symbol.trim().toUpperCase()));
+  }
+
+  private static Optional<BigDecimal> parsePositiveAmountOrEmpty(String text) {
+    try {
+      BigDecimal value = parsePositiveAmount(text);
+      return Optional.of(value);
+    } catch (RuntimeException exception) {
+      return Optional.empty();
+    }
+  }
+
+  private static BuyEstimate createBuyEstimate(InvestableAsset asset, BigDecimal quantity) {
+    BigDecimal unitPrice = asset.getSalesPrice();
+    PurchaseCalculator calculator = new PurchaseCalculator(new Share(asset, quantity, unitPrice));
+    return new BuyEstimate(
+        unitPrice,
+        quantity,
+        calculator.calculateGross(),
+        calculator.calculateCommission(),
+        calculator.calculateTotal());
   }
 
   private static BigDecimal parsePositiveAmount(String text) {

@@ -12,9 +12,25 @@ import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
 import model.core.market.Exchange;
 import model.core.market.ExchangeBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class FundsControllerTest {
+
+  private FundsController controller;
+
+  @BeforeEach
+  void setUp() {
+    Stock apple = stock("AAPL", "Apple Inc.", "150.00");
+    Stock microsoft = stock("MSFT", "Microsoft Corporation", "300.00");
+    Fund tech = fund("TECHX", "Tech Titans Blend Fund", apple, microsoft);
+    Fund growth = fund("GROW", "Global Growth Fund", apple, microsoft);
+    Exchange exchange = new ExchangeBuilder("NYSE")
+        .stocks(List.of(apple, microsoft))
+        .funds(List.of(tech, growth))
+        .build();
+    controller = new FundsController(exchange);
+  }
 
   @Test
   void constructor_nullExchange_throwsNullPointerException() {
@@ -26,20 +42,41 @@ class FundsControllerTest {
   }
 
   @Test
-  void refresh_preservesSelectionBySymbol() {
-    Exchange exchange = exchangeWithFunds("FUND_A", "FUND_B");
-    FundsController controller = new FundsController(exchange);
-    Fund second = controller.getFunds().get(1);
-    controller.setSelectedFund(second);
+  void setSearchTerm_filtersBySymbol() {
+    controller.setSearchTerm("tech");
 
-    controller.refresh();
+    assertEquals(1, controller.getFunds().size());
+    assertEquals("TECHX", controller.getFunds().getFirst().getSymbol());
+    assertEquals("TECHX", controller.getSelectedFund().getSymbol());
+  }
 
-    assertEquals("FUND_B", controller.getSelectedFund().getSymbol());
+  @Test
+  void setSearchTerm_filtersByFundNameCaseInsensitive() {
+    controller.setSearchTerm("growth");
+
+    assertEquals(1, controller.getFunds().size());
+    assertEquals("GROW", controller.getFunds().getFirst().getSymbol());
+  }
+
+  @Test
+  void setSearchTerm_blankResetsAllRows() {
+    controller.setSearchTerm("growth");
+    controller.setSearchTerm("");
+
+    assertEquals(2, controller.getFunds().size());
+    assertEquals("GROW", controller.getFunds().getFirst().getSymbol());
+  }
+
+  @Test
+  void setSearchTerm_clearsSelectionWhenNoRowsMatch() {
+    controller.setSearchTerm("bond");
+
+    assertEquals(0, controller.getFunds().size());
+    assertNull(controller.getSelectedFund());
   }
 
   @Test
   void setSelectedFund_null_clearsSelection() {
-    FundsController controller = new FundsController(exchangeWithFunds("FUND_A"));
     controller.setSelectedFund(null);
 
     assertNull(controller.getSelectedFund());
@@ -47,20 +84,36 @@ class FundsControllerTest {
 
   @Test
   void getMetaText_includesExchangeNameAndFundCount() {
-    FundsController controller = new FundsController(exchangeWithFunds("FUND_A", "FUND_B"));
-
     String meta = controller.getMetaText();
 
     assertTrue(meta.contains("NYSE"));
     assertTrue(meta.contains("2 fund(s)"));
   }
 
-  private static Exchange exchangeWithFunds(String... symbols) {
-    Stock stock = new Stock("BASE", "Base Corp");
-    stock.addNewSalesPrice(BigDecimal.TEN);
-    List<Fund> funds = java.util.Arrays.stream(symbols)
-        .map(symbol -> new Fund(symbol, symbol + " Name", List.of(new FundComponent(stock, BigDecimal.ONE))))
-        .toList();
-    return new ExchangeBuilder("NYSE").stocks(List.of(stock)).funds(funds).build();
+  @Test
+  void setSearchTerm_preservesSelectionWhenStillVisible() {
+    controller.setSelectedFund(controller.getFunds().stream()
+        .filter(fund -> fund.getSymbol().equals("TECHX"))
+        .findFirst()
+        .orElseThrow());
+
+    controller.setSearchTerm("fund");
+
+    assertEquals("TECHX", controller.getSelectedFund().getSymbol());
+  }
+
+  private static Stock stock(String symbol, String company, String price) {
+    Stock stock = new Stock(symbol, company);
+    stock.addNewSalesPrice(new BigDecimal(price));
+    return stock;
+  }
+
+  private static Fund fund(String symbol, String name, Stock first, Stock second) {
+    return new Fund(
+        symbol,
+        name,
+        List.of(
+            new FundComponent(first, new BigDecimal("0.50")),
+            new FundComponent(second, new BigDecimal("0.50"))));
   }
 }

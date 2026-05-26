@@ -3,7 +3,6 @@ package view.pages.auth;
 import model.core.player.Player;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +25,7 @@ import model.session.leaderboard.PlayerLeaderboardMetric;
 import model.session.leaderboard.PlayerLeaderboardRanking;
 import view.components.table.AppTableView;
 import view.theme.ThemeStyles;
+import view.util.UiFormat;
 
 /**
  * Dedicated auth-screen leaderboard for comparing saved players.
@@ -231,12 +231,10 @@ public class AuthPlayerLeaderboardPanel extends BorderPane {
   }
 
   private static String formatCurrency(BigDecimal value) {
-    return value.setScale(2, RoundingMode.HALF_UP).toPlainString();
+    return UiFormat.decimal(value);
   }
 
   private static String formatPercent(BigDecimal value) {
-    return value.multiply(BigDecimal.valueOf(100))
-        .setScale(2, RoundingMode.HALF_UP)
-        .toPlainString() + "%";
+    return UiFormat.percent(value);
   }
 }

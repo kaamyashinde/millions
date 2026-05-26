@@ -126,6 +126,15 @@ public final class ThemeStyles {
   }
 
   /**
+   * Applies the shared destructive-action button classes to a button.
+   *
+   * @param button button to style
+   */
+  public static void styleDangerButton(Button button) {
+    addStyleClasses(button, "btn", "btn-danger");
+  }
+
+  /**
    * Applies the difficulty badge style class for a learning item.
    *
    * @param badge badge label to style

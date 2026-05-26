@@ -10,9 +10,9 @@ import javafx.util.Duration;
 import view.components.toast.ToastMode;
 
 /**
- * Owns the notification list and schedules auto-dismiss. Bind a {@link ToastTray} to {@link
- * #getItems()} to display toasts. Mutate notifications through this service so timers stay
- * consistent.
+ * Owns visible notifications, session notification history, and auto-dismiss timers. Bind a
+ * {@link ToastTray} to {@link #getItems()} to display transient toasts. Bind notification history
+ * views to {@link #getHistoryItems()} so dismissed toasts remain available during the session.
  *
  * @author kaamyashinde
  * @version 1.0.0
@@ -21,6 +21,7 @@ import view.components.toast.ToastMode;
 public class NotificationService {
 
   private final ObservableList<NotificationItem> items = FXCollections.observableArrayList();
+  private final ObservableList<NotificationItem> historyItems = FXCollections.observableArrayList();
   private final Map<UUID, PauseTransition> pendingDismiss = new HashMap<>();
   private final Duration defaultAutoDismiss;
 
@@ -56,6 +57,15 @@ public class NotificationService {
    */
   public ObservableList<NotificationItem> getItems() {
     return items;
+  }
+
+  /**
+   * List of every notification shown during the active session, newest first.
+   *
+   * @return the observable session notification history
+   */
+  public ObservableList<NotificationItem> getHistoryItems() {
+    return historyItems;
   }
 
   /**
@@ -113,6 +123,7 @@ public class NotificationService {
     NotificationItem item =
         new NotificationItem(id, mode, title, description, actionLabel, onAction);
     boolean _ = items.add(item);
+    historyItems.addFirst(item);
     scheduleDismiss(id, displayDuration);
     return id;
   }
@@ -144,11 +155,19 @@ public class NotificationService {
   }
 
   /**
-   * Removes all notifications and cancels all pending auto-dismiss timers.
+   * Removes all retained session history while leaving visible toasts and timers unchanged.
+   */
+  public void clearHistory() {
+    historyItems.clear();
+  }
+
+  /**
+   * Removes all visible notifications and history, and cancels all pending auto-dismiss timers.
    */
   public void clear() {
     pendingDismiss.values().forEach(PauseTransition::stop);
     pendingDismiss.clear();
     items.clear();
+    historyItems.clear();
   }
 }

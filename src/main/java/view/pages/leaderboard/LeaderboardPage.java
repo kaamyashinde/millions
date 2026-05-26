@@ -1,6 +1,5 @@
 package view.pages.leaderboard;
 
-import java.math.RoundingMode;
 import java.util.List;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -13,6 +12,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import model.session.leaderboard.LocalLeaderboardService.LeaderboardRow;
 import model.session.SessionService;
+import view.util.UiFormat;
 
 /**
  * Local leaderboard ranked by net worth with player levels.
@@ -49,8 +49,7 @@ public class LeaderboardPage extends BorderPane {
 
     TableColumn<LeaderboardRow, String> worthCol = new TableColumn<>("Net Worth");
     worthCol.setCellValueFactory(
-        c -> new SimpleStringProperty(
-            c.getValue().netWorth().setScale(2, RoundingMode.HALF_UP).toPlainString()));
+        c -> new SimpleStringProperty(UiFormat.decimal(c.getValue().netWorth())));
     worthCol.setPrefWidth(140);
 
     table.getColumns().setAll(List.of(rankCol, levelCol, nameCol, worthCol));

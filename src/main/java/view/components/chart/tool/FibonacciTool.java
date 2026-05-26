@@ -6,6 +6,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import view.theme.ThemeStyles;
 import model.analysis.tools.FibonacciRetracement;
+import view.util.UiFormat;
 
 /**
  * Two-click chart tool that draws seven horizontal Fibonacci retracement lines.
@@ -110,7 +111,7 @@ public class FibonacciTool extends AbstractChartTool {
     for (int i = 0; i < levels.size(); i++) {
       FibonacciRetracement.Level level = levels.get(i);
       double levelPrice = level.price().doubleValue();
-      String seriesName = level.name() + " \u2014 $" + level.price().toPlainString();
+      String seriesName = level.name() + " \u2014 $" + UiFormat.decimal(level.price());
 
       XYChart.Series<Number, Number> series = new XYChart.Series<>();
       series.setName(seriesName);

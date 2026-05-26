@@ -26,6 +26,8 @@ import model.core.asset.InvestableAsset;
 import model.trading.savings.RegularSavingsPlan;
 import model.trading.savings.SavingsInstallmentMode;
 import view.theme.ThemeStyles;
+import view.util.SavingsInstallmentLabels;
+import view.util.UiFormat;
 
 /**
  * Regular savings plans page: list, add, edit, and remove plans.
@@ -75,6 +77,7 @@ public class SavingsPage extends BorderPane {
     setCenter(table);
 
     addMode.setValue(SavingsInstallmentMode.FIXED_SHARES);
+    configureInstallmentModeCombo(addMode);
     addAsset.setItems(controller.getListedAssets());
     addAsset.setPromptText("Asset");
     configureAssetCombo(addAsset);
@@ -93,6 +96,7 @@ public class SavingsPage extends BorderPane {
     addGrid.addRow(0, new Label("New plan"), addAsset, addMode, addAmount, addInterval, addBtn);
 
     editMode.setValue(SavingsInstallmentMode.FIXED_SHARES);
+    configureInstallmentModeCombo(editMode);
     ThemeStyles.styleField(editAmount);
     ThemeStyles.styleField(editInterval);
     ThemeStyles.styleField(editNextDue);
@@ -121,7 +125,7 @@ public class SavingsPage extends BorderPane {
     table.getSelectionModel().selectedItemProperty().addListener((obs, prev, sel) -> {
       if (sel != null) {
         editMode.setValue(sel.getMode());
-        editAmount.setText(sel.getAmount().toPlainString());
+        editAmount.setText(UiFormat.decimal(sel.getAmount()));
         editInterval.setText(Integer.toString(sel.getIntervalDays()));
         editNextDue.setText(Integer.toString(sel.getNextDueDay()));
         editActive.setSelected(sel.isActive());
@@ -138,10 +142,11 @@ public class SavingsPage extends BorderPane {
     TableColumn<RegularSavingsPlan, String> colSym = new TableColumn<>("Symbol");
     colSym.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getSymbol()));
     TableColumn<RegularSavingsPlan, String> colMode = new TableColumn<>("Mode");
-    colMode.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getMode().name()));
+    colMode.setCellValueFactory(
+        c -> new SimpleStringProperty(SavingsInstallmentLabels.label(c.getValue().getMode())));
     TableColumn<RegularSavingsPlan, String> colAmt = new TableColumn<>("Amount");
     colAmt.setCellValueFactory(
-        c -> new SimpleStringProperty(c.getValue().getAmount().toPlainString()));
+        c -> new SimpleStringProperty(UiFormat.decimal(c.getValue().getAmount())));
     TableColumn<RegularSavingsPlan, String> colInt = new TableColumn<>("Interval");
     colInt.setCellValueFactory(
         c -> new SimpleStringProperty(Integer.toString(c.getValue().getIntervalDays())));
@@ -244,6 +249,38 @@ public class SavingsPage extends BorderPane {
 
   private void updateDayLabel() {
     dayLabel.setText("Trading Day: " + controller.getTradingDay());
+  }
+
+  private static void configureInstallmentModeCombo(ComboBox<SavingsInstallmentMode> combo) {
+    combo.setConverter(
+        new StringConverter<>() {
+          @Override
+          public String toString(SavingsInstallmentMode mode) {
+            return mode == null ? "" : SavingsInstallmentLabels.label(mode);
+          }
+
+          @Override
+          public SavingsInstallmentMode fromString(String s) {
+            return null;
+          }
+        });
+    combo.setCellFactory(
+        lv ->
+            new ListCell<>() {
+              @Override
+              protected void updateItem(SavingsInstallmentMode item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : SavingsInstallmentLabels.label(item));
+              }
+            });
+    combo.setButtonCell(
+        new ListCell<>() {
+          @Override
+          protected void updateItem(SavingsInstallmentMode item, boolean empty) {
+            super.updateItem(item, empty);
+            setText(empty || item == null ? null : SavingsInstallmentLabels.label(item));
+          }
+        });
   }
 
   private static void configureAssetCombo(ComboBox<InvestableAsset> combo) {

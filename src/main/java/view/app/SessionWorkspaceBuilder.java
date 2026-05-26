@@ -21,6 +21,7 @@ import view.layout.WorkspaceLayout;
 import view.pages.funds.FundsPage;
 import view.pages.leaderboard.LeaderboardPage;
 import view.pages.learning.LearningHubPage;
+import view.pages.notifications.NotificationHistoryPage;
 import view.pages.portfolio.PlayerPortfolioPage;
 import view.pages.quiz.QuizLauncherPage;
 import view.pages.savings.SavingsPage;
@@ -86,11 +87,16 @@ public final class SessionWorkspaceBuilder {
             workspaceController.getTrading(),
             onTradeComplete);
     FundsPage fundsPage =
-        new FundsPage(session.exchange(), workspaceController.getTrading(), onTradeComplete);
+        new FundsPage(
+            workspaceController.getFunds(),
+            workspaceController.getTrading(),
+            onTradeComplete);
     SavingsPage savingsPage =
         new SavingsPage(workspaceController.getSavings(), onSavingsChanged);
     TransactionHistoryPage transactionsPage =
         new TransactionHistoryPage(session.exchange(), session.player());
+    NotificationHistoryPage notificationsPage =
+        new NotificationHistoryPage(workspaceController.getNotifications());
     LeaderboardPage leaderboardPage = new LeaderboardPage(sessionService);
     LearningHubPage learningHubPage =
         new LearningHubPage(workspaceController.getLearningHub(), workspaceController.getQuiz());
@@ -100,6 +106,7 @@ public final class SessionWorkspaceBuilder {
     Tab fundsTab = new Tab("Funds", fundsPage);
     Tab savingsTab = new Tab("Savings", savingsPage);
     Tab transactionsTab = new Tab("Transactions", transactionsPage);
+    Tab notificationsTab = new Tab("Notifications", notificationsPage);
     Tab leaderboardTab = new Tab("Leaderboard", leaderboardPage);
     Tab learningTab = new Tab("Learning", learningHubPage);
     Tab quizTab = new Tab("Quizzes");
@@ -110,6 +117,7 @@ public final class SessionWorkspaceBuilder {
         fundsTab,
         savingsTab,
         transactionsTab,
+        notificationsTab,
         leaderboardTab,
         learningTab,
         quizTab)
@@ -162,6 +170,7 @@ public final class SessionWorkspaceBuilder {
             fundsTab,
             savingsTab,
             transactionsTab,
+            notificationsTab,
             leaderboardTab,
             learningTab,
             quizTab);

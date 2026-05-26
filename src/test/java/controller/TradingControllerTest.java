@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
@@ -60,6 +61,30 @@ class TradingControllerTest {
 
     assertInstanceOf(TradeResult.Success.class, result);
     assertTrue(player.getPortfolio().totalQuantityForSymbol("AAPL").signum() > 0);
+  }
+
+  @Test
+  void estimateBuyByQuantity_returnsGrossCommissionAndTotal() {
+    Optional<TradingController.BuyEstimate> estimate =
+        controller.estimateBuyByQuantity("AAPL", "2");
+
+    assertTrue(estimate.isPresent());
+    assertEquals(0, estimate.get().unitPrice().compareTo(new BigDecimal("150.00")));
+    assertEquals(0, estimate.get().quantity().compareTo(new BigDecimal("2")));
+    assertEquals(0, estimate.get().gross().compareTo(new BigDecimal("300.00")));
+    assertEquals(0, estimate.get().commission().compareTo(new BigDecimal("1.50000")));
+    assertEquals(0, estimate.get().total().compareTo(new BigDecimal("301.50000")));
+  }
+
+  @Test
+  void estimateBuyForBudget_returnsQuantityWithinTotalBudget() {
+    Optional<TradingController.BuyEstimate> estimate =
+        controller.estimateBuyForBudget("AAPL", "500");
+
+    assertTrue(estimate.isPresent());
+    assertTrue(estimate.get().quantity().signum() > 0);
+    assertTrue(estimate.get().commission().signum() > 0);
+    assertTrue(estimate.get().total().compareTo(new BigDecimal("500")) <= 0);
   }
 
   @Test

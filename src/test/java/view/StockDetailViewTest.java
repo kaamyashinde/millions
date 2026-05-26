@@ -121,6 +121,22 @@ class StockDetailViewTest {
   }
 
   @Test
+  void showStock_roundsLatestPriceToTwoDecimals() throws Exception {
+    Stock stock = new Stock("AAPL", "Apple Inc.");
+    stock.addNewSalesPrice(new BigDecimal("102.005"));
+
+    StockDetailView view =
+        runOnFxThread(
+            () -> {
+              StockDetailView detailView = new StockDetailView();
+              detailView.showStock(stock, 1);
+              return detailView;
+            });
+
+    assertEquals("Latest price: 102.01", view.getLatestPriceText());
+  }
+
+  @Test
   void showStock_displaysRelevantMarketEventTextForAffectedStock() throws Exception {
     Stock stock = new Stock("AAPL", "Apple Inc.");
     stock.addNewSalesPrice(new BigDecimal("100.00"));

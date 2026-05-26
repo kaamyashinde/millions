@@ -65,7 +65,6 @@ public final class ExitGameDialog {
 
     Button confirm = new Button(I18n.get("exitGame.pin.confirm"));
     confirm.setDefaultButton(true);
-    ThemeStyles.addStyleClasses(confirm, "text-error");
     confirm.setOnAction(_ -> {
       status.setText("");
       char[] pin = pinField.getText().toCharArray();
@@ -102,7 +101,7 @@ public final class ExitGameDialog {
     ThemeStyles.install(scene);
     ThemeStyles.addStyleClasses(root, "dialog-root");
     ThemeStyles.styleField(pinField);
-    ThemeStyles.styleButton(confirm);
+    ThemeStyles.styleDangerButton(confirm);
     ThemeStyles.styleButton(cancel);
     stage.setScene(scene);
     stage.showAndWait();
