@@ -14,6 +14,9 @@ import view.util.UiFormat;
  * <p>Workflow: activate → click LOW pivot → click HIGH pivot → seven dashed horizontal lines
  * appear spanning the full day range. Deactivating removes all lines and hides the legend.
  *
+ * <p>AI assistance note: Claude Code was used as inspiration when planning the visual analysis
+ * structure for this tool; the final implementation was reviewed and adapted by the group.
+ *
  * @author kaamyashinde
  * @version 0.1.0
  * @since 2026-03-30

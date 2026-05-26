@@ -37,6 +37,9 @@ import model.trading.transaction.Transaction;
  * Use {@link #capture(Player, Exchange, String, String, String, String, boolean)} to serialize live
  * model state and {@link #restore(MarketData)} to rebuild an active session.
  *
+ * <p>AI assistance note: Codex was used as inspiration when planning the responsibility split
+ * for this persistence document; the final implementation was reviewed and adapted by the group.
+ *
  * @param username original username as entered by the player
  * @param normalizedUsername normalized username used for file names and PIN hashing
  * @param pinHash hashed PIN payload

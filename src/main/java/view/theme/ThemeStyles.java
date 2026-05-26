@@ -14,6 +14,9 @@ import model.learning.content.Difficulty;
 
 /**
  * Reusable JavaFX stylesheet and style-class helpers.
+ *
+ * <p>AI assistance note: Claude Code was used as inspiration when planning the styling
+ * organization for this helper; the final implementation was reviewed and adapted by the group.
  */
 public final class ThemeStyles {
 

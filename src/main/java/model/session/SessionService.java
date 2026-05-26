@@ -16,6 +16,9 @@ import model.session.profile.ProfileService;
 /**
  * Coordinates authentication, profile management, and persistence for the active session.
  *
+ * <p>AI assistance note: Codex was used as inspiration when planning the responsibility split
+ * for this class; the final implementation was reviewed and adapted by the group.
+ *
  * @author kevindmazali
  * @contributor kaamyashinde
  * @version 1.0.0

@@ -29,6 +29,9 @@ import model.session.validation.rules.UsernameValidator;
  * session restoration. Validation is delegated to {@link RegistrationValidator} chains so
  * registration and login share the same input rules.
  *
+ * <p>AI assistance note: Cursor was used as inspiration when planning the responsibility split
+ * for this service; the final implementation was reviewed and adapted by the group.
+ *
  * @author kevindmazali
  * @contributor kaamyashinde
  * @version 1.0.0

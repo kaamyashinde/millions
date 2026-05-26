@@ -13,6 +13,9 @@ import view.theme.ThemeStyles;
  * click all eight segments are drawn at once, impulse waves (1–5) in blue and corrective waves
  * (A–C) in red. The legend is enabled to show wave labels.
  *
+ * <p>AI assistance note: Codex was used as inspiration when planning the visual analysis structure
+ * for this tool; the final implementation was reviewed and adapted by the group.
+ *
  * @author kaamyashinde
  * @version 0.1.0
  * @since 2026-03-30

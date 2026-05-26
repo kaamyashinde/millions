@@ -11,6 +11,9 @@ import model.session.profile.ProfileService;
 
 /**
  * Creates fully wired local-profile session services for application entry points.
+ *
+ * <p>AI assistance note: Claude Code was used as inspiration when planning the responsibility
+ * split for this factory; the final implementation was reviewed and adapted by the group.
  */
 public final class SessionServiceFactory {
 
