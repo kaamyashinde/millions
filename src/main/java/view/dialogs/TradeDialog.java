@@ -132,26 +132,69 @@ public final class TradeDialog {
     TextField symbolField = new TextField(symbol != null ? symbol : "");
     symbolField.setPromptText("Symbol");
 
-    TextField quantityField = new TextField();
-    quantityField.setPromptText("Quantity to sell");
+    ToggleGroup modeGroup = new ToggleGroup();
+    RadioButton quantityMode = new RadioButton(I18n.get("trade.sell.mode.quantity"));
+    quantityMode.setToggleGroup(modeGroup);
+    quantityMode.setSelected(true);
+    RadioButton amountMode = new RadioButton(I18n.get("trade.sell.mode.amount"));
+    amountMode.setToggleGroup(modeGroup);
+    RadioButton sellAllMode = new RadioButton(I18n.get("trade.sell.mode.all"));
+    sellAllMode.setToggleGroup(modeGroup);
+
+    TextField amountField = new TextField();
+    amountField.setPromptText(I18n.get("trade.sell.amount.prompt"));
 
     Label ownedHint = new Label();
     ownedHint.setWrapText(true);
-    Label errorLabel = createErrorLabel();
+    Label unitPriceHint = new Label("Unit price: —");
+    Label quantityHint = new Label("Quantity: —");
+    Label grossHint = new Label("Gross proceeds: —");
+    Label commissionHint = new Label("Commission: —");
+    Label taxHint = new Label("Capital gains tax: —");
+    Label netProceedsHint = new Label("Net proceeds: —");
+    ThemeStyles.addStyleClasses(netProceedsHint, "trade-estimate-total");
+    VBox estimateBox =
+        new VBox(
+            4,
+            new Label("Sale estimate"),
+            unitPriceHint,
+            quantityHint,
+            grossHint,
+            commissionHint,
+            taxHint,
+            netProceedsHint);
+    ThemeStyles.addStyleClasses(estimateBox, "trade-estimate-card");
 
-    Runnable updateHints = () -> {
-      String sym = symbolField.getText();
-      BigDecimal owned = controller.getOwnedQuantity(sym);
-      ownedHint.setText("You own " + controller.formatQuantity(owned) + " share(s)");
-    };
+    final Label errorLabel = createErrorLabel();
+
+    Runnable updateHints = () -> updateSellHints(
+        controller, symbolField, amountField,
+        amountMode, sellAllMode,
+        ownedHint, unitPriceHint, quantityHint, grossHint,
+        commissionHint, taxHint, netProceedsHint);
     symbolField.textProperty().addListener((_, _, _) -> updateHints.run());
+    amountField.textProperty().addListener((_, _, _) -> updateHints.run());
+    modeGroup.selectedToggleProperty().addListener((_, _, _) -> {
+      amountField.setDisable(sellAllMode.isSelected());
+      if (sellAllMode.isSelected()) {
+        amountField.setText("");
+      }
+      updateHints.run();
+    });
     updateHints.run();
 
     Button confirm = new Button("Confirm");
     confirm.setDefaultButton(true);
     confirm.setOnAction(_ -> {
       errorLabel.setText("");
-      TradeResult result = controller.sellByQuantity(symbolField.getText(), quantityField.getText());
+      TradeResult result;
+      if (sellAllMode.isSelected()) {
+        result = controller.sellAllForSymbol(symbolField.getText());
+      } else if (amountMode.isSelected()) {
+        result = controller.sellUpToTargetNet(symbolField.getText(), amountField.getText());
+      } else {
+        result = controller.sellByQuantity(symbolField.getText(), amountField.getText());
+      }
       handleResult(result, errorLabel, onCompleted, stage);
     });
 
@@ -163,13 +206,19 @@ public final class TradeDialog {
     form.setHgap(10);
     form.setVgap(8);
     form.addRow(0, new Label("Symbol"), symbolField);
-    form.addRow(1, new Label("Quantity"), quantityField);
+    form.addRow(1, new Label("Mode"), new HBox(12, quantityMode, amountMode, sellAllMode));
+    form.addRow(2, new Label("Amount"), amountField);
 
     VBox root = new VBox(
-        10, form, ownedHint, errorLabel, new HBox(10, confirm, cancel));
+        10,
+        form,
+        estimateBox,
+        ownedHint,
+        errorLabel,
+        new HBox(10, confirm, cancel));
     root.setPadding(new Insets(16));
     root.setAlignment(Pos.TOP_LEFT);
-    showStage(stage, root, symbolField, quantityField, confirm, cancel);
+    showStage(stage, root, symbolField, amountField, confirm, cancel);
   }
 
   private static void updateBuyHints(
@@ -224,6 +273,62 @@ public final class TradeDialog {
     beforeCommissionHint.setText("Before commission: " + controller.formatMoney(value.gross()));
     commissionHint.setText("Commission: " + controller.formatMoney(value.commission()));
     afterCommissionHint.setText("After commission: " + controller.formatMoney(value.total()));
+  }
+
+  private static void updateSellHints(
+      TradingController controller,
+      TextField symbolField,
+      TextField amountField,
+      RadioButton amountMode,
+      RadioButton sellAllMode,
+      Label ownedHint,
+      Label unitPriceHint,
+      Label quantityHint,
+      Label grossHint,
+      Label commissionHint,
+      Label taxHint,
+      Label netProceedsHint) {
+    String sym = symbolField.getText();
+    BigDecimal owned = controller.getOwnedQuantity(sym);
+    ownedHint.setText("You own " + controller.formatQuantity(owned) + " share(s)");
+
+    Optional<TradingController.SellEstimate> estimate;
+    if (sellAllMode.isSelected()) {
+      estimate = controller.estimateSellAll(sym);
+    } else if (amountMode.isSelected()) {
+      estimate = controller.estimateSellByQuantity(sym, amountField.getText());
+    } else {
+      estimate = controller.estimateSellByQuantity(sym, amountField.getText());
+    }
+    applySellEstimate(controller, estimate, unitPriceHint, quantityHint, grossHint,
+        commissionHint, taxHint, netProceedsHint);
+  }
+
+  static void applySellEstimate(
+      TradingController controller,
+      Optional<TradingController.SellEstimate> estimate,
+      Label unitPriceHint,
+      Label quantityHint,
+      Label grossHint,
+      Label commissionHint,
+      Label taxHint,
+      Label netProceedsHint) {
+    if (estimate.isEmpty()) {
+      unitPriceHint.setText("Unit price: —");
+      quantityHint.setText("Quantity: —");
+      grossHint.setText("Gross proceeds: —");
+      commissionHint.setText("Commission: —");
+      taxHint.setText("Capital gains tax: —");
+      netProceedsHint.setText("Net proceeds: —");
+      return;
+    }
+    TradingController.SellEstimate value = estimate.get();
+    unitPriceHint.setText("Unit price: " + controller.formatMoney(value.unitPrice()));
+    quantityHint.setText("Quantity: " + controller.formatQuantity(value.quantity()));
+    grossHint.setText("Gross proceeds: " + controller.formatMoney(value.gross()));
+    commissionHint.setText("Commission: " + controller.formatMoney(value.commission()));
+    taxHint.setText("Capital gains tax: " + controller.formatMoney(value.tax()));
+    netProceedsHint.setText("Net proceeds: " + controller.formatMoney(value.netProceeds()));
   }
 
   private static void handleResult(
