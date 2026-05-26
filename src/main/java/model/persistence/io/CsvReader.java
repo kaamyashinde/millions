@@ -1,8 +1,6 @@
 package model.persistence.io;
 
 
-import model.persistence.market.MarketData;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +17,7 @@ import java.util.stream.Stream;
 import model.core.asset.Stock;
 import model.core.asset.fund.Fund;
 import model.core.asset.fund.FundComponent;
+import model.persistence.market.MarketData;
 import util.MarketDataCsvValidator;
 
 /**
@@ -30,7 +29,7 @@ import util.MarketDataCsvValidator;
  *   <li>{@code FUND,symbol,name,STOCK_A:0.40,STOCK_B:0.60}</li>
  * </ul>
  *
- * Empty lines and comment lines beginning with {@code #} are ignored.
+ * <p>Empty lines and comment lines beginning with {@code #} are ignored.
  */
 public final class CsvReader {
 
@@ -50,6 +49,20 @@ public final class CsvReader {
   }
 
   /**
+   * Reads mixed market data from an input stream such as a bundled classpath resource.
+   *
+   * @param input UTF-8 market-data text stream
+   * @return parsed stocks and funds
+   */
+  public static MarketData readMarketData(InputStream input) {
+    BufferedReader reader =
+        new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+    try (Stream<String> lines = reader.lines()) {
+      return marketDataFromLineStream(lines);
+    }
+  }
+
+  /**
    * Reads mixed market data from a CSV file at an arbitrary path.
    *
    * @param file path to a {@code .csv} file
@@ -60,19 +73,6 @@ public final class CsvReader {
       return marketDataFromLineStream(lines);
     } catch (IOException exception) {
       throw new UncheckedIOException(exception);
-    }
-  }
-
-  /**
-   * Reads mixed market data from an input stream such as a bundled classpath resource.
-   *
-   * @param input UTF-8 market-data text stream
-   * @return parsed stocks and funds
-   */
-  public static MarketData readMarketData(InputStream input) {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
-    try (Stream<String> lines = reader.lines()) {
-      return marketDataFromLineStream(lines);
     }
   }
 
@@ -124,7 +124,8 @@ public final class CsvReader {
     return stocksBySymbol;
   }
 
-  private static List<Fund> parseFunds(List<String> cleanedLines, Map<String, Stock> stocksBySymbol) {
+  private static List<Fund> parseFunds(
+      List<String> cleanedLines, Map<String, Stock> stocksBySymbol) {
     return cleanedLines.stream()
         .map(MarketDataCsvValidator::splitValidatedRow)
         .filter(tokens -> MarketDataCsvValidator.FUND_RECORD.equals(tokens[0]))

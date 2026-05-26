@@ -8,7 +8,8 @@ import util.IoLogger;
 /**
  * Reads mixed market-data CSV files from an arbitrary path.
  */
-public final class CsvMarketDataReader implements TextDocumentReader<MarketData, MarketDataImportException> {
+public final class CsvMarketDataReader
+    implements TextDocumentReader<MarketData, MarketDataImportException> {
 
   /**
    * Creates a market-data CSV reader.
