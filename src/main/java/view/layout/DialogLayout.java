@@ -28,7 +28,7 @@ public class DialogLayout extends BorderPane {
 
     Button close = new Button(closeLabel);
     ThemeStyles.styleButton(close);
-    close.setOnAction(_ -> onClose.run());
+    close.setOnAction(unused -> onClose.run());
 
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);

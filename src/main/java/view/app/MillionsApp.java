@@ -7,23 +7,23 @@ import static view.app.events.WorkspaceEventType.PROFILE_CHANGED;
 import static view.app.events.WorkspaceEventType.SAVINGS_CHANGED;
 import static view.app.events.WorkspaceEventType.TRANSACTIONS_CHANGED;
 
+import controller.WorkspaceController;
 import java.math.BigDecimal;
+import java.util.Optional;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.layout.Region;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
-import java.util.Optional;
-import model.session.ActiveSession;
 import model.exception.auth.AuthenticationException;
 import model.exception.auth.DuplicateUsernameException;
 import model.exception.market.MarketDataImportException;
 import model.exception.persistence.PersistenceException;
+import model.session.ActiveSession;
 import model.session.SessionService;
 import model.session.SessionServiceFactory;
-import controller.WorkspaceController;
 import view.app.events.WorkspaceEventBus;
 import view.dialogs.ProfileEditorDialog;
 import view.layout.ResponsiveLayout;
@@ -87,7 +87,7 @@ public class MillionsApp extends Application {
     stage.setTitle("Millions");
     stage.setMinWidth(MIN_WINDOW_WIDTH);
     stage.setMinHeight(MIN_WINDOW_HEIGHT);
-    stage.setOnCloseRequest(_ -> sessionService.saveActiveSession());
+    stage.setOnCloseRequest(unused -> sessionService.saveActiveSession());
     stage.show();
 
     Runnable notifyResize = () -> {
@@ -139,7 +139,8 @@ public class MillionsApp extends Application {
     } catch (AuthenticationException e) {
       loginPage.setStatus("Invalid username or PIN.");
     } catch (PersistenceException e) {
-      loginPage.setStatus("Profile data could not be read. Reset this profile or restore a backup.");
+      loginPage.setStatus(
+          "Profile data could not be read. Reset this profile or restore a backup.");
     } catch (IllegalArgumentException e) {
       loginPage.setStatus(mapValidationMessage(e.getMessage()));
     } catch (RuntimeException e) {
@@ -269,7 +270,7 @@ public class MillionsApp extends Application {
     Tab fundsTab = makeTab("Funds", fundsPage);
     Tab savingsTab = makeTab("Savings", savingsPage);
     Tab transactionsTab = makeTab("Transactions", transactionsPage);
-    Tab notificationsTab = makeTab("Notifications", notificationsPage);
+    final Tab notificationsTab = makeTab("Notifications", notificationsPage);
 
     portfolioTab.selectedProperty().addListener((obs, oldVal, sel) -> {
       if (Boolean.TRUE.equals(sel)) {

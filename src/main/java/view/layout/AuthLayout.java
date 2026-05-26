@@ -64,13 +64,13 @@ public class AuthLayout extends HBox implements ResponsiveLayout {
 
     VBox left = buildLeftPanel();
     this.leftPanel = left;
-    BorderPane right = buildRightPanel(navLinkText, navLinkAction, sidePanel);
+    final BorderPane right = buildRightPanel(navLinkText, navLinkAction, sidePanel);
 
     returnButton.setVisible(showReturnToSession);
     returnButton.setManaged(showReturnToSession);
     ThemeStyles.styleButton(returnButton);
     if (returnAction != null) {
-      returnButton.setOnAction(_ -> returnAction.run());
+      returnButton.setOnAction(unused -> returnAction.run());
     }
 
     statusLabel.setWrapText(true);
@@ -173,7 +173,7 @@ public class AuthLayout extends HBox implements ResponsiveLayout {
 
     Label navLinkLabel = new Label(navLinkText);
     ThemeStyles.addStyleClasses(navLinkLabel, "auth-nav-link");
-    navLinkLabel.setOnMouseClicked(_ -> navLinkAction.run());
+    navLinkLabel.setOnMouseClicked(unused -> navLinkAction.run());
 
     HBox navRow = new HBox(navLinkLabel);
     navRow.setAlignment(Pos.CENTER_RIGHT);
