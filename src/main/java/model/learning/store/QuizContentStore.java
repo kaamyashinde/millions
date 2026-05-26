@@ -3,13 +3,12 @@ package model.learning.store;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.learning.quiz.Quiz;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import model.learning.quiz.Quiz;
 
 /**
  * Static store providing all quiz content for the Learning Hub.

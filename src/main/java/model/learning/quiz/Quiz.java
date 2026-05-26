@@ -1,10 +1,8 @@
 package model.learning.quiz;
 
 
-import model.learning.content.LearningItem;
-
 import java.util.List;
-
+import model.learning.content.LearningItem;
 import util.Validator;
 
 /**

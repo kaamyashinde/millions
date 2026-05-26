@@ -2,12 +2,6 @@ package model.learning.store;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.learning.content.Difficulty;
-import model.learning.content.LearningCategory;
-import model.learning.content.LearningItem;
-import model.learning.content.LearningResource;
-import model.learning.content.LearningResourceType;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Comparator;
@@ -15,6 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import model.learning.content.Difficulty;
+import model.learning.content.LearningCategory;
+import model.learning.content.LearningItem;
+import model.learning.content.LearningResource;
+import model.learning.content.LearningResourceType;
 
 /**
  * Central store for all Learning Hub catalog content. Loads categories, items, and resources
