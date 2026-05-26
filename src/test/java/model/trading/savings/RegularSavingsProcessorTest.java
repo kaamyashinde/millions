@@ -2,6 +2,7 @@ package model.trading.savings;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
@@ -34,6 +35,18 @@ class RegularSavingsProcessorTest {
         .funds(List.of(techFund))
         .build();
     player = new Player("T", new BigDecimal("50000"));
+  }
+
+  @Test
+  void run_nullExchangeWithDuePlan_throwsNullPointerException() {
+    player.addRegularSavingsPlan(
+        new RegularSavingsPlan("AAPL", SavingsInstallmentMode.FIXED_SHARES, new BigDecimal("1"),
+            1, exchange.getDay()));
+    exchange.advance(1);
+
+    assertThrows(
+        NullPointerException.class,
+        () -> RegularSavingsProcessor.run(null, player, exchange.getDay() - 1, exchange.getDay()));
   }
 
   @Test

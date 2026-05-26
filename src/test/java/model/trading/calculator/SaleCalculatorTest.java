@@ -2,6 +2,7 @@ package model.trading.calculator;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
 import model.core.asset.Share;
 import model.core.asset.Stock;
@@ -18,6 +19,24 @@ class SaleCalculatorTest {
     stock.addNewSalesPrice(new BigDecimal("200.00"));
     Share share = new Share(stock, new BigDecimal("10"), new BigDecimal("100.00"));
     calculator = new SaleCalculator(share);
+  }
+
+  @Test
+  void constructor_nullShare_throwsNullPointerException() {
+    assertThrows(NullPointerException.class, () -> new SaleCalculator(null));
+  }
+
+  @Test
+  void constructor_nullSalePrice_throwsNullPointerException() {
+    Stock stock = new Stock("AAPL", "Apple Inc.");
+    stock.addNewSalesPrice(new BigDecimal("200.00"));
+    Share share = new Share(stock, new BigDecimal("1"), new BigDecimal("100.00"));
+
+    NullPointerException thrown = assertThrows(
+        NullPointerException.class,
+        () -> new SaleCalculator(share, null));
+
+    assertEquals("Sale price cannot be null", thrown.getMessage());
   }
 
   @Test

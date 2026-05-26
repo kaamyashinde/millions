@@ -29,6 +29,10 @@ import model.session.validation.ValidationError;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Integration tests for {@link SessionService} profile and session persistence on disk.
+ * JSON parsing unit tests belong in {@link model.persistence.io.JsonProfileReaderWriterTest}.
+ */
 class SessionServiceTest {
 
   @TempDir

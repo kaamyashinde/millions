@@ -2,6 +2,8 @@ package controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,6 +30,15 @@ class FundsControllerTest {
         .funds(List.of(tech, growth))
         .build();
     controller = new FundsController(exchange);
+  }
+
+  @Test
+  void constructor_nullExchange_throwsNullPointerException() {
+    NullPointerException thrown = assertThrows(
+        NullPointerException.class,
+        () -> new FundsController(null));
+
+    assertEquals("Exchange cannot be null", thrown.getMessage());
   }
 
   @Test
@@ -62,6 +73,21 @@ class FundsControllerTest {
 
     assertEquals(0, controller.getFunds().size());
     assertNull(controller.getSelectedFund());
+  }
+
+  @Test
+  void setSelectedFund_null_clearsSelection() {
+    controller.setSelectedFund(null);
+
+    assertNull(controller.getSelectedFund());
+  }
+
+  @Test
+  void getMetaText_includesExchangeNameAndFundCount() {
+    String meta = controller.getMetaText();
+
+    assertTrue(meta.contains("NYSE"));
+    assertTrue(meta.contains("2 fund(s)"));
   }
 
   @Test

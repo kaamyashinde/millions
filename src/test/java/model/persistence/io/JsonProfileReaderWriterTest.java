@@ -13,6 +13,10 @@ import model.persistence.ProfileFile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * {@link JsonProfileReader#readJson(String)} covers parsing and validation without disk I/O.
+ * {@link TempDir} is used only for round-trip and filesystem error paths.
+ */
 class JsonProfileReaderWriterTest {
 
   @TempDir
@@ -32,9 +36,17 @@ class JsonProfileReaderWriterTest {
   }
 
   @Test
-  void reader_wrapsValidationFailures() throws Exception {
-    Path path = tempDir.resolve("invalid-profile.json");
-    Files.writeString(path, """
+  void readJson_malformedSyntax_throwsPersistenceException() {
+    PersistenceException thrown = assertThrows(
+        PersistenceException.class,
+        () -> new JsonProfileReader().readJson("{ not json"));
+
+    assertTrue(thrown.getMessage().contains("Could not read JSON content"));
+  }
+
+  @Test
+  void readJson_mismatchedNormalizedUsername_throwsPersistenceException() {
+    String json = """
         {
           "username": "Alice",
           "normalizedUsername": "bob",
@@ -45,13 +57,56 @@ class JsonProfileReaderWriterTest {
           "exchangeName": "NYSE",
           "day": 1
         }
-        """);
+        """;
 
     PersistenceException thrown = assertThrows(
         PersistenceException.class,
-        () -> new JsonProfileReader().read(path));
+        () -> new JsonProfileReader().readJson(json));
 
     assertTrue(thrown.getMessage().startsWith("Invalid profile file:"));
+  }
+
+  @Test
+  void readJson_dayBelowOne_throwsPersistenceException() {
+    String json = """
+        {
+          "username": "Alice",
+          "normalizedUsername": "alice",
+          "pinHash": "hash",
+          "playerName": "Alice",
+          "startingMoney": 10,
+          "cash": 10,
+          "exchangeName": "NYSE",
+          "day": 0
+        }
+        """;
+
+    PersistenceException thrown = assertThrows(
+        PersistenceException.class,
+        () -> new JsonProfileReader().readJson(json));
+
+    assertTrue(thrown.getMessage().contains("day must be at least 1"));
+  }
+
+  @Test
+  void readJson_missingRequiredField_throwsPersistenceException() {
+    String json = """
+        {
+          "normalizedUsername": "alice",
+          "pinHash": "hash",
+          "playerName": "Alice",
+          "startingMoney": 10,
+          "cash": 10,
+          "exchangeName": "NYSE",
+          "day": 1
+        }
+        """;
+
+    PersistenceException thrown = assertThrows(
+        PersistenceException.class,
+        () -> new JsonProfileReader().readJson(json));
+
+    assertTrue(thrown.getMessage().contains("Invalid profile file"));
   }
 
   @Test

@@ -1,6 +1,7 @@
 package model.trading.command.sell;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -38,6 +39,11 @@ class SellAllHoldingsCommandTest {
         .funds(List.of(fund))
         .build();
     player = new Player("T", new BigDecimal("100000.00"));
+  }
+
+  @Test
+  void constructor_nullExchange_throwsNullPointerException() {
+    assertThrows(NullPointerException.class, () -> new SellAllHoldingsCommand(null));
   }
 
   @Test

@@ -15,20 +15,23 @@ import model.persistence.market.MarketData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Integration tests for {@link CsvMarketDataReader} and {@link CsvMarketDataWriter} file I/O
+ * and exception wrapping. CSV grammar and validation are covered in {@link CsvReaderTest}.
+ */
 class CsvMarketDataReaderWriterTest {
 
   @TempDir
   Path tempDir;
 
   @Test
-  void reader_parsesValidMarketData() throws Exception {
+  void reader_readsValidFileOnDisk() throws Exception {
     Path csv = tempDir.resolve("market.csv");
     Files.writeString(csv, "STOCK,ABC,Abc Corp,12.34\n");
 
     MarketData marketData = new CsvMarketDataReader().read(csv);
 
     assertEquals(1, marketData.stocks().size());
-    assertEquals("ABC", marketData.stocks().getFirst().getSymbol());
   }
 
   @Test

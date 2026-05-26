@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import model.exception.trading.AlreadyCommittedException;
+import model.exception.trading.InsufficientFundsException;
 import java.math.BigDecimal;
 import model.core.player.Player;
 import model.core.asset.Share;
@@ -56,6 +59,24 @@ class TransactionTest {
     Purchase purchase = new Purchase(share, 1);
     assertNotNull(purchase.getCalculator());
     assertInstanceOf(PurchaseCalculator.class, purchase.getCalculator());
+  }
+
+  @Test
+  void commit_purchaseWithoutFunds_throwsInsufficientFundsException() {
+    Purchase purchase = new Purchase(share, 1);
+    Player broke = new Player("Broke", new BigDecimal("1.00"));
+
+    assertThrows(InsufficientFundsException.class, () -> purchase.commit(broke));
+  }
+
+  @Test
+  void commit_twice_throwsAlreadyCommittedException() {
+    Sale sale = new Sale(share, 1);
+    Player player = new Player("Alice", new BigDecimal("10000.00"));
+    player.getPortfolio().addShare(share);
+    sale.commit(player);
+
+    assertThrows(AlreadyCommittedException.class, () -> sale.commit(player));
   }
 
   @Test

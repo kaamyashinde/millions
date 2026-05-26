@@ -23,6 +23,13 @@ class I18nTest {
   }
 
   @Test
+  void get_unknownKey_returnsKeyAsFallback() {
+    I18n.setLocale(Locale.ENGLISH);
+
+    assertEquals("nonexistent.key.xyz", I18n.get("nonexistent.key.xyz"));
+  }
+
+  @Test
   void getResolvesKnownKey() {
     I18n.setLocale(Locale.ENGLISH);
     assertEquals("------------ MENU -----------", I18n.get("menu.header"));

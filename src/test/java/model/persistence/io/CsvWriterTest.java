@@ -21,6 +21,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Integration tests for {@link CsvWriter} disk output. Parsing is covered in
+ * {@link CsvReaderTest} via {@link java.io.InputStream}.
+ */
 class CsvWriterTest {
 
   @TempDir

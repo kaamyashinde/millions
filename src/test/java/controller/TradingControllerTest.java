@@ -2,6 +2,7 @@ package controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -146,5 +147,64 @@ class TradingControllerTest {
   void getLatestPrice_returnsListedPrice() {
     assertTrue(controller.getLatestPrice("AAPL").isPresent());
     assertEquals(0, controller.getLatestPrice("AAPL").get().compareTo(new BigDecimal("150.00")));
+  }
+
+  @Test
+  void constructor_nullExchange_throwsNullPointerException() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new TradingController(null, player, new NotificationService()));
+  }
+
+  @Test
+  void buyUpToBudget_unknownSymbol_returnsFailure() {
+    TradeResult result = controller.buyUpToBudget("UNKNOWN", "500");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+  }
+
+  @Test
+  void buyUpToBudget_invalidBudget_returnsFailure() {
+    TradeResult result = controller.buyUpToBudget("AAPL", "not-a-number");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+  }
+
+  @Test
+  void buyUpToBudget_zeroBudget_returnsFailure() {
+    TradeResult result = controller.buyUpToBudget("AAPL", "0");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+  }
+
+  @Test
+  void buyUpToBudget_insufficientFunds_returnsFailure() {
+    player.withdrawMoney(player.getMoney());
+    TradeResult result = controller.buyUpToBudget("AAPL", "500");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+    assertTrue(((TradeResult.Failure) result).message().toLowerCase().contains("insufficient"));
+  }
+
+  @Test
+  void sellByQuantity_unknownSymbol_returnsFailure() {
+    TradeResult result = controller.sellByQuantity("UNKNOWN", "1");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+  }
+
+  @Test
+  void sellByQuantity_invalidQuantity_returnsFailure() {
+    TradeResult result = controller.sellByQuantity("AAPL", "not-a-number");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
+  }
+
+  @Test
+  void sellByQuantity_zeroQuantity_returnsFailure() {
+    exchange.buy("AAPL", new BigDecimal("5"), player);
+    TradeResult result = controller.sellByQuantity("AAPL", "0");
+
+    assertInstanceOf(TradeResult.Failure.class, result);
   }
 }

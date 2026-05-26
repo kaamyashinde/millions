@@ -19,6 +19,9 @@ import model.exception.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Integration tests for {@link ProfileImageService} filesystem read/write of profile images.
+ */
 class ProfileImageServiceTest {
 
   @TempDir

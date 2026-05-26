@@ -28,6 +28,13 @@ class MarkdownLoaderTest {
   }
 
   @Test
+  void stripFrontMatter_unclosedBlock_returnsOriginalMarkdown() {
+    String markdown = "---\ntitle: Broken\n\n## Body";
+
+    assertTrue(MarkdownLoader.stripFrontMatter(markdown).startsWith("---"));
+  }
+
+  @Test
   void stripFrontMatter_leavesMarkdownWithoutFrontMatterUnchanged() {
     String markdown = "## Summary\n\nHello.";
 

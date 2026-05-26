@@ -2,6 +2,7 @@ package controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -25,6 +26,15 @@ class StocksControllerTest {
         .stocks(List.of(microsoft, apple, alphabet))
         .build();
     controller = new StocksController(exchange);
+  }
+
+  @Test
+  void constructor_nullExchange_throwsNullPointerException() {
+    NullPointerException thrown = assertThrows(
+        NullPointerException.class,
+        () -> new StocksController(null));
+
+    assertEquals("Exchange cannot be null", thrown.getMessage());
   }
 
   @Test
@@ -59,6 +69,11 @@ class StocksControllerTest {
 
     assertEquals(0, controller.getStocks().size());
     assertNull(controller.getSelectedStock());
+  }
+
+  @Test
+  void getMarketHistoryFor_null_returnsEmptyList() {
+    assertTrue(controller.getMarketHistoryFor(null).isEmpty());
   }
 
   @Test
