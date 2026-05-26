@@ -1,5 +1,6 @@
 package view.dialogs;
 
+import controller.ExitGameController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -12,7 +13,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import controller.ExitGameController;
 import model.exception.auth.AuthenticationException;
 import model.exception.auth.RegistrationValidationException;
 import util.I18n;
@@ -38,7 +38,8 @@ public final class ExitGameDialog {
     confirm.setHeaderText(I18n.get("exitGame.confirm.header"));
     String body = I18n.get("exitGame.confirm.body");
     if (controller.hasHoldings()) {
-      body = body + "\n\n" + I18n.format("exitGame.confirm.holdings", controller.countHeldSymbols());
+      body =
+          body + "\n\n" + I18n.format("exitGame.confirm.holdings", controller.countHeldSymbols());
     }
     confirm.setContentText(body);
     ThemeStyles.installOnDialog(confirm);
@@ -48,7 +49,8 @@ public final class ExitGameDialog {
     showPinDialog(owner, controller, onDeleted);
   }
 
-  private static void showPinDialog(Window owner, ExitGameController controller, Runnable onDeleted) {
+  private static void showPinDialog(
+      Window owner, ExitGameController controller, Runnable onDeleted) {
     Stage stage = new Stage();
     stage.initOwner(owner);
     stage.initModality(Modality.WINDOW_MODAL);
@@ -65,7 +67,7 @@ public final class ExitGameDialog {
 
     Button confirm = new Button(I18n.get("exitGame.pin.confirm"));
     confirm.setDefaultButton(true);
-    confirm.setOnAction(_ -> {
+    confirm.setOnAction(unused -> {
       status.setText("");
       char[] pin = pinField.getText().toCharArray();
       try {
@@ -88,7 +90,7 @@ public final class ExitGameDialog {
 
     Button cancel = new Button(I18n.get("exitGame.pin.cancel"));
     cancel.setCancelButton(true);
-    cancel.setOnAction(_ -> stage.close());
+    cancel.setOnAction(unused -> stage.close());
 
     VBox root = new VBox(12, intro, pinField, status, confirm, cancel);
     root.setPadding(new Insets(16));

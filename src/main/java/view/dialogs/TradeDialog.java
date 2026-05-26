@@ -38,7 +38,7 @@ public final class TradeDialog {
    */
   public static void showBuy(
       Window owner, TradingController controller, String symbol, Runnable onCompleted) {
-    Stage stage = createStage(owner, "Buy shares");
+    final Stage stage = createStage(owner, "Buy shares");
     TextField symbolField = new TextField(symbol != null ? symbol : "");
     symbolField.setPromptText("Symbol");
 
@@ -73,20 +73,20 @@ public final class TradeDialog {
             afterCommissionHint);
     ThemeStyles.addStyleClasses(estimateBox, "trade-estimate-card");
 
-    Label errorLabel = createErrorLabel();
+    final Label errorLabel = createErrorLabel();
 
     Runnable updateHints = () -> updateBuyHints(
         controller, symbolField, amountField, quantityMode.isSelected(),
         balanceHint, ownedHint, unitPriceHint, quantityHint, beforeCommissionHint,
         commissionHint, afterCommissionHint);
-    symbolField.textProperty().addListener((_, _, _) -> updateHints.run());
-    amountField.textProperty().addListener((_, _, _) -> updateHints.run());
-    modeGroup.selectedToggleProperty().addListener((_, _, _) -> updateHints.run());
+    symbolField.textProperty().addListener((obs, previous, current) -> updateHints.run());
+    amountField.textProperty().addListener((obs, previous, current) -> updateHints.run());
+    modeGroup.selectedToggleProperty().addListener((obs, previous, current) -> updateHints.run());
     updateHints.run();
 
     Button confirm = new Button("Confirm");
     confirm.setDefaultButton(true);
-    confirm.setOnAction(_ -> {
+    confirm.setOnAction(unused -> {
       errorLabel.setText("");
       TradeResult result = quantityMode.isSelected()
           ? controller.buyByQuantity(symbolField.getText(), amountField.getText())
@@ -96,7 +96,7 @@ public final class TradeDialog {
 
     Button cancel = new Button("Cancel");
     cancel.setCancelButton(true);
-    cancel.setOnAction(_ -> stage.close());
+    cancel.setOnAction(unused -> stage.close());
 
     GridPane form = new GridPane();
     form.setHgap(10);
@@ -128,7 +128,7 @@ public final class TradeDialog {
    */
   public static void showSell(
       Window owner, TradingController controller, String symbol, Runnable onCompleted) {
-    Stage stage = createStage(owner, "Sell shares");
+    final Stage stage = createStage(owner, "Sell shares");
     TextField symbolField = new TextField(symbol != null ? symbol : "");
     symbolField.setPromptText("Symbol");
 
@@ -137,27 +137,28 @@ public final class TradeDialog {
 
     Label ownedHint = new Label();
     ownedHint.setWrapText(true);
-    Label errorLabel = createErrorLabel();
+    final Label errorLabel = createErrorLabel();
 
     Runnable updateHints = () -> {
       String sym = symbolField.getText();
       BigDecimal owned = controller.getOwnedQuantity(sym);
       ownedHint.setText("You own " + controller.formatQuantity(owned) + " share(s)");
     };
-    symbolField.textProperty().addListener((_, _, _) -> updateHints.run());
+    symbolField.textProperty().addListener((obs, previous, current) -> updateHints.run());
     updateHints.run();
 
     Button confirm = new Button("Confirm");
     confirm.setDefaultButton(true);
-    confirm.setOnAction(_ -> {
+    confirm.setOnAction(unused -> {
       errorLabel.setText("");
-      TradeResult result = controller.sellByQuantity(symbolField.getText(), quantityField.getText());
+      TradeResult result =
+          controller.sellByQuantity(symbolField.getText(), quantityField.getText());
       handleResult(result, errorLabel, onCompleted, stage);
     });
 
     Button cancel = new Button("Cancel");
     cancel.setCancelButton(true);
-    cancel.setOnAction(_ -> stage.close());
+    cancel.setOnAction(unused -> stage.close());
 
     GridPane form = new GridPane();
     form.setHgap(10);
