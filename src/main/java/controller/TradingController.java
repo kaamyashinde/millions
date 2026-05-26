@@ -13,8 +13,9 @@ import model.exception.trading.InsufficientFundsException;
 import model.exception.trading.InsufficientSharesException;
 import model.exception.trading.ShareNotFoundException;
 import model.trading.calculator.PurchaseCalculator;
-import model.trading.transaction.TransactionSizing;
+import model.trading.calculator.SaleCalculator;
 import model.trading.transaction.Transaction;
+import model.trading.transaction.TransactionSizing;
 import util.I18n;
 import util.Validator;
 import view.components.notification.NotificationService;
@@ -52,6 +53,24 @@ public class TradingController {
       BigDecimal gross,
       BigDecimal commission,
       BigDecimal total) {}
+
+  /**
+   * Display-friendly sale estimate for the current price and quantity.
+   *
+   * @param unitPrice current market price per share
+   * @param quantity estimated quantity to sell
+   * @param gross sale proceeds before deductions
+   * @param commission sale commission
+   * @param tax capital gains tax (zero when no profit)
+   * @param netProceeds cash credited after commission and tax
+   */
+  public record SellEstimate(
+      BigDecimal unitPrice,
+      BigDecimal quantity,
+      BigDecimal gross,
+      BigDecimal commission,
+      BigDecimal tax,
+      BigDecimal netProceeds) {}
 
   /**
    * Creates a trading controller for one active player.
@@ -230,6 +249,85 @@ public class TradingController {
     });
   }
 
+  /**
+   * Sells FIFO lots until cumulative net proceeds reach the target amount.
+   *
+   * @param symbol stock or fund symbol
+   * @param targetNetText target net cash to raise as entered by the user
+   * @return success or failure with a user-facing message
+   */
+  public TradeResult sellUpToTargetNet(String symbol, String targetNetText) {
+    return execute(symbol, targetNetText, normalized -> {
+      BigDecimal targetNet = parsePositiveAmount(targetNetText);
+      List<Transaction> txs = exchange.sellUpToTargetNet(normalized, targetNet, player);
+      if (txs.isEmpty()) {
+        return I18n.format("sell.success.multi", 0, normalized);
+      }
+      if (txs.size() == 1) {
+        Share share = txs.getFirst().getShare();
+        return I18n.format("sell.success", share.getQuantity(), normalized);
+      }
+      return I18n.format("sell.success.multi", txs.size(), normalized);
+    });
+  }
+
+  /**
+   * Sells the entire held quantity for a single symbol.
+   *
+   * @param symbol stock or fund symbol
+   * @return success or failure with a user-facing message
+   */
+  public TradeResult sellAllForSymbol(String symbol) {
+    return execute(symbol, "all", normalized -> {
+      BigDecimal totalQuantity = player.getPortfolio().totalQuantityForSymbol(normalized);
+      if (totalQuantity.signum() <= 0) {
+        throw new InsufficientSharesException(normalized, BigDecimal.ONE);
+      }
+      exchange.sellByQuantity(normalized, totalQuantity, player);
+      return I18n.format("sell.success.all", totalQuantity, normalized);
+    });
+  }
+
+  /**
+   * Estimates sale proceeds for selling a given quantity.
+   *
+   * @param symbol stock or fund symbol
+   * @param quantityText quantity as entered by the user
+   * @return estimate when the symbol and quantity are valid and sufficient shares are held
+   */
+  public Optional<SellEstimate> estimateSellByQuantity(String symbol, String quantityText) {
+    Optional<InvestableAsset> asset = findAsset(symbol);
+    Optional<BigDecimal> quantity = parsePositiveAmountOrEmpty(quantityText);
+    if (asset.isEmpty() || quantity.isEmpty()) {
+      return Optional.empty();
+    }
+    String normalized = symbol.trim().toUpperCase();
+    BigDecimal owned = player.getPortfolio().totalQuantityForSymbol(normalized);
+    if (owned.compareTo(quantity.get()) < 0) {
+      return Optional.empty();
+    }
+    return Optional.of(createSellEstimate(normalized, quantity.get()));
+  }
+
+  /**
+   * Estimates sale proceeds for selling the entire held quantity for a symbol.
+   *
+   * @param symbol stock or fund symbol
+   * @return estimate when shares are held
+   */
+  public Optional<SellEstimate> estimateSellAll(String symbol) {
+    Optional<InvestableAsset> asset = findAsset(symbol);
+    if (asset.isEmpty()) {
+      return Optional.empty();
+    }
+    String normalized = symbol.trim().toUpperCase();
+    BigDecimal totalQuantity = player.getPortfolio().totalQuantityForSymbol(normalized);
+    if (totalQuantity.signum() <= 0) {
+      return Optional.empty();
+    }
+    return Optional.of(createSellEstimate(normalized, totalQuantity));
+  }
+
   private TradeResult execute(String symbol, String amountText, TradeOperation operation) {
     Optional<String> symbolError = validateSymbol(symbol);
     if (symbolError.isPresent()) {
@@ -297,6 +395,34 @@ public class TradingController {
         calculator.calculateGross(),
         calculator.calculateCommission(),
         calculator.calculateTotal());
+  }
+
+  private SellEstimate createSellEstimate(String symbol, BigDecimal quantityToSell) {
+    List<Share> lots = player.getPortfolio().getSharesBasedOnSymbol(symbol);
+    BigDecimal remaining = quantityToSell;
+    BigDecimal totalGross = BigDecimal.ZERO;
+    BigDecimal totalCommission = BigDecimal.ZERO;
+    BigDecimal totalTax = BigDecimal.ZERO;
+    BigDecimal totalNet = BigDecimal.ZERO;
+
+    for (Share lot : lots) {
+      if (remaining.signum() <= 0) {
+        break;
+      }
+      BigDecimal sliceQty = lot.getQuantity().min(remaining);
+      Share slice = new Share(lot.getAsset(), sliceQty, lot.getPurchasePrice());
+      SaleCalculator calc = new SaleCalculator(slice);
+      totalGross = totalGross.add(calc.calculateGross());
+      totalCommission = totalCommission.add(calc.calculateCommission());
+      totalTax = totalTax.add(calc.calculateTax());
+      totalNet = totalNet.add(calc.calculateTotal());
+      remaining = remaining.subtract(sliceQty);
+    }
+
+    InvestableAsset asset = exchange.listings().getAsset(symbol);
+    BigDecimal unitPrice = asset != null ? asset.getSalesPrice() : BigDecimal.ZERO;
+    return new SellEstimate(unitPrice, quantityToSell, totalGross, totalCommission, totalTax,
+        totalNet);
   }
 
   private static BigDecimal parsePositiveAmount(String text) {
