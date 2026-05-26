@@ -215,6 +215,11 @@ public class StocksPage extends BorderPane {
     return detailView;
   }
 
+  /**
+   * Returns the current text in the search field.
+   *
+   * @return search field text
+   */
   public String getSearchText() {
     return searchField.getText();
   }

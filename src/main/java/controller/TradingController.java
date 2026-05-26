@@ -137,6 +137,8 @@ public class TradingController {
   }
 
   /**
+   * Formats a quantity for display.
+   *
    * @param value quantity to format
    * @return plain string with two decimal places
    */

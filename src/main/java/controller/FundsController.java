@@ -16,7 +16,8 @@ import model.core.asset.fund.Fund;
 /**
  * Supplies sorted fund listings and selection state for the funds tab.
  *
- * <p>The controller adapts {@link Exchange#findFunds(String)} into an {@link ObservableList} for
+ * <p>The controller adapts {@link model.core.market.ExchangeListings#findFunds(String)}
+ * via {@link Exchange#listings()} into an {@link ObservableList} for
  * table and detail bindings, preserving the selected {@link Fund} when listings refresh.
  *
  * @author kevindmazali
@@ -87,6 +88,11 @@ public class FundsController {
     selectedFund.set(fund);
   }
 
+  /**
+   * Returns the active search term used to filter fund rows.
+   *
+   * @return current search term, or an empty string when no filter is applied
+   */
   public String getSearchTerm() {
     return searchTerm;
   }

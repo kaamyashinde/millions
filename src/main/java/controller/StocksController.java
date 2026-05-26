@@ -19,7 +19,8 @@ import model.core.market.event.MarketEvent;
 /**
  * Supplies sorted stock listings and selection state for the stocks tab.
  *
- * <p>The controller adapts {@link Exchange#findStocks(String)} into observable rows for
+ * <p>The controller adapts {@link model.core.market.ExchangeListings#findStocks(String)}
+ * via {@link Exchange#listings()} into observable rows for
  * {@link view.pages.stocks.StocksPage} and exposes market-event history for selected stocks.
  *
  * @author kevindmazali
@@ -92,6 +93,11 @@ public class StocksController {
     selectedStock.set(stock);
   }
 
+  /**
+   * Returns the active search term used to filter stock rows.
+   *
+   * @return current search term, or an empty string when no filter is applied
+   */
   public String getSearchTerm() {
     return searchTerm;
   }

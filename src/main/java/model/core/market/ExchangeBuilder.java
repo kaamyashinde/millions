@@ -29,6 +29,8 @@ public final class ExchangeBuilder {
   private MarketEvent lastMarketEvent;
 
   /**
+   * Creates a builder for an exchange with the given display name.
+   *
    * @param name exchange display name
    */
   public ExchangeBuilder(String name) {
