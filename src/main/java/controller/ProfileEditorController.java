@@ -3,8 +3,8 @@ package controller;
 import static util.Validator.checkNotNull;
 
 import java.nio.file.Path;
-import model.session.ActiveSession;
 import model.exception.auth.AuthenticationException;
+import model.session.ActiveSession;
 import model.session.SessionService;
 
 /**

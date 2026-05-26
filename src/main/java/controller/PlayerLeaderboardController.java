@@ -1,7 +1,5 @@
 package controller;
 
-import model.session.SessionService;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +7,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import model.session.SessionService;
 import model.session.leaderboard.PlayerLeaderboardEntry;
 import model.session.leaderboard.PlayerLeaderboardMetric;
 import model.session.leaderboard.PlayerLeaderboardRanking;

@@ -4,13 +4,13 @@ import static util.Validator.checkNotNull;
 
 import java.util.List;
 import java.util.Optional;
-import model.core.market.Exchange;
-import model.core.asset.Stock;
-import model.core.market.event.MarketEvent;
-import model.core.asset.info.StockFinancialInfo;
-import model.core.asset.info.StockFinancialInfoProvider;
 import model.analysis.recommendation.StockRecommendation;
 import model.analysis.recommendation.StockRecommendationService;
+import model.core.asset.Stock;
+import model.core.asset.info.StockFinancialInfo;
+import model.core.asset.info.StockFinancialInfoProvider;
+import model.core.market.Exchange;
+import model.core.market.event.MarketEvent;
 
 /**
  * Supplies stock detail data: fundamentals, recommendation, and market events.
